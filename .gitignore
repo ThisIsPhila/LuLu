@@ -1,0 +1,13 @@
+.DS_Store
+.sdd-framework/
+node_modules/
+dist/
+.next/
+.env
+.env.*
+!.env.example
+.sdd/state
+.sdd/local/
+.sdd/evidence/hooks/
+.sdd/graphs/*.json
+.sdd/graphs/*.tmp

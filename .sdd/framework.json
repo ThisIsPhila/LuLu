@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 2,
+  "frameworkVersion": "2.2.0",
+  "profile": "full-stack+devsecops",
+  "forwardThreshold": 0,
+  "validator": ".sdd/scripts/validate-spec.cjs",
+  "ownership": {
+    "frameworkManaged": [
+      "scripts",
+      "baseline templates",
+      "baseline rules"
+    ],
+    "projectManaged": [
+      "constitution",
+      "memory",
+      "specs",
+      "evidence",
+      "reports",
+      "skills",
+      "hooks"
+    ]
+  }
+}

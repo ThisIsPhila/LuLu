@@ -1,0 +1,250 @@
+
+> @sdd/visual@2.2.0 test
+> node --import ./tests/setup-dom.js --test tests/*.test.js
+
+TAP version 13
+# (node:60169) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: accounts persist private projects, isolate owners and support connector publishing
+ok 1 - accounts persist private projects, isolate owners and support connector publishing
+  ---
+  duration_ms: 237.077833
+  type: 'test'
+  ...
+# Subtest: bootstrap claim is private, persistent and automatically refreshes configured projects
+ok 2 - bootstrap claim is private, persistent and automatically refreshes configured projects
+  ---
+  duration_ms: 538.378125
+  type: 'test'
+  ...
+# Subtest: actual CLI accepts repeated project arguments, serves them and exits cleanly
+ok 3 - actual CLI accepts repeated project arguments, serves them and exits cleanly
+  ---
+  duration_ms: 694.186875
+  type: 'test'
+  ...
+# Subtest: CLI rejects unknown options rather than silently ignoring them
+ok 4 - CLI rejects unknown options rather than silently ignoring them
+  ---
+  duration_ms: 150.989125
+  type: 'test'
+  ...
+# Subtest: missing results, references and acceptance prose cannot certify work
+ok 5 - missing results, references and acceptance prose cannot certify work
+  ---
+  duration_ms: 247.324542
+  type: 'test'
+  ...
+# Subtest: real DOM sanitization removes executable metadata while preserving controls
+ok 6 - real DOM sanitization removes executable metadata while preserving controls
+  ---
+  duration_ms: 10.183042
+  type: 'test'
+  ...
+# Subtest: service isolates artifacts, rejects foreign origins and refreshes changed sources
+ok 7 - service isolates artifacts, rejects foreign origins and refreshes changed sources
+  ---
+  duration_ms: 545.177167
+  type: 'test'
+  ...
+# Subtest: same-named projects register independently and repeated roots are idempotent
+ok 8 - same-named projects register independently and repeated roots are idempotent
+  ---
+  duration_ms: 238.442125
+  type: 'test'
+  ...
+# Subtest: read failures retain the last valid source and expose a bounded stale diagnostic
+ok 9 - read failures retain the last valid source and expose a bounded stale diagnostic
+  ---
+  duration_ms: 407.367625
+  type: 'test'
+  ...
+# Subtest: canonical template metadata and each procedure are recognised
+ok 10 - canonical template metadata and each procedure are recognised
+  ---
+  duration_ms: 1.445959
+  type: 'test'
+  ...
+# Subtest: mixed outcomes, negation and missing observations never become pass
+ok 11 - mixed outcomes, negation and missing observations never become pass
+  ---
+  duration_ms: 0.497333
+  type: 'test'
+  ...
+# Subtest: legacy metadata still works and skipped observations stay distinct
+ok 12 - legacy metadata still works and skipped observations stay distinct
+  ---
+  duration_ms: 0.103584
+  type: 'test'
+  ...
+# Subtest: extracts canonical project accurately
+ok 13 - extracts canonical project accurately
+  ---
+  duration_ms: 400.646833
+  type: 'test'
+  ...
+# Subtest: extracts legacy project tasks correctly
+ok 14 - extracts legacy project tasks correctly
+  ---
+  duration_ms: 272.169833
+  type: 'test'
+  ...
+# Subtest: computes deterministic contentRevision that reflects changes
+ok 15 - computes deterministic contentRevision that reflects changes
+  ---
+  duration_ms: 469.400709
+  type: 'test'
+  ...
+# Subtest: rejects directories without .sdd folder
+ok 16 - rejects directories without .sdd folder
+  ---
+  duration_ms: 0.490709
+  type: 'test'
+  ...
+# Subtest: extracts comprehensive framework elements from repository
+ok 17 - extracts comprehensive framework elements from repository
+  ---
+  duration_ms: 446.621292
+  type: 'test'
+  ...
+# Subtest: renderPhaseExplorerView renders scalable on-screen navigator and phase canvas
+ok 18 - renderPhaseExplorerView renders scalable on-screen navigator and phase canvas
+  ---
+  duration_ms: 1.872625
+  type: 'test'
+  ...
+# Subtest: renderGovernanceView surfaces constitution, memories and enforced rules
+ok 19 - renderGovernanceView surfaces constitution, memories and enforced rules
+  ---
+  duration_ms: 19.158542
+  type: 'test'
+  ...
+# Subtest: renderAutomationView surfaces scripts and Git pre-commit telemetry
+ok 20 - renderAutomationView surfaces scripts and Git pre-commit telemetry
+  ---
+  duration_ms: 0.601792
+  type: 'test'
+  ...
+# Subtest: renderKnowledgeView surfaces spec templates, docs and Graphify network
+ok 21 - renderKnowledgeView surfaces spec templates, docs and Graphify network
+  ---
+  duration_ms: 7.8
+  type: 'test'
+  ...
+# Subtest: actual Graphify exports show topology and external node types instead of an empty matrix
+ok 22 - actual Graphify exports show topology and external node types instead of an empty matrix
+  ---
+  duration_ms: 0.535167
+  type: 'test'
+  ...
+# Subtest: focus expands across incoming and outgoing edges without exposing distant or unrelated nodes
+ok 23 - focus expands across incoming and outgoing edges without exposing distant or unrelated nodes
+  ---
+  duration_ms: 1.704041
+  type: 'test'
+  ...
+# Subtest: selecting and expanding connections preserves overview geometry and all nodes
+ok 24 - selecting and expanding connections preserves overview geometry and all nodes
+  ---
+  duration_ms: 46.427917
+  type: 'test'
+  ...
+# Subtest: overview separates recorded progress, absent inputs and declared decisions
+ok 25 - overview separates recorded progress, absent inputs and declared decisions
+  ---
+  duration_ms: 4.471333
+  type: 'test'
+  ...
+# Subtest: overview orders phases numerically and does not invent task progress
+ok 26 - overview orders phases numerically and does not invent task progress
+  ---
+  duration_ms: 0.163333
+  type: 'test'
+  ...
+# Subtest: large networks occupy the centre without accumulating on canvas boundaries
+ok 27 - large networks occupy the centre without accumulating on canvas boundaries
+  ---
+  duration_ms: 880.568292
+  type: 'test'
+  ...
+# Subtest: singletons are centred and invalid links are ignored
+ok 28 - singletons are centred and invalid links are ignored
+  ---
+  duration_ms: 0.55275
+  type: 'test'
+  ...
+# Subtest: phase dependencies distinguish unknown and empty declarations and resolve only existing targets
+ok 29 - phase dependencies distinguish unknown and empty declarations and resolve only existing targets
+  ---
+  duration_ms: 0.677042
+  type: 'test'
+  ...
+# Subtest: phase sorting defaults to latest number and supports ascending and names without mutating source
+ok 30 - phase sorting defaults to latest number and supports ascending and names without mutating source
+  ---
+  duration_ms: 7.757667
+  type: 'test'
+  ...
+# Subtest: synthetic demo dataset is valid and free of sensitive private paths
+ok 31 - synthetic demo dataset is valid and free of sensitive private paths
+  ---
+  duration_ms: 1.598458
+  type: 'test'
+  ...
+# Subtest: landing view renders hero, install command, and profiles catalog
+ok 32 - landing view renders hero, install command, and profiles catalog
+  ---
+  duration_ms: 0.290792
+  type: 'test'
+  ...
+# Subtest: demo phase integrates with workspace views without errors
+ok 33 - demo phase integrates with workspace views without errors
+  ---
+  duration_ms: 41.204584
+  type: 'test'
+  ...
+# Subtest: rendered views are completely free of emojis and contain vector SVG icons
+ok 34 - rendered views are completely free of emojis and contain vector SVG icons
+  ---
+  duration_ms: 6.066042
+  type: 'test'
+  ...
+# Subtest: sanitization removes scripts and unsafe links
+ok 35 - sanitization removes scripts and unsafe links
+  ---
+  duration_ms: 7.5675
+  type: 'test'
+  ...
+# Subtest: renderMarkdown converts markdown and wraps mermaid fences safely
+ok 36 - renderMarkdown converts markdown and wraps mermaid fences safely
+  ---
+  duration_ms: 15.434375
+  type: 'test'
+  ...
+# Subtest: buildTraceabilityModel maps requirements, tasks, and evidence
+ok 37 - buildTraceabilityModel maps requirements, tasks, and evidence
+  ---
+  duration_ms: 0.849292
+  type: 'test'
+  ...
+# Subtest: server handles auth, snapshots, and security bounds
+ok 38 - server handles auth, snapshots, and security bounds
+  ---
+  duration_ms: 247.244708
+  type: 'test'
+  ...
+# Subtest: community packs install and update managed skills without overwriting local edits
+ok 39 - community packs install and update managed skills without overwriting local edits
+  ---
+  duration_ms: 16.920542
+  type: 'test'
+  ...
+1..39
+# tests 39
+# suites 0
+# pass 39
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2998.215625
