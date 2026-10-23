@@ -15,3 +15,7 @@ SDD core and visual workspace installed; initial verification recorded in ../../
 ## Latest context change
 
 Current product-vision.md is the owner-provided replacement. Rewrote current context and contributor explainer accordingly; marked prior handoffs historical and preserved prior reconciled context. Retained useful implementation distinctions without imposing a fixed processing pipeline, mandatory per-entry review, selected outer app or preselected runtime stack. SDD governance remains in the constitution/onboarding. No first spec authored.
+
+## Onboarding correction
+
+Restored framework-provided AGENTS.md and CLAUDE.md entry points. Removed duplicated lifecycle, approval, session and handoff procedures from CONTRIBUTING.md. It now contains only project orientation, cloning and the new-checkout hook note. Existing SDD onboarding and constitution remain the single workflow authority.
