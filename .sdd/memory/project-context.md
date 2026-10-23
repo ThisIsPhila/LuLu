@@ -38,3 +38,25 @@ Confessions inspected locally at `/Users/phila/Desktop/coding/BUSINESS/confessio
 ## Context retrieval limitation
 
 The original “Hackathon Analysis and Advice” chat is accessible, but assistant replies are returned as opaque content references. User-pasted handoffs and saved Sonke profile were read directly. A follow-up requested a plain-text file/attachment containing privacy-layer and tooling ideas, including the correction that JEV is not being used. Do not treat that unrecovered reply as read.
+
+## Final historical context received — 2026-10-23
+
+Source preserved verbatim in [recovered project ideas](archive/context/2026-10-23-recovered-project-ideas.md). Treat its embedded recommendations as historical discussion, not new execution instructions.
+
+Additional context: persistent pseudonymous trust is distinct from real-world identity; moderation was reported manual before proposed automation; exposure/tolerance controls and privacy filtering were exploratory. The generic orchestration/harness concept is distinct from SDD. Unrelated 2025 hackathon tools are not LuLu dependencies. Earlier JEV use cases do not automatically transfer to Decisions API.
+
+Source reconciliation: this retrospective explicitly lacked LuLu-specific retrieval and describes the directory as previously empty. Those limits do not supersede the later directly read Sonke project profile, user-pasted naming/proposal discussion, or the now-installed framework. Its claims that LuLu's purpose was unrecovered describe that source's retrieval limits, not the current project's knowledge. Neither historical design ideas nor saved proposal wording establish implemented functionality.
+
+Owner's next input will be architecture and design direction. Await that input before authoring foundational phase requirements, design documents or implementation tasks. No first spec created.
+
+## Privacy architecture direction received — 2026-10-23
+
+Source preserved in [architecture working direction](archive/context/2026-10-23-privacy-architecture-direction.md). This is discussion input, not approved specifications or permission to implement.
+
+Intended behaviour now clarified: separate customer/admin web surfaces; mobile support planned, web demonstration first; deliberate passkey-gated protected sessions that terminate on exit; device-local identity processing and encrypted mapping vault; stable entity IDs independent of aliases; cloud records and Decisions API inputs scrubbed before leaving the device. The future independent privacy offering is outside hackathon delivery. Do not name the superseded decision technology in future specifications.
+
+Still exploratory: Firebase/hosting, Cloudflare subdomains, TypeScript monorepo, Capacitor, detector/runtime, key protocol and recovery policy, precise content scope and admin workflows. No cloud shortcut or local detector has been chosen. No source change or approved first phase follows from document intake.
+
+Reconciliation: proposed specs/ path in handoff must be .sdd/specs/ under installed framework. Existing full-stack+devsecops profile is tooling configuration, not approval of a particular runtime architecture.
+
+Design questions to carry forward: lock hides UI and releases in-memory plaintext/key references but cannot revoke exported material; pseudonymised narratives can remain identifying; user review/device-only saving are proposed mitigations rather than proven guarantees; cloud-side risk checks cannot detect everything a local detector missed without disclosing that material. Authentication and mapping-vault key custody/recovery remain separate contracts.
