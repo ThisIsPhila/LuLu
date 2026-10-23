@@ -1,11 +1,9 @@
 # LuLu
 
-Team KHÔRA’s virtual entry in the FNB AOTY Hackathon 2026, Safety sector, safer communities and GBV response challenge.
+Team KHÔRA’s FNB AOTY Hackathon 2026 entry for safer communities and GBV response.
 
-An everyday companion with deliberately accessed protected documentation and user-controlled disclosure. Feature ideas and stack remain subject to requirements and design approval. OpenAI Decisions API replaces the earlier JEV idea.
+LuLu turns natural writing into a coherent concealed narrative, recognising people, places, times and relationships with subtle visual feedback and optional corrections. Its author can retrieve the record through their original words and meaning, with private associations available through protected access.
 
-The team began solo; the owner reports a friend has now joined. GitHub access and Sonke membership must be managed separately.
+Read [current product vision](product-vision.md), then [project context](project-context.md). The owner-supplied vision supersedes incompatible framing in older handoffs. The outer application and demo engineering route remain open; focus on a compelling web-first experience.
 
-New contributors start with [the explainer](../../docs/project-explainer.md) and [contributor workflow](../../CONTRIBUTING.md).
-
-See [project context](project-context.md) for decisions, evidence boundaries and hackathon milestones. No application code exists yet.
+SDD installed. No product code or first specification exists. Contributors start with [the explainer](../../docs/project-explainer.md) and [contribution guide](../../CONTRIBUTING.md).

@@ -2,43 +2,31 @@
 
 For teammates and their coding agents. Updated 23 October 2026. This explains the current direction; it is not an approved implementation specification. Read [current project memory](../.sdd/memory/project-context.md) and the active phase before starting work.
 
-## The problem and intended experience
+## The intended experience
 
-Someone in an unsafe situation may need to preserve a private account of events or find support without visibly advertising that need. LuLu is intended to be a useful everyday companion or utility with deliberate access to a protected personal space. The exact ordinary utility and access gesture are still open.
+**Write normally; LuLu handles the concealed representation naturally.** A person journals in ordinary language. LuLu recognises people, places, times, relationships and revealing context, then transforms them into a coherent private narrative. Subtle visual indicators show associations as they develop; the writer can correct them in place without approving every transformation.
 
-Within the protected space, the proposed experience includes incident records, supporting material, a chronology and relevant support information. Users control disclosure. AI assistance does not automatically send records to others or escalate incidents.
+For example, David visiting a home at a particular time could appear as “Person A/John came to the Nest at Blue Moon.” The goal extends beyond name replacement: preserve the meaning and relationships while concealing real-world references. The author can retrieve records through their original intent and words without memorising the transformed wording. Changing an alias preserves its underlying associations.
 
-LuLu is Team KHÔRA's entry in the FNB App of the Year Hackathon 2026, under **Safer communities and gender-based violence response**. The team began as a solo entry and is now collaborating. Repository collaboration and Sonke team membership are separate steps.
+The everyday outer app is deliberately undecided: storybook/writing, notes, tasks or another authentic utility. A deliberate concealed interaction opens the protected experience using a passkey when required, without a conventional sign-in journey. Leaving ends protected access.
 
-## Intended privacy architecture
+LuLu is Team KHÔRA's FNB AOTY Hackathon 2026 entry for safer communities and GBV response. The team now collaborates across Codex and Claude Code.
 
-The design direction is to process raw identifying information locally, before storage outside the device or cloud AI calls:
+## Current vision and engineering approach
 
-1. A user deliberately enters a passkey-gated protected session.
-2. Local processing identifies sensitive information and substitutes stable entity references.
-3. An encrypted local mapping connects entity IDs, aliases and actual identifying details. Identity must not depend on alias spelling.
-4. Intended cloud-visible records and model requests contain scrubbed material. An authorised local view can restore identifying details or display aliases.
-5. Leaving the protected space ends its session. Exact timeout, backgrounding, key custody and recovery behaviour require design.
+Read [the owner’s corrected product vision](../.sdd/memory/product-vision.md). It replaces incompatible framing in earlier architecture/handoffs. Approach the hackathon optimistically: choose a practical route to an impressive, coherent demonstration of this experience, then refine it using evidence.
 
-This is an intended boundary, not a guarantee already implemented. A name replacement alone does not anonymise a narrative. Dates, relationships, locations, attachments and metadata can still identify someone. Local detection quality, review, device-only saving and supported input types remain open decisions.
+Logical capabilities include natural writing/feedback, entity continuity, device-controlled private mappings, protected access, contextual transformation, decisions, synchronised records and administration. They are not a prescribed list of separate services.
 
-Passkeys authenticate access; they do not by themselves encrypt records. Encryption, key storage, recovery and session authority require separate contracts. Restoring original keys/mappings is different from manually relabelling surviving pseudonymous records. Admin access must not imply access to decrypted identity mappings.
+Local/edge transformation before the next layer needs the content is the target. The first demo's processing placement, sequencing, models and trade-offs remain engineering choices. **OpenAI Decisions API** is selected for demo decisions, one service among others; it is not synonymous with cloud storage or the whole privacy engine. Its exact role is not yet prescribed.
 
-## AI role
+Customer and separate admin web applications are intended. Web is the demonstration priority, with iOS/Android anticipated. Firebase, Capacitor, a TypeScript monorepo and Cloudflare subdomains are candidates, not adopted decisions. Design discussion comes next.
 
-**OpenAI Decisions API** is the intended tool for fast bounded classifications, such as a second-pass risk check on material already scrubbed locally. It returns predicates, choices or scores. It is not the local privacy boundary, a text-span replacement engine or a general narrative-generation API. Its exact LuLu questions, thresholds, fallback behaviour and evaluation cases remain undecided.
+## Useful foundations
 
-Official reference: https://developers.openai.com/api/docs/guides/decisions
+Confessions supplies real passkey-first identity and multi-device experience. Draw on inspected code where useful; LuLu has its own interaction model. Distinguish authentication from encryption/key custody as engineering details are designed. Stable entities should survive alias changes; continued device access and human re-association offer different recovery experiences to explore.
 
-Do not adopt a cloud-first shortcut without an explicit architecture decision and an accurate description of the resulting privacy limitations.
-
-## Product and implementation boundaries
-
-- Customer-facing web app and separate admin web app are the intended surfaces, backed by shared services.
-- The hackathon demo prioritises web; future mobile clients are considered. Capacitor, Firebase, TypeScript monorepo layout and Cloudflare-managed hosting/subdomains are candidates, not approved stack decisions.
-- Confessions is a separate existing product. Its inspected code supplies evidence of passkey-based pseudonymous identity and cross-device continuation, not proof of an encrypted LuLu vault. Do not copy its entire application, connect user identities across products or assume its archive specifications describe current code.
-- The privacy capability could later become a separate KHÔRA offering. That business is outside the hackathon delivery; proprietary internals must not be published merely to explain this project.
-- Confessions' visual design is not automatically LuLu's design. LuLu design direction is still forthcoming.
+The privacy capability may eventually become a reusable KHÔRA product. Building that standalone business is not this hackathon deliverable. Preserve proprietary boundaries when sharing public demonstration material.
 
 ## What exists today
 
@@ -65,7 +53,7 @@ Times are recorded as South African event times. Check live organiser notices fo
 - [Contributor workflow](../CONTRIBUTING.md): getting started, coordinating agents and submitting changes.
 - [AGENTS.md](../AGENTS.md): agent entry point; Claude Code also reads the pointer in CLAUDE.md.
 - [Project context](../.sdd/memory/project-context.md): decisions and reconciled source limits.
-- [Architecture thinking](../.sdd/memory/archive/context/2026-10-23-privacy-architecture-direction.md): original working direction, not an approved spec.
+- [Current product vision](../.sdd/memory/product-vision.md): owner-supplied replacement; earlier handoffs are historical context only.
 - [SDD onboarding](../.sdd/AGENT_ONBOARDING.md): canonical specification and execution workflow.
 
 The next owner input is architecture/design direction. Contributions can review assumptions and propose alternatives, but must not silently turn these ideas into approved scope.

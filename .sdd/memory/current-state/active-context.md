@@ -2,20 +2,16 @@
 
 2026-10-23 — Codex
 
-Current work: owner-authorized SDD core and visual installation, private GitHub creation, initial commit. No phase active. Do not create the first specification until the owner resumes that work.
+## Current direction
 
-Reviewed Confessions phases 009 and 013 and Smart Trader phase 042 as usage examples. See ../../reports/framework-adoption.md. Product ideas are not approved requirements. Preserve the identity/encryption distinction and proprietary boundaries in ../project-context.md.
+Read ../product-vision.md first for product intent. The owner supplied it as the replacement for prior handoff/architecture framing. Natural writing, automatic contextual concealment, responsive entity indicators, optional correction and original-intent retrieval are central. The outer app and demo implementation route remain open. Engineering should investigate a focused path to a compelling hackathon demonstration.
 
-Setup complete: core doctor and skills gates pass; visual build and 39 tests pass; LuLu browser overview verified; private ThisIsPhila/LuLu main pushed. No first spec created. Local server session is running on loopback port 3456.
+No active product phase, first spec or application code. Next owner discussion is design before foundational phase authoring. Do not turn the vision into an already-approved technical specification.
 
-## Context intake complete
+## Shared project state
 
-Read and preserved the final recovered-ideas document; reconciled its retrieval limitations against direct profile/conversation evidence in ../project-context.md. Await owner's architecture/design direction before foundational phase authoring. No spec or application implementation started.
+SDD core and visual workspace installed; initial verification recorded in ../../reports/framework-adoption.md. Private GitHub repository exists. Contributor guide and agent entry points are shared across Codex and Claude Code. Phila is initial integration owner; teammate task split not established here.
 
-## Architecture discussion intake
+## Latest context change
 
-Read owner's privacy architecture working-direction file. Updated project context with intended local/remote trust boundary, protected-session behaviour and proposed separate admin/customer surfaces. Preserve open implementation choices; no phase/spec created. Respond with architectural assessment and unresolved foundational decisions, then continue co-authoring when directed.
-
-## Collaborative onboarding — 2026-10-23
-
-Owner reports a friend has joined and authorises sharing context/instructions through the existing private GitHub repository. Added model-neutral project explainer and contribution workflow; root AGENTS.md and CLAUDE.md link to them. Historical source attachments are preserved under memory/archive/context with retrieval limits reconciled in project-context.md. No first spec or application code created. Initial integration owner: Phila; teammate handle and task split not yet supplied. Contributor invitation remains the owner's action.
+Current product-vision.md is the owner-provided replacement. Rewrote current context and contributor explainer accordingly; marked prior handoffs historical and preserved prior reconciled context. Retained useful implementation distinctions without imposing a fixed processing pipeline, mandatory per-entry review, selected outer app or preselected runtime stack. SDD governance remains in the constitution/onboarding. No first spec authored.

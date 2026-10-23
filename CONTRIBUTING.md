@@ -11,7 +11,7 @@ git clone https://github.com/ThisIsPhila/LuLu.git
 cd LuLu
 ```
 
-Read AGENTS.md, then the linked project and SDD onboarding files. Ask your agent to explain the current product, established decisions, open questions and its proposed contribution before changing anything. The file `docs/project-explainer.md` can also be shared on its own as a dated orientation; a fresh checkout is the current source.
+Read AGENTS.md, then the current product vision at `.sdd/memory/product-vision.md` and the linked project/SDD onboarding files. The current vision supersedes incompatible architecture/handoff framing; preserve engineering freedom for the demo instead of imposing old proposed workflows. Ask your agent to explain the current product, established decisions, open questions and its proposed contribution before changing anything. The file `docs/project-explainer.md` can also be shared on its own as a dated orientation; a fresh checkout is the current source.
 
 Core SDD scripts, templates and skills are already tracked. Do not rerun setup on an existing checkout just to start contributing. Recreate missing empty directories if necessary, then install the existing local commit hook and validate:
 

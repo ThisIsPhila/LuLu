@@ -8,7 +8,7 @@ SDD is installed with the full-stack+devsecops profile. Start with AGENTS.md and
 
 New teammates: read [the project explainer](docs/project-explainer.md), then [contributor setup and coordination](CONTRIBUTING.md). Agents start at [AGENTS.md](AGENTS.md); Claude Code has a matching [CLAUDE.md](CLAUDE.md) pointer.
 
-The first product specification has not been created. Architecture and design discussion is ongoing. The private repository contains the historical context files as well as the latest reconciled project memory.
+Read the [current product vision](.sdd/memory/product-vision.md) before older architecture handoffs; it supersedes incompatible framing. The first product specification has not been created. Architecture and design discussion is ongoing. The private repository contains the historical context files as well as the latest reconciled project memory.
 
 ## Local framework workspace
 

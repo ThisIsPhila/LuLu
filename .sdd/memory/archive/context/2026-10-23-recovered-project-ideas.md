@@ -1,3 +1,5 @@
+> Historical context. Where framing differs, the current [product vision](../../product-vision.md) supersedes this document. Do not promote historical proposals into current technical decisions.
+
 # Recovered Project Ideas: Confessions, the Privacy Layer, LuLu, Decisions API, and SDD
 
 **Historical ideas document — 23 October 2026**  

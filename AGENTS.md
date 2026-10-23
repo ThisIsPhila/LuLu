@@ -2,6 +2,6 @@
 
 Before project work, read `.sdd/AGENT_ONBOARDING.md`, `.sdd/constitution.md`, `.sdd/memory/current-state/active-context.md`, and the active phase documents.
 
-For LuLu-specific orientation and collaboration, also read `docs/project-explainer.md`, `CONTRIBUTING.md`, and `.sdd/memory/project-context.md`.
+For LuLu-specific orientation and collaboration, also read `.sdd/memory/product-vision.md`, `docs/project-explainer.md`, `CONTRIBUTING.md`, and `.sdd/memory/project-context.md`.
 
 The authoritative workflow, placement, evidence, security, and project-boundary rules live in `.sdd/`; do not restate or weaken them here. Preserve hooks and unrelated work. Local authoring or implementation never implies authority to deploy, publish, merge, push, or mutate an external environment.
