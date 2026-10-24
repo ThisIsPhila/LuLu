@@ -1,0 +1,4 @@
+export type Entity={id:string;original:string;alias:string;type:'Person'|'Place'|'Time'};
+export const initialEntities:Entity[]=[{id:'person-david',original:'David',alias:'John',type:'Person'},{id:'place-home',original:'home',alias:'the Nest',type:'Place'},{id:'time-evening',original:'9pm',alias:'Blue Moon',type:'Time'}];
+export function transform(text:string,entities:Entity[]):string {let out=text;for(const e of entities){const escaped=e.original.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');out=out.replace(new RegExp('\\b'+escaped+'\\b','gi'),()=>e.alias);}return out.replace(/\bmy home\b/gi,'the Nest').replace(/\bmy the Nest\b/gi,'the Nest').replace(/\bI was\b/g,'she was').replace(/\bI am\b/g,'she is').replace(/\bI\b/g,'she').replace(/\bme\b/g,'her').replace(/\bmy\b/g,'her');}
+export function recognised(text:string,entities:Entity[]){return entities.filter(e=>text.toLowerCase().includes(e.original.toLowerCase()));}

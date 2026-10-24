@@ -11,3 +11,5 @@ dist/
 .sdd/evidence/hooks/
 .sdd/graphs/*.json
 .sdd/graphs/*.tmp
+
+*.tsbuildinfo

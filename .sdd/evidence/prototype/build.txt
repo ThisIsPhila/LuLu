@@ -1,0 +1,13 @@
+
+> lulu-prototype@0.1.0 build
+> tsc -b && vite build
+
+vite v6.4.5 building for production...
+transforming...
+✓ 1587 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.42 kB │ gzip:  0.30 kB
+dist/assets/index-Bxlq7x60.css   12.81 kB │ gzip:  3.83 kB
+dist/assets/index-C-MRenrr.js   248.40 kB │ gzip: 77.19 kB
+✓ built in 1.65s
