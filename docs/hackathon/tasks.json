@@ -128,9 +128,9 @@
     "id": "hosting",
     "group": "internal",
     "title": "Host the working app and verify judge access",
-    "when": "Before final submission",
-    "done": false,
-    "note": "Programme requires a live web app. Verify links and a suitable demo account/access route; deployment still needs owner direction."
+    "when": "Completed · 24 October 2026",
+    "done": true,
+    "note": "Firebase Hosting deployed and live app opened successfully at https://khora-lulu-2026.web.app. KHORA project; LuLu web app. Backend authentication and protected storage are separate implementation work."
   },
   {
     "id": "slides",

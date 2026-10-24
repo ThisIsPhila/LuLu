@@ -74,5 +74,215 @@
   {
     "title": "Preserved Demo",
     "path": ".sdd/evidence/app-demo-separation/preserved-demo.png"
+  },
+  {
+    "title": "Brand World",
+    "path": "docs/design/resources/2026-10-24-lulu-brand-kit/01-brand-world.png",
+    "category": "Brand kit",
+    "status": "current"
+  },
+  {
+    "title": "Identity System",
+    "path": "docs/design/resources/2026-10-24-lulu-brand-kit/02-identity-system.png",
+    "category": "Brand kit",
+    "status": "current"
+  },
+  {
+    "title": "Colour And Type",
+    "path": "docs/design/resources/2026-10-24-lulu-brand-kit/03-colour-and-type.png",
+    "category": "Brand kit",
+    "status": "current"
+  },
+  {
+    "title": "Imagery And Materials",
+    "path": "docs/design/resources/2026-10-24-lulu-brand-kit/04-imagery-and-materials.png",
+    "category": "Brand kit",
+    "status": "current"
+  },
+  {
+    "title": "Brand In Use",
+    "path": "docs/design/resources/2026-10-24-lulu-brand-kit/05-brand-in-use.png",
+    "category": "Brand kit",
+    "status": "current"
+  },
+  {
+    "title": "LuLu wordmark black",
+    "path": "public/media/brand/lulu-wordmark-black.png",
+    "category": "Logo",
+    "status": "current"
+  },
+  {
+    "title": "LuLu wordmark white",
+    "path": "public/media/brand/lulu-wordmark-white.png",
+    "category": "Logo",
+    "status": "current"
+  },
+  {
+    "title": "Lu short mark black",
+    "path": "public/media/brand/lu-mark-black.png",
+    "category": "Logo",
+    "status": "current"
+  },
+  {
+    "title": "Lu short mark white",
+    "path": "public/media/brand/lu-mark-white.png",
+    "category": "Logo",
+    "status": "current"
+  },
+  {
+    "title": "Entity Inspector screen",
+    "path": "docs/design/stitch_lulu_mobile_journal_experience/lulu_entity_inspector/screen.png",
+    "category": "App page design",
+    "status": "current"
+  },
+  {
+    "title": "Entity Inspector source",
+    "path": "docs/design/stitch_lulu_mobile_journal_experience/lulu_entity_inspector/code.html",
+    "category": "App page design",
+    "status": "current"
+  },
+  {
+    "title": "Journal Home screen",
+    "path": "docs/design/stitch_lulu_mobile_journal_experience/lulu_journal_home/screen.png",
+    "category": "App page design",
+    "status": "current"
+  },
+  {
+    "title": "Journal Home source",
+    "path": "docs/design/stitch_lulu_mobile_journal_experience/lulu_journal_home/code.html",
+    "category": "App page design",
+    "status": "current"
+  },
+  {
+    "title": "Journal Story Leaves 1 screen",
+    "path": "docs/design/stitch_lulu_mobile_journal_experience/lulu_journal_story_leaves_1/screen.png",
+    "category": "App page design",
+    "status": "current"
+  },
+  {
+    "title": "Journal Story Leaves 1 source",
+    "path": "docs/design/stitch_lulu_mobile_journal_experience/lulu_journal_story_leaves_1/code.html",
+    "category": "App page design",
+    "status": "current"
+  },
+  {
+    "title": "Journal Story Leaves 2 screen",
+    "path": "docs/design/stitch_lulu_mobile_journal_experience/lulu_journal_story_leaves_2/screen.png",
+    "category": "App page design",
+    "status": "current"
+  },
+  {
+    "title": "Journal Story Leaves 2 source",
+    "path": "docs/design/stitch_lulu_mobile_journal_experience/lulu_journal_story_leaves_2/code.html",
+    "category": "App page design",
+    "status": "current"
+  },
+  {
+    "title": "Private Support Sanctuary Dark Mode screen",
+    "path": "docs/design/stitch_lulu_mobile_journal_experience/lulu_private_support_sanctuary_dark_mode/screen.png",
+    "category": "App page design",
+    "status": "current"
+  },
+  {
+    "title": "Private Support Sanctuary Dark Mode source",
+    "path": "docs/design/stitch_lulu_mobile_journal_experience/lulu_private_support_sanctuary_dark_mode/code.html",
+    "category": "App page design",
+    "status": "current"
+  },
+  {
+    "title": "Protected Writing screen",
+    "path": "docs/design/stitch_lulu_mobile_journal_experience/lulu_protected_writing/screen.png",
+    "category": "App page design",
+    "status": "current"
+  },
+  {
+    "title": "Protected Writing source",
+    "path": "docs/design/stitch_lulu_mobile_journal_experience/lulu_protected_writing/code.html",
+    "category": "App page design",
+    "status": "current"
+  },
+  {
+    "title": "Story Reading Mode screen",
+    "path": "docs/design/stitch_lulu_mobile_journal_experience/lulu_story_reading_mode/screen.png",
+    "category": "App page design",
+    "status": "current"
+  },
+  {
+    "title": "Story Reading Mode source",
+    "path": "docs/design/stitch_lulu_mobile_journal_experience/lulu_story_reading_mode/code.html",
+    "category": "App page design",
+    "status": "current"
+  },
+  {
+    "title": "Transform Protect screen",
+    "path": "docs/design/stitch_lulu_mobile_journal_experience/lulu_transform_protect/screen.png",
+    "category": "App page design",
+    "status": "current"
+  },
+  {
+    "title": "Transform Protect source",
+    "path": "docs/design/stitch_lulu_mobile_journal_experience/lulu_transform_protect/code.html",
+    "category": "App page design",
+    "status": "current"
+  },
+  {
+    "title": "01 Folded Page",
+    "path": "docs/design/resources/rejected-app-icon-concepts/concept-01-folded-page.png",
+    "category": "Icon study",
+    "status": "rejected"
+  },
+  {
+    "title": "01 Folded Page",
+    "path": "docs/design/resources/rejected-app-icon-concepts/concept-01-folded-page.svg",
+    "category": "Icon study",
+    "status": "rejected"
+  },
+  {
+    "title": "02 Open Journal",
+    "path": "docs/design/resources/rejected-app-icon-concepts/concept-02-open-journal.png",
+    "category": "Icon study",
+    "status": "rejected"
+  },
+  {
+    "title": "02 Open Journal",
+    "path": "docs/design/resources/rejected-app-icon-concepts/concept-02-open-journal.svg",
+    "category": "Icon study",
+    "status": "rejected"
+  },
+  {
+    "title": "03 Layered Stories",
+    "path": "docs/design/resources/rejected-app-icon-concepts/concept-03-layered-stories.png",
+    "category": "Icon study",
+    "status": "rejected"
+  },
+  {
+    "title": "03 Layered Stories",
+    "path": "docs/design/resources/rejected-app-icon-concepts/concept-03-layered-stories.svg",
+    "category": "Icon study",
+    "status": "rejected"
+  },
+  {
+    "title": "04 Unfolding Line",
+    "path": "docs/design/resources/rejected-app-icon-concepts/concept-04-unfolding-line.png",
+    "category": "Icon study",
+    "status": "rejected"
+  },
+  {
+    "title": "04 Unfolding Line",
+    "path": "docs/design/resources/rejected-app-icon-concepts/concept-04-unfolding-line.svg",
+    "category": "Icon study",
+    "status": "rejected"
+  },
+  {
+    "title": "Comparison",
+    "path": "docs/design/resources/rejected-app-icon-concepts/concept-comparison.png",
+    "category": "Icon study",
+    "status": "rejected"
+  },
+  {
+    "title": "Comparison",
+    "path": "docs/design/resources/rejected-app-icon-concepts/concept-comparison.svg",
+    "category": "Icon study",
+    "status": "rejected"
   }
 ]

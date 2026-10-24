@@ -1,0 +1,210 @@
+TAP version 13
+# Subtest: missing storage returns independent defaults without writing
+ok 1 - missing storage returns independent defaults without writing
+  ---
+  duration_ms: 0.724583
+  type: 'test'
+  ...
+# Subtest: legacy arrays migrate on explicit save; deleting everything stays empty on reload
+not ok 2 - legacy arrays migrate on explicit save; deleting everything stays empty on reload
+  ---
+  duration_ms: 1.283875
+  type: 'test'
+  location: '/Users/phila/Desktop/coding/HACKATHONS/LuLu/src/domain/journal.test.ts:28:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/phila/Desktop/coding/HACKATHONS/LuLu/src/domain/journal.test.ts:31:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: malformed, duplicate and future-version data are retained and cannot be overwritten
+ok 3 - malformed, duplicate and future-version data are retained and cannot be overwritten
+  ---
+  duration_ms: 0.803541
+  type: 'test'
+  ...
+# Subtest: read and quota failures are observable without changing saved bytes
+not ok 4 - read and quota failures are observable without changing saved bytes
+  ---
+  duration_ms: 0.592583
+  type: 'test'
+  location: '/Users/phila/Desktop/coding/HACKATHONS/LuLu/src/domain/journal.test.ts:43:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+    +   error: 'invalid-data',
+    -   error: 'write-failed',
+        ok: false
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    ok: false
+    error: 'write-failed'
+  actual:
+    ok: false
+    error: 'invalid-data'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/phila/Desktop/coding/HACKATHONS/LuLu/src/domain/journal.test.ts:47:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: invalid records or blank mappings cannot be saved
+ok 5 - invalid records or blank mappings cannot be saved
+  ---
+  duration_ms: 0.1655
+  type: 'test'
+  ...
+# Subtest: alias correction persists across entries and reload while preserving source and ordinary writing
+not ok 6 - alias correction persists across entries and reload while preserving source and ordinary writing
+  ---
+  duration_ms: 0.111208
+  type: 'test'
+  location: '/Users/phila/Desktop/coding/HACKATHONS/LuLu/src/domain/journal.test.ts:54:1'
+  failureType: 'testCodeFailure'
+  error: 'Invalid correction'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    correctAlias (file:///Users/phila/Desktop/coding/HACKATHONS/LuLu/src/domain/continuity.ts:8:53)
+    TestContext.<anonymous> (file:///Users/phila/Desktop/coding/HACKATHONS/LuLu/src/domain/journal.test.ts:56:34)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: original-meaning retrieval requires explicit access; entity filters use chosen identity
+not ok 7 - original-meaning retrieval requires explicit access; entity filters use chosen identity
+  ---
+  duration_ms: 0.067542
+  type: 'test'
+  location: '/Users/phila/Desktop/coding/HACKATHONS/LuLu/src/domain/journal.test.ts:66:1'
+  failureType: 'testCodeFailure'
+  error: 'Invalid correction'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    correctAlias (file:///Users/phila/Desktop/coding/HACKATHONS/LuLu/src/domain/continuity.ts:8:53)
+    TestContext.<anonymous> (file:///Users/phila/Desktop/coding/HACKATHONS/LuLu/src/domain/journal.test.ts:67:20)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: correction rejects unknown or blank representations and leaves source-less legacy records intact
+not ok 8 - correction rejects unknown or blank representations and leaves source-less legacy records intact
+  ---
+  duration_ms: 0.135958
+  type: 'test'
+  location: '/Users/phila/Desktop/coding/HACKATHONS/LuLu/src/domain/journal.test.ts:74:1'
+  failureType: 'testCodeFailure'
+  error: 'Invalid correction'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    correctAlias (file:///Users/phila/Desktop/coding/HACKATHONS/LuLu/src/domain/continuity.ts:8:53)
+    TestContext.<anonymous> (file:///Users/phila/Desktop/coding/HACKATHONS/LuLu/src/domain/journal.test.ts:78:20)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: replacement does not cascade aliases, longest overlapping source wins and empty references terminate
+not ok 9 - replacement does not cascade aliases, longest overlapping source wins and empty references terminate
+  ---
+  duration_ms: 0.6745
+  type: 'test'
+  location: '/Users/phila/Desktop/coding/HACKATHONS/LuLu/src/domain/journal.test.ts:80:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'badRobinbad badmetbad badRobinbad badandbad badRobinbad badSmithbad.'
+    - 'David met Robin and Jordan.'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'David met Robin and Jordan.'
+  actual: 'badRobinbad badmetbad badRobinbad badandbad badRobinbad badSmithbad.'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/phila/Desktop/coding/HACKATHONS/LuLu/src/domain/journal.test.ts:87:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: context and perspective remain coherent
+ok 10 - context and perspective remain coherent
+  ---
+  duration_ms: 1.050292
+  type: 'test'
+  ...
+# Subtest: alias updates retain references
+ok 11 - alias updates retain references
+  ---
+  duration_ms: 0.4235
+  type: 'test'
+  ...
+# Subtest: replacement is literal and original stays unchanged
+ok 12 - replacement is literal and original stays unchanged
+  ---
+  duration_ms: 0.210875
+  type: 'test'
+  ...
+# Subtest: perspective distancing can be toggled independently
+ok 13 - perspective distancing can be toggled independently
+  ---
+  duration_ms: 0.248458
+  type: 'test'
+  ...
+# Subtest: recognised mentions counts entities accurately
+ok 14 - recognised mentions counts entities accurately
+  ---
+  duration_ms: 0.311625
+  type: 'test'
+  ...
+# Subtest: detectEntitySpans identifies positions
+ok 15 - detectEntitySpans identifies positions
+  ---
+  duration_ms: 0.139375
+  type: 'test'
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 9
+# fail 6
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 125.125042

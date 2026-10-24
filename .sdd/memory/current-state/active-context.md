@@ -71,3 +71,11 @@ Implemented:
 - Screen F (Reader View): `Literata` serif editorial reading layout, date/time meta, floating reader pill dock (Lock/Exit, Read, Reveal Original Intent when unlocked, Listen audio wave simulation, Tr 1st/3rd person toggle, Aa font size).
 - Screen G & 06 (Library): real-time search with author original-intent querying, category subtabs (Entries, People, Places, Topics), and multi-tag filtering chips.
 - Verified: production build passes in 1.13s, 6 domain tests pass in 98ms, live hot reload running on port 5173.
+
+## Compact home and composing correction — 24 October
+
+Owner requested discreet home categories, compact expandable card stacks, keyboard-adjacent writing with processing above, and camera-safe top bars. Implemented in root app and deployed via Firebase MCP to https://khora-lulu-2026.web.app (Hosting version 869a7827d1480502). Build and live stack/preview interactions observed. Physical iPhone keyboard/safe-area verification pending. See ../../reports/hackathon-ui/2026-10-24-compact-home-writing.md. Preserved demo remains independent.
+
+## Categorized snapshot and UI owner handoff — 24 October
+
+Owner rejected the current card-stack interpretation and requested categorized commits plus implementation delegation to LuLu UI Design. Current UI remains unaccepted. Handoff: docs/handoffs/ui-design-2026-10-24.md. Main/demo builds pass; latest combined domain run is 9 passing / 6 failing (earlier all-green core evidence is historical). Preserve the snapshot and document contract drift for the functionality track; do not invent another visual replacement or recreate Firebase resources during this handoff.
