@@ -2,7 +2,7 @@
 
 Private development workspace for Team KHÔRA’s FNB AOTY Hackathon 2026 project.
 
-SDD is installed with the full-stack+devsecops profile. Start with AGENTS.md and .sdd/AGENT_ONBOARDING.md. No application stack or first specification has been approved.
+SDD is installed with the full-stack+devsecops profile. Start with AGENTS.md and .sdd/AGENT_ONBOARDING.md. A local React/TypeScript prototype is available. Phase 001 remains a draft; see the bounded prototype direction in .sdd/memory/governance/.
 
 ## Start here
 
@@ -19,3 +19,19 @@ Launch: npm --prefix .sdd-framework/visual run workspace -- --project "$PWD"
 Keep the generated local launch credential private. Markdown in .sdd remains authoritative.
 
 Apply `.sdd/evidence/setup/visual-security.patch` in the framework clone before installing dependencies to reproduce the local DOMPurify security correction.
+
+## Run the app prototype
+
+`npm install`, then `npm run dev` (local Vite server). `npm run build` checks TypeScript and builds; `npm test` verifies the demonstration transformer.
+
+Ordinary journaling supports creation, reading, editing, search, filters, favorites and deletion with browser-local persistence. Protected writing is an explicitly labelled preview session with deterministic example/reference substitutions and perspective changes. It is not production authentication, general PII detection, encryption or OpenAI Decisions integration. Source text and mapping edits are session-only; concealed protected entries are saved locally. Use synthetic examples. Shared backend, admin and mobile builds remain future work.
+
+## Work areas for teammates
+
+- Product and current handoff: [.sdd/memory/current-state/active-context.md](.sdd/memory/current-state/active-context.md). Includes subsequent decisions and outstanding work.
+- Architecture: [Phase 001 draft requirements](.sdd/specs/active/phase-001-architecture-foundation/requirements.md). Not yet approved for execution.
+- Visual direction: [design references](docs/design/README.md). Mobile-first alignment and owner acceptance remain pending.
+- Prototype: `src/components`, `src/domain`, and `src/hooks`; local verification in [.sdd/evidence/prototype/](.sdd/evidence/prototype/).
+- Hackathon materials: [SSDLC draft](docs/hackathon/ssdlc-draft-2026-10-24.md). Describes intended security lifecycle, awaiting owner review/submission.
+
+Commit subjects distinguish architecture drafts, design context, prototype implementation, hackathon materials and shared documentation. Commit bodies record scope and validation; a shared draft does not imply approval or completed implementation.

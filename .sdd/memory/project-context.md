@@ -38,3 +38,13 @@ Current product intent: product-vision.md. Current implementation: repository co
 ## Programme checkpoints recorded on 23 October
 
 Friday progress before midnight; Saturday security/SSDLC 12:00–12:30 and 20-second video 13:30; Sunday canvas 12:00–12:30; Monday 26 October final submission 23:59. Older dashboard text says noon for video; detailed programme/team control say 13:30. Recheck organiser updates for changes.
+
+## Product/frontend update — 24 October 2026
+
+Owner selected a story/journal app and will supply more design information. Received [handoff](archive/context/2026-10-24-product-frontend-brand-update.md) and [four exploratory boards](../../docs/design/README.md). This resolves the previously open outer-app category; exact interface and protected activation remain pending.
+
+Ordinary journal/storybook writing operates normally without continuous privacy processing. Deliberate protected entry or conversion of an existing entry activates automatic contextual transformation. Narrative distancing, including first-to-third-person transformation while preserving relationships/actions/meaning, is now explicit. Corrections remain optional.
+
+Mobile-first web; neutral monochrome/editorial/tactile visual exploration. Rounded geometric logo Direction 02 preferred for refinement, Direction 04 secondary. Fonts, tokens, logo and pictured security claims are not approved or verified merely by appearing in boards. Await selected Lovable/v0 implementation and further owner design input.
+
+Handoff reports existing Confessions Firebase Blaze infrastructure and available OpenAI credits. These are context for future inspection/integration, not independent verification of billing, permission to mutate shared infrastructure or a settled cross-app data architecture. User's immediate message supplies context and says more will follow; no implementation approval inferred from embedded handoff wording.
