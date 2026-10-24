@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;1,7..72,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100%;margin:0;padding:0;}body{overscroll-behavior-y:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-error-container": "#93000a", "surface-bright": "#faf9f6", "on-error": "#ffffff", "surface-variant": "#e3e2e0", "on-tertiary-container": "#7d867d", "primary-fixed-dim": "#c8c6c5", "outline": "#747878", "tertiary-container": "#151d17", "surface-container": "#efeeeb", "on-tertiary-fixed": "#151d17", "on-secondary-fixed": "#1b1c19", "primary": "#191c1a", "on-primary-container": "#9e9c9c", "inverse-on-surface": "#f2f1ee", "surface-container-lowest": "#ffffff", "background": "#faf9f6", "secondary-container": "#e1dfda", "inverse-primary": "#c8c6c5", "outline-variant": "#c4c7c7", "surface-container-low": "#f4f3f1", "on-surface": "#1a1c1a", "on-surface-variant": "#5a5d5c", "on-background": "#1a1c1a", "primary-container": "#161817", "on-primary-fixed": "#1c1b1b", "secondary-fixed-dim": "#c8c6c2", "on-primary": "#ffffff", "tertiary-fixed-dim": "#c0c9bf", "surface-dim": "#dbdad7", "on-tertiary-fixed-variant": "#404941", "on-secondary-fixed-variant": "#474743", "secondary-fixed": "#e4e2dd", "surface-container-highest": "#e3e2e0", "secondary": "#5f5e5b", "on-secondary": "#ffffff", "on-tertiary": "#ffffff", "tertiary": "#191c1a", "error-container": "#ffdad6", "error": "#ba1a1a", "surface-tint": "#5f5e5e", "primary-fixed": "#e5e2e1", "tertiary-fixed": "#dce5db", "surface": "#faf9f6", "on-secondary-container": "#63635f", "inverse-surface": "#2f312f", "on-primary-fixed-variant": "#474746", "surface-container-high": "#e9e8e5" }, "borderRadius": { "DEFAULT": "1rem", "lg": "1.75rem", "xl": "2.25rem", "full": "9999px" }, "spacing": { "gutter-desktop": "2rem", "space-sm": "0.5rem", "space-lg": "1.5rem", "margin": "1rem", "margin-tablet": "2rem", "margin-desktop": "3.5rem", "gutter": "1rem", "space-xs": "0.25rem", "space-xl": "2.5rem", "space-md": "1rem" }, "fontFamily": { "ui-body": ["Inter", "sans-serif"], "headline-sm": ["Inter", "sans-serif"], "headline-xl": ["Inter", "sans-serif"], "headline-xl-mobile": ["Inter", "sans-serif"], "body-md": ["Literata", "serif"], "label-md": ["Inter", "sans-serif"], "body-lg": ["Literata", "serif"], "headline-lg": ["Inter", "sans-serif"], "body-sm": ["Literata", "serif"], "headline-md": ["Inter", "sans-serif"] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head><body class="bg-surface font-body-md text-on-surface min-h-screen flex flex-col antialiased selection:bg-secondary-container"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/90 backdrop-blur-md border-b border-surface-container-highest/60"><div class="h-16 px-gutter flex items-center justify-between gap-space-sm"><div class="flex items-center gap-2"><button aria-label="Go back" class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface hover:bg-surface-container transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-[22px]">arrow_back</span></button><img alt="LuLu Logo" class="h-6 w-auto object-contain ml-1" src="https://lh3.googleusercontent.com/aida/AEtjO1X7KYidb5ROUf1mrzZvZ8AZPJRH8yg5pwFSOPWSNO_jugCsH7xrwqFF8G8PLWZAT5FkfSnHKwtpToMHJOZZ_fPV9vMHkNuYWPHHEZYYgV_iPGGjYSXI5GSWKSo7XyzwTHDJDWOr0Gdbcjk7w2gDfRPK2o1wFLBnKC-GePJWzrhcZFHH0H1rwbzpD7D4nsSB5r6LOkDP6iZDQeoGYltQI1aIAe2myYfqFOBoIc0LmFLPt9CbDG4TpcWmQBE"/><h1 class="font-headline-sm font-semibold text-[17px] text-on-surface tracking-tight ml-1 truncate">Entry Composer</h1></div><div class="flex items-center gap-space-xs"><div class="w-9 h-9 rounded-full bg-surface-container-highest flex items-center justify-center shrink-0 text-on-surface hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[19px]">account_circle</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-safe bg-surface min-h-screen"><div class="flex flex-col w-full px-margin pt-4 pb-12 gap-space-lg">
+<!-- Category Filter Pills -->
+<div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+<button class="h-8 px-4 rounded-full bg-primary text-on-primary font-label-md text-xs font-medium shadow-sm transition-transform active:scale-95 flex items-center justify-center shrink-0">
+      All
+    </button>
+<button class="h-8 px-4 rounded-full bg-surface-container text-on-surface-variant font-label-md text-xs font-medium hover:bg-surface-container-high transition-colors flex items-center justify-center shrink-0">
+      Journal
+    </button>
+<button class="h-8 px-4 rounded-full bg-surface-container text-on-surface-variant font-label-md text-xs font-medium hover:bg-surface-container-high transition-colors flex items-center justify-center shrink-0">
+      Stories
+    </button>
+<button class="h-8 px-4 rounded-full bg-surface-container text-on-surface-variant font-label-md text-xs font-medium hover:bg-surface-container-high transition-colors flex items-center justify-center gap-1.5 shrink-0">
+<span class="material-symbols-outlined text-[13px]">lock</span>
+<span>Private</span>
+</button>
+</div>
+<!-- Editorial Section Title & Context -->
+<div class="flex flex-col">
+<div class="flex items-center justify-between">
+<div class="flex flex-col gap-0.5">
+<span class="font-headline-sm font-semibold text-xl text-on-surface tracking-tight">Today</span>
+<span class="font-label-md text-xs text-on-surface-variant font-medium tracking-normal">Mon, 14 Apr 2025</span>
+</div>
+<button aria-label="Entry options" class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[19px]">more_horiz</span>
+</button>
+</div>
+</div>
+<!-- Interactive Dual-State Flow Wrapper -->
+<div class="flex flex-col gap-4">
+<!-- 1. Original Entry Card -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg border border-surface-container-highest/60 shadow-sm flex flex-col gap-3.5">
+<div class="flex items-center justify-between pb-1">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-amber-600/70"></span>
+<span class="font-label-md text-xs font-medium text-on-surface-variant tracking-normal">Original Entry · Your Natural Words</span>
+</div>
+<span class="font-label-md text-xs text-on-surface-variant font-medium">09:41 AM</span>
+</div>
+<div class="font-body-md text-[16px] text-on-surface leading-[1.7] antialiased">
+        David came to my place yesterday and threatened me. I'm worried about what might happen next...
+      </div>
+<!-- Action Shelf Inside Card -->
+<div class="flex items-center justify-between pt-2 border-t border-surface-container-low">
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<button aria-label="Add image" class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[17px]">image</span>
+</button>
+<button aria-label="Voice memo" class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[17px]">mic</span>
+</button>
+<button aria-label="More media" class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[17px]">more_horiz</span>
+</button>
+</div>
+<span class="font-label-md text-xs text-on-surface-variant font-medium">19 words</span>
+</div>
+</div>
+<!-- 2. AI Entity Transformation Ledger -->
+<div class="flex flex-col gap-2 pt-1">
+<div class="flex items-center justify-between px-1">
+<span class="font-label-md text-xs font-medium text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-on-surface">auto_awesome</span>
+          Live Semantic Cloaking
+        </span>
+<span class="font-label-md text-xs text-on-surface-variant font-medium">3 entities replaced</span>
+</div>
+<!-- Mapping Card 1: Person -->
+<div class="bg-surface-container-low border border-surface-container-highest/60 rounded-xl p-3 flex items-center justify-between transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface shrink-0">
+<span class="material-symbols-outlined text-[17px]">person</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-[11px] font-medium text-on-surface-variant">Person</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-ui-body text-sm line-through text-on-surface-variant">David</span>
+<span class="material-symbols-outlined text-[13px] text-on-surface-variant">arrow_forward</span>
+</div>
+</div>
+</div>
+<div class="px-3 py-1 rounded-full bg-surface-container-lowest text-on-surface font-label-md text-xs font-medium border border-surface-container-highest/50 shadow-sm">
+          John
+        </div>
+</div>
+<!-- Mapping Card 2: Place -->
+<div class="bg-surface-container-low border border-surface-container-highest/60 rounded-xl p-3 flex items-center justify-between transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface shrink-0">
+<span class="material-symbols-outlined text-[17px]">location_on</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-[11px] font-medium text-on-surface-variant">Place</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-ui-body text-sm line-through text-on-surface-variant">my place</span>
+<span class="material-symbols-outlined text-[13px] text-on-surface-variant">arrow_forward</span>
+</div>
+</div>
+</div>
+<div class="px-3 py-1 rounded-full bg-surface-container-lowest text-on-surface font-label-md text-xs font-medium border border-surface-container-highest/50 shadow-sm">
+          Blue Moon
+        </div>
+</div>
+<!-- Mapping Card 3: Pronoun -->
+<div class="bg-surface-container-low border border-surface-container-highest/60 rounded-xl p-3 flex items-center justify-between transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface shrink-0">
+<span class="material-symbols-outlined text-[17px]">manage_accounts</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-[11px] font-medium text-on-surface-variant">Pronoun</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-ui-body text-sm line-through text-on-surface-variant">me / I</span>
+<span class="material-symbols-outlined text-[13px] text-on-surface-variant">arrow_forward</span>
+</div>
+</div>
+</div>
+<div class="px-3 py-1 rounded-full bg-surface-container-lowest text-on-surface font-label-md text-xs font-medium border border-surface-container-highest/50 shadow-sm">
+          her / she
+        </div>
+</div>
+</div>
+<!-- 3. Protected Version Vault Card (Dark Tactile Sanctuary) -->
+<div class="bg-[#141715] text-[#f4f3f1] rounded-xl p-space-lg border border-neutral-800 shadow-md flex flex-col gap-3.5 relative overflow-hidden">
+<!-- Soft ambient glow -->
+<div class="absolute -top-10 -right-10 w-44 h-44 bg-emerald-950/20 rounded-full blur-2xl pointer-events-none"></div>
+<!-- Security Meta Header -->
+<div class="flex items-start gap-2.5 relative z-10">
+<div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[15px] text-[#f4f3f1]" style="font-variation-settings: 'FILL' 1;">lock</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm font-semibold text-[15px] text-[#f4f3f1] leading-tight">Protected Version</span>
+<span class="font-label-md text-xs text-[#9b9f9c] mt-0.5">Same meaning. Identifying details removed.</span>
+</div>
+</div>
+<!-- Protected Body Editorial Text -->
+<div class="font-body-md text-[16px] text-[#f4f3f1] leading-[1.7] antialiased relative z-10">
+<span class="font-medium bg-white/15 px-1.5 py-0.5 rounded text-white border border-white/10">John</span> came to <span class="font-medium bg-white/15 px-1.5 py-0.5 rounded text-white border border-white/10">Blue Moon</span> yesterday and threatened <span class="font-medium bg-white/15 px-1.5 py-0.5 rounded text-white border border-white/10">her</span>. <span class="font-medium bg-white/15 px-1.5 py-0.5 rounded text-white border border-white/10">She</span> is worried about what might happen next...
+      </div>
+<!-- Protected Footer Controls -->
+<div class="flex items-center justify-between pt-2 border-t border-white/10 relative z-10">
+<div class="flex items-center gap-1.5 text-neutral-400">
+<button aria-label="Protected attachments" class="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[15px]">image</span>
+</button>
+<button aria-label="Protected audio" class="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[15px]">mic</span>
+</button>
+<button aria-label="Options" class="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[15px]">more_horiz</span>
+</button>
+</div>
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 text-[#c4c7c5] font-label-md text-[11px] font-medium border border-white/5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+<span>Zero-Knowledge Sync</span>
+</div>
+</div>
+</div>
+<!-- Editorial Action Drawer / Primary Trigger -->
+<div class="flex flex-col gap-2 pt-2">
+<button class="w-full h-13 py-3.5 rounded-full bg-primary text-on-primary font-headline-sm font-medium text-[15px] shadow-sm active:scale-[0.99] transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[19px]">shield</span>
+<span>Save Protected Entry</span>
+</button>
+<div class="flex items-center justify-center gap-1.5 py-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">lock_outline</span>
+<span class="font-label-md text-xs text-on-surface-variant">Original draft encrypted with your personal passkey</span>
+</div>
+</div>
+</div>
+</div></main></body></html>

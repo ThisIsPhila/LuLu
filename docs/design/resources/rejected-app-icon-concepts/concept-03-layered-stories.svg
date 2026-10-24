@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <filter id="layersShadow" x="-25%" y="-20%" width="150%" height="160%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="18"/>
+      <feOffset dy="18"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.2"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" fill="#D9CABC"/>
+  <g transform="rotate(-8 512 512)">
+    <rect x="238" y="210" width="570" height="644" rx="52" fill="#242421" opacity=".94"/>
+    <path d="M346 262h376c28 0 50 22 50 50v475c0 28-22 50-50 50H302c-28 0-50-22-50-50V306c0-28 22-50 50-50h44Z" fill="#AAB09B"/>
+  </g>
+  <g filter="url(#layersShadow)">
+    <path d="M318 177h352l174 174v481c0 32-26 58-58 58H318c-32 0-58-26-58-58V235c0-32 26-58 58-58Z" fill="#F7F2E9"/>
+    <path d="M670 177v130c0 24 20 44 44 44h130Z" fill="#D9CABC"/>
+    <path d="M430 475h248M430 552h190M430 629h225" fill="none" stroke="#242421" stroke-width="20" stroke-linecap="round" opacity=".83"/>
+    <circle cx="371" cy="475" r="12" fill="#AAB09B"/>
+    <circle cx="371" cy="552" r="12" fill="#AAB09B"/>
+    <circle cx="371" cy="629" r="12" fill="#AAB09B"/>
+  </g>
+</svg>

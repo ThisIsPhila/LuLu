@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><title>LuLu</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;1,7..72,400&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "outline-variant": "#c4c7c7", "on-tertiary": "#ffffff", "secondary-container": "#e1dfdf", "surface-bright": "#f9f9f9", "on-secondary-container": "#626262", "on-surface": "#1a1c1c", "on-background": "#1a1c1c", "tertiary-fixed-dim": "#cbc6bb", "on-secondary-fixed": "#1b1c1c", "surface-container-highest": "#e2e2e2", "primary": "#000000", "on-error": "#ffffff", "on-primary": "#ffffff", "on-primary-fixed-variant": "#474646", "error-container": "#ffdad6", "secondary-fixed-dim": "#c7c6c6", "inverse-primary": "#c9c6c5", "inverse-on-surface": "#f0f1f1", "surface-tint": "#5f5e5e", "surface-container": "#eeeeee", "surface-variant": "#e2e2e2", "tertiary-container": "#1e1b15", "on-tertiary-fixed-variant": "#4a473e", "on-tertiary-fixed": "#1e1b15", "secondary-fixed": "#e4e2e2", "surface": "#f9f9f9", "primary-fixed": "#e5e2e1", "primary-container": "#1c1b1b", "primary-fixed-dim": "#c9c6c5", "inverse-surface": "#2f3131", "error": "#ba1a1a", "on-secondary-fixed-variant": "#464747", "on-primary-container": "#858383", "tertiary": "#000000", "surface-container-lowest": "#ffffff", "surface-dim": "#dadada", "on-surface-variant": "#444748", "on-error-container": "#93000a", "surface-container-low": "#f3f3f3", "background": "#f9f9f9", "secondary": "#5e5e5e", "surface-container-high": "#e8e8e8", "on-primary-fixed": "#1c1b1b", "outline": "#747878", "on-secondary": "#ffffff", "tertiary-fixed": "#e8e2d7", "on-tertiary-container": "#88837a" }, "borderRadius": { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" }, "spacing": { "space-md": "1rem", "space-2xs": "0.125rem", "space-xs": "0.25rem", "margin": "1rem", "space-xl": "2rem", "space-sm": "0.5rem", "gutter-desktop": "1.5rem", "space-2xl": "3rem", "gutter": "1rem", "margin-tablet": "2rem", "space-lg": "1.5rem", "margin-desktop": "3rem" }, "fontFamily": { "label-mono": [ "JetBrains Mono" ], "headline-md": [ "Literata" ], "body-sm": [ "Inter" ], "label-md": [ "Inter" ], "label-mono-sm": [ "JetBrains Mono" ], "headline-lg-mobile": [ "Literata" ], "headline-lg": [ "Literata" ], "body-md": [ "Inter" ], "headline-sm": [ "Inter" ], "headline-xl-mobile": [ "Literata" ], "body-lg": [ "Literata" ], "headline-xl": [ "Literata" ] }, "fontSize": { "label-mono": [ "12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "400" } ], "headline-md": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "500" } ], "body-sm": [ "13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" } ], "label-md": [ "13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500" } ], "label-mono-sm": [ "10px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "500" } ], "headline-lg-mobile": [ "26px", { "lineHeight": "34px", "letterSpacing": "-0.01em", "fontWeight": "500" } ], "headline-lg": [ "32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "500" } ], "body-md": [ "15px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" } ], "headline-sm": [ "16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "600" } ], "headline-xl-mobile": [ "36px", { "lineHeight": "44px", "letterSpacing": "-0.015em", "fontWeight": "500" } ], "body-lg": [ "18px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400" } ], "headline-xl": [ "48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "500" } ] } } } };</script><style>@layer base { html, body { min-height: 100%; margin: 0; padding: 0; background-color: #f9f9f9; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; } .tactile-pebble { box-shadow: 0 1px 2px rgba(0,0,0,0.03), 0 4px 12px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.85); }</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface antialiased flex flex-col min-h-screen selection:bg-surface-container-high"><header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.02)]"><div class="h-16 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><button aria-label="Go Back" class="tactile-pebble w-11 h-11 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface hover:bg-surface-container active:scale-95 transition-all" onclick="history.back()" type="button"><span class="material-symbols-outlined text-[20px]">arrow_back</span></button><img alt="LuLu Brand Wordmark" class="h-7 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XyE-iOqKuuxApv8ZeOpUR_pK9iyWYub4ORrX4SYC_AE9tmelbCLONMrgzdW3y-hLwacFeCLKnr1PtQEJWRXJMtQrD_PRSuWpU7q2UQuNMoNUbKbnx92ji4_xWZn4dgHSOC7zmxGOUdvKIehuHU4XlDlDGNHeQLuaapOhC9fWMedounA_KIyCwhalOdyZEVMJgNRo3aWpS-3rxdgALEqp3ThDKV7j8wT80WVL70WhLY"/><h1 class="text-headline-sm font-headline-sm text-on-surface truncate max-w-[140px]">Write</h1></div><div class="flex items-center gap-space-xs"><button aria-label="Privacy Passkey Lock" class="tactile-pebble relative w-11 h-11 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface hover:bg-surface-container active:scale-95 transition-all" type="button"><span class="material-symbols-outlined text-[20px]">shield</span><span class="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-primary ring-2 ring-surface"></span></button><div class="tactile-pebble p-0.5 rounded-full bg-surface-container-low"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBl0O5X42Wb9hJML6xkV2SHEB_r5PgYM521yESH5ok_UnemwP50HeoYobqahhVbGW-9dnobRx8aUmHUbdDo8NIRC4XnyJyCgyz14Gn9gjcpPMyS8nGA5qUMBBSOxLdJ1ZDnkmYL4KLybXW_1eVWmZqf5tp8pqyYOdxW4jDQLTJwUBCV3erM0iMfhxtewZNRjndWsdQEuvkJa0zCTYVO2dsjyBTt559dFK37gCVZCn0"/></div></div></div></header><main class="flex flex-col relative w-full pt-16 pb-safe px-gutter bg-surface min-h-screen"><div class="flex flex-col w-full pb-6 space-y-4">
+<!-- Privacy Shield Indicator Ribbon -->
+<div class="tactile-pebble flex items-center justify-between px-3.5 py-2.5 rounded-full bg-surface-container-low shadow-sm">
+<div class="flex items-center gap-2 min-w-0">
+<div class="relative flex items-center justify-center w-6 h-6 rounded-full bg-primary text-on-primary">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">enhanced_encryption</span>
+<span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="text-label-mono-sm font-label-mono-sm tracking-wider uppercase text-on-surface">Protected Mode</span>
+<span class="text-[9px] font-label-mono px-1.5 py-0.2 rounded bg-surface-container-highest text-secondary">ENCLAVE</span>
+</div>
+<p class="text-body-sm text-[11px] text-secondary truncate">Live pseudonymization active</p>
+</div>
+</div>
+<div class="flex items-center gap-1.5 shrink-0">
+<button class="tactile-pebble px-2.5 py-1 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface transition-all flex items-center gap-1" id="toggle-mask-btn" type="button">
+<span class="material-symbols-outlined text-[14px]">visibility</span>
+<span class="text-label-mono-sm font-label-mono-sm">Masked</span>
+</button>
+<button class="tactile-pebble px-3 py-1 rounded-full bg-primary text-on-primary font-headline-sm text-body-sm hover:opacity-90 active:scale-95 transition-all" type="button">
+        Done
+      </button>
+</div>
+</div>
+<!-- Writing Canvas Card -->
+<section class="tactile-pebble flex flex-col p-5 rounded-lg bg-surface-container-lowest shadow-sm relative overflow-hidden">
+<!-- Paper Grain Subtlety & Ambient Watermark -->
+<div class="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-primary/5 blur-2xl pointer-events-none"></div>
+<!-- Date & Word Counter -->
+<div class="flex items-center justify-between pb-3 text-secondary text-label-mono-sm font-label-mono-sm">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[13px]">calendar_today</span>
+<span>14 APRIL 2026 • 09:14</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+<span id="word-count">56 words</span>
+</div>
+</div>
+<!-- Title Input -->
+<input aria-label="Entry Title" class="w-full bg-transparent font-headline-lg-mobile text-headline-lg-mobile text-on-surface focus:outline-none placeholder:text-outline-variant font-medium pb-3" placeholder="Entry Title..." type="text" value="A walk around the city"/>
+<!-- Editorial Story Body with Intelligent Inline Recognitions -->
+<div class="font-body-lg text-body-lg text-on-surface leading-relaxed space-y-3.5 pt-1">
+<p class="text-[17px] leading-[29px] text-on-surface font-body-lg">
+        Started the day with a walk. The air was crisp and it helped me think more clearly about what I want to work on this month.
+      </p>
+<p class="text-[17px] leading-[31px] text-on-surface font-body-lg">
+        I met up with
+        <!-- Entity Chip: Person -->
+<button class="inline-flex items-baseline align-baseline gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-on-surface text-[13px] font-label-mono active:scale-95 transition-transform" onclick="openEntityDrawer('David', 'John', 'Person', '1 mention replaced')" type="button">
+<span class="font-medium">John</span>
+<span class="text-[9px] uppercase tracking-wider text-secondary px-1 py-0.2 rounded-full bg-amber-500/15">Person</span>
+</button>
+        later and we discussed a few ideas for the project at
+        <!-- Entity Chip: Location -->
+<button class="inline-flex items-baseline align-baseline gap-1 px-2 py-0.5 rounded-full bg-stone-500/15 text-on-surface text-[13px] font-label-mono active:scale-95 transition-transform" onclick="openEntityDrawer('Cape Town House', 'The Nest', 'Location', '2 mentions replaced')" type="button">
+<span class="font-medium">The Nest</span>
+<span class="text-[9px] uppercase tracking-wider text-secondary px-1 py-0.2 rounded-full bg-stone-500/20">Location</span>
+</button>.
+        It felt like a good conversation and I left feeling motivated for
+        <!-- Entity Chip: Time -->
+<button class="inline-flex items-baseline align-baseline gap-1 px-2 py-0.5 rounded-full bg-sky-500/15 text-on-surface text-[13px] font-label-mono active:scale-95 transition-transform" onclick="openEntityDrawer('May 2026', 'This month', 'Time', 'Temporal anchor protected')" type="button">
+<span class="font-medium">this month</span>
+<span class="text-[9px] uppercase tracking-wider text-secondary px-1 py-0.2 rounded-full bg-sky-500/20">Time</span>
+</button>.
+      </p>
+<!-- Active Caret Simulation -->
+<div class="flex items-center gap-1 pt-1">
+<span class="inline-block w-0.5 h-5 bg-primary animate-pulse"></span>
+<span class="text-secondary text-body-sm italic">Continue writing freely...</span>
+</div>
+</div>
+</section>
+<!-- Ambient Recognition & Local Enclave Status Card -->
+<section class="tactile-pebble p-4 rounded-lg bg-surface-container-low shadow-sm flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[17px]">fingerprint</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-headline-sm font-headline-sm text-[14px] text-on-surface">3 entities transformed</span>
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+</div>
+<span class="text-label-mono-sm font-label-mono-sm text-secondary">Zero knowledge representation</span>
+</div>
+</div>
+<button class="tactile-pebble px-3 py-1.5 rounded-full bg-surface text-on-surface font-label-md text-label-md hover:bg-surface-container active:scale-95 transition-all" id="review-all-btn" type="button">
+        Review all
+      </button>
+</div>
+<div class="p-2.5 rounded bg-surface-container-lowest flex items-center justify-between text-body-sm text-secondary">
+<div class="flex items-center gap-2 min-w-0">
+<span class="material-symbols-outlined text-[16px] text-on-surface shrink-0">verified_user</span>
+<p class="truncate text-[12px]">Original mentions (<strong class="text-on-surface font-medium">David</strong>, <strong class="text-on-surface font-medium">Cape Town</strong>) locked in device enclave.</p>
+</div>
+<span class="material-symbols-outlined text-[16px] shrink-0 text-secondary ml-1">lock</span>
+</div>
+</section>
+<!-- Entity Inspector Modal Sheet (Contextual Drawer) -->
+<div class="hidden tactile-pebble p-4 rounded-lg bg-surface-container-lowest shadow-md space-y-3" id="entity-modal">
+<div class="flex items-center justify-between pb-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">auto_fix_high</span>
+<span class="text-headline-sm font-headline-sm text-on-surface">Entity Mapping</span>
+</div>
+<button class="w-7 h-7 rounded-full bg-surface-container flex items-center justify-center text-secondary hover:text-on-surface" onclick="closeEntityDrawer()" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<div class="p-3 rounded-DEFAULT bg-surface-container-low flex items-center justify-between">
+<div>
+<span class="text-label-mono-sm font-label-mono-sm text-secondary uppercase">Original</span>
+<p class="font-headline-sm text-on-surface" id="modal-original">David</p>
+</div>
+<span class="material-symbols-outlined text-secondary text-[20px]">arrow_forward</span>
+<div>
+<span class="text-label-mono-sm font-label-mono-sm text-secondary uppercase">Pseudonym</span>
+<p class="font-headline-sm text-on-surface" id="modal-transformed">John</p>
+</div>
+</div>
+<div class="flex items-center justify-between text-label-mono-sm font-label-mono-sm text-secondary px-1">
+<span id="modal-type">Person [Entity Type]</span>
+<span id="modal-note">Local alias assigned</span>
+</div>
+<div class="grid grid-cols-2 gap-2 pt-1">
+<button class="tactile-pebble py-2 px-3 rounded-full bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-all" onclick="cycleAlias()" type="button">
+        Change alias
+      </button>
+<button class="tactile-pebble py-2 px-3 rounded-full bg-primary text-on-primary font-label-md text-label-md active:scale-95 transition-all" onclick="closeEntityDrawer()" type="button">
+        Keep pseudonym
+      </button>
+</div>
+</div>
+<!-- Tactile Editor Action Bar (Fixed Floating Island) -->
+<div class="sticky bottom-2 z-40 w-full pt-2">
+<div class="tactile-pebble flex items-center justify-between px-3.5 py-2 rounded-full bg-surface-container-lowest/95 backdrop-blur-lg shadow-lg">
+<!-- Left Toolset: Typography & Media -->
+<div class="flex items-center gap-1">
+<button aria-label="Typography Controls" class="w-9 h-9 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface active:scale-90 transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">format_size</span>
+</button>
+<button aria-label="Attach Encrypted Photo" class="w-9 h-9 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface active:scale-90 transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">image</span>
+</button>
+<button aria-label="Voice Memo" class="w-9 h-9 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface active:scale-90 transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">mic</span>
+</button>
+<button aria-label="Privacy Tagger" class="w-9 h-9 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface active:scale-90 transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">tag</span>
+</button>
+</div>
+<!-- Center Divider Dot -->
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<!-- Right Action: Security Passkey Quick Lock -->
+<div class="flex items-center gap-1.5">
+<button aria-label="Lock Session" class="tactile-pebble flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-on-primary hover:opacity-95 active:scale-95 transition-all" id="biometric-lock-btn" type="button">
+<span class="material-symbols-outlined text-[16px]">key</span>
+<span class="text-label-mono-sm font-label-mono-sm tracking-wide">LOCK</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  function openEntityDrawer(orig, transformed, type, note) {
+    const modal = document.getElementById('entity-modal');
+    document.getElementById('modal-original').textContent = orig;
+    document.getElementById('modal-transformed').textContent = transformed;
+    document.getElementById('modal-type').textContent = type + ' [Entity Type]';
+    document.getElementById('modal-note').textContent = note;
+    modal.classList.remove('hidden');
+    modal.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function closeEntityDrawer() {
+    const modal = document.getElementById('entity-modal');
+    modal.classList.add('hidden');
+  }
+
+  function cycleAlias() {
+    const current = document.getElementById('modal-transformed').textContent;
+    const pool = ['Alex', 'Morgan', 'Taylor', 'Rowan', 'The Studio', 'Harbor View', 'Next season'];
+    const next = pool[(pool.indexOf(current) + 1) % pool.length];
+    document.getElementById('modal-transformed').textContent = next;
+  }
+
+  const reviewBtn = document.getElementById('review-all-btn');
+  if (reviewBtn) {
+    reviewBtn.addEventListener('click', () => {
+      openEntityDrawer('David & Cape Town', 'John & The Nest', 'Multi-Entity', '3 entries stored locally');
+    });
+  }
+
+  const maskBtn = document.getElementById('toggle-mask-btn');
+  let isMasked = true;
+  if (maskBtn) {
+    maskBtn.addEventListener('click', () => {
+      isMasked = !isMasked;
+      maskBtn.querySelector('span:last-child').textContent = isMasked ? 'Masked' : 'Original';
+      const icon = maskBtn.querySelector('span:first-child');
+      icon.textContent = isMasked ? 'visibility' : 'visibility_off';
+    });
+  }
+</script></main></body></html>

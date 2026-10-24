@@ -15,6 +15,8 @@ The six [new resources](resources/2026-10-24-warm-tactile/) supersede the earlie
 
 The current task separates the app from the interactive demo and preserves these resources; applying the new visual treatment follows. UI assessment should address aesthetics, not turn pictured controls into adopted functional requirements. Preserve useful existing work. Do not redesign unrelated elements when making a targeted change.
 
+See the complete analysis and mapping of each Stitch direction in [STITCH_DIRECTIONS_REPORT.md](STITCH_DIRECTIONS_REPORT.md).
+
 ## Earlier exploration
 
 The four boards in references/ are explorations, not approved specifications. Neutral monochrome, editorial typography, tactile restraint and inclusive multilingual use guide further design. Logo Direction 02 is preferred for refinement; Direction 04 is secondary. Optional pearl/soft themes are exploratory. Typefaces, tokens, copy and interface details pictured on a board are not automatically selected. In particular, security claims pictured in mockups are not implementation evidence.

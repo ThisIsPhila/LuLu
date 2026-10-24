@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><title>LuLu — Direction 02</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&amp;family=JetBrains+Mono:ital,wght@0,400;0,500;1,400&amp;family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;1,7..72,400&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          paper: "#FAF9F6",
+          stone: {
+            50: "#FAF9F6",
+            100: "#F4F3F0",
+            200: "#E8E6E1",
+            300: "#E2DFD9",
+            400: "#C4C2BC",
+            500: "#8E8C87",
+            600: "#5E5D59"
+          },
+          ink: {
+            DEFAULT: "#1A1A1A",
+            muted: "#5F5E5B",
+            faint: "#888681",
+            soft: "#3A3937"
+          },
+          sage: {
+            DEFAULT: "#C9D2C8",
+            light: "#E3E9E2",
+            dark: "#4B564A",
+            surface: "#EBF0EA"
+          },
+          surface: "#FAF9F6",
+          "surface-container-low": "#F4F3F0",
+          "surface-container": "#EFECE7",
+          "surface-container-high": "#E8E6E1",
+          "surface-container-highest": "#E2DFD9",
+          "surface-container-lowest": "#FFFFFF",
+          "on-surface": "#1A1A1A",
+          "on-surface-variant": "#5F5E5B",
+          border: "#E2DFD9"
+        },
+        borderRadius: {
+          DEFAULT: "1rem",
+          "pill": "9999px",
+          "card": "1.25rem",
+          "subtle": "0.75rem"
+        },
+        fontFamily: {
+          sans: ["'Inter Tight'", "sans-serif"],
+          serif: ["Literata", "serif"],
+          mono: ["'JetBrains Mono'", "monospace"],
+          heading: ["'Inter Tight'", "sans-serif"],
+          body: ["Literata", "serif"]
+        },
+        boxShadow: {
+          'tactile-card': '0 1px 3px rgba(26,26,26,0.03), 0 4px 16px rgba(26,26,26,0.04), inset 0 1px 0 rgba(255,255,255,0.95)',
+          'tactile-btn': '0 2px 6px rgba(26,26,26,0.08), inset 0 1px 0 rgba(255,255,255,0.2)',
+          'tactile-well': 'inset 0 1.5px 3px rgba(26,26,26,0.06), 0 1px 0 rgba(255,255,255,0.8)',
+          'dock': '0 12px 32px rgba(26,26,26,0.08), 0 2px 8px rgba(26,26,26,0.04), inset 0 1px 0 rgba(255,255,255,0.95)'
+        }
+      }
+    }
+  };</script><style>
+    @layer base {
+      html, body {
+        min-height: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: #FAF9F6;
+        color: #1A1A1A;
+        -webkit-font-smoothing: antialiased;
+      }
+      .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom, 20px);
+      }
+      .pt-safe {
+        padding-top: env(safe-area-inset-top, 0px);
+      }
+    }
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    .tactile-chip {
+      box-shadow: 0 1px 2px rgba(26,26,26,0.04), inset 0 1px 0 rgba(255,255,255,0.9);
+      border: 1px solid #E2DFD9;
+    }
+    .tactile-chip-active {
+      box-shadow: 0 2px 6px rgba(26,26,26,0.18), inset 0 1px 0 rgba(255,255,255,0.22);
+      border: 1px solid #1A1A1A;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+    .material-symbols-outlined.fill-1 {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+  </style></head><body class="bg-paper text-ink antialiased flex flex-col min-h-screen selection:bg-stone-200"><header class="fixed top-0 w-full z-50 bg-[#FAF9F6]/85 backdrop-blur-xl border-b border-stone-300/60 pt-safe"><div class="h-14 px-4 max-w-[430px] mx-auto flex items-center justify-between"><div class="flex items-center gap-2"><svg class="h-7 w-auto text-ink" fill="currentColor" viewbox="0 0 148 48"><path d="M12 4c2.2 0 4 1.8 4 4v24h18c2.2 0 4 1.8 4 4s-1.8 4-4 4H12c-4.4 0-8-3.6-8-8V8c0-2.2 1.8-4 4-4z"></path><path d="M46 16c2.2 0 4 1.8 4 4v12c0 4.4 3.6 8 8 8s8-3.6 8-8V20c0-2.2 1.8-4 4-4s4 1.8 4 4v12c0 8.8-7.2 16-16 16s-16-7.2-16-16V20c0-2.2 1.8-4 4-4z"></path><path d="M86 4c2.2 0 4 1.8 4 4v24h18c2.2 0 4 1.8 4 4s-1.8 4-4 4H86c-4.4 0-8-3.6-8-8V8c0-2.2 1.8-4 4-4z"></path><path d="M120 16c2.2 0 4 1.8 4 4v12c0 4.4 3.6 8 8 8s8-3.6 8-8V20c0-2.2 1.8-4 4-4s4 1.8 4 4v12c0 8.8-7.2 16-16 16s-16-7.2-16-16V20c0-2.2 1.8-4 4-4z"></path></svg><span class="sr-only">LuLu — Direction 02</span></div><div class="flex items-center gap-2"><button aria-label="Protected Vault Status" class="w-9 h-9 rounded-full bg-stone-100 hover:bg-stone-200 border border-stone-300/80 flex items-center justify-center text-ink shadow-sm active:scale-95 transition-all" type="button"><span class="material-symbols-outlined text-[18px]">shield</span></button><button aria-label="Search Entries" class="w-9 h-9 rounded-full bg-stone-100 hover:bg-stone-200 border border-stone-300/80 flex items-center justify-center text-ink shadow-sm active:scale-95 transition-all" type="button"><span class="material-symbols-outlined text-[18px]">search</span></button><div class="w-9 h-9 p-0.5 rounded-full bg-stone-100 border border-stone-300/90 shadow-sm shrink-0"><img alt="Lerato Profile" class="w-full h-full rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBl0O5X42Wb9hJML6xkV2SHEB_r5PgYM521yESH5ok_UnemwP50HeoYobqahhVbGW-9dnobRx8aUmHUbdDo8NIRC4XnyJyCgyz14Gn9gjcpPMyS8nGA5qUMBBSOxLdJ1ZDnkmYL4KLybXW_1eVWmZqf5tp8pqyYOdxW4jDQLTJwUBCV3erM0iMfhxtewZNRjndWsdQEuvkJa0zCTYVO2dsjyBTt559dFK37gCVZCn0"/></div></div></div></header><main class="flex flex-col relative w-full pt-[72px] pb-28 px-4 bg-paper min-h-screen"><div class="flex flex-col w-full max-w-[420px] mx-auto space-y-4">
+<!-- Temporal Greeting -->
+<section class="flex flex-col pt-1">
+<div class="flex items-center justify-between mb-1">
+<span class="font-mono text-[11px] tracking-wider uppercase text-ink-muted">Tuesday, 14 May 2026</span>
+<div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sage-surface border border-sage text-sage-dark font-mono text-[10px] font-medium tracking-wide">
+<span class="w-1.5 h-1.5 rounded-full bg-sage-dark animate-pulse"></span>
+<span>VAULT ACTIVE</span>
+</div>
+</div>
+<h1 class="font-heading text-[28px] font-semibold text-ink tracking-tight leading-tight">Good morning, Lerato</h1>
+<p class="font-serif text-[15px] text-ink-muted mt-1 leading-relaxed">A quiet sanctuary for your personal thoughts &amp; discoveries.</p>
+</section>
+<!-- Tactile Pill Filters -->
+<section aria-label="Journal Filters" class="w-full">
+<div class="flex items-center gap-2 overflow-x-auto py-1 no-scrollbar">
+<button class="filter-chip tactile-chip-active flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-ink text-white font-sans text-[13px] font-medium transition-all active:scale-95" data-filter="all" type="button">
+<span>All</span>
+<span class="font-mono text-[10px] px-1.5 py-0.2 rounded-full bg-stone-600 text-stone-100">14</span>
+</button>
+<button class="filter-chip tactile-chip flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-stone-100 text-ink hover:bg-stone-200/70 font-sans text-[13px] font-medium transition-all active:scale-95" data-filter="journal" type="button">
+<span>Journal</span>
+</button>
+<button class="filter-chip tactile-chip flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-stone-100 text-ink hover:bg-stone-200/70 font-sans text-[13px] font-medium transition-all active:scale-95" data-filter="stories" type="button">
+<span>Stories</span>
+</button>
+<button class="filter-chip tactile-chip flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-stone-100 text-ink hover:bg-stone-200/70 font-sans text-[13px] font-medium transition-all active:scale-95" data-filter="protected" type="button">
+<span class="material-symbols-outlined text-[15px] text-ink">lock</span>
+<span>Protected</span>
+<span class="w-2 h-2 rounded-full bg-sage ring-2 ring-stone-100"></span>
+</button>
+</div>
+</section>
+<!-- Daily Reflection Quote Card -->
+<section class="w-full">
+<div class="relative overflow-hidden rounded-card bg-stone-100 border border-stone-300 p-4 shadow-tactile-card transition-all">
+<div class="flex flex-col space-y-3">
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white border border-stone-300 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+<span class="material-symbols-outlined text-[13px] text-ink">auto_awesome</span>
+            Daily Reflection
+          </span>
+<span class="font-mono text-[11px] text-ink-faint">06:00 AM Prompt</span>
+</div>
+<blockquote class="font-serif text-[20px] font-normal text-ink leading-snug tracking-tight pt-0.5">
+          “What felt quiet today, even while everything else was moving?”
+        </blockquote>
+<!-- Inset tactile pill input trigger -->
+<div class="pt-1">
+<div class="group flex items-center justify-between w-full px-4 py-2.5 rounded-pill bg-white border border-stone-300/80 shadow-tactile-well hover:bg-stone-50 active:scale-[0.99] transition-all cursor-pointer" onclick="document.getElementById('quick-note-modal').classList.remove('hidden')" role="button" tabindex="0">
+<div class="flex items-center gap-2.5 text-ink-muted">
+<span class="material-symbols-outlined text-[17px] text-ink-faint group-hover:text-ink transition-colors">stylus_note</span>
+<span class="font-serif text-[14px] text-ink-muted">Begin quick entry...</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-stone-100 border border-stone-300 text-ink-muted">Enter</span>
+<span class="material-symbols-outlined text-[16px] text-ink-faint group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Timeline Entries -->
+<div class="w-full space-y-5">
+<!-- Group: TODAY -->
+<section class="space-y-3" data-group="today">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-ink"></span>
+<h2 class="font-sans text-[12px] text-ink uppercase tracking-wider font-semibold">Today</h2>
+</div>
+<span class="font-mono text-[11px] text-ink-faint">2 entries</span>
+</div>
+<!-- Entry 1: Calm Morning -->
+<article class="group rounded-card bg-white border border-stone-300/80 p-4 shadow-tactile-card hover:border-stone-400 transition-all cursor-pointer">
+<div class="flex items-start justify-between gap-3">
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1.5">
+<span class="font-mono text-[11px] text-ink-faint">09:14</span>
+<span class="w-1 h-1 rounded-full bg-stone-300"></span>
+<span class="font-mono text-[11px] text-ink-faint">324 words</span>
+</div>
+<h3 class="font-sans text-[17px] font-semibold text-ink tracking-tight group-hover:text-ink transition-colors">A calm morning</h3>
+<p class="font-serif text-[14px] text-ink-muted mt-1 line-clamp-2 leading-relaxed">
+              Started the day with a walk. The air was crisp and it helped me think more clearly about what I want to work on this month. The leaves were still damp with dew.
+            </p>
+</div>
+<div class="shrink-0 w-16 h-16 rounded-subtle overflow-hidden bg-stone-200 border border-stone-300/50">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="A peaceful misty morning path surrounded by calm architectural concrete walls and soft damp green foliage in muted Nordic tones, minimal editorial photography, soft diffused natural morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOrRBwodjFnq9g6puWvWiNvTeaoOqz-AR09_1o2s1T0V_SUOxLUiqq65bt1idX2FDQT-sqN5jqIAiXsxfFHroOL--pj9EEo9QKGjfA7I0AplnaapjaDINKBn-Wyhnl7vOBU6BC5kjw7QBACm1Zc7WqwHPQFuHj7jrGmHOfVZoxE3ndWAoLG_8Eh0yoZpnh5w_MNq-lvJ9HD1p1yPiyhdKAmbMSMztyGeDlt_ykor0"/>
+</div>
+</div>
+<!-- Entity Tags -->
+<div class="flex items-center justify-between pt-3 mt-3 border-t border-stone-100">
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-100 border border-stone-200 text-ink font-mono text-[11px]">
+<span class="material-symbols-outlined text-[13px] text-ink-muted">directions_walk</span>
+              Morning Walk
+            </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-100 border border-stone-200 text-ink font-mono text-[11px]">
+<span class="material-symbols-outlined text-[13px] text-ink-muted">self_improvement</span>
+              Reflection
+            </span>
+</div>
+<button aria-label="Entry options" class="w-7 h-7 rounded-full flex items-center justify-center text-ink-faint hover:text-ink hover:bg-stone-100 transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">more_horiz</span>
+</button>
+</div>
+</article>
+<!-- Entry 2: Notes on focus -->
+<article class="group rounded-card bg-white border border-stone-300/80 p-4 shadow-tactile-card hover:border-stone-400 transition-all cursor-pointer">
+<div class="flex items-start justify-between gap-3">
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1.5">
+<span class="font-mono text-[11px] text-ink-faint">08:02</span>
+<span class="w-1 h-1 rounded-full bg-stone-300"></span>
+<span class="font-mono text-[11px] text-ink-faint">180 words</span>
+</div>
+<h3 class="font-sans text-[17px] font-semibold text-ink tracking-tight group-hover:text-ink transition-colors">Notes on focus</h3>
+<p class="font-serif text-[14px] text-ink-muted mt-1 line-clamp-2 leading-relaxed">
+              Some thoughts on where I want to put my energy before the workshop starts. Eliminating secondary priorities until the narrative backbone is completely solidified.
+            </p>
+</div>
+</div>
+<div class="flex items-center justify-between pt-3 mt-3 border-t border-stone-100">
+<div class="flex items-center gap-1.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-100 border border-stone-200 text-ink font-mono text-[11px]">
+<span class="material-symbols-outlined text-[13px] text-ink-muted">adjust</span>
+              Deep Work
+            </span>
+</div>
+<span class="material-symbols-outlined text-[18px] text-ink-faint group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</div>
+</article>
+</section>
+<!-- Group: YESTERDAY -->
+<section class="space-y-3" data-group="yesterday">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-ink-muted"></span>
+<h2 class="font-sans text-[12px] text-ink uppercase tracking-wider font-semibold">Yesterday</h2>
+</div>
+<span class="font-mono text-[11px] text-ink-faint">13 May</span>
+</div>
+<!-- Entry 3: Protected Entry (The conversation) with Sage Highlights -->
+<article class="group relative rounded-card bg-stone-100/90 border border-sage/70 p-4 shadow-tactile-card hover:border-sage transition-all cursor-pointer">
+<div class="flex items-start justify-between gap-3">
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1.5">
+<span class="font-mono text-[11px] text-ink-faint">21:36</span>
+<span class="w-1 h-1 rounded-full bg-stone-300"></span>
+<span class="inline-flex items-center gap-1 font-mono text-[10px] px-2 py-0.5 rounded-full bg-sage-surface border border-sage text-sage-dark font-medium">
+<span class="material-symbols-outlined text-[12px] text-sage-dark">lock</span>
+                Passkey Encrypted
+              </span>
+</div>
+<h3 class="font-sans text-[17px] font-semibold text-ink tracking-tight flex items-center gap-1.5">
+<span>The conversation</span>
+<span class="w-2 h-2 rounded-full bg-sage-dark"></span>
+</h3>
+<p class="font-serif text-[14px] text-ink-muted mt-1 line-clamp-2 leading-relaxed">
+<span class="inline-block px-1.5 py-0.5 rounded bg-white border border-stone-200 text-ink font-mono text-[11px]">John [Person]</span> came to <span class="inline-block px-1.5 py-0.5 rounded bg-white border border-stone-200 text-ink font-mono text-[11px]">The Nest [Location]</span> at Blue Moon and we discussed a few ideas for the project...
+            </p>
+</div>
+<!-- Tactile biometric shield glyph container -->
+<div class="shrink-0 w-16 h-16 rounded-subtle bg-sage-surface border border-sage flex items-center justify-center text-sage-dark shadow-sm group-hover:bg-ink group-hover:text-white transition-all duration-200">
+<span class="material-symbols-outlined text-[26px]">fingerprint</span>
+</div>
+</div>
+<!-- Entity Redaction & Unlock -->
+<div class="flex items-center justify-between pt-3 mt-3 border-t border-stone-200">
+<div class="flex items-center gap-1.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white border border-stone-300 text-ink font-mono text-[11px]">
+<span class="material-symbols-outlined text-[13px] text-sage-dark">verified_user</span>
+              3 entities protected
+            </span>
+</div>
+<button class="font-mono text-[11px] text-ink flex items-center gap-1 px-3 py-1 rounded-full bg-white border border-stone-300 shadow-sm hover:bg-stone-50 active:scale-95 transition-all" type="button">
+<span>Unlock</span>
+<span class="material-symbols-outlined text-[14px] text-ink-muted">key</span>
+</button>
+</div>
+</article>
+<!-- Entry 4: Project ideas -->
+<article class="group rounded-card bg-white border border-stone-300/80 p-4 shadow-tactile-card hover:border-stone-400 transition-all cursor-pointer">
+<div class="flex items-start justify-between gap-3">
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1.5">
+<span class="font-mono text-[11px] text-ink-faint">17:11</span>
+<span class="w-1 h-1 rounded-full bg-stone-300"></span>
+<span class="font-mono text-[11px] text-ink-faint">412 words</span>
+</div>
+<h3 class="font-sans text-[17px] font-semibold text-ink tracking-tight group-hover:text-ink transition-colors">Project ideas &amp; exploratory themes</h3>
+<p class="font-serif text-[14px] text-ink-muted mt-1 line-clamp-2 leading-relaxed">
+              Things to explore this week with the creative circle. Focus on low-frequency acoustic textures and tactile book binding formats that slow readers down.
+            </p>
+</div>
+<div class="shrink-0 w-16 h-16 rounded-subtle overflow-hidden bg-stone-200 border border-stone-300/50">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Minimalist design notebook resting open on textured warm stone desk beside cast-ceramic water cup, studio shadow, natural studio light with warm paper grain aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLhbz3PKAo24wYdoy1FEJ2CJvU3sbg6P3Wk32WW5K35Eree4f1yUVTOaWNBbQefYMhk2Bnjbj0scvwbQlOTb474SUuwKx6SfdDkhGSUmH9u3TZrOry67IoLj5nH933D8LzmCOnobViVcTslrgKwMWmG0B9ZGd6ZsZmY3JX7_m9vqhuhSY-fI0cWmlJmCTLuZ9o8MS2D9RC3MP9JDRHJ37AV05TStdBydSLhTq6JaQ"/>
+</div>
+</div>
+<div class="flex items-center justify-between pt-3 mt-3 border-t border-stone-100">
+<div class="flex items-center gap-1.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-100 border border-stone-200 text-ink font-mono text-[11px]">
+<span class="material-symbols-outlined text-[13px] text-ink-muted">lightbulb</span>
+              Studio Roadmap
+            </span>
+</div>
+<span class="material-symbols-outlined text-[18px] text-ink-faint group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</div>
+</article>
+</section>
+<!-- Sanctuary Insight Rhythm Widget -->
+<section class="rounded-card bg-stone-100 border border-stone-300 p-4 flex items-center justify-between shadow-tactile-card">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-white border border-stone-200 flex items-center justify-center text-ink shadow-sm shrink-0">
+<span class="material-symbols-outlined text-[19px]">psychology</span>
+</div>
+<div class="flex flex-col">
+<span class="font-sans text-[13px] text-ink font-semibold">Weekly Clarity Rhythm</span>
+<span class="font-mono text-[11px] text-ink-muted">7 entries recorded • 100% on-device</span>
+</div>
+</div>
+<div class="flex items-end gap-1.5 h-7">
+<span class="w-1.5 h-3.5 rounded-full bg-ink"></span>
+<span class="w-1.5 h-6 rounded-full bg-ink"></span>
+<span class="w-1.5 h-2.5 rounded-full bg-stone-300"></span>
+<span class="w-1.5 h-5 rounded-full bg-ink"></span>
+<span class="w-1.5 h-7 rounded-full bg-sage-dark"></span>
+</div>
+</section>
+</div>
+<!-- Interactive Quick Note Slide-over Modal -->
+<div class="hidden fixed inset-0 z-50 flex flex-col justify-end bg-ink/40 backdrop-blur-sm p-4 animate-fade-in" id="quick-note-modal">
+<div class="w-full max-w-[420px] mx-auto rounded-card bg-paper border border-stone-300 p-4 shadow-dock flex flex-col space-y-3">
+<div class="flex items-center justify-between pb-1">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-ink animate-ping"></span>
+<span class="font-mono text-[11px] text-ink uppercase tracking-wider font-semibold">Quick Reflection</span>
+</div>
+<button aria-label="Close" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 border border-stone-300 flex items-center justify-center text-ink transition-colors" onclick="document.getElementById('quick-note-modal').classList.add('hidden')" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<textarea class="w-full bg-white p-3 rounded-DEFAULT border border-stone-300 text-ink placeholder:text-ink-faint font-serif text-[15px] focus:outline-none focus:border-ink resize-none shadow-tactile-well" placeholder="What is quiet right now? Type your uncensored thought..." rows="4"></textarea>
+<div class="flex items-center justify-between pt-1">
+<div class="flex items-center gap-2">
+<button class="w-9 h-9 rounded-full bg-stone-100 hover:bg-stone-200 border border-stone-300 flex items-center justify-center text-ink-muted hover:text-ink transition-colors" title="Add biometric protection" type="button">
+<span class="material-symbols-outlined text-[18px]">shield</span>
+</button>
+<button class="w-9 h-9 rounded-full bg-stone-100 hover:bg-stone-200 border border-stone-300 flex items-center justify-center text-ink-muted hover:text-ink transition-colors" title="Audio dictation" type="button">
+<span class="material-symbols-outlined text-[18px]">mic</span>
+</button>
+</div>
+<button class="px-5 py-2 rounded-full bg-ink text-white font-sans text-[13px] font-semibold tactile-chip-active hover:bg-black active:scale-95 transition-all" onclick="document.getElementById('quick-note-modal').classList.add('hidden')" type="button">
+          Save Reflection
+        </button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Filter pill tactile state switcher
+  document.querySelectorAll('.filter-chip').forEach(button => {
+    button.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(b => {
+        b.classList.remove('tactile-chip-active', 'bg-ink', 'text-white');
+        b.classList.add('tactile-chip', 'bg-stone-100', 'text-ink');
+      });
+      button.classList.remove('tactile-chip', 'bg-stone-100', 'text-ink');
+      button.classList.add('tactile-chip-active', 'bg-ink', 'text-white');
+
+      if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(8);
+      }
+    });
+  });
+</script></main><!-- Bottom Tactile Navigation Bar (Direction 02) --><div class="fixed bottom-0 w-full z-50 pb-safe pointer-events-none px-4"><nav class="pointer-events-auto max-w-[370px] mx-auto mb-2.5 shadow-dock rounded-pill bg-[#FAF9F6]/90 border border-stone-300/80 backdrop-blur-2xl p-1.5 flex items-center justify-between"><a aria-current="page" aria-label="Journal" class="flex items-center justify-center w-11 h-11 rounded-full transition-all active:scale-95 bg-ink text-white shadow-sm" data-path="journal" href="#"><span class="material-symbols-outlined text-[20px]">auto_stories</span><span class="sr-only">Journal</span></a><a aria-label="Library" class="flex items-center justify-center w-11 h-11 rounded-full text-ink-muted hover:text-ink transition-all active:scale-95" data-path="library" href="#"><span class="material-symbols-outlined text-[20px]">local_library</span><span class="sr-only">Library</span></a><a aria-label="Write" class="flex items-center justify-center w-11 h-11 rounded-full bg-stone-100 hover:bg-stone-200 border border-stone-300/80 text-ink active:scale-90 transition-all shadow-sm" data-path="write" href="#"><span class="material-symbols-outlined text-[20px]">edit_note</span><span class="sr-only">Write</span></a><a aria-label="Protected Mode" class="flex items-center justify-center w-11 h-11 rounded-full text-ink-muted hover:text-ink transition-all active:scale-95" data-path="protected-mode" href="#"><span class="material-symbols-outlined text-[20px]">lock_open</span><span class="sr-only">Protected Mode</span></a><a aria-label="Settings" class="flex items-center justify-center w-11 h-11 rounded-full text-ink-muted hover:text-ink transition-all active:scale-95" data-path="settings" href="#"><span class="material-symbols-outlined text-[20px]">tune</span><span class="sr-only">Settings</span></a></nav></div></body></html>
