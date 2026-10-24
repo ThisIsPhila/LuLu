@@ -1,2 +1,290 @@
-import {useState} from 'react';import {Plus,Search,ArrowUpRight,Feather,Shield,X} from 'lucide-react';import {Sidebar} from './components/Sidebar';import {EntryList} from './components/EntryList';import {Editor} from './components/Editor';import {Reader} from './components/Reader';import {Dialog} from './components/Dialogs';import {useJournal} from './hooks/useJournal';import {initialEntities,transform} from './domain/transform';import type {Entry} from './domain/journal';
-export default function App(){const journal=useJournal();const [view,setView]=useState('All'),[query,setQuery]=useState(''),[page,setPage]=useState<'home'|'edit'|'read'>('home'),[selected,setSelected]=useState(''),[dialog,setDialog]=useState(''),[protectedMode,setProtected]=useState(false),[entities,setEntities]=useState(initialEntities),[originals,setOriginals]=useState<Record<string,string>>({}),[draft,setDraft]=useState<Entry|null>(null),[notice,setNotice]=useState('');const active=journal.entries.find(e=>e.id===selected);function newEntry(){setDraft({id:crypto.randomUUID(),title:'',body:'',kind:'Journal',date:new Date().toISOString(),favorite:false,protected:protectedMode});setPage('edit');}function endSession(){setProtected(false);setEntities(initialEntities);setOriginals({});setDraft(null);setPage('home');setNotice('Preview session ended. Private references cleared.');}const filtered=journal.entries.filter(e=>(view==='All'||view==='Favorites'&&e.favorite||view==='Protected'&&e.protected||e.kind===view)&&`${e.title} ${e.body} ${protectedMode?originals[e.id]??'':''}`.toLowerCase().includes(query.toLowerCase()));return <div className="app"><Sidebar view={view} onView={v=>{setView(v);setPage('home')}} onSettings={()=>setDialog('settings')}/><main className="main"><div className="topbar"><span>YOUR PERSONAL WRITING SPACE</span><button className={protectedMode?'session active-session':'session'} onClick={()=>protectedMode?endSession():setDialog('protected')}><Shield size={14}/>{protectedMode?'End preview session':'Your space, your terms'}{protectedMode&&<X size={13}/>}</button></div>{journal.error&&<div role="alert" className="notice">{journal.error}</div>}{notice&&<button role="status" className="notice" onClick={()=>setNotice('')}>{notice} <X size={12}/></button>}{page==='home'?<><section className="hero"><div><div className="eyebrow">{new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}).toUpperCase()} <span className="tiny-line"/></div><h1>A little room<br/>for <i>your story.</i></h1><p>The everyday. The extraordinary. The things in between.<br/>Write freely. Keep what matters yours.</p><button className="primary" onClick={newEntry}><Plus size={17}/>Write something</button></div><div className="hero-art" aria-hidden="true"><div className="art-orbit"/><div className="art-sheet sheet-one"/><div className="art-sheet sheet-two"/><div className="art-sheet sheet-three"><Feather size={32} strokeWidth={.8}/><span>EVERY STORY<br/>BEGINS WITH<br/>A LITTLE SPACE.</span><span className="sheet-logo">LuLu</span></div><span className="art-no">A PLACE TO BEGIN — 001</span></div></section><section className="journal-section"><div className="section-head"><div><span className="eyebrow">THE COLLECTION</span><h2>Your pages<span>{journal.entries.length.toString().padStart(2,'0')}</span></h2></div><label className="search"><Search size={16}/><input id="search" placeholder="Find a thought, a moment…" aria-label="Search entries" value={query} onChange={e=>setQuery(e.target.value)}/>{query&&<button aria-label="Clear search" onClick={()=>setQuery('')}><X size={13}/></button>}</label></div><div className="filter-row"><div className="tabs">{['All','Journal','Story','Favorites','Protected'].map(v=><button key={v} onClick={()=>setView(v)} className={view===v?'selected':''}>{v==='Story'?'Stories':v}</button>)}</div><span className="entry-count">{filtered.length} entries <span>↓</span></span></div><EntryList entries={filtered} onOpen={e=>{setSelected(e.id);setPage('read')}}/></section><footer className="page-footer"><span>LuLu — always yours.</span><span>MADE FOR THE WAY YOU FEEL <ArrowUpRight size={12}/></span></footer></>:page==='edit'&&draft?<Editor draft={draft} setDraft={setDraft} protectedMode={protectedMode} entities={entities} setEntities={setEntities} onProtect={()=>setDialog('protected')} onBack={()=>{setDraft(null);setPage('home')}} onSave={()=>{if(!draft.body.trim()){setNotice('Give your page a few words first.');return;}const concealed=protectedMode||draft.protected;const entry={...draft,title:(concealed?transform(draft.title,entities):draft.title).trim()||'Untitled entry',body:concealed?transform(draft.body,entities):draft.body,protected:concealed};if(journal.save(entry)){if(concealed)setOriginals({...originals,[entry.id]:draft.body});setSelected(entry.id);setDraft(null);setPage('read');setNotice('Your page has been saved.');}}}/>:active?<Reader entry={active} original={protectedMode?originals[active.id]:undefined} onBack={()=>setPage('home')} onEdit={()=>{setDraft({...active,body:protectedMode?originals[active.id]??active.body:active.body});setPage('edit')}} onFavorite={()=>journal.favorite(active.id)} onDelete={()=>{if(window.confirm('Delete this entry from this browser?')){if(journal.remove(active.id)){setOriginals(x=>{const n={...x};delete n[active.id];return n});setPage('home');}}}}/>:null}</main>{dialog&&<Dialog kind={dialog} onClose={()=>setDialog('')} onStart={()=>{setProtected(true);setDialog('');if(!draft)newEntry();}}/>}</div>}
+import React, { useState, useEffect, useSyncExternalStore } from 'react';
+import type { Entry } from './domain/journal';
+import { loadEntries, persistEntries } from './domain/journal';
+import type { Entity, EntityType } from './domain/transform';
+import { initialEntities } from './domain/transform';
+import { JournalHome } from './components/JournalHome';
+import { EditorView } from './components/EditorView';
+import { ReaderView } from './components/ReaderView';
+import { LibraryView } from './components/LibraryView';
+import { BottomNav } from './components/BottomNav';
+import { DesktopSidebar } from './components/DesktopSidebar';
+import { ProtectedGateModal } from './components/ProtectedGateModal';
+import { EntityControlsSheet } from './components/EntityControlsSheet';
+
+const desktopQuery = '(min-width: 1024px)';
+function subscribeToViewport(onChange: () => void) {
+  const query = window.matchMedia(desktopQuery);
+  query.addEventListener('change', onChange);
+  return () => query.removeEventListener('change', onChange);
+}
+function isDesktopViewport() { return window.matchMedia(desktopQuery).matches; }
+
+export default function App() {
+  const [entries, setEntries] = useState<Entry[]>(() => loadEntries());
+  const [entities, setEntities] = useState<Entity[]>(initialEntities);
+  const desktop = useSyncExternalStore(subscribeToViewport, isDesktopViewport, () => false);
+
+  // Navigation and screen routing
+  const [activeNav, setActiveNav] = useState<'home' | 'search' | 'library' | 'edit'>('home');
+  const [activeScreen, setActiveScreen] = useState<'list' | 'editor' | 'reader'>('list');
+  const [activeTab, setActiveTab] = useState<string>('All');
+
+  // Selected item / draft
+  const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
+  const [draftEntry, setDraftEntry] = useState<Partial<Entry> | null>(null);
+
+  // Protected Mode & Modals
+  const [protectedMode, setProtectedMode] = useState<boolean>(false);
+  const [isProtectedGateOpen, setIsProtectedGateOpen] = useState<boolean>(false);
+  const [isEntityControlsOpen, setIsEntityControlsOpen] = useState<boolean>(false);
+  const [notice, setNotice] = useState<string>('');
+
+  // Persist entries on change
+  useEffect(() => {
+    persistEntries(entries);
+  }, [entries]);
+
+  // Notice auto-clear
+  useEffect(() => {
+    if (notice) {
+      const timer = setTimeout(() => setNotice(''), 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [notice]);
+
+  const handleNewEntry = () => {
+    setDraftEntry({
+      title: '',
+      body: '',
+      kind: activeTab === 'Stories' ? 'Story' : 'Journal',
+      protected: protectedMode,
+      perspective: protectedMode ? 'third' : 'first',
+    });
+    setActiveScreen('editor');
+  };
+
+  const handleSelectEntry = (entry: Entry) => {
+    setSelectedEntry(entry);
+    setActiveScreen('reader');
+  };
+
+  const handleSaveEntry = (data: {
+    title: string;
+    body: string;
+    originalBody?: string;
+    kind: 'Journal' | 'Story';
+    protected: boolean;
+    perspective: 'first' | 'third';
+  }) => {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+    if (draftEntry && 'id' in draftEntry && draftEntry.id) {
+      // Update existing
+      setEntries((prev) =>
+        prev.map((e) =>
+          e.id === draftEntry.id
+            ? {
+                ...e,
+                ...data,
+              }
+            : e
+        )
+      );
+      setNotice('Entry updated successfully.');
+    } else {
+      // Create new
+      const newEntry: Entry = {
+        id: 'entry-' + Date.now(),
+        title: data.title,
+        body: data.body,
+        originalBody: data.originalBody,
+        kind: data.kind,
+        date: now.toISOString(),
+        timeStr,
+        groupDate: 'Today',
+        favorite: false,
+        protected: data.protected,
+        perspective: data.perspective,
+      };
+      setEntries((prev) => [newEntry, ...prev]);
+      setNotice(data.protected ? 'Protected entry saved with narrative distancing.' : 'Entry saved.');
+    }
+
+    setDraftEntry(null);
+    setActiveScreen('list');
+    setActiveNav('home');
+  };
+
+  const handleFavorite = (id: string) => {
+    setEntries((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, favorite: !e.favorite } : e))
+    );
+  };
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Delete this entry?')) {
+      setEntries((prev) => prev.filter((e) => e.id !== id));
+      setActiveScreen('list');
+      setNotice('Entry deleted.');
+    }
+  };
+
+  const handleUpdateEntityAlias = (entityId: string, newAlias: string) => {
+    setEntities((prev) =>
+      prev.map((e) => (e.id === entityId ? { ...e, alias: newAlias } : e))
+    );
+    setNotice(`Updated alias to "${newAlias}".`);
+  };
+
+  const handleAddEntity = (newEntity: { original: string; alias: string; type: EntityType }) => {
+    const created: Entity = {
+      id: 'entity-' + Date.now(),
+      original: newEntity.original,
+      alias: newEntity.alias,
+      type: newEntity.type,
+      mentions: 1,
+    };
+    setEntities((prev) => [...prev, created]);
+    setNotice(`Added association for ${newEntity.original}.`);
+  };
+
+  const handleProtectedSuccess = () => {
+    setProtectedMode(true);
+    setIsProtectedGateOpen(false);
+    setNotice('Passkey verified. Protected writing environment active.');
+  };
+
+  const handleExitProtected = () => {
+    setProtectedMode(false);
+    setNotice('Protected session closed. Local private mappings concealed.');
+  };
+
+  // App screens adapt to the browser viewport without a demonstration shell.
+  const renderScreenContent = () => {
+    if (activeScreen === 'editor') {
+      return (
+        <EditorView
+          initialEntry={draftEntry || {}}
+          protectedMode={protectedMode}
+          entities={entities}
+          onOpenProtectedGate={() => setIsProtectedGateOpen(true)}
+          onOpenEntityControls={() => setIsEntityControlsOpen(true)}
+          onBack={() => {
+            setDraftEntry(null);
+            setActiveScreen('list');
+          }}
+          onSave={handleSaveEntry}
+          onUpdateEntityAlias={handleUpdateEntityAlias}
+        />
+      );
+    }
+
+    if (activeScreen === 'reader' && selectedEntry) {
+      return (
+        <ReaderView
+          entry={selectedEntry}
+          protectedMode={protectedMode}
+          entities={entities}
+          onBack={() => {
+            setSelectedEntry(null);
+            setActiveScreen('list');
+          }}
+          onEdit={() => {
+            setDraftEntry(selectedEntry);
+            setActiveScreen('editor');
+          }}
+          onFavorite={() => handleFavorite(selectedEntry.id)}
+          onDelete={() => handleDelete(selectedEntry.id)}
+          onExitProtected={handleExitProtected}
+          onEnterProtected={() => setIsProtectedGateOpen(true)}
+        />
+      );
+    }
+
+    // List Views
+    if (activeNav === 'library' || activeNav === 'search') {
+      return (
+        <LibraryView
+          entries={entries}
+          entities={entities}
+          protectedMode={protectedMode}
+          onSelectEntry={handleSelectEntry}
+          onNewEntry={handleNewEntry}
+          onOpenProtectedGate={() => setIsProtectedGateOpen(true)}
+        />
+      );
+    }
+
+    return (
+      <JournalHome
+        entries={entries}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onNewEntry={handleNewEntry}
+        onSelectEntry={handleSelectEntry}
+        onOpenProtectedGate={() => setIsProtectedGateOpen(true)}
+        protectedMode={protectedMode}
+        onOpenSearch={() => setActiveNav('search')}
+      />
+    );
+  };
+
+  return (
+    <div className="lulu-app-root">
+      {notice && (
+        <aside className="global-toast" role="status">
+          <span>{notice}</span>
+          <button onClick={() => setNotice('')} aria-label="Dismiss">✕</button>
+        </aside>
+      )}
+      <div className="app-layout">
+        {desktop && (
+          <DesktopSidebar
+            activeView={activeNav}
+            onNavigate={(nav) => {
+              if (nav === 'edit') handleNewEntry();
+              else { setActiveNav(nav); setActiveScreen('list'); }
+            }}
+            protectedMode={protectedMode}
+            onOpenProtectedGate={() => setIsProtectedGateOpen(true)}
+            onExitProtected={handleExitProtected}
+            onNewEntry={handleNewEntry}
+          />
+        )}
+        <div className={`app-content ${desktop ? 'wide' : 'compact'}`}>
+          {renderScreenContent()}
+          {!desktop && activeScreen === 'list' && (
+            <BottomNav
+              currentView={activeNav}
+              onNavigate={(nav) => {
+                if (nav === 'edit') handleNewEntry();
+                else { setActiveNav(nav); setActiveScreen('list'); }
+              }}
+              protectedMode={protectedMode}
+              onOpenProtectedGate={() => setIsProtectedGateOpen(true)}
+              onExitProtected={handleExitProtected}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Protected Gate Passkey Modal (Screen C) */}
+      <ProtectedGateModal
+        isOpen={isProtectedGateOpen}
+        onClose={() => setIsProtectedGateOpen(false)}
+        onSuccess={handleProtectedSuccess}
+      />
+
+      {/* Entity Controls Sheet (Screen E) */}
+      <EntityControlsSheet
+        isOpen={isEntityControlsOpen}
+        onClose={() => setIsEntityControlsOpen(false)}
+        entities={entities}
+        onUpdateEntity={handleUpdateEntityAlias}
+        onAddEntity={handleAddEntity}
+      />
+    </div>
+  );
+}

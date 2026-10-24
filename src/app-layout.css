@@ -1,0 +1,12 @@
+/* Responsive product shell. Demo framing lives exclusively under /demo/. */
+html, body, #root { min-height: 100%; }
+body { background: var(--bg); }
+.lulu-app-root { min-height: 100dvh; }
+.app-layout { display: flex; height: 100dvh; overflow: hidden; }
+.app-content { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+.app-content.wide { max-width: 1040px; margin-inline: auto; padding: 24px; }
+.app-content.compact { width: 100%; }
+.lulu-app-root .desktop-sidebar { height: 100dvh; overflow-y: auto; }
+.lulu-app-root .mobile-bottom-nav { position: relative; flex-shrink: 0; height: auto; min-height: 64px; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+.lulu-app-root .global-toast { top: 16px; }
+@media(max-width: 600px) { .app-content { padding-top: env(safe-area-inset-top); } }
