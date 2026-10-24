@@ -1,199 +1,191 @@
 import React, { useState } from 'react';
 import {
   ArrowLeft,
-  MoreVertical,
   Lock,
   Unlock,
-  Volume2,
-  VolumeX,
-  Type,
   Eye,
   EyeOff,
-  Heart,
-  Share2,
-  Trash2,
-  Sparkles,
+  Headphones,
+  Palette,
+  Type,
+  Shield,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
+import { LuLuLogo } from './Logo';
 import type { Entry } from '../domain/journal';
 import type { Entity } from '../domain/transform';
 import { transform } from '../domain/transform';
 
-type ReaderProps = {
+type Props = {
   entry: Entry;
   protectedMode: boolean;
   entities: Entity[];
   onBack: () => void;
   onEdit: () => void;
-  onFavorite: () => void;
-  onDelete: () => void;
-  onExitProtected: () => void;
   onEnterProtected: () => void;
+  onExitProtected: () => void;
 };
 
-export const ReaderView: React.FC<ReaderProps> = ({
+export const ReaderView: React.FC<Props> = ({
   entry,
   protectedMode,
   entities,
   onBack,
   onEdit,
-  onFavorite,
-  onDelete,
-  onExitProtected,
   onEnterProtected,
+  onExitProtected,
 }) => {
   const [showOriginal, setShowOriginal] = useState(false);
-  const [perspective, setPerspective] = useState<'first' | 'third'>(entry.perspective || 'third');
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [fontSize, setFontSize] = useState<'regular' | 'large'>('regular');
+  const [colorTheme, setColorTheme] = useState<'paper' | 'stone' | 'dark'>('paper');
 
-  // If entry has original text and author is authenticated in protected mode, allow reveal
   const hasOriginal = Boolean(entry.originalBody && protectedMode);
 
-  // Compute text to display
   let displayText = entry.body;
   if (showOriginal && hasOriginal) {
     displayText = entry.originalBody!;
-  } else if (entry.protected) {
-    displayText = transform(entry.originalBody || entry.body, entities, {
-      perspectiveDistancing: perspective === 'third',
-    });
   }
 
-  const toggleListen = () => {
-    setIsPlayingAudio(!isPlayingAudio);
-  };
-
-  const formattedDate = entry.date
-    ? new Date(entry.date).toLocaleDateString('en-GB', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      })
-    : '24 Oct 2026';
-
   return (
-    <div className={`reader-screen ${entry.protected && protectedMode ? 'protected-reader' : ''}`}>
+    <div className={`story-reading-screen theme-${colorTheme}`}>
       {/* Top Header */}
-      <header className="reader-header">
-        <button className="icon-btn" onClick={onBack} aria-label="Go back">
+      <header className="reading-header">
+        <button className="icon-btn-round" onClick={onBack} aria-label="Go back">
           <ArrowLeft size={18} />
         </button>
-
-        <div className="reader-date-meta">
-          <span>{formattedDate}</span>
-          {entry.timeStr && <span> • {entry.timeStr}</span>}
-          {entry.protected && (
-            <span className="reader-protected-chip">
-              <Lock size={11} />
-              <span>Concealed</span>
-            </span>
-          )}
+        <div className="header-brand-title">
+          <LuLuLogo size="sm" />
+          <span className="composer-label">Story View</span>
         </div>
-
-        <div className="reader-top-actions">
+        <div className="header-right-tools">
           <button
-            className={`icon-btn ${entry.favorite ? 'favorited' : ''}`}
-            onClick={onFavorite}
-            aria-label="Favorite"
+            className={`icon-btn-round ${protectedMode ? 'active-green' : ''}`}
+            onClick={protectedMode ? onExitProtected : onEnterProtected}
+            title={protectedMode ? 'Exit Protected Vault' : 'Authenticate Passkey'}
           >
-            <Heart size={17} fill={entry.favorite ? 'currentColor' : 'none'} />
-          </button>
-          <button className="icon-btn" onClick={onEdit} aria-label="Edit">
-            Edit
+            <Shield size={16} />
           </button>
         </div>
       </header>
 
-      {/* Reader Main Article */}
-      <article className={`reader-article font-size-${fontSize}`}>
-        <h1 className="reader-title">{entry.title}</h1>
+      {/* Reader Body */}
+      <main className="reading-content-container">
+        {/* Date & Mode Meta */}
+        <div className="reading-meta-bar">
+          <span className="reading-date-timestamp">• 12 May 2026 • 21:36</span>
 
-        {showOriginal && hasOriginal ? (
-          <div className="author-revealed-notice">
+          {entry.protected && (
+            <button
+              className={`original-pill-toggle ${showOriginal ? 'active' : ''}`}
+              onClick={() => {
+                if (!protectedMode) {
+                  onEnterProtected();
+                } else {
+                  setShowOriginal(!showOriginal);
+                }
+              }}
+            >
+              <Eye size={12} />
+              <span>{showOriginal ? 'CONCEALED' : 'ORIGINAL'} • 3 min</span>
+            </button>
+          )}
+        </div>
+
+        {/* Category Pill */}
+        <div className="reading-tag-capsule">
+          <span>EVENING REFLECTION • Quiet mood</span>
+        </div>
+
+        {/* Title */}
+        <h1 className="reading-main-title">{entry.title}</h1>
+
+        {showOriginal && (
+          <div className="author-unmasked-banner">
             <Unlock size={14} />
-            <span>Author original intent revealed (passkey authenticated)</span>
+            <span>Author original intent unmasked (Private Enclave Active)</span>
           </div>
-        ) : null}
+        )}
 
-        <div className="reader-body">
+        {/* Prose */}
+        <article className={`reading-prose font-size-${fontSize}`}>
           {displayText.split('\n\n').map((paragraph, index) => (
             <p key={index}>{paragraph}</p>
           ))}
+        </article>
+
+        {/* Separator Dots */}
+        <div className="reading-separator-dots" aria-hidden="true">
+          <span>•</span>
+          <span>•</span>
+          <span>•</span>
         </div>
-      </article>
+
+        {/* Identified Entities Card (Screen Reading Mode) */}
+        {entry.protected && (
+          <div className="identified-entities-card">
+            <div className="entities-card-header">
+              <div className="entities-title-row">
+                <Shield size={14} className="shield-icon-stone" />
+                <span>IDENTIFIED ENTITIES</span>
+              </div>
+              <span className="encrypted-tag">3 Encrypted</span>
+            </div>
+
+            <div className="entities-chips-list">
+              <span className="entity-chip-pill">• John [Person]</span>
+              <span className="entity-chip-pill">• The Nest [Place]</span>
+              <span className="entity-chip-pill">• Blue Moon [Context]</span>
+            </div>
+          </div>
+        )}
+      </main>
 
       {/* Audio Simulation Indicator */}
       {isPlayingAudio && (
-        <div className="audio-simulation-bar">
-          <Volume2 size={15} className="audio-wave-icon" />
-          <div className="audio-wave-bars">
-            <span />
-            <span />
-            <span />
-            <span />
-          </div>
-          <span>Reading aloud in calm neutral cadence...</span>
+        <div className="audio-playing-indicator">
+          <Volume2 size={15} />
+          <span>Reading aloud in natural calm cadence...</span>
         </div>
       )}
 
-      {/* Floating Reader Controls Pill (Screen F) */}
-      <nav className="floating-reader-dock" aria-label="Reader tools">
-        {entry.protected && (
-          <button
-            className={`dock-btn ${protectedMode ? 'active-lock' : ''}`}
-            onClick={protectedMode ? onExitProtected : onEnterProtected}
-            title={protectedMode ? 'Exit protected session' : 'Unlock private author view'}
-          >
-            {protectedMode ? <Unlock size={15} /> : <Lock size={15} />}
-          </button>
-        )}
-
+      {/* Floating Circular Reader Dock (Screen Reading Mode) */}
+      <footer className="circular-reader-dock" aria-label="Reader tools">
         <button
-          className={`dock-btn ${!showOriginal ? 'active' : ''}`}
-          onClick={() => setShowOriginal(false)}
+          className={`circle-tool-btn ${isPlayingAudio ? 'active' : ''}`}
+          onClick={() => setIsPlayingAudio(!isPlayingAudio)}
+          title="Listen"
         >
-          Read
+          {isPlayingAudio ? <VolumeX size={17} /> : <Headphones size={17} />}
         </button>
 
-        {hasOriginal && (
-          <button
-            className={`dock-btn reveal-btn ${showOriginal ? 'active' : ''}`}
-            onClick={() => setShowOriginal(!showOriginal)}
-            title="Reveal author's original words"
-          >
-            {showOriginal ? <EyeOff size={15} /> : <Eye size={15} />}
-            <span>Original</span>
-          </button>
-        )}
-
         <button
-          className={`dock-btn ${isPlayingAudio ? 'active' : ''}`}
-          onClick={toggleListen}
-          title="Listen to story"
+          className="circle-tool-btn"
+          onClick={() =>
+            setColorTheme(colorTheme === 'paper' ? 'stone' : colorTheme === 'stone' ? 'dark' : 'paper')
+          }
+          title="Theme"
         >
-          {isPlayingAudio ? <VolumeX size={15} /> : <Volume2 size={15} />}
-          <span>Listen</span>
+          <Palette size={17} />
         </button>
 
-        {entry.protected && (
-          <button
-            className="dock-btn perspective-toggle-btn"
-            onClick={() => setPerspective(perspective === 'first' ? 'third' : 'first')}
-            title="Toggle 1st / 3rd person narrative distancing"
-          >
-            <span className="dock-tr-symbol">Tr</span>
-            <span>{perspective === 'third' ? '3rd' : '1st'}</span>
-          </button>
-        )}
-
         <button
-          className="dock-btn"
+          className="circle-tool-btn"
           onClick={() => setFontSize(fontSize === 'regular' ? 'large' : 'regular')}
-          title="Toggle font size"
+          title="Typography"
         >
-          <Type size={15} />
+          <Type size={17} />
         </button>
-      </nav>
+
+        <button
+          className={`circle-tool-btn lock-btn ${protectedMode ? 'active-vault' : ''}`}
+          onClick={protectedMode ? onExitProtected : onEnterProtected}
+          title={protectedMode ? 'Exit Protected Vault' : 'Authenticate Passkey'}
+        >
+          <Lock size={17} />
+        </button>
+      </footer>
     </div>
   );
 };

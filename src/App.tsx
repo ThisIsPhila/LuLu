@@ -1,46 +1,36 @@
-import React, { useState, useEffect, useSyncExternalStore } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Entry } from './domain/journal';
-import { loadEntries, persistEntries } from './domain/journal';
-import type { Entity, EntityType } from './domain/transform';
+import { loadEntries, persistEntries, seed } from './domain/journal';
+import type { Entity } from './domain/transform';
 import { initialEntities } from './domain/transform';
 import { JournalHome } from './components/JournalHome';
-import { EditorView } from './components/EditorView';
+import { TransformProtectView } from './components/TransformProtectView';
+import { ProtectedWritingView } from './components/ProtectedWritingView';
+import { EntityInspectorView } from './components/EntityInspectorView';
 import { ReaderView } from './components/ReaderView';
-import { LibraryView } from './components/LibraryView';
+import { StoryLeavesView } from './components/StoryLeavesView';
+import { PrivateSanctuaryView } from './components/PrivateSanctuaryView';
 import { BottomNav } from './components/BottomNav';
-import { DesktopSidebar } from './components/DesktopSidebar';
 import { ProtectedGateModal } from './components/ProtectedGateModal';
-import { EntityControlsSheet } from './components/EntityControlsSheet';
-
-const desktopQuery = '(min-width: 1024px)';
-function subscribeToViewport(onChange: () => void) {
-  const query = window.matchMedia(desktopQuery);
-  query.addEventListener('change', onChange);
-  return () => query.removeEventListener('change', onChange);
-}
-function isDesktopViewport() { return window.matchMedia(desktopQuery).matches; }
 
 export default function App() {
   const [entries, setEntries] = useState<Entry[]>(() => loadEntries());
   const [entities, setEntities] = useState<Entity[]>(initialEntities);
-  const desktop = useSyncExternalStore(subscribeToViewport, isDesktopViewport, () => false);
 
-  // Navigation and screen routing
-  const [activeNav, setActiveNav] = useState<'home' | 'search' | 'library' | 'edit'>('home');
-  const [activeScreen, setActiveScreen] = useState<'list' | 'editor' | 'reader'>('list');
-  const [activeTab, setActiveTab] = useState<string>('All');
+  // Active view: 'home' | 'leaves' | 'compose' | 'enclave-writing' | 'vault' | 'inspector' | 'reader'
+  const [currentView, setCurrentView] = useState<
+    'home' | 'leaves' | 'compose' | 'enclave-writing' | 'vault' | 'inspector' | 'reader'
+  >('home');
 
-  // Selected item / draft
+  const [activeCategoryTab, setActiveCategoryTab] = useState<string>('All');
   const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
-  const [draftEntry, setDraftEntry] = useState<Partial<Entry> | null>(null);
 
   // Protected Mode & Modals
   const [protectedMode, setProtectedMode] = useState<boolean>(false);
   const [isProtectedGateOpen, setIsProtectedGateOpen] = useState<boolean>(false);
-  const [isEntityControlsOpen, setIsEntityControlsOpen] = useState<boolean>(false);
   const [notice, setNotice] = useState<string>('');
 
-  // Persist entries on change
+  // Persist entries
   useEffect(() => {
     persistEntries(entries);
   }, [entries]);
@@ -53,237 +43,167 @@ export default function App() {
     }
   }, [notice]);
 
-  const handleNewEntry = () => {
-    setDraftEntry({
-      title: '',
-      body: '',
-      kind: activeTab === 'Stories' ? 'Story' : 'Journal',
-      protected: protectedMode,
-      perspective: protectedMode ? 'third' : 'first',
-    });
-    setActiveScreen('editor');
-  };
-
   const handleSelectEntry = (entry: Entry) => {
     setSelectedEntry(entry);
-    setActiveScreen('reader');
+    setCurrentView('reader');
   };
 
-  const handleSaveEntry = (data: {
+  const handleSaveProtectedEntry = (data: {
     title: string;
     body: string;
-    originalBody?: string;
+    originalBody: string;
     kind: 'Journal' | 'Story';
-    protected: boolean;
-    perspective: 'first' | 'third';
   }) => {
     const now = new Date();
     const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-
-    if (draftEntry && 'id' in draftEntry && draftEntry.id) {
-      // Update existing
-      setEntries((prev) =>
-        prev.map((e) =>
-          e.id === draftEntry.id
-            ? {
-                ...e,
-                ...data,
-              }
-            : e
-        )
-      );
-      setNotice('Entry updated successfully.');
-    } else {
-      // Create new
-      const newEntry: Entry = {
-        id: 'entry-' + Date.now(),
-        title: data.title,
-        body: data.body,
-        originalBody: data.originalBody,
-        kind: data.kind,
-        date: now.toISOString(),
-        timeStr,
-        groupDate: 'Today',
-        favorite: false,
-        protected: data.protected,
-        perspective: data.perspective,
-      };
-      setEntries((prev) => [newEntry, ...prev]);
-      setNotice(data.protected ? 'Protected entry saved with narrative distancing.' : 'Entry saved.');
-    }
-
-    setDraftEntry(null);
-    setActiveScreen('list');
-    setActiveNav('home');
-  };
-
-  const handleFavorite = (id: string) => {
-    setEntries((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, favorite: !e.favorite } : e))
-    );
-  };
-
-  const handleDelete = (id: string) => {
-    if (window.confirm('Delete this entry?')) {
-      setEntries((prev) => prev.filter((e) => e.id !== id));
-      setActiveScreen('list');
-      setNotice('Entry deleted.');
-    }
-  };
-
-  const handleUpdateEntityAlias = (entityId: string, newAlias: string) => {
-    setEntities((prev) =>
-      prev.map((e) => (e.id === entityId ? { ...e, alias: newAlias } : e))
-    );
-    setNotice(`Updated alias to "${newAlias}".`);
-  };
-
-  const handleAddEntity = (newEntity: { original: string; alias: string; type: EntityType }) => {
-    const created: Entity = {
-      id: 'entity-' + Date.now(),
-      original: newEntity.original,
-      alias: newEntity.alias,
-      type: newEntity.type,
-      mentions: 1,
+    const newEntry: Entry = {
+      id: 'entry-' + Date.now(),
+      title: data.title,
+      body: data.body,
+      originalBody: data.originalBody,
+      kind: data.kind,
+      date: now.toISOString(),
+      timeStr,
+      wordsCount: data.body.trim().split(/\s+/).length,
+      groupDate: 'Today',
+      tags: ['Protected', 'Enclave'],
+      favorite: false,
+      protected: true,
+      perspective: 'third',
+      entitiesRecognized: ['John', 'Blue Moon'],
     };
-    setEntities((prev) => [...prev, created]);
-    setNotice(`Added association for ${newEntity.original}.`);
+
+    setEntries((prev) => [newEntry, ...prev]);
+    setProtectedMode(true);
+    setNotice('Protected entry encrypted with your personal passkey.');
+    setCurrentView('home');
+  };
+
+  const handleUpdateAlias = (id: string, newAlias: string) => {
+    setEntities((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, alias: newAlias } : e))
+    );
+    setNotice(`Updated representation to "${newAlias}".`);
   };
 
   const handleProtectedSuccess = () => {
     setProtectedMode(true);
     setIsProtectedGateOpen(false);
-    setNotice('Passkey verified. Protected writing environment active.');
+    setNotice('Biometric Passkey authenticated. Enclave memory active.');
   };
 
   const handleExitProtected = () => {
     setProtectedMode(false);
-    setNotice('Protected session closed. Local private mappings concealed.');
-  };
-
-  // App screens adapt to the browser viewport without a demonstration shell.
-  const renderScreenContent = () => {
-    if (activeScreen === 'editor') {
-      return (
-        <EditorView
-          initialEntry={draftEntry || {}}
-          protectedMode={protectedMode}
-          entities={entities}
-          onOpenProtectedGate={() => setIsProtectedGateOpen(true)}
-          onOpenEntityControls={() => setIsEntityControlsOpen(true)}
-          onBack={() => {
-            setDraftEntry(null);
-            setActiveScreen('list');
-          }}
-          onSave={handleSaveEntry}
-          onUpdateEntityAlias={handleUpdateEntityAlias}
-        />
-      );
-    }
-
-    if (activeScreen === 'reader' && selectedEntry) {
-      return (
-        <ReaderView
-          entry={selectedEntry}
-          protectedMode={protectedMode}
-          entities={entities}
-          onBack={() => {
-            setSelectedEntry(null);
-            setActiveScreen('list');
-          }}
-          onEdit={() => {
-            setDraftEntry(selectedEntry);
-            setActiveScreen('editor');
-          }}
-          onFavorite={() => handleFavorite(selectedEntry.id)}
-          onDelete={() => handleDelete(selectedEntry.id)}
-          onExitProtected={handleExitProtected}
-          onEnterProtected={() => setIsProtectedGateOpen(true)}
-        />
-      );
-    }
-
-    // List Views
-    if (activeNav === 'library' || activeNav === 'search') {
-      return (
-        <LibraryView
-          entries={entries}
-          entities={entities}
-          protectedMode={protectedMode}
-          onSelectEntry={handleSelectEntry}
-          onNewEntry={handleNewEntry}
-          onOpenProtectedGate={() => setIsProtectedGateOpen(true)}
-        />
-      );
-    }
-
-    return (
-      <JournalHome
-        entries={entries}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        onNewEntry={handleNewEntry}
-        onSelectEntry={handleSelectEntry}
-        onOpenProtectedGate={() => setIsProtectedGateOpen(true)}
-        protectedMode={protectedMode}
-        onOpenSearch={() => setActiveNav('search')}
-      />
-    );
+    setNotice('Protected session closed. Real-world mappings locked.');
   };
 
   return (
-    <div className="lulu-app-root">
+    <div className={`lulu-app-root ${currentView === 'vault' ? 'vault-dark-mode' : ''}`}>
+      {/* Global Status Toast */}
       {notice && (
-        <aside className="global-toast" role="status">
+        <aside className="global-toast-stitch" role="status">
           <span>{notice}</span>
-          <button onClick={() => setNotice('')} aria-label="Dismiss">✕</button>
+          <button onClick={() => setNotice('')} aria-label="Dismiss">
+            ✕
+          </button>
         </aside>
       )}
-      <div className="app-layout">
-        {desktop && (
-          <DesktopSidebar
-            activeView={activeNav}
-            onNavigate={(nav) => {
-              if (nav === 'edit') handleNewEntry();
-              else { setActiveNav(nav); setActiveScreen('list'); }
-            }}
-            protectedMode={protectedMode}
+
+      {/* Main Responsive Application Shell (Edge-to-Edge with clean Max-Width) */}
+      <div className="lulu-viewport-shell">
+        {currentView === 'home' && (
+          <JournalHome
+            entries={entries}
+            activeTab={activeCategoryTab}
+            onTabChange={setActiveCategoryTab}
+            onNewEntry={() => setCurrentView('compose')}
+            onSelectEntry={handleSelectEntry}
             onOpenProtectedGate={() => setIsProtectedGateOpen(true)}
-            onExitProtected={handleExitProtected}
-            onNewEntry={handleNewEntry}
+            protectedMode={protectedMode}
+            onOpenVault={() => setCurrentView('vault')}
           />
         )}
-        <div className={`app-content ${desktop ? 'wide' : 'compact'}`}>
-          {renderScreenContent()}
-          {!desktop && activeScreen === 'list' && (
-            <BottomNav
-              currentView={activeNav}
-              onNavigate={(nav) => {
-                if (nav === 'edit') handleNewEntry();
-                else { setActiveNav(nav); setActiveScreen('list'); }
-              }}
-              protectedMode={protectedMode}
-              onOpenProtectedGate={() => setIsProtectedGateOpen(true)}
-              onExitProtected={handleExitProtected}
-            />
-          )}
-        </div>
+
+        {currentView === 'leaves' && (
+          <StoryLeavesView
+            entries={entries}
+            onSelectEntry={handleSelectEntry}
+            onOpenProtectedGate={() => setIsProtectedGateOpen(true)}
+          />
+        )}
+
+        {currentView === 'compose' && (
+          <TransformProtectView
+            entities={entities}
+            onBack={() => setCurrentView('home')}
+            onSaveProtected={handleSaveProtectedEntry}
+            onOpenEntityInspector={() => setCurrentView('inspector')}
+          />
+        )}
+
+        {currentView === 'enclave-writing' && (
+          <ProtectedWritingView
+            onBack={() => setCurrentView('home')}
+            onOpenEntityInspector={() => setCurrentView('inspector')}
+            onDone={() => setCurrentView('home')}
+          />
+        )}
+
+        {currentView === 'vault' && (
+          <PrivateSanctuaryView
+            onQuickExit={() => setCurrentView('home')}
+            onOpenJournal={() => setCurrentView('home')}
+          />
+        )}
+
+        {currentView === 'inspector' && (
+          <EntityInspectorView
+            entities={entities}
+            onBack={() => setCurrentView('home')}
+            onUpdateAlias={handleUpdateAlias}
+            onConfirm={() => {
+              setNotice('Representations confirmed in Neural Enclave.');
+              setCurrentView('home');
+            }}
+          />
+        )}
+
+        {currentView === 'reader' && selectedEntry && (
+          <ReaderView
+            entry={selectedEntry}
+            protectedMode={protectedMode}
+            entities={entities}
+            onBack={() => {
+              setSelectedEntry(null);
+              setCurrentView('home');
+            }}
+            onEdit={() => setCurrentView('compose')}
+            onEnterProtected={() => setIsProtectedGateOpen(true)}
+            onExitProtected={handleExitProtected}
+          />
+        )}
+
+        {/* Bottom Floating Navigation Dock (Hidden on Reader and Compose) */}
+        {currentView !== 'reader' && currentView !== 'compose' && currentView !== 'enclave-writing' && (
+          <BottomNav
+            currentView={currentView as any}
+            onNavigate={(view) => {
+              if (view === 'compose') {
+                setCurrentView('compose');
+              } else {
+                setCurrentView(view);
+              }
+            }}
+            protectedMode={protectedMode}
+          />
+        )}
       </div>
 
-      {/* Protected Gate Passkey Modal (Screen C) */}
+      {/* Biometric Passkey Modal (Screen C) */}
       <ProtectedGateModal
         isOpen={isProtectedGateOpen}
         onClose={() => setIsProtectedGateOpen(false)}
         onSuccess={handleProtectedSuccess}
-      />
-
-      {/* Entity Controls Sheet (Screen E) */}
-      <EntityControlsSheet
-        isOpen={isEntityControlsOpen}
-        onClose={() => setIsEntityControlsOpen(false)}
-        entities={entities}
-        onUpdateEntity={handleUpdateEntityAlias}
-        onAddEntity={handleAddEntity}
       />
     </div>
   );

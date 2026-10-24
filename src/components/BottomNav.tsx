@@ -1,64 +1,83 @@
 import React from 'react';
-import { Home, Search, Plus, BookOpen, Shield, ShieldCheck } from 'lucide-react';
+import {
+  BookOpen,
+  Layers,
+  Edit3,
+  Shield,
+  ShieldCheck,
+  Settings2,
+  Lock,
+} from 'lucide-react';
 
-type NavProps = {
-  currentView: 'home' | 'search' | 'library' | 'edit';
-  onNavigate: (view: 'home' | 'search' | 'library' | 'edit') => void;
+type Props = {
+  currentView: 'home' | 'leaves' | 'compose' | 'vault' | 'inspector';
+  onNavigate: (view: 'home' | 'leaves' | 'compose' | 'vault' | 'inspector') => void;
   protectedMode: boolean;
-  onOpenProtectedGate: () => void;
-  onExitProtected: () => void;
 };
 
-export const BottomNav: React.FC<NavProps> = ({
-  currentView,
-  onNavigate,
-  protectedMode,
-  onOpenProtectedGate,
-  onExitProtected,
-}) => {
+export const BottomNav: React.FC<Props> = ({ currentView, onNavigate, protectedMode }) => {
   return (
-    <nav className="mobile-bottom-nav" aria-label="Bottom Navigation">
-      <button
-        className={`nav-tab-btn ${currentView === 'home' ? 'active' : ''}`}
-        onClick={() => onNavigate('home')}
-      >
-        <Home size={20} />
-        <span>Home</span>
-      </button>
+    <nav className="stitch-bottom-dock" aria-label="Main Navigation">
+      <div className="dock-inner-container">
+        {/* 1. Home / Journal */}
+        <button
+          className={`dock-item-btn ${currentView === 'home' ? 'active' : ''}`}
+          onClick={() => onNavigate('home')}
+          aria-label="Journal Home"
+        >
+          <div className="dock-icon-wrapper">
+            <BookOpen size={18} />
+          </div>
+          <span className="dock-label">Home</span>
+        </button>
 
-      <button
-        className={`nav-tab-btn ${currentView === 'search' ? 'active' : ''}`}
-        onClick={() => onNavigate('search')}
-      >
-        <Search size={20} />
-        <span>Search</span>
-      </button>
+        {/* 2. Leaves / Decks */}
+        <button
+          className={`dock-item-btn ${currentView === 'leaves' ? 'active' : ''}`}
+          onClick={() => onNavigate('leaves')}
+          aria-label="Story Leaves"
+        >
+          <div className="dock-icon-wrapper">
+            <Layers size={18} />
+          </div>
+          <span className="dock-label">Leaves</span>
+        </button>
 
-      {/* Center Write Button */}
-      <button
-        className="nav-center-write-btn"
-        onClick={() => onNavigate('edit')}
-        aria-label="New Entry"
-      >
-        <Plus size={22} />
-      </button>
+        {/* 3. Center Compose Button */}
+        <button
+          className="dock-compose-btn"
+          onClick={() => onNavigate('compose')}
+          aria-label="Compose Entry"
+        >
+          <Edit3 size={20} />
+        </button>
 
-      <button
-        className={`nav-tab-btn ${currentView === 'library' ? 'active' : ''}`}
-        onClick={() => onNavigate('library')}
-      >
-        <BookOpen size={20} />
-        <span>Library</span>
-      </button>
+        {/* 4. Vault / Sanctuary */}
+        <button
+          className={`dock-item-btn ${currentView === 'vault' ? 'active' : ''} ${
+            protectedMode ? 'enclave-unlocked' : ''
+          }`}
+          onClick={() => onNavigate('vault')}
+          aria-label="Private Sanctuary Vault"
+        >
+          <div className="dock-icon-wrapper">
+            {protectedMode ? <ShieldCheck size={18} className="text-sage" /> : <Shield size={18} />}
+          </div>
+          <span className="dock-label">Vault</span>
+        </button>
 
-      <button
-        className={`nav-tab-btn ${protectedMode ? 'active-protected' : ''}`}
-        onClick={protectedMode ? onExitProtected : onOpenProtectedGate}
-        aria-label={protectedMode ? 'Exit Protected Mode' : 'Enter Protected Mode'}
-      >
-        {protectedMode ? <ShieldCheck size={20} /> : <Shield size={20} />}
-        <span>{protectedMode ? 'Private' : 'Protect'}</span>
-      </button>
+        {/* 5. Entity Inspector */}
+        <button
+          className={`dock-item-btn ${currentView === 'inspector' ? 'active' : ''}`}
+          onClick={() => onNavigate('inspector')}
+          aria-label="Entity Inspector"
+        >
+          <div className="dock-icon-wrapper">
+            <Settings2 size={18} />
+          </div>
+          <span className="dock-label">Inspector</span>
+        </button>
+      </div>
     </nav>
   );
 };
