@@ -1,0 +1,13 @@
+
+> lulu-prototype@0.1.0 build:app
+> tsc -b && vite build --mode app
+
+vite v6.4.5 building for app...
+transforming...
+✓ 1593 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/app/index.html                   0.86 kB │ gzip:  0.47 kB
+dist/app/assets/index-BXCGdC-5.css   26.86 kB │ gzip:  5.66 kB
+dist/app/assets/index-0c9UiZ09.js   277.51 kB │ gzip: 83.69 kB
+✓ built in 1.33s

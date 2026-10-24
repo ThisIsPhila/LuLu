@@ -5,46 +5,58 @@ export type Entry = {
   originalBody?: string;
   kind: 'Journal' | 'Story';
   date: string;
-  timeStr?: string;
-  groupDate?: 'Today' | 'Yesterday' | 'Earlier';
+  timeStr: string;
+  wordsCount: number;
+  groupDate: 'Today' | 'Yesterday' | 'Earlier';
+  tags: string[];
+  imageUrl?: string;
   favorite: boolean;
   protected: boolean;
   perspective?: 'first' | 'third';
   entitiesRecognized?: string[];
+  curatedDeck?: string;
 };
 
 export const seed: Entry[] = [
   {
     id: 'entry-1',
     title: 'A calm morning',
-    body: 'Started the day with a walk. The air was crisp and it helped me think more clearly about what I want to work on this month.\n\nI met up with David later and we discussed a few ideas for the project. It felt like a good conversation and I left feeling motivated.',
+    body: 'Started the day with a walk. The air was crisp and it helped me think more clearly about what I want to work on this month. The leaves were still damp with dew.',
     kind: 'Journal',
-    date: '2026-10-24T09:14:00',
+    date: '2026-05-14T09:14:00',
     timeStr: '09:14',
+    wordsCount: 324,
     groupDate: 'Today',
+    tags: ['Morning Walk', 'Reflection'],
+    imageUrl: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=300&q=80',
     favorite: false,
     protected: false,
   },
   {
     id: 'entry-2',
     title: 'Notes on focus',
-    body: 'Some thoughts on where I want to put my creative energy. Less noise, more craft.\n\nFocusing on building things that feel thoughtful, private and enduring.',
+    body: 'Some thoughts on where I want to put my energy before the workshop starts. Eliminating secondary priorities until the narrative backbone is completely solidified.',
     kind: 'Journal',
-    date: '2026-10-24T08:02:00',
+    date: '2026-05-14T08:02:00',
     timeStr: '08:02',
+    wordsCount: 180,
     groupDate: 'Today',
+    tags: ['Deep Work'],
     favorite: true,
     protected: false,
   },
   {
     id: 'entry-3',
     title: 'The conversation',
-    body: 'John came to the Nest at Blue Moon and we discussed a few ideas for the project. It felt like a good conversation and I left feeling motivated.\n\nThere are still a few things to consider, but overall it was a positive step forward. I want to build on this and keep the momentum going.',
-    originalBody: 'David came to my home at 9pm and threatened me. We argued about a few things for the project. It felt like a dangerous conversation and I left feeling terrified.\n\nThere are still a few things to report, but overall I survived. I want to build on this and keep myself safe.',
+    body: 'John came to the Nest at Blue Moon and we discussed a few ideas for the project. It felt like a good conversation and I left feeling motivated.\n\nThere are still a few things to consider, but overall it was a positive step forward. I want to build on this and keep the momentum going as the winter approaches.\n\nWalking back under the lamplight, the silence of the city felt grounding rather than lonely. Sometimes all you need is a mirror that keeps your secrets safe while letting you see them clearly.',
+    originalBody: 'David came to my place yesterday and threatened me. I am worried about what might happen next...\n\nHe shouted at my house in Tamboerskloof around 9pm. I managed to lock the door and call someone I trust, but I felt terrified.\n\nI am keeping this private record here so there is an exact timeline if I need to report this.',
     kind: 'Journal',
-    date: '2026-10-23T21:36:00',
+    date: '2026-05-13T21:36:00',
     timeStr: '21:36',
+    wordsCount: 245,
     groupDate: 'Yesterday',
+    tags: ['Protected', 'Enclave'],
+    imageUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=300&q=80',
     favorite: true,
     protected: true,
     perspective: 'third',
@@ -52,40 +64,36 @@ export const seed: Entry[] = [
   },
   {
     id: 'entry-4',
-    title: 'Ideas for the studio',
-    body: 'Things to explore this week: tactile interactions, quiet typography, and building software that feels like an open notebook rather than a transaction.',
+    title: 'Project ideas & exploratory themes',
+    body: 'Things to explore this week with the creative circle: ceramic textures, quiet typography, and building software that feels like an open notebook rather than a transaction.',
     kind: 'Story',
-    date: '2026-10-23T17:11:00',
+    date: '2026-05-13T17:11:00',
     timeStr: '17:11',
+    wordsCount: 412,
     groupDate: 'Yesterday',
+    tags: ['Studio Roadmap', 'Materiality'],
+    imageUrl: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&q=80',
     favorite: false,
     protected: false,
   },
   {
     id: 'entry-5',
-    title: 'The long walk home',
-    body: 'There is a quiet rhythm to walking after sunset. The city turns down its volume just enough for thoughts to complete themselves.',
+    title: 'Spring Monologue',
+    body: 'Quiet daylight drifting through linen curtains. Notes on stillness, the cadence of early tea, and the small rituals that keep life anchored.',
     kind: 'Story',
-    date: '2026-10-11T19:40:00',
-    timeStr: '19:40',
+    date: '2026-05-11T12:30:00',
+    timeStr: '12:30',
+    wordsCount: 195,
     groupDate: 'Earlier',
-    favorite: false,
-    protected: false,
-  },
-  {
-    id: 'entry-6',
-    title: 'A question of time',
-    body: 'She asked how long it takes to know someone. Sometimes a minute. Sometimes three seasons. Most times, we are only meeting ourselves in another mirror.',
-    kind: 'Story',
-    date: '2026-10-06T14:15:00',
-    timeStr: '14:15',
-    groupDate: 'Earlier',
+    tags: ['Archival Sheets'],
+    imageUrl: 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=300&q=80',
+    curatedDeck: 'Curated Deck • 4 archival sheets',
     favorite: false,
     protected: false,
   },
 ];
 
-const STORAGE_KEY = 'lulu.app.entries.v1';
+const STORAGE_KEY = 'lulu.stitch.entries.v3';
 
 export function loadEntries(): Entry[] {
   try {
@@ -93,9 +101,7 @@ export function loadEntries(): Entry[] {
     if (!raw) return seed;
     const v = JSON.parse(raw);
     if (Array.isArray(v) && v.length > 0) return v;
-  } catch {
-    // fallback
-  }
+  } catch {}
   return seed;
 }
 
@@ -106,3 +112,4 @@ export function persistEntries(entries: Entry[]) {
 }
 
 export const persist = persistEntries;
+export const loadJournal = loadEntries;

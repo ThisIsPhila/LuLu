@@ -1,0 +1,100 @@
+TAP version 13
+# Subtest: missing storage returns independent defaults without writing
+ok 1 - missing storage returns independent defaults without writing
+  ---
+  duration_ms: 0.719875
+  type: 'test'
+  ...
+# Subtest: legacy arrays migrate on explicit save; deleting everything stays empty on reload
+ok 2 - legacy arrays migrate on explicit save; deleting everything stays empty on reload
+  ---
+  duration_ms: 0.725208
+  type: 'test'
+  ...
+# Subtest: malformed, duplicate and future-version data are retained and cannot be overwritten
+ok 3 - malformed, duplicate and future-version data are retained and cannot be overwritten
+  ---
+  duration_ms: 0.421167
+  type: 'test'
+  ...
+# Subtest: read and quota failures are observable without changing saved bytes
+ok 4 - read and quota failures are observable without changing saved bytes
+  ---
+  duration_ms: 0.114209
+  type: 'test'
+  ...
+# Subtest: invalid records or blank mappings cannot be saved
+ok 5 - invalid records or blank mappings cannot be saved
+  ---
+  duration_ms: 0.82025
+  type: 'test'
+  ...
+# Subtest: alias correction persists across entries and reload while preserving source and ordinary writing
+ok 6 - alias correction persists across entries and reload while preserving source and ordinary writing
+  ---
+  duration_ms: 4.074041
+  type: 'test'
+  ...
+# Subtest: original-meaning retrieval requires explicit access; entity filters use chosen identity
+ok 7 - original-meaning retrieval requires explicit access; entity filters use chosen identity
+  ---
+  duration_ms: 0.662833
+  type: 'test'
+  ...
+# Subtest: correction rejects unknown or blank representations and leaves source-less legacy records intact
+ok 8 - correction rejects unknown or blank representations and leaves source-less legacy records intact
+  ---
+  duration_ms: 0.153959
+  type: 'test'
+  ...
+# Subtest: replacement does not cascade aliases, longest overlapping source wins and empty references terminate
+ok 9 - replacement does not cascade aliases, longest overlapping source wins and empty references terminate
+  ---
+  duration_ms: 2.424542
+  type: 'test'
+  ...
+# Subtest: context and perspective remain coherent
+ok 10 - context and perspective remain coherent
+  ---
+  duration_ms: 4.976334
+  type: 'test'
+  ...
+# Subtest: alias updates retain references
+ok 11 - alias updates retain references
+  ---
+  duration_ms: 0.754583
+  type: 'test'
+  ...
+# Subtest: replacement is literal and original stays unchanged
+ok 12 - replacement is literal and original stays unchanged
+  ---
+  duration_ms: 1.02575
+  type: 'test'
+  ...
+# Subtest: perspective distancing can be toggled independently
+ok 13 - perspective distancing can be toggled independently
+  ---
+  duration_ms: 0.112833
+  type: 'test'
+  ...
+# Subtest: recognised mentions counts entities accurately
+ok 14 - recognised mentions counts entities accurately
+  ---
+  duration_ms: 0.175792
+  type: 'test'
+  ...
+# Subtest: detectEntitySpans identifies positions
+ok 15 - detectEntitySpans identifies positions
+  ---
+  duration_ms: 0.064667
+  type: 'test'
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 15
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 126.717333
