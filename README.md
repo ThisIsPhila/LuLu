@@ -24,7 +24,11 @@ Apply `.sdd/evidence/setup/visual-security.patch` in the framework clone before 
 
 `npm install`, then `npm run dev` (local Vite server). `npm run build` checks TypeScript and builds; `npm test` verifies the demonstration transformer.
 
-Ordinary journaling supports creation, reading, editing, search, filters, favorites and deletion with browser-local persistence. Protected writing is an explicitly labelled preview session with deterministic example/reference substitutions and perspective changes. It is not production authentication, general PII detection, encryption or OpenAI Decisions integration. Source text and mapping edits are session-only; concealed protected entries are saved locally. Use synthetic examples. Shared backend, admin and mobile builds remain future work.
+Main responsive app: `http://127.0.0.1:5173/` (root `src/`, no demo toolbar or phone frame).
+
+Preserved interactive demo: `http://127.0.0.1:5173/demo/` (independent `demo/src/`; see [demo notes](demo/README.md)). Separate build commands: `npm run build:app` → `dist/app/`, `npm run build:demo` → `dist/demo/`. `npm run build` builds both without combining their output. An independent demo dev server is available through `npm run dev:demo` (port 5174). They have separate browser storage. The app still inherits the existing local feature implementation; separating it is not a claim that all planned capabilities are complete. The latest warm/tactile design references are in [design resources](docs/design/README.md); visual integration is next.
+
+The current implementation includes local journal screens, deterministic example/reference substitutions and perspective changes. The newer interactive implementation is preserved in the demo and provides the starting components for the separate app. Its passkey interaction is simulated, and its entry model can persist original text in browser storage. Use synthetic data; production authentication, encryption, backend and AI integration remain separate implementation work. The latest separation changes packaging and layout, not those underlying capabilities.
 
 ## Work areas for teammates
 
