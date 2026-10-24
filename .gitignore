@@ -21,3 +21,7 @@ dist/
 *.m4v
 *.MP4
 *.MOV
+
+# Firebase local deployment cache and diagnostic logs.
+.firebase/
+firebase-debug.log*
