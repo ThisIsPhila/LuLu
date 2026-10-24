@@ -13,3 +13,11 @@ dist/
 .sdd/graphs/*.tmp
 
 *.tsbuildinfo
+
+# Local pitch/video assets must not be pushed to GitHub.
+*.mp4
+*.webm
+*.mov
+*.m4v
+*.MP4
+*.MOV

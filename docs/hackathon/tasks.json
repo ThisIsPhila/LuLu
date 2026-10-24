@@ -1,0 +1,151 @@
+[
+  {
+    "id": "team",
+    "group": "platform",
+    "title": "Team profile and members",
+    "date": "2026-10-23T20:30:00+02:00",
+    "when": "Friday 23 Oct · 20:00–20:30",
+    "done": true,
+    "note": "KHÔRA profile and two team members observed in Sonke."
+  },
+  {
+    "id": "friday-update",
+    "group": "platform",
+    "title": "Friday progress update",
+    "date": "2026-10-24T00:00:00+02:00",
+    "when": "Friday 23 Oct · before midnight",
+    "done": false,
+    "note": "No progress updates were recorded at the last team-centre check. Confirm any later submission."
+  },
+  {
+    "id": "ssdlc",
+    "group": "platform",
+    "title": "Submit SSDLC",
+    "date": "2026-10-24T12:30:00+02:00",
+    "when": "Saturday 24 Oct · 12:00–12:30",
+    "done": true,
+    "note": "Submitted by owner; Sonke subsequently showed Security (SSDLC) filled. Final wording may differ from our draft.",
+    "link": "#ssdlc"
+  },
+  {
+    "id": "pitch",
+    "group": "platform",
+    "title": "Upload 20-second HustleWindow pitch",
+    "date": "2026-10-24T13:30:00+02:00",
+    "when": "Saturday 24 Oct · 13:30",
+    "done": true,
+    "note": "Upload confirmed in Sonke with one VIDEO submission. Recorded after the scheduled deadline; panel acceptance is not independently confirmed.",
+    "link": "#media-pitch"
+  },
+  {
+    "id": "feedback",
+    "group": "platform",
+    "title": "Check panel feedback",
+    "date": "2026-10-24T17:00:00+02:00",
+    "when": "Saturday 24 Oct · 14:00–17:00",
+    "done": false,
+    "note": "Programme feedback window. Upload confirmation instead said “14:00 tomorrow”; check Sonke/email or organisers for actual availability."
+  },
+  {
+    "id": "saturday-update",
+    "group": "platform",
+    "title": "Post Saturday progress update",
+    "date": "2026-10-25T00:00:00+02:00",
+    "when": "Saturday 24 Oct · 23:00–00:00",
+    "done": false,
+    "note": "Describe implemented work, outstanding work and any reused functionality honestly."
+  },
+  {
+    "id": "canvas",
+    "group": "platform",
+    "title": "Complete Lean Business Canvas",
+    "date": "2026-10-25T12:30:00+02:00",
+    "when": "Sunday 25 Oct · 12:00–12:30",
+    "done": true,
+    "note": "All nine sections saved successfully in Sonke. Personal review can continue before the checkpoint.",
+    "link": "#canvas"
+  },
+  {
+    "id": "mentor",
+    "group": "platform",
+    "title": "Resolve remaining mentor questions",
+    "date": "2026-10-25T17:00:00+02:00",
+    "when": "Sunday 25 Oct · mentors through 17:00",
+    "done": false,
+    "note": "Opportunity before mentor support ends, rather than a required submission. Monday has no mentor support."
+  },
+  {
+    "id": "final",
+    "group": "platform",
+    "title": "Submit final app and materials",
+    "date": "2026-10-26T23:59:00+02:00",
+    "when": "Monday 26 Oct · 23:59",
+    "done": false,
+    "note": "Working hosted web app or usable build, slides with user journey, architecture and demo access, and Git repository link. Code files are not uploaded to Sonke."
+  },
+  {
+    "id": "refs",
+    "group": "internal",
+    "title": "Save latest visual references",
+    "when": "Completed · design preparation",
+    "done": true,
+    "note": "Six warm/tactile images saved and indexed. Flat-white direction superseded.",
+    "link": "#media-warm"
+  },
+  {
+    "id": "split",
+    "group": "internal",
+    "title": "Separate app and framed demo",
+    "when": "Completed · foundation",
+    "done": true,
+    "note": "Independent source trees, storage keys and build outputs; builds and 12 domain tests pass."
+  },
+  {
+    "id": "visual",
+    "group": "internal",
+    "title": "Apply the warm, tactile app design",
+    "when": "Next build priority",
+    "done": false,
+    "note": "Use the latest imagery, material depth and light/dark palette in the actual responsive app. Preserve useful existing components."
+  },
+  {
+    "id": "journey",
+    "group": "internal",
+    "title": "Complete the core end-to-end app journey",
+    "when": "Before release verification",
+    "done": false,
+    "note": "Writing, transformation, correction, persistence and retrieval connected through the intended access model. Current local interactions are not evidence of completed backend or security controls."
+  },
+  {
+    "id": "testing",
+    "group": "internal",
+    "title": "Verify responsive layout and integrations",
+    "when": "Before release verification",
+    "done": false,
+    "note": "Check actual narrow and wide screens, persistence, access boundaries and the selected submission journey."
+  },
+  {
+    "id": "hosting",
+    "group": "internal",
+    "title": "Host the working app and verify judge access",
+    "when": "Before final submission",
+    "done": false,
+    "note": "Programme requires a live web app. Verify links and a suitable demo account/access route; deployment still needs owner direction."
+  },
+  {
+    "id": "slides",
+    "group": "internal",
+    "title": "Prepare final slides and repository access",
+    "when": "Before final submission",
+    "done": false,
+    "note": "Include user journey story, technical architecture, app link and demo login/access details, plus an accessible repository link. Private repository access must be arranged deliberately."
+  },
+  {
+    "id": "handoff",
+    "group": "internal",
+    "title": "Keep documentation and commits current",
+    "when": "Alongside implementation",
+    "done": false,
+    "note": "Record decisions and actual verification in the background. Formal SDD progression remains paused."
+  }
+]
