@@ -1,0 +1,35 @@
+[
+  {
+    "path": "/",
+    "status": 200,
+    "contentType": "text/html; charset=utf-8",
+    "bytes": 911,
+    "title": [
+      "LuLu \u2014 A private space for your true stories"
+    ],
+    "scripts": [
+      "/assets/index-BPAHjEDK.js"
+    ],
+    "logoPathCorrect": null
+  },
+  {
+    "path": "/demo/",
+    "status": 200,
+    "contentType": "text/html; charset=utf-8",
+    "bytes": 4097,
+    "title": [
+      "LuLu \u2014 Current app preview"
+    ],
+    "scripts": [],
+    "logoPathCorrect": true
+  },
+  {
+    "path": "/media/brand/lulu-wordmark-black.png",
+    "status": 200,
+    "contentType": "image/png",
+    "bytes": 30475,
+    "title": [],
+    "scripts": [],
+    "logoPathCorrect": null
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "path": "/session",
+    "method": "POST",
+    "status": 401
+  },
+  {
+    "path": "/session",
+    "method": "OPTIONS",
+    "status": 204,
+    "rpID": null,
+    "userVerification": null
+  },
+  {
+    "path": "/session",
+    "method": "POST",
+    "status": 403
+  },
+  {
+    "path": "/auth/register/options",
+    "method": "POST",
+    "status": 200,
+    "rpID": "khora-lulu-2026.web.app",
+    "userVerification": "required"
+  }
+]

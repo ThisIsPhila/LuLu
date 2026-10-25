@@ -1,0 +1,148 @@
+TAP version 13
+# Subtest: owner can create, read and query the actual journal shape
+ok 1 - owner can create, read and query the actual journal shape
+  ---
+  duration_ms: 247.758792
+  type: 'test'
+  ...
+# [2026-10-25T11:55:01.535Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd614 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'create' @ L64, false for 'create' @ L114, false for 'update' @ L67, false for 'update' @ L114
+# [2026-10-25T11:55:01.569Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd616 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'create' @ L64, false for 'create' @ L114, false for 'update' @ L67, false for 'update' @ L114
+# [2026-10-25T11:55:01.596Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd618 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L64:24 for 'create' @ L64, false for 'create' @ L114, evaluation error at L67:24 for 'update' @ L67, false for 'update' @ L114, Null value error. for 'create' @ L64, false for 'create' @ L114
+# Subtest: anonymous, another account, missing and expired sessions cannot access journal
+ok 2 - anonymous, another account, missing and expired sessions cannot access journal
+  ---
+  duration_ms: 142.722625
+  type: 'test'
+  ...
+# [2026-10-25T11:55:01.659Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd61c error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L64:24 for 'create' @ L64, false for 'create' @ L114, evaluation error at L67:24 for 'update' @ L67, false for 'update' @ L114, false for 'create' @ L64, false for 'create' @ L114
+# [2026-10-25T11:55:01.666Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd61d error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L64:24 for 'create' @ L64, false for 'create' @ L114, evaluation error at L67:24 for 'update' @ L67, false for 'update' @ L114, false for 'create' @ L64, false for 'create' @ L114
+# [2026-10-25T11:55:01.671Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd61e error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L64:24 for 'create' @ L64, false for 'create' @ L114, evaluation error at L67:24 for 'update' @ L67, false for 'update' @ L114, false for 'create' @ L64, false for 'create' @ L114
+# [2026-10-25T11:55:01.678Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd61f error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L64:24 for 'create' @ L64, false for 'create' @ L114, evaluation error at L67:24 for 'update' @ L67, false for 'update' @ L114, false for 'create' @ L64, false for 'create' @ L114
+# [2026-10-25T11:55:01.684Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd620 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L64:24 for 'create' @ L64, false for 'create' @ L114, evaluation error at L67:24 for 'update' @ L67, false for 'update' @ L114, false for 'create' @ L64, false for 'create' @ L114
+# [2026-10-25T11:55:01.690Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd621 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L64:24 for 'create' @ L64, false for 'create' @ L114, evaluation error at L67:24 for 'update' @ L67, false for 'update' @ L114, false for 'create' @ L64, false for 'create' @ L114
+# [2026-10-25T11:55:01.695Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd622 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L64:24 for 'create' @ L64, false for 'create' @ L114, evaluation error at L67:24 for 'update' @ L67, false for 'update' @ L114, false for 'create' @ L64, false for 'create' @ L114
+# [2026-10-25T11:55:01.705Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd623 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L67:24 for 'update' @ L67, false for 'update' @ L114, false for 'update' @ L67, false for 'update' @ L114
+# [2026-10-25T11:55:01.711Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd624 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L67:24 for 'update' @ L67, false for 'update' @ L114, false for 'update' @ L67, false for 'update' @ L114
+# [2026-10-25T11:55:01.716Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd625 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L67:24 for 'update' @ L67, false for 'update' @ L114, false for 'update' @ L67, false for 'update' @ L114
+# [2026-10-25T11:55:01.720Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd626 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L67:24 for 'update' @ L67, false for 'update' @ L114, false for 'update' @ L67, false for 'update' @ L114
+# [2026-10-25T11:55:01.725Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd627 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L67:24 for 'update' @ L67, false for 'update' @ L114, false for 'update' @ L67, false for 'update' @ L114
+# [2026-10-25T11:55:01.730Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd628 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L67:24 for 'update' @ L67, false for 'update' @ L114, false for 'update' @ L67, false for 'update' @ L114
+# [2026-10-25T11:55:01.735Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd629 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'create' @ L64, false for 'create' @ L114, false for 'update' @ L67, false for 'update' @ L114
+# Subtest: strict schema prevents source leakage, ownership changes, type corruption, oversized input and update bypass
+ok 3 - strict schema prevents source leakage, ownership changes, type corruption, oversized input and update bypass
+  ---
+  duration_ms: 108.42325
+  type: 'test'
+  ...
+# [2026-10-25T11:55:01.779Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd62c error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L64:24 for 'create' @ L64, false for 'create' @ L114, evaluation error at L67:24 for 'update' @ L67, false for 'update' @ L114, false for 'create' @ L64, false for 'create' @ L114
+# [2026-10-25T11:55:01.783Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd62b error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L67:24 for 'update' @ L67, false for 'update' @ L114, false for 'update' @ L67, false for 'update' @ L114
+# Subtest: protected entries require a generic title on create and update
+ok 4 - protected entries require a generic title on create and update
+  ---
+  duration_ms: 51.837167
+  type: 'test'
+  ...
+# [2026-10-25T11:55:01.818Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd630 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'create' @ L114, false for 'update' @ L114
+# [2026-10-25T11:55:01.837Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd632 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'create' @ L114, false for 'update' @ L114
+# [2026-10-25T11:55:01.856Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd634 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'create' @ L114, false for 'update' @ L114
+# [2026-10-25T11:55:01.874Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd636 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'create' @ L114, false for 'update' @ L114
+# Subtest: server credentials/challenges/sessions cannot be read, listed or modified by clients
+ok 5 - server credentials/challenges/sessions cannot be read, listed or modified by clients
+  ---
+  duration_ms: 89.711416
+  type: 'test'
+  ...
+# [2026-10-25T11:55:01.914Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd638 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L101:32 for 'update' @ L101, false for 'update' @ L114, false for 'update' @ L101, false for 'update' @ L114
+# [2026-10-25T11:55:01.917Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd63a error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L101:32 for 'update' @ L101, false for 'update' @ L114, false for 'update' @ L101, false for 'update' @ L114
+# [2026-10-25T11:55:01.950Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd63d error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L101:32 for 'create' @ L101, false for 'create' @ L114, evaluation error at L101:32 for 'update' @ L101, false for 'update' @ L114, false for 'update' @ L101, false for 'update' @ L114
+# [2026-10-25T11:55:01.955Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd63e error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L102:24 for 'delete' @ L102, false for 'delete' @ L114, false for 'delete' @ L102, false for 'delete' @ L114
+# Subtest: private encrypted records require recent step-up, strict format and owner session
+ok 6 - private encrypted records require recent step-up, strict format and owner session
+  ---
+  duration_ms: 78.008791
+  type: 'test'
+  ...
+# [2026-10-25T11:55:02.153Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd64e error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'create' @ L108, false for 'create' @ L114, false for 'update' @ L108, false for 'update' @ L114
+# [2026-10-25T11:55:02.164Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd64f error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'create' @ L112, false for 'create' @ L114, false for 'update' @ L112, false for 'update' @ L114
+# [2026-10-25T11:55:02.174Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd650 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'update' @ L112, false for 'update' @ L114
+# [2026-10-25T11:55:02.185Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd651 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'delete' @ L112, false for 'delete' @ L114
+# Subtest: signed-in active passkey sessions can read the catalogue manifest and validated samples only
+ok 7 - signed-in active passkey sessions can read the catalogue manifest and validated samples only
+  ---
+  duration_ms: 229.759417
+  type: 'test'
+  ...
+# [2026-10-25T11:55:02.213Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd653 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'create' @ L95, false for 'create' @ L114, false for 'update' @ L97, false for 'update' @ L114
+# [2026-10-25T11:55:02.225Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd654 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L95:24 for 'create' @ L95, false for 'create' @ L114, false for 'update' @ L97, false for 'update' @ L114, false for 'create' @ L95, false for 'create' @ L114
+# [2026-10-25T11:55:02.231Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd655 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L95:24 for 'create' @ L95, false for 'create' @ L114, false for 'update' @ L97, false for 'update' @ L114, false for 'create' @ L95, false for 'create' @ L114
+# [2026-10-25T11:55:02.258Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd656 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'update' @ L97, false for 'update' @ L114
+# [2026-10-25T11:55:02.262Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x2c0bd659 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'delete' @ L97, false for 'delete' @ L114
+# Subtest: starter marker is owner-only, strict and immutable after creation
+ok 8 - starter marker is owner-only, strict and immutable after creation
+  ---
+  duration_ms: 77.197083
+  type: 'test'
+  ...
+# Subtest: concurrent initializations create each starter once and record one marker
+ok 9 - concurrent initializations create each starter once and record one marker
+  ---
+  duration_ms: 1681.389334
+  type: 'test'
+  ...
+# Subtest: reinitialization preserves an edit and does not restore a deleted starter
+ok 10 - reinitialization preserves an edit and does not restore a deleted starter
+  ---
+  duration_ms: 98.714417
+  type: 'test'
+  ...
+# Subtest: a preexisting record at a starter ID is preserved while other starters are added
+ok 11 - a preexisting record at a starter ID is preserved while other starters are added
+  ---
+  duration_ms: 74.572292
+  type: 'test'
+  ...
+1..11
+# tests 11
+# suites 0
+# pass 11
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2056.503417

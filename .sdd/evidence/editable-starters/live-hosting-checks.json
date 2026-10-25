@@ -1,0 +1,35 @@
+[
+  {
+    "path": "/",
+    "status": 200,
+    "title": [
+      "LuLu \u2014 A private space for your true stories"
+    ],
+    "scripts": [
+      "/assets/index-Di7Z8fE3.js"
+    ],
+    "hasInteractiveFrame": false
+  },
+  {
+    "path": "/demo/",
+    "status": 200,
+    "title": [
+      "LuLu \u2014 A private space for your true stories"
+    ],
+    "scripts": [
+      "/assets/index-Di7Z8fE3.js"
+    ],
+    "hasInteractiveFrame": false
+  },
+  {
+    "path": "/demo/index.html",
+    "status": 200,
+    "title": [
+      "LuLu \u2014 A private space for your true stories"
+    ],
+    "scripts": [
+      "/assets/index-Di7Z8fE3.js"
+    ],
+    "hasInteractiveFrame": false
+  }
+]

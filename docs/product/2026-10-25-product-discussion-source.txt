@@ -1,0 +1,894 @@
+Right, let's get back to lulu.
+
+
+I need a clear set of features and flows (including data management and tools) for how the platform works.
+
+Think:
+Onboarding flows
+Standard usage (pages that should exist, etc.)
+Ways to enter private mode (from where and what it means for either viewing or capturing either text, image, or voice).
+Ways to exit private mode.
+Security (passkey trigger when entering privacy mode)
+Auto-scrubbing at a paragraph away, scrubbing editing.
+Writing (normal writing then trigger and trigger to write in private)
+Quick triggers like capture and auto-exit
+Quick exit shortcuts
+Where Decisions API comes in (PII scraping, finding patterns in content to not diagnose but show x people who experience y share similar experience -- but make sure to put it in a way that doesn't make diagnosis but shows certain stats according to content and shows possible solutions and who to talk to)
+Generating mock data to not have a latest writing exposed. Functions that brings those mocks up daily so it looks like there's something everyday that the user know is mock but someone else takes as recent but has generic content.
+SA languages support
+Offline mode
+Connection to professionals or help -- police, shelter, therapy, and all possible platforms to asist in some of these issues.
+We also need to be able to have a trusted companion to help someone with their trusted data, maybe they can be sent voice notes which the trusted user can help document with thm if they are more comfortable with that.
+
+
+Then we need to look at the competition again nd what they're doing and missing (perhaps we start with that)
+
+Worked for 1m 7s
+LuLu: Competitive landscape and product architecture
+I think starting with the competition is the right move, because several of the capabilities you've described already exist in some form. The opportunity is to understand where those products stop, how their interaction models work, and what LuLu could bring together differently.
+
+Your proposed experience has an important characteristic: the person doesn't necessarily arrive intending to report abuse or request emergency assistance. They may simply want to write something down, preserve a voice note, understand recurring experiences, or quietly ask someone they trust for help.
+
+That makes the ordinary writing experience, the transition into privacy, and the handling of sensitive content central to the product.
+
+1. What already exists
+I found five particularly relevant products or categories, including South African services.
+
+Bright Sky by Hestia
+
+Bright Sky South Africa
+
+South Africa · Information, journalling and support
+
+Bright Sky SA provides relationship-abuse information, questionnaires, support resources and a My Journal function. It supports English, isiZulu and Southern Sesotho.
+
+Its own listing cautions users that it is an information app rather than an emergency safety app, and recommends having a secure email account before using its journal. 
+
+Apps on Google Play
+
+Relevant opening: More seamless, private-by-default writing and capture, without making secure email the foundation of the user's experience.
+
+Dating safety: bSafe, USafeUS and myPlan among 3 apps to help keep you safe on a date or assess dangerous situations - ABC13 Houston
+
+myPlan
+
+International · Discretion and personalised safety planning
+
+This is an especially important comparison because it already offers anonymous use, a PIN, a dummy code that conceals the sensitive interface, a changeable app icon, quick exit and personalised safety guidance. 
+
+myplanapp.org
++1
+
+Relevant opening: An everyday writing environment with fine-grained private content, multimodal capture and trusted collaboration. LuLu's disguised-access idea alone is not unique.
+
+App created in NJ so domestic violence victims can fight back
+
+VictimsVoice
+
+International · Evidence documentation
+
+VictimsVoice focuses on structured incident records, image metadata, secure communication, preservation and user-controlled reporting. Its emphasis is on records suitable for legal processes. 
+
+VictimsVoice
++1
+
+Relevant opening: Supporting informal, incremental documentation without forcing a user into a formal incident-reporting workflow from the outset.
+
+Namola · Emergency help and family safety in one app
+
+Namola
+
+South Africa · Emergency response
+
+Namola provides SOS services, location sharing and access to public or private responders according to plan and coverage. Its private response service relies on actual operators and a response network. 
+
+namola.com
+
+Relevant opening: Help people prepare, document and reach suitable support before a situation becomes an emergency. LuLu would complement rather than duplicate an established emergency-dispatch network.
+
+GRIT / Kwanele and related South African GBV tools
+
+South Africa · Reporting, evidence and referrals
+
+A 2026 South African research paper identifies GRIT/Kwanele, Eyerus and Bright Sky among existing GBV-related tools. It describes Kwanele as supporting confidential reporting, geolocated and timestamped evidence, and assistance pathways. 
+
+frontiersin.org
+
+Relevant opening: Better continuity between everyday documentation, optional interpretation, trusted companions and help-seeking. The available research does not establish whether these products lack each capability individually.
+
+There's also a useful historical example: DocuSAFE, developed by the National Network to End Domestic Violence, enabled people to collect and share evidence of abuse. It stopped functioning in October 2023. 
+
+Safety Net Project
+
+That illustrates another issue for LuLu: a person's records may outlive the service hosting them. Long-term access, export and recovery are therefore product requirements, not merely administrative features.
+
+2. Where LuLu could differentiate
+The competitor research suggests several distinct opportunities.
+
+Capability
+
+Existing precedent
+
+LuLu's potential contribution
+
+Discreet access
+
+myPlan already has dummy access and app concealment
+
+A genuinely useful everyday writing surface with selective private content
+
+Journalling
+
+Bright Sky and evidence apps support records
+
+Move naturally between ordinary writing and protected text, images or voice
+
+Evidence preservation
+
+VictimsVoice and Kwanele cover documentation
+
+Preserve provenance while allowing private annotations, revisions and organisation
+
+Personalised guidance
+
+myPlan offers tailored planning
+
+Connect emerging writing patterns to optional, relevant support without diagnosis
+
+Emergency assistance
+
+Namola and public GBV services
+
+Route to existing verified services rather than pretend LuLu itself dispatches responders
+
+Trusted support
+
+Some apps support advocates or designated recipients
+
+Collaborative documentation with explicit, revocable permissions
+
+Language support
+
+Bright Sky SA already supports three languages
+
+Expand access across South African languages, including mixed-language writing and voice
+
+The potentially distinctive experience is:
+
+Someone can use LuLu as an ordinary writing application, privately preserve something important without visibly changing applications, return immediately to an ordinary interface, and later decide whether to understand, organise or share what they recorded.
+
+The person determines when an experience becomes a private record, when it is interpreted and when someone else becomes involved.
+
+That is a coherent product proposition. It also makes your proposed auto-scrubbing, paragraph-level privacy, mock writing and quick-exit behaviour more than isolated features.
+
+3. The product structure emerging from this comparison
+I see four interconnected areas for LuLu.
+
+Everyday
+
+Normal notes, daily mock content, writing, editing, organising and searching.
+
+Private
+
+Passkey-gated entry, protected paragraphs, private journals and image/voice capture.
+
+Understanding
+
+PII detection, optional pattern discovery, carefully grounded aggregate statistics and relevant support pathways.
+
+Support
+
+Trusted companions, selective sharing, professional referrals, emergency contacts and support organisations.
+
+These are functional domains, not necessarily four visible tabs. In fact, the first two need to feel like different privacy states within an otherwise believable writing application.
+
+Initial flow model
+Flow
+
+Entry
+
+Expected behaviour
+
+Onboarding
+
+First launch
+
+Set up ordinary writing, explain privacy options privately, establish passkey/recovery preferences
+
+Ordinary writing
+
+Home / notebook
+
+Write, edit, browse and organise nonsensitive notes
+
+Enter private mode
+
+Deliberate trigger from writing or navigation
+
+Authenticate with passkey; unlock private data only after successful verification
+
+Private writing
+
+Protected note or selected paragraph
+
+Capture text, images or audio; distinguish original evidence from later edits and annotations
+
+Quick capture
+
+User-configured shortcut
+
+Start a private capture with minimal interaction, save locally where authorised and return to the ordinary surface
+
+Quick exit
+
+Persistent gesture/control in sensitive surfaces
+
+Remove sensitive UI immediately, revoke the unlocked session and return to an ordinary view
+
+Trusted companion
+
+Private sharing settings
+
+Invite a trusted person with narrowly scoped permissions to view or contribute to selected records
+
+Understanding
+
+Optional action on selected records
+
+Detect possible PII, identify recurring themes and present appropriately supported resources
+
+Get help
+
+Private support directory
+
+Locate verified services and let the user choose whether to call, visit or disclose information
+
+Your paragraph-level auto-scrubbing idea deserves special treatment: it means the editor needs a clear distinction between the underlying stored record and what is currently permitted to appear on screen. An obscured paragraph must not become visible in previews, search results, notifications, accessibility announcements or app-switcher snapshots.
+
+For voice, quick capture needs a similarly explicit distinction between a recording saved safely and one still recording. A quick exit must have predictable recording behaviour, not silently continue collecting audio.
+
+For mock notes, I'd keep the ordinary application genuinely useful, with seeded everyday content clearly recognisable to the account owner. Generated entries should never be mixed into sensitive evidence, aggregate statistics or records presented as authentic personal experiences.
+
+4. Where OpenAI Decisions API fits
+The role you've described is well suited to a structured interpretation layer, operating only when permitted.
+
+For example, after the user writes a private paragraph, LuLu could offer to examine it for identifying information before sharing. Or, across selected private entries, it could identify recurring descriptions such as isolation, financial control or intimidation, without declaring that the person has a particular condition or diagnosing an abusive relationship.
+
+An important distinction: actual statements such as “142 people have described similar experiences” require genuine, safely aggregated underlying data. The model cannot manufacture those counts. Until that data exists, LuLu can provide qualitative context or sourced population research instead.
+
+I would define the decisions as separate operations:
+
+detect_sensitive_information
+
+classify_content_themes
+
+identify_recurring_patterns
+
+retrieve_supported_aggregate_statistics
+
+suggest_relevant_support_categories
+
+check_disclosure_risks
+
+These are proposed operations, not confirmed OpenAI endpoint names or implemented API calls. The exact OpenAI API interface needs to be matched to its published contract.
+
+User permission, data minimisation and policy enforcement should determine which information reaches the model. That is especially relevant because the underlying privacy infrastructure is meant to remain useful independently of LuLu.
+
+5. South African support integration
+LuLu can begin with a maintained directory of real services rather than trying to become an emergency-response provider.
+
+The South African government's GBV Command Centre provides a 24-hour service on 0800 428 428, with social workers who can provide counselling and referrals. 
+
+justice.gov.za
+
+The National Prosecuting Authority's Thuthuzela Care Centres provide coordinated services for survivors of sexual violence, including medical, counselling and justice-related assistance. 
+
+NPA
+
+The national GBVF support directory also lists shelter services, police, medical assistance and other organisations. 
+
+Get Help
+
+Integration should distinguish between a verified referral contact, a service that accepts direct digital referrals and a service with an actual API. Those aren't interchangeable.
+
+6. Three product decisions worth resolving next
+The competition has clarified three questions that directly affect the flows you've proposed.
+
+First: how private is the ordinary editor? Is private mode an entirely separate protected workspace, or can individual paragraphs inside an otherwise normal document become protected? Your auto-scrubbing idea suggests that both may be useful, but the editor's data model will determine how reliably that works.
+
+Second: what does the trusted companion actually receive? There is a difference between giving someone access to selected evidence, allowing them to contribute their own account, and letting them manage another person's records. This needs explicit permissions and an audit trail, especially for voice notes.
+
+Third: how does the decoy behave under scrutiny? myPlan demonstrates that dummy access already exists. LuLu's stronger proposition is that its ordinary experience is functional and believable. Still, passkey prompts, application history, device monitoring and cloud records may reveal sensitive activity, so an initial safety assessment must account for shared or monitored devices. 
+
+School of Social Work
+
+My assessment from the research is that LuLu has a credible opportunity in the continuity between ordinary writing, discreet documentation, private interpretation and trusted support. Each constituent capability has precedents, but the integrated experience you're describing is where the product could become distinctive.
+
+I'd develop that interaction and data architecture next, particularly the normal-to-private transitions, paragraph-level protection and trusted-companion permissions. Those three will shape nearly every other feature you've listed.
+
+I like the changeable app icon idea (for app).
+Saving for legal reasons is important too.
+With a companion we could add things like location sharing when a user feels unsafe, like find my by Apple but specifically for this app. This is to leave “Trails” for their report or companions for follow on.
+DocuSafe is a good opportunity. And you’re right about long term storage this also ties to companion storage or the ability to save/back up evidence with a trusted user.
+
+It's also worth noticing that the goal here is not that we are trying to take every single feature that is out there. The goal is to close the gap so that the user doesn't feel the need to use a separate tool for a different function even though these are topics with the same concern we want to be able to support the user from capturing documenting, understanding the options, understanding what they can do and having the confidence in all that information and the ability to move forward whenever that is. And I think the slogan speaks for itself. So yes, let's try and a list all of these things and have a proper documentation of how we can implement this. We can I believe incorporate these features. None of them in its isolation are complex to that end but we can put all of that together and essentially have this be the one place to have all of these issues dealt with. I I might be butchering the words but I think you understand my intention and what I'm trying to get at.
+
+This is exactly it, "Someone can use LuLu as an ordinary writing application, privately preserve something important without visibly changing applications, return immediately to an ordinary interface, and later decide whether to understand, organise or share what they recorded."
+
+The "proposed auto-scrubbing, paragraph-level privacy, mock writing and quick-exit behaviour more than isolated features." becomes super important and possibly the next to be implemented.
+
+Remember that the decision layer when the user chooses to put something in private it stays privately on their device. It is only after being processed through decisions and scrubbed, that it can go to the database, and this would be made known to the user when they open or enter that private layer. But this is not something that the user needs to be deciding on the spot just in case they're in a situation where they need to get out quickly so the application should always assume and act as though everything is private unless stated otherwise.
+
+And remember that the counts such as a hundred and forty two people have described similar experiences is when we start using the data as a collective, this is something for later down the line, to 'cause remember in essence this data can and the goal especially in terms of monetization may not be for direct from consumer access but things like for research and I'm not sure people working in psychology can use this data for understanding and dealing with cases and how these behaviors form and how they are being managed and stuff like that and only then can such things be available. This should be mostly internal data unless if there's a database access of certain things. So the model cannot manufacture the counts, which is true, and that's why we're using a decision model and not an AI model to avoid hallucination issues and only assess inputs such as does it have any personally identifiable information and then even like to secondary is that is there information in there that could identify a situation, person or location and then those kinds of statements can help make decisions of how to make masking work and the distancing. but when it comes to actually deciding or helping the user is is something like users is that there is a pattern of behaviors that is conducive to and then the certain behavior but without actually I don't know if you understand what I'm saying I'm not too well versed into These issues, but the whole point is to show the user the possibilities of certain kinds of abuse on what they are, understand them, and be able to ask a professional according to their stored their stored data without actually exposing themselves of who they are. So they should easily feel as if they are detached from the content itself. And the app shows that this is what's being shared with the user to which the reverse scrub from the professional doesn't reveal the person's name or location but can say that this specific person is experien experiencing XYZ and be able to see the data that is scrubbed. And you write about the decisions, operations. I think it's very important for us to know what these operations are. And in this project of hackathon, we need to figure out what we can do or data that we have access to.
+ Otherwise we can just point out that certain data such as XYZ can be used.
+
+ And also communication with these the Cedar Command centre would be a goal of trying to connect with social workers for them to be able to have an application or a dashboard where they can talk to people and help them and these can be documented as people without personally identifiable information. I'm not sure what the policies are in that do they actually need to capture the specific details or or how they handle these situations, but in essence, allow the platform to be used by these professionals given that they can be given access through the the portals or the centers to which they're working from
+
+ that's where the monetization comes in because these professionals are on duty. The government might not be willing to pay, but some of them need the data to understand certain behaviors maybe they are working on something or it's for research purposes but also I think there could be something in there and to prove that the the person they're talking to is a verified professional and they should have their own profiles and things, but that's again for the future. Let's come back to focus on what the application can do. Then we'll deal with the professionals in detail afterwards.
+
+ Can we stop taking positions such as cause it seems like it's it's it's very contrary to the effort and the speed that I'm trying to move forward when you keep on pointing out things like how private is the ordinary editor? It is private as I want it to be. That's the whole goal. I cannot prove anything because I haven't implemented anything. We need to focus on how we actually make it as private as possible. What does the trusted companion achieve? It all comes down to the order trail. Remember that the the content should always remain the owners. What the companion has because they are trusted is the ability to see what their content is. If they want to contribute to that evidence, they can, but then the evidence I mean the the content itself isn't changed. It is just appended on and can always be traced to the original user's inputs.  The whole point is to have a working journal that looks like it works and I was thinking earlier that if we do something like having some sort of a to do list which which a user can use for quick access and quick entries without having to get into paragraph mode. this is something that would be similar to your notion even though that's for productivity but in a way be able to use that as access and a quick way to get in but again we'll get to that point once we have the foundation that we need.
+
+ So help me get a formal analysis of of what I've been pointing out and some of my feedback because I want to know or I want us to start implementing as soon as possible.
+LuLu: Product and implementation foundation
+Your latest feedback establishes the product's central architecture much more clearly.
+
+LuLu is a private documentation and support environment disguised within a genuinely useful everyday application. Its purpose is to let someone capture an experience, preserve it, understand their options and eventually seek assistance, without forcing them to disclose their identity or take action before they are ready.
+
+The key distinction is continuity. A person shouldn't have to move between a notes application, evidence recorder, safety app, messaging service and support directory to deal with different aspects of the same experience.
+
+The principle you approved captures it well:
+
+Someone can use LuLu as an ordinary writing application, privately preserve something important without visibly changing applications, return immediately to an ordinary interface, and later decide whether to understand, organise or share what they recorded.
+
+That gives us a coherent product foundation rather than a collection of unrelated safety features.
+
+1. Decisions established by your feedback
+Area
+
+Established direction
+
+Everyday application
+
+A believable, genuinely functional journal or lightweight notes/to-do application
+
+Private access
+
+Discreet entry with passkey authentication
+
+Privacy default
+
+Everything captured privately remains on-device unless the user has authorised another treatment
+
+Content protection
+
+Paragraph-level concealment, automatic scrubbing and fast return to ordinary content
+
+Quick capture
+
+Text, image and voice capture, with fast exit
+
+Evidence
+
+Preserve originals and their history; edits and companion contributions remain traceable
+
+Trusted companions
+
+Permissioned access, supplementary documentation, optional backup and safety Trails
+
+Analysis
+
+Structured decisions for identifying disclosure risks, recurring themes and relevant support categories
+
+Help
+
+User-controlled access to trusted people, verified services and eventually professionals
+
+Languages
+
+South African languages, including multilingual content and voice
+
+Resilience
+
+Offline capture and access to locally stored information
+
+Public statistics
+
+Future, genuine aggregate data rather than invented counts
+
+Commercial direction
+
+Potential professional, organisational and research services; not required for the initial user experience
+
+There is one technical boundary that materially affects implementation: a remote Decisions API cannot examine raw content without that content leaving the device. We can preserve your intended privacy guarantee by designing local processing before any remote call. I'll make that explicit in the architecture.
+
+2. How LuLu should work as a system
+LuLu's privacy and data architecture
+
+Everyday writing surface
+
+Notes · tasks · ordinary content · harmless sample entries
+
+Passkey-gated private session
+
+Journal · text · photos · voice · evidence · Trails
+
+Encrypted local private vault
+
+Originals · versions · metadata · permission state
+
+Local privacy-processing boundary
+
+PII detection · contextual redaction · reviewable disclosure copy
+
+Authorised external operations
+
+Decisions API · encrypted sync · companion sharing · support requests
+
+Recipient-specific disclosure
+
+Different information for a companion, professional or aggregated research
+
+The design separates three kinds of data:
+
+Original private record. The authoritative text, audio, image or document stays in the encrypted local vault. It retains its authorship and provenance.
+
+Protected synchronisation copy. With the relevant feature enabled, encrypted records can be backed up or made available to an authorised companion. This is distinct from sending readable content to an AI provider.
+
+Disclosure copy. A separate, redacted representation created for a defined purpose, such as requesting professional advice or running an external classification.
+
+The user continues to own and control the original record. No model or recipient should silently rewrite it.
+
+A crucial detail: the Decisions API is a structured AI decision service, but structured outputs alone don't guarantee that it cannot make errors. Deterministic validation, local privacy checks and explicit disclosure policies still matter.
+
+3. The main application flows
+A. Onboarding and ordinary usage
+
+Launch directly into a useful notes/to-do experience, with normal writing, task creation and organisation.
+Introduce the private capability discreetly, including what remains on-device and what optional sharing or processing involves.
+Register a passkey and establish device-local protection for the private vault.
+Provide optional recovery and trusted-companion setup once the user can complete it safely.
+Populate the ordinary surface with clearly labelled sample or generated content for the owner, kept completely separate from authentic records.
+B. Entering private mode
+
+A user should be able to enter from more than one context: a deliberate gesture in the ordinary editor, a protected note, a designated quick-action control or a configured shortcut. Each route opens the same authenticated privacy boundary.
+
+Successful passkey verification unlocks the private session and permits access to selected local records. A quick-capture shortcut can first capture into an encrypted, pending local record, provided the device can protect it securely, with authentication required to review or organise it afterwards.
+
+C. Private writing and capture
+
+Private writing uses an editor that supports paragraphs and embedded evidence. Individual passages can be concealed, revealed or included in a separately redacted disclosure copy.
+
+Images, voice recordings and attachments belong to records but retain their original form. A transcript or annotation is derived material, never a replacement for the original audio.
+
+A capture can become a journal entry, incident record or unclassified private note. The user doesn't need to determine its legal or psychological meaning when recording it.
+
+D. Exiting private mode
+
+A quick exit removes sensitive content from the screen, navigates to an ordinary safe surface, locks the private session and prevents sensitive information from appearing in app previews.
+
+Normal exit may save the current private work and return to the ordinary editor. Automatic concealment can also occur on inactivity or when the application moves into the background.
+
+The recording behaviour of quick exit must be predictable: a user should know whether capture stops and whether the last recording was saved. Quick exit should not silently continue recording.
+
+E. Understanding and receiving help
+
+A user selects a record or set of records to understand. LuLu evaluates identifying-information risks and potentially recurring themes, then shows explanatory information and available support categories without issuing a diagnosis.
+
+From there, the user may keep the information private, save the interpretation, create a disclosure copy, contact a trusted companion or eventually speak to a verified professional.
+
+4. Trusted companions, evidence and Trails
+Your latest addition makes the companion substantially more useful than an emergency contact.
+
+A trusted companion is an authorised participant in a private support relationship, with narrowly defined access.
+
+They might be permitted to receive a selected voice note, view a particular record, contribute a statement, retain an encrypted backup, or follow a temporary Trail when someone feels unsafe.
+
+Their contributions must be separate from the owner's originals.
+
+For example:
+
+Illustrative evidence history
+
+Original record
+
+Owner · 14:32 · Audio recording created
+
+Supplementary statement
+
+Trusted companion · 15:06 · Added contextual information
+
+Disclosure version
+
+Redacted copy prepared for a particular recipient
+
+The evidence model therefore needs immutable originals, append-only changes or events, version history, actor attribution and content hashes. Hashes can indicate whether bytes have changed; they do not by themselves establish that a reported incident occurred or prove an exact real-world capture time.
+
+Trails introduces another record type: a time-bounded series of location observations captured with the owner's permission. It could be viewed live by an authorised companion or retained as part of the owner's record.
+
+Location history is exceptionally sensitive. LuLu needs clear control over when a Trail begins, who can view it, how long sharing lasts, and whether historical points are retained. An ordinary journal backup should not automatically grant access to Trails.
+
+For recovery, trusted storage could use encrypted copies held by a companion without necessarily giving that person the ability to read every private record. That separates backup authority from viewing authority.
+
+5. Functional specification for implementation
+The following consolidates the agreed features into a working product specification. It distinguishes foundation work from later integrations without removing anything from the product direction.
+
+LuLu — Product Foundation and Technical Specification
+Status: Initial implementation specification
+Primary use case: Private documentation, contextual understanding and access to support
+Initial audience: South African users seeking discreet ways to document and understand sensitive personal experiences
+Product principle: Private by default, disclosure by deliberate action
+
+1. Product objective
+LuLu provides one continuous environment for capturing, preserving, understanding and optionally sharing sensitive experiences.
+
+The ordinary application functions as a real writing and lightweight productivity tool. Protected functionality lets users maintain private journals, supporting evidence and trusted relationships without making the sensitive purpose of the application immediately visible.
+
+The user controls whether and when private records become part of a support request, companion relationship or external disclosure.
+
+2. Application surfaces
+Ordinary mode
+Home: recent ordinary notes, lists and tasks
+
+Notes: create, edit, organise and search notes
+
+Tasks: quick entries, completion and organisation
+
+Editor: rich text with paragraphs and attachments
+
+Search: ordinary content only
+
+Settings: ordinary appearance and application preferences
+
+Changeable app icon: platform-supported alternative icons
+
+Sample content: generic, identifiable-to-owner examples that keep the interface useful and populated
+
+Private mode
+These are authenticated views, not necessarily visible navigation tabs.
+
+Private home: recent records, drafts and protected collections
+
+Private editor: text, paragraph protection, image and voice attachments
+
+Quick capture: text, camera and audio
+
+Evidence library: originals, supporting materials and provenance
+
+Record history: revisions, annotations and access events
+
+Privacy review: identifying-information detection and proposed masking
+
+Understanding: themes, patterns and explanatory resources
+
+Companions: identities, invitations, permissions and shared records
+
+Trails: temporary location sharing and retained history
+
+Support: verified services, helplines and referral information
+
+Secure settings: passkeys, device access, backups, data export and deletion
+
+3. Privacy state model
+OrdinaryLocked: no access to private records
+
+Authenticating: passkey verification in progress
+
+PrivateUnlocked: authorised local private session
+
+QuickCapture: restricted write-only capture where securely supported
+
+Concealed: sensitive content hidden, private session locked
+
+Recovery: identity/device recovery flow with additional safeguards
+
+All private screens must support immediate concealment.
+
+Private content must not appear in ordinary search, ordinary note previews, notifications, recent-item widgets or application-switcher screenshots.
+
+4. Data entities
+Identity
+
+Pseudonymous account identifier
+
+Passkey credential references
+
+Authorised devices
+
+Recovery relationships
+
+Record
+
+Owner identifier
+
+Record identifier
+
+Created and modified timestamps
+
+Record type and privacy classification
+
+Encrypted payload reference
+
+Current version reference
+
+Evidence
+
+Original encrypted media or document
+
+Media type
+
+Capture metadata
+
+Content hash
+
+Relationship to one or more records
+
+Revision / Event
+
+Event identifier
+
+Actor
+
+Action type
+
+Timestamp
+
+Parent record/version
+
+Encrypted change payload
+
+Disclosure
+
+Source record/version
+
+Intended recipient/purpose
+
+Redaction policy
+
+Released fields
+
+Disclosure timestamp
+
+Sharing status
+
+Companion
+
+Pseudonymous identity
+
+Trust relationship
+
+Granted permissions
+
+Invitation/acceptance state
+
+Permission changes
+
+Trail
+
+Owner
+
+Start and stop events
+
+Encrypted location observations
+
+Authorised recipients
+
+Retention and sharing policy
+
+Decision Result
+
+Operation
+
+Input reference
+
+Decision/schema version
+
+Structured output
+
+Confidence or uncertainty where supported
+
+Review outcome
+
+Sample Content
+
+Sample identifier
+
+Generated or bundled content
+
+Display date
+
+Sample provenance flag
+
+No relationship to evidence or private analytics
+
+5. Data handling
+Private input is created locally.
+
+Its original form is stored in the encrypted local vault.
+
+Local privacy processing prepares any potential external-processing copy.
+
+A separate disclosure object is constructed and checked.
+
+External processing, synchronisation or sharing is performed only under a previously established, clearly explained user policy or a specific user action.
+
+External outputs are stored separately from the original.
+
+Revisions and companion contributions append to the history rather than overwriting the originating record.
+
+A quick exit must never trigger new external disclosure.
+
+6. Privacy processing operations
+The system needs distinct operations for:
+
+Detecting direct identifiers: names, phone numbers, email addresses, identification numbers and explicit addresses
+
+Detecting indirect identifiers: contextual references to workplaces, schools, relationships, landmarks, schedules or rare events
+
+Identifying combinations of details that could enable re-identification
+
+Preparing redacted disclosure copies
+
+Evaluating whether the disclosure copy still presents material identity risks
+
+Identifying topics or recurring descriptions across selected records
+
+Mapping supported topics to explanatory resources
+
+Retrieving genuine statistics or support information from approved sources
+
+Determining which information may be supplied to a selected recipient
+
+7. Trusted companion permissions
+Companions receive explicitly granted permissions, such as:
+
+ViewSelectedRecord
+
+ReceiveSelectedEvidence
+
+AppendStatement
+
+ReceiveVoiceNote
+
+ViewActiveTrail
+
+ViewTrailHistory
+
+HoldEncryptedBackup
+
+Permissions are independent, limited in scope and recorded in an audit trail.
+
+An appended statement never changes an original record. Revocation prevents subsequent authorised access where technically enforceable but cannot erase copies already independently retained by a recipient.
+
+8. Quick interaction requirements
+One deliberate route to protected entry from the ordinary editor
+
+Passkey verification for private viewing
+
+Quick capture for text, photos and voice
+
+Fast concealment from every sensitive screen
+
+Auto-lock on backgrounding or inactivity
+
+Concealment of selected paragraphs without destroying their contents
+
+No sensitive content in application previews
+
+Predictable save/stop behaviour during quick exit
+
+Offline support for essential capture and access
+
+9. Language support
+Initial language architecture must support multilingual content, rather than assume one language per account.
+
+Required capabilities include Unicode-safe writing, language metadata, multilingual privacy detection, original-language preservation and optional translation.
+
+South African language coverage should be evaluated per operation: text understanding, PII detection, transcription, text-to-speech and interface localisation have different capability requirements.
+
+An untranslated original must remain available even when translated or summarised text is presented.
+
+10. Professional integration
+Future professional access uses verified organisational identities and role-based permissions.
+
+Professional access should be based on a purpose-specific disclosure rather than unrestricted access to the owner's account.
+
+The intended extension includes social workers, counselling providers, shelters, legal assistance and other verified support organisations.
+
+Actual organisations, integrations, data obligations and professional policies require separate investigation.
+
+11. Aggregate research
+Future aggregated analysis may support understanding of recurring patterns and service needs.
+
+Such analysis requires a defined permission and governance model, genuine source data, minimum cohort sizes, re-identification safeguards and separation from personal records.
+
+Generated sample content must never contribute to counts.
+
+Research or commercial analytics must not be inferred as authorised merely because content was processed for a user's private benefit.
+
+12. Implementation validation
+Completion is demonstrated through working behaviour:
+
+A private record remains inaccessible while the vault is locked.
+
+Passkey authentication opens an authorised session.
+
+Quick exit conceals content and locks the session.
+
+Offline capture survives application restart.
+
+Ordinary content cannot reveal private records through search or previews.
+
+Evidence originals remain unchanged after editing or companion contributions.
+
+Redacted disclosures can be inspected independently of originals.
+
+Companion permissions are enforced.
+
+Simulated backend compromise does not reveal plaintext from encrypted backups.
+
+Generated sample entries never appear in evidence or statistical records.
+
+6. Where the Decisions API fits
+The decision layer has two responsibilities, which are related but distinct.
+
+The first is privacy assessment: identify direct PII, indirect identifying context and potentially sensitive combinations of information. The second is content interpretation: identify themes that might help someone understand the experiences they've described.
+
+For example, a person's journal might repeatedly discuss being prevented from accessing money. LuLu could offer information about financial control as a recognised concern, show the relevant descriptions that prompted this suggestion, and present support resources or the option of speaking to a professional.
+
+It does not need to conclude that the person is experiencing a particular legally or clinically defined form of abuse.
+
+The next architectural step is to define typed decision contracts, including their inputs, allowed outputs and which ones are permitted to receive locally sanitised information.
+
+There's a necessary distinction between two processing arrangements:
+
+Processing path
+
+Privacy implication
+
+On-device identification and masking
+
+Raw content can remain on the device
+
+OpenAI-hosted Decisions API
+
+Whatever content is sent leaves the device, even if the API returns only a classification
+
+So the first local processing stage must protect the data before an external Decisions API call. If a safe disclosure copy cannot be prepared reliably, that operation remains local or waits for an explicit, informed disclosure. This implements your default-private rule without interrupting someone during an urgent capture.
+
+7. What to implement first
+The implementation dependency is now clear.
+
+Foundation: private vault and evidence model
+
+Establish the encrypted local record store, original/derived-content separation, versions, audit events and device-local capture. This is where the privacy guarantees actually begin.
+
+Interaction: ordinary/private transitions
+
+Implement the real everyday editor, passkey entry, quick capture, concealment and paragraph-level privacy controls. Ensure the UI is connected to the actual vault state.
+
+Interpretation: local sanitisation and structured decisions
+
+Add privacy-detection contracts, redacted disclosure copies and explanation of potential themes. Connect external model services only through the established privacy boundary.
+
+Continuity: companion and support services
+
+Add selective sharing, companion-contributed evidence, encrypted backup arrangements, Trails and service discovery. Professional portals and collective research can then build on these same records and permission boundaries.
+
+This is an implementation dependency order, not a recommendation to strip away the functionality you've identified.
+
+The prior Confessions identity work is relevant here. The coding agent has already inspected its passkey and synchronisation code, so the immediate engineering task is to determine which components can support LuLu's privacy boundary and where additional encrypted storage, evidence and permission infrastructure is required.
+
+Final assessment
+I see LuLu taking shape around four durable principles:
+
+Continuity: Capture, documentation, understanding and help are parts of the same experience.
+
+Control: The person determines when private information is accessible and when it is shared.
+
+Integrity: Original records remain preserved and attributable, while edits, companions and disclosures have their own histories.
+
+Discretion: Ordinary use, protected access, fast concealment and offline capture are fundamental behaviours of the product.
+
+Your additions around Trails, legal evidence, companion backups and professional support fit naturally within that architecture. They don't require turning LuLu into several separate applications.
+
+The next concrete deliverable is to turn this specification into the repository's SDD source of truth, with explicit data contracts, state transitions, permission policies and acceptance tests. That gives the implementation agent a coherent foundation to build from, while preserving the distinction between your established product decisions and later professional or research integrations.

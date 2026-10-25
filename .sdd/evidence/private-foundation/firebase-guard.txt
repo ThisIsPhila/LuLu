@@ -1,0 +1,5 @@
+
+> lulu-prototype@0.1.0 guard:firebase
+> node scripts/firebase-guard.mjs
+
+Firebase guard passed. This local check does not set a spending cap or prevent a hook bypass.

@@ -1,0 +1,11 @@
+# Firebase guardrail implementation and review
+
+25 October 2026, Africa/Johannesburg. Owner requested documenting the retained Blaze/free-allowance decision and adding Firebase service guardrails/hooks. Formal phase progression remains paused under the owner exception; no phase approval inferred.
+
+Luna High implemented the guard; parent reviewed and requested hardening for unchecked resource options, alternate exports, staged-versus-working-tree differences, service object keys and paid backend Hosting rewrites. Final guard uses the existing TypeScript parser, exact service/project/runtime allowlists and bounded resource settings. It fails closed on unsupported function option expressions and extra exports. Temporary exceptions require exact matching values, explicit owner decision/reference/rationale and expiry; the file alone does not prove approval.
+
+Installed hook runner preserves doctor/skills/existing-hook handling and adds a staged-config Firebase check. Existing .git/hooks/pre-commit already calls that runner, so no replacement was required. Hosting, Firestore, Functions and Auth predeploy paths run the working-tree check, preserving the existing Functions TypeScript build hook. Hook scripts/policy themselves still require human review; console/API mutations and bypassed hooks are outside local enforcement.
+
+Validation: working-tree guard passes; ten positive/negative tests pass, including a real isolated Git-index fixture; backend TypeScript build passes; hook shell syntax and git diff whitespace checks pass. Raw outputs are in ../../evidence/firebase-guardrails/. No production deployment, billing change, resource migration, cleanup policy change, commit or push was performed for these guardrails. The region source is now a literal, replacing the prior environment fallback; deployed behavior was already Johannesburg and was not changed in this task.
+
+Current operational gaps remain explicit: actual billing/usage not checked here; live artifact cleanup unverified; min/max instances and budget alerts are not spend caps. Read the owner decision in ../../memory/governance/2026-10-25-firebase-cost-boundary.md and operator guide docs/operations/firebase-cost-and-guardrails.md.

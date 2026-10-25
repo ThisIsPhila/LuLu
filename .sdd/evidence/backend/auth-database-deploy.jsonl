@@ -1,0 +1,5 @@
+{"tool":"firebase_deploy","result":{"content":[{"type":"text","text":"Deployment started with Job ID: 1792906960493. Use deploy_status tool to track."}],"structuredContent":{"jobId":"1792906960493","message":"Deployment started"}}}
+{"content":[{"type":"text","text":"Job ID: 1792906960493\nStatus: running\nProgress: 0%\n\nLogs:\n"}],"structuredContent":{"status":"running","progress":0,"logs":[]}}
+{"content":[{"type":"text","text":"Job ID: 1792906960493\nStatus: running\nProgress: 0%\n\nLogs:\n"}],"structuredContent":{"status":"running","progress":0,"logs":[]}}
+{"content":[{"type":"text","text":"Job ID: 1792906960493\nStatus: running\nProgress: 0%\n\nLogs:\n"}],"structuredContent":{"status":"running","progress":0,"logs":[]}}
+{"content":[{"type":"text","text":"Job ID: 1792906960493\nStatus: success\nProgress: 100%\n\nLogs:\n"}],"structuredContent":{"status":"success","progress":100,"logs":[],"result":{}}}

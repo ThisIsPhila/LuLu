@@ -1,0 +1,62 @@
+
+> test
+> node --test lib/policy.test.js
+
+TAP version 13
+# Subtest: challenge rejects expiry, replay, changed origin and changed purpose
+ok 1 - challenge rejects expiry, replay, changed origin and changed purpose
+  ---
+  duration_ms: 0.659291
+  type: 'test'
+  ...
+# Subtest: sessions reject other owners, expiry and expired private access
+ok 2 - sessions reject other owners, expiry and expired private access
+  ---
+  duration_ms: 0.1145
+  type: 'test'
+  ...
+# Subtest: document paths cannot escape their collection
+ok 3 - document paths cannot escape their collection
+  ---
+  duration_ms: 0.697875
+  type: 'test'
+  ...
+# Subtest: registration user-creation failure attempts credential cleanup and preserves the original failure
+ok 4 - registration user-creation failure attempts credential cleanup and preserves the original failure
+  ---
+  duration_ms: 0.905375
+  type: 'test'
+  ...
+# Subtest: credential cleanup failure is recorded without replacing or exposing the original error
+ok 5 - credential cleanup failure is recorded without replacing or exposing the original error
+  ---
+  duration_ms: 0.141
+  type: 'test'
+  ...
+# Subtest: failure diagnostics allow only known routes, stages, codes, and error names
+ok 6 - failure diagnostics allow only known routes, stages, codes, and error names
+  ---
+  duration_ms: 0.076375
+  type: 'test'
+  ...
+# Subtest: session persistence is skipped when custom-token minting fails
+ok 7 - session persistence is skipped when custom-token minting fails
+  ---
+  duration_ms: 0.176583
+  type: 'test'
+  ...
+# Subtest: registration recovery is offered only after both the passkey and account are available
+ok 8 - registration recovery is offered only after both the passkey and account are available
+  ---
+  duration_ms: 0.052958
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 57.628083
