@@ -1,0 +1,116 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // users/{uid}/entries/{id}: ownerId string immutable, title <=200, body <=50000,
+    // kind Journal|Story, protected bool, perspective first|third,
+    // createdAt immutable timestamp, updatedAt server timestamp. No source fields.
+    // users/{uid}/private/{id}: AES-GCM v1 ciphertext <=150000, iv base64 <=24,
+    // updatedAt server timestamp. Device key is never uploaded.
+    // All underscore collections are server-only, including session authority.
+    function isAuthenticated() {
+      return request.auth != null && request.auth.token.passkey == true
+        && request.auth.token.sid is string;
+    }
+    function isOwner(uid) { return isAuthenticated() && request.auth.uid == uid; }
+    function activeSession(uid) {
+      let s = get(/databases/$(database)/documents/_sessions/$(request.auth.token.sid)).data;
+      return isOwner(uid) && s.uid == uid && s.expiresAt > request.time.toMillis();
+    }
+    function privateSession(uid) {
+      let s = get(/databases/$(database)/documents/_sessions/$(request.auth.token.sid)).data;
+      return activeSession(uid) && s.privateUntil > request.time.toMillis();
+    }
+    function activeCurrentSession() {
+      return isAuthenticated() && activeSession(request.auth.uid);
+    }
+    function uidUnchanged(uid) { return request.resource.data.ownerId == uid; }
+    function uidNotModified() { return request.resource.data.ownerId == resource.data.ownerId; }
+    function isValidEntry(d) {
+      return d.keys().hasAll(['ownerId','title','body','kind','protected','perspective','createdAt','updatedAt'])
+        && d.keys().hasOnly(['ownerId','title','body','kind','protected','perspective','createdAt','updatedAt'])
+        && d.ownerId is string && d.ownerId.size() <=128
+        && d.title is string && d.title.size() <=200
+        && (!d.protected || d.title == 'Journal entry')
+        && d.body is string && d.body.size() >0 && d.body.size() <=50000
+        && d.kind in ['Journal','Story'] && d.protected is bool
+        && d.perspective in ['first','third']
+        && d.createdAt is timestamp && d.updatedAt == request.time;
+    }
+    function isValidPrivate(d) {
+      return d.keys().hasAll(['version','iv','ciphertext','updatedAt'])
+        && d.keys().hasOnly(['version','iv','ciphertext','updatedAt'])
+        && d.version == 1 && d.iv is string && d.iv.size() ==16
+        && d.ciphertext is string && d.ciphertext.size() >=24 && d.ciphertext.size() <=150000
+        && d.updatedAt == request.time;
+    }
+    function isValidDemoEntry(d) {
+      return d.keys().hasAll(['title','body','kind','protected','perspective','tags','createdAt'])
+        && d.keys().hasOnly(['title','body','kind','protected','perspective','tags','createdAt'])
+        && d.title is string && d.title.size() > 0 && d.title.size() <= 200
+        && d.body is string && d.body.size() > 0 && d.body.size() <= 50000
+        && d.kind in ['Journal','Story'] && d.protected == false
+        && d.perspective in ['first','third'] && d.tags is list && d.tags.size() <= 12
+        && d.createdAt is timestamp;
+    }
+    function isValidDemoManifest(d) {
+      return d.keys().hasAll(['version','label','entryIds'])
+        && d.keys().hasOnly(['version','label','entryIds'])
+        && d.version == 1 && d.label is string && d.label.size() > 0 && d.label.size() <= 80
+        && d.entryIds is list && d.entryIds.size() <= 10;
+    }
+    match /users/{uid}/entries/{id} {
+      allow get: if activeSession(uid);
+      allow list: if activeSession(uid) && request.query.limit <=100;
+      allow create: if activeSession(uid) && uidUnchanged(uid) && isValidEntry(request.resource.data)
+        && request.resource.data.createdAt == request.time
+        && (!request.resource.data.protected || privateSession(uid));
+      allow update: if activeSession(uid) && uidUnchanged(uid) && uidNotModified()
+        && isValidEntry(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.protected == resource.data.protected
+        && (!resource.data.protected || privateSession(uid));
+      allow delete: if activeSession(uid) && (!resource.data.protected || privateSession(uid));
+    }
+    // One-time initialization marker. Removing/editing a starter entry must never
+    // cause it to be restored by a later sign-in or another device.
+    function validStarterId(ids, i) {
+      return i >= ids.size() || (ids[i] is string && ids[i].size() <= 120
+        && ids[i].matches('^starter-johannesburg-v1-[a-z0-9-]+$'));
+    }
+    function isValidStarterMarker(d) {
+      return d.keys().hasAll(['catalogueId','version','entryIds','completedAt'])
+        && d.keys().hasOnly(['catalogueId','version','entryIds','completedAt'])
+        && d.catalogueId == 'johannesburg-v1' && d.version == 1
+        && d.entryIds is list && d.entryIds.size() <= 10
+        && d.entryIds.toSet().size() == d.entryIds.size()
+        && validStarterId(d.entryIds,0) && validStarterId(d.entryIds,1)
+        && validStarterId(d.entryIds,2) && validStarterId(d.entryIds,3)
+        && validStarterId(d.entryIds,4) && validStarterId(d.entryIds,5)
+        && validStarterId(d.entryIds,6) && validStarterId(d.entryIds,7)
+        && validStarterId(d.entryIds,8) && validStarterId(d.entryIds,9)
+        && d.completedAt == request.time;
+    }
+    match /users/{uid}/starterCatalogues/{catalogueId} {
+      allow get: if activeSession(uid) && catalogueId == 'johannesburg-v1';
+      allow create: if activeSession(uid) && catalogueId == 'johannesburg-v1'
+        && isValidStarterMarker(request.resource.data);
+      allow list, update, delete: if false;
+    }
+    match /users/{uid}/private/{id} {
+      allow get: if privateSession(uid);
+      allow create, update: if privateSession(uid) && isValidPrivate(request.resource.data);
+      allow delete: if privateSession(uid);
+    }
+    // Shared fictional catalogue; owner-authenticated sessions can read its manifest
+    // and individually validated samples. Client queries and all client writes are denied.
+    match /demoCatalogues/{catalogueId} {
+      allow get: if catalogueId == 'johannesburg-v1' && activeCurrentSession() && isValidDemoManifest(resource.data);
+      allow list, create, update, delete: if false;
+    }
+    match /demoCatalogues/{catalogueId}/entries/{id} {
+      allow get: if catalogueId == 'johannesburg-v1' && activeCurrentSession() && isValidDemoEntry(resource.data);
+      allow list, create, update, delete: if false;
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

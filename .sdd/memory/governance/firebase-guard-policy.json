@@ -1,0 +1,15 @@
+{
+  "projectId": "khora-lulu-2026",
+  "firebaseRootKeys": ["hosting", "firestore", "functions", "auth"],
+  "hostingSite": "khora-lulu-2026",
+  "functionSource": "functions",
+  "functionCodebase": "lulu",
+  "functionRuntime": "nodejs22",
+  "functionName": "api",
+  "functionRegion": "africa-south1",
+  "functionMemoryMiBMax": 256,
+  "functionTimeoutSecondsMax": 30,
+  "functionConcurrencyMax": 10,
+  "functionMinInstances": 0,
+  "functionMaxInstances": 2
+}

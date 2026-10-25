@@ -7,20 +7,32 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build --mode app && vite build --mode demo",
     "test": "node --experimental-strip-types --test src/domain/transform.test.ts",
-    "dev:demo": "vite demo --host 127.0.0.1 --port 5174",
+    "guard:firebase": "node scripts/firebase-guard.mjs",
+    "test:firebase-guard": "node --test tests/firebase-guard.test.mjs",
+    "dev:demo": "vite --host 127.0.0.1 --port 5174",
     "build:app": "tsc -b && vite build --mode app",
     "build:demo": "tsc -b && vite build --mode demo",
-    "test:demo": "node --experimental-strip-types --test demo/src/domain/transform.test.ts"
+    "test:demo": "node --experimental-strip-types --test demo/src/domain/transform.test.ts",
+    "build:hosted": "npm run build:app && node scripts/package-hosting.mjs"
   },
   "dependencies": {
+    "@simplewebauthn/browser": "^14.0.0",
+    "firebase": "^12.19.0",
+    "lucide-react": "^0.468.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "lucide-react": "^0.468.0"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.8.3",
-    "vite": "^6.2.0",
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0"
+    "@types/react-dom": "^19.0.0",
+    "fake-indexeddb": "^6.2.6",
+    "typescript": "^5.8.3",
+    "vite": "^6.2.0"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "^1.14.6",
+    "@firebase/app": "0.16.4",
+    "@firebase/app-compat": "0.5.20"
   }
 }

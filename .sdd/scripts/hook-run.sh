@@ -28,3 +28,4 @@ if [[ "${1:-}" == "--existing-hook" ]]; then
 fi
 run_gate doctor "$SCRIPT_DIR/doctor.sh" || exit 1
 run_gate skills "$SCRIPT_DIR/skills.sh" validate || exit 1
+run_gate firebase-guard "$ROOT/scripts/firebase-guard.mjs" --native --staged || exit 1

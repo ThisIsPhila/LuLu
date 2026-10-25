@@ -13,6 +13,9 @@
       }
     ],
     "site": "khora-lulu-2026",
+    "predeploy": [
+      "node scripts/firebase-guard.mjs"
+    ],
     "cleanUrls": true,
     "trailingSlash": false,
     "headers": [
@@ -26,5 +29,32 @@
         ]
       }
     ]
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json",
+    "predeploy": [
+      "node scripts/firebase-guard.mjs"
+    ]
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "lulu",
+      "runtime": "nodejs22",
+      "predeploy": [
+        "node scripts/firebase-guard.mjs",
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ]
+    }
+  ],
+  "auth": {
+    "predeploy": [
+      "node scripts/firebase-guard.mjs"
+    ],
+    "providers": {
+      "anonymous": false,
+      "emailPassword": false
+    }
   }
 }
