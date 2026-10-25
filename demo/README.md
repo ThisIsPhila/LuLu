@@ -1,9 +1,9 @@
-# Preserved interactive demo
+# Current app preview and legacy snapshot
 
-Open `/demo/` on the local Vite server. This is the interactive framed implementation captured before separating the actual web app. It retains the mobile/desktop preview toggle, phone shell and demo controls.
+Open `/demo/` on the local Vite server to see the **current app** from `/` inside a mobile or desktop frame. The frame loads the root app directly, so changes under root `src/` appear without copying UI code. It shares the current site's browser storage.
 
-Its entry, components, styles and domain code live under `demo/src/`. The main responsive app lives under root `src/` and opens at `/`. Neither application imports the other's implementation. Both use the repository's React/Vite dependencies. `npm run build:app` outputs only the product to `dist/app/`; `npm run build:demo` outputs only the demo to `dist/demo/`. `npm run build` checks TypeScript and builds both. `npm run dev:demo` serves the demo independently on port 5174.
+The earlier independent prototype remains at `/demo/legacy.html`. Its source stays under `demo/src/`, including its original toolbar and local `lulu.prototype.entries.v2` storage. It is a historical snapshot and does not follow changes to root `src/`.
 
-The demo keeps the existing `lulu.prototype.entries.v2` browser-storage key. The app uses `lulu.app.entries.v1`. Existing demo entries are left intact; app edits and demo resets do not overwrite one another. Both are local implementations with synthetic seed data, not production security or cloud integrations.
+`npm run dev` and `npm run dev:demo` both serve the repository root; the latter uses port 5174. Visit `/demo/` on either server for the current preview, or `/demo/legacy.html` for the snapshot. `npm run build:demo` builds both preview pages into `dist/demo/`. The current-app frame needs the root product app served at the parent path. `npm run build:app` builds only the root product to `dist/app/`; Firebase Hosting uses that output and does not publish the demo.
 
-This intentional snapshot allows the app's design to evolve independently. Copy a fix deliberately when it should apply to both; do not silently couple their UI or state again. No per-page `/test` routing is introduced in this separation.
+The preview does not imply that authentication, database, or protected storage are implemented. Use synthetic entries until those capabilities are in place.

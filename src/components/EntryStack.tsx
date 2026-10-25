@@ -1,31 +1,61 @@
-import React, { useState } from 'react';
-import { ChevronDown, ArrowUpRight } from 'lucide-react';
+import React from 'react';
+import { ArrowUpRight, BookOpen, ChevronRight, Layers3 } from 'lucide-react';
 import type { Entry } from '../domain/journal';
 
-export function EntryStack({ title, entries, onSelectEntry }: {
-  title: string; entries: Entry[]; onSelectEntry: (entry: Entry) => void;
+type Collection = 'Journal' | 'Stories';
+
+/** A compact collection of writing. Opening it reveals a separate sheet of entries. */
+export function EntryStack({ title, entries, expanded, onToggle, controls }: {
+  title: Collection;
+  entries: Entry[];
+  expanded: boolean;
+  onToggle: () => void;
+  controls: string;
 }) {
-  const [expanded, setExpanded] = useState(false);
-  const id = React.useId();
-  if (!entries.length) return null;
+  const latest = entries[0];
+  const Icon = title === 'Journal' ? BookOpen : Layers3;
   return (
-    <section className={`entry-collection ${expanded ? 'expanded' : ''}`}>
-      <button className="entry-stack-cover" aria-expanded={expanded} aria-controls={id} onClick={() => setExpanded(!expanded)}>
-        <span className="stack-cover-copy"><strong>{title}</strong><span>{entries.length} {entries.length === 1 ? 'entry' : 'entries'}</span></span>
-        <span className="stack-cover-action">{expanded ? 'Close' : 'Open'}<ChevronDown size={15} /></span>
-      </button>
-      <div id={id} className="stack-entries" hidden={!expanded}>
-        {entries.map(entry => (
-          <button key={entry.id} className="stitch-entry-card stack-entry-button" onClick={() => onSelectEntry(entry)}>
-            <span className="card-text-col">
-              <span className="card-meta-line">{entry.groupDate} · {entry.timeStr}</span>
-              <strong className="card-entry-title">{entry.title}</strong>
-              <span className="card-entry-snippet">{entry.body}</span>
-            </span>
-            <ArrowUpRight size={16} aria-hidden="true" />
-          </button>
-        ))}
-      </div>
+    <button
+      type="button"
+      className={`collection-stack ${expanded ? 'is-open' : ''}`}
+      aria-expanded={expanded}
+      aria-controls={controls}
+      aria-label={`${title}, ${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}. ${expanded ? 'Close' : 'Open'} collection`}
+      onClick={onToggle}
+    >
+      <span className="collection-stack-sheet sheet-back" aria-hidden="true" />
+      <span className="collection-stack-sheet sheet-middle" aria-hidden="true" />
+      <span className="collection-stack-face">
+        <span className="collection-stack-top"><Icon size={17} strokeWidth={1.5} /><ChevronRight size={16} className="collection-stack-chevron" /></span>
+        <span className="collection-stack-title">{title}</span>
+        <span className="collection-stack-count">{entries.length} {entries.length === 1 ? 'entry' : 'entries'}</span>
+        <span className="collection-stack-preview">{latest ? latest.title : 'A place for what matters'}</span>
+      </span>
+    </button>
+  );
+}
+
+export function EntrySpread({ title, entries, onSelectEntry, id }: {
+  title: Collection;
+  entries: Entry[];
+  onSelectEntry: (entry: Entry) => void;
+  id: string;
+}) {
+  return (
+    <section id={id} className="collection-spread" aria-label={`${title} entries`}>
+      <div className="collection-spread-heading"><h2>{title}</h2><span>{entries.length} {entries.length === 1 ? 'entry' : 'entries'}</span></div>
+      {entries.length ? (
+        <div className="collection-spread-track">
+          {entries.map(entry => (
+            <button key={entry.id} type="button" className="collection-leaf" onClick={() => onSelectEntry(entry)}>
+              <span className="collection-leaf-meta">{entry.groupDate || 'Entry'}{entry.timeStr ? ` · ${entry.timeStr}` : ''}</span>
+              <strong>{entry.title}</strong>
+              <span className="collection-leaf-excerpt">{entry.body}</span>
+              <span className="collection-leaf-action">Read entry <ArrowUpRight size={15} aria-hidden="true" /></span>
+            </button>
+          ))}
+        </div>
+      ) : <p className="collection-spread-empty">Your first {title === 'Journal' ? 'journal entry' : 'story'} will appear here.</p>}
     </section>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { EntryStack } from './EntryStack';
+import { EntryStack, EntrySpread } from './EntryStack';
 import {
   Shield,
   Search,
@@ -13,6 +13,8 @@ import {
   Target,
   KeyRound,
   Fingerprint,
+  LogOut,
+  UserRound,
 } from 'lucide-react';
 import { LuLuLogo } from './Logo';
 import type { Entry } from '../domain/journal';
@@ -26,6 +28,7 @@ type Props = {
   onOpenProtectedGate: () => void;
   protectedMode: boolean;
   onOpenVault: () => void;
+  onSignOut: () => void;
 };
 
 export const JournalHome: React.FC<Props> = ({
@@ -37,9 +40,14 @@ export const JournalHome: React.FC<Props> = ({
   onOpenProtectedGate,
   protectedMode,
   onOpenVault,
+  onSignOut,
 }) => {
   const [searching, setSearching] = useState(false);
   const [query, setQuery] = useState('');
+  const [openCollection, setOpenCollection] = useState<'Journal' | 'Stories' | null>(null);
+  const spreadId = React.useId();
+  const now = new Date();
+  const greeting = now.getHours() < 12 ? 'Good morning' : now.getHours() < 17 ? 'Good afternoon' : 'Good evening';
 
   const filteredEntries = entries.filter((e) => {
     if (activeTab === 'All') return true;
@@ -75,9 +83,13 @@ export const JournalHome: React.FC<Props> = ({
               <Search size={16} />
             </button>
 
-            <div className="user-avatar-circle" title="Lerato Profile">
-              <span>L</span>
-            </div>
+            <details className="account-menu">
+              <summary className="user-avatar-circle" aria-label="Account menu" title="Account menu"><UserRound size={18} aria-hidden="true" /></summary>
+              <div className="account-menu-panel">
+                <span className="account-menu-label">Your account</span>
+                <button type="button" onClick={onSignOut}><LogOut size={16} aria-hidden="true" />Sign out</button>
+              </div>
+            </details>
           </div>
         </div>
       </header>
@@ -87,11 +99,11 @@ export const JournalHome: React.FC<Props> = ({
         {/* Temporal Greeting */}
         <section className="temporal-greeting-section">
           <div className="temporal-date-row">
-            <span className="temporal-date">Tuesday, 14 May 2026</span>
+            <span className="temporal-date">{new Intl.DateTimeFormat('en-ZA', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(now)}</span>
 
           </div>
 
-          <h1 className="greeting-headline">Good morning, Lerato</h1>
+          <h1 className="greeting-headline">{greeting}</h1>
           <p className="greeting-sub">
             A quiet sanctuary for your personal thoughts & discoveries.
           </p>
@@ -140,7 +152,7 @@ export const JournalHome: React.FC<Props> = ({
             </blockquote>
 
             {/* Inset Well Quick Entry */}
-            <div className="quick-entry-well" onClick={onNewEntry} role="button" tabIndex={0}>
+            <button type="button" className="quick-entry-well" onClick={onNewEntry}>
               <div className="well-left">
                 <span className="well-pen-icon">✎</span>
                 <span className="well-placeholder">Begin quick entry...</span>
@@ -149,17 +161,31 @@ export const JournalHome: React.FC<Props> = ({
                 <kbd className="enter-kbd">Enter</kbd>
                 <ArrowRight size={13} className="arrow-well" />
               </div>
-            </div>
+            </button>
           </section>
         )}
 
         {searching && <input className="home-search-input" type="search" aria-label="Search entries" placeholder="Search your entries…" value={query} onChange={e => setQuery(e.target.value)} autoFocus />}
-        <div className="home-collection-stacks">
-          <EntryStack title="Journal" entries={visibleEntries.filter(e => e.kind === 'Journal')} onSelectEntry={onSelectEntry} />
-          <EntryStack title="Stories" entries={visibleEntries.filter(e => e.kind === 'Story')} onSelectEntry={onSelectEntry} />
-          {visibleEntries.length === 0 && <p className="empty-collection">No entries in this collection yet.</p>}
+        <div className="home-collection-stacks" aria-label="Your collections">
+          {(['Journal', 'Stories'] as const).map(title => (
+            <EntryStack
+              key={title}
+              title={title}
+              entries={visibleEntries.filter(e => e.kind === (title === 'Journal' ? 'Journal' : 'Story'))}
+              expanded={openCollection === title}
+              onToggle={() => setOpenCollection(current => current === title ? null : title)}
+              controls={spreadId}
+            />
+          ))}
         </div>
-
+        {openCollection && (
+          <EntrySpread
+            id={spreadId}
+            title={openCollection}
+            entries={visibleEntries.filter(e => e.kind === (openCollection === 'Journal' ? 'Journal' : 'Story'))}
+            onSelectEntry={onSelectEntry}
+          />
+        )}
         {/* Weekly Clarity Rhythm Card */}
         <section className="clarity-rhythm-card">
           <div className="clarity-left">

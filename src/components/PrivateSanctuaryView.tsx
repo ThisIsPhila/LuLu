@@ -13,13 +13,16 @@ import {
   LifeBuoy,
 } from 'lucide-react';
 import { LuLuLogo } from './Logo';
+import {TrustedContacts} from './TrustedContacts';
 
 type Props = {
+  uid:string;
   onQuickExit: () => void;
   onOpenJournal: () => void;
 };
 
-export const PrivateSanctuaryView: React.FC<Props> = ({ onQuickExit, onOpenJournal }) => {
+export const PrivateSanctuaryView: React.FC<Props> = ({ uid, onQuickExit, onOpenJournal }) => {
+  const [showContacts,setShowContacts]=useState(false);
   const [activeCategory, setActiveCategory] = useState<'Private' | 'Safety' | 'Resources'>('Private');
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [selectedPlanStep, setSelectedPlanStep] = useState<string | null>(null);
@@ -66,7 +69,7 @@ export const PrivateSanctuaryView: React.FC<Props> = ({ onQuickExit, onOpenJourn
         <div className="sanctuary-hero">
           <h1 className="sanctuary-title">You're not alone.</h1>
           <p className="sanctuary-subtitle">
-            Support, information and tools when you're ready. Everything stays encrypted on this device.
+            Support, information and tools when you're ready. You choose what to record and when to take the next step.
           </p>
         </div>
 
@@ -110,11 +113,7 @@ export const PrivateSanctuaryView: React.FC<Props> = ({ onQuickExit, onOpenJourn
 
           <div
             className="sanctuary-card"
-            onClick={() =>
-              alert(
-                'Trusted Contacts:\n\nYour trusted emergency circle can receive silent alerts or pre-written check-ins if ever triggered by your choice.'
-              )
-            }
+            onClick={() => setShowContacts(true)}
           >
             <div className="sanctuary-card-icon">
               <Users size={18} />
@@ -145,6 +144,7 @@ export const PrivateSanctuaryView: React.FC<Props> = ({ onQuickExit, onOpenJourn
           </div>
         </section>
 
+        {showContacts&&<TrustedContacts uid={uid} onClose={()=>setShowContacts(false)}/>}
         {/* Privacy Assurance Box */}
         <div className="sanctuary-assurance-box">
           <div className="assurance-icon">
@@ -153,8 +153,7 @@ export const PrivateSanctuaryView: React.FC<Props> = ({ onQuickExit, onOpenJourn
           <div className="assurance-text">
             <strong>This is your private space.</strong>
             <p>
-              You're in control. You can explore, save and return at any time. No history or
-              notifications will leave this device.
+              You're in control. Original records and trusted contacts are encrypted before cloud storage. Their key stays in this browser.
             </p>
           </div>
         </div>
