@@ -1,0 +1,93 @@
+[
+  {
+    "feature": "Team and challenge",
+    "status": "Done",
+    "remaining": "KHÔRA; two members; safety/GBV response challenge.",
+    "evidence_needed": "Confirmed in Sonke.",
+    "owner": "—"
+  },
+  {
+    "feature": "Canvas, SSDLC and pitch",
+    "status": "Done",
+    "remaining": "Canvas and SSDLC filled; one video submission.",
+    "evidence_needed": "Confirmed in Sonke; timing acceptance is separate.",
+    "owner": "—"
+  },
+  {
+    "feature": "Hosting and frontend foundation",
+    "status": "Done / iterative",
+    "remaining": "Live Firebase app; separate framed demo; modular screens and brand assets.",
+    "evidence_needed": "Build and deployment observed; UI acceptance remains pending.",
+    "owner": "Integration / UI"
+  },
+  {
+    "feature": "Discreet private entrance",
+    "status": "P0 · Pending",
+    "remaining": "Ordinary journal appearance with deliberate private access; no exposing home labels. Current shield entrance is temporary.",
+    "evidence_needed": "Verify ordinary vs private paths on a real device, including exit/re-entry.",
+    "owner": "Integration + UI"
+  },
+  {
+    "feature": "Real authentication and protected access",
+    "status": "P0 · Pending",
+    "remaining": "Replace simulated gate with the selected real access mechanism and enforce the boundary.",
+    "evidence_needed": "Unauthorised access fails; authenticated access and exit work.",
+    "owner": "Integration"
+  },
+  {
+    "feature": "Journal/data contract reconciliation",
+    "status": "P0 · Blocked by known failures",
+    "remaining": "Resolve array/snapshot and storage-key drift; preserve records, observable saves and entity catalogue compatibility.",
+    "evidence_needed": "All relevant domain tests pass; save, empty journal and reload verified.",
+    "owner": "Integration"
+  },
+  {
+    "feature": "Meaning-preserving processing",
+    "status": "P0 · Partial",
+    "remaining": "Deterministic frontend transformation exists; contextual processing service and durable representations remain to be connected.",
+    "evidence_needed": "Input → processed narrative; correction persists; original meaning retrievable through authorised access.",
+    "owner": "Integration"
+  },
+  {
+    "feature": "Database and protected persistence",
+    "status": "P0 · Pending",
+    "remaining": "Configure chosen database, scoped access rules and original/mapping handling; connect real writes and reads.",
+    "evidence_needed": "Record survives reload and a new authenticated session; other users cannot read it.",
+    "owner": "Integration"
+  },
+  {
+    "feature": "Supporting documentation/attachments",
+    "status": "P1 · Pending",
+    "remaining": "Implement the selected evidence types, their storage, chronology and retrieval. Visible attachment icons are not working uploads.",
+    "evidence_needed": "Add and retrieve a synthetic attachment without losing its record link.",
+    "owner": "Integration"
+  },
+  {
+    "feature": "Support and trusted connections",
+    "status": "P0 · Partial UI only",
+    "remaining": "Replace placeholder support/contact controls with actionable pathways; user chooses trusted people and disclosure.",
+    "evidence_needed": "Find an appropriate resource/contact and deliberately choose what to share; no automatic sending.",
+    "owner": "Integration + UI"
+  },
+  {
+    "feature": "UI and component alignment",
+    "status": "In progress",
+    "remaining": "UI Design chat owns the reference-led pass and component research; latest local collection spread is separate from deployed UI.",
+    "evidence_needed": "Owner review plus narrow/wide and touch/keyboard checks.",
+    "owner": "LuLu UI Design"
+  },
+  {
+    "feature": "Release/judge access",
+    "status": "P0 · Pending",
+    "remaining": "Test the complete journey, provide a usable access route and prepare final architecture/user-journey slides.",
+    "evidence_needed": "Judge can open the hosted app and complete the intended journey.",
+    "owner": "Integration + owner"
+  },
+  {
+    "feature": "Platform progress updates",
+    "status": "Saturday update submitted",
+    "remaining": "Owner confirmed submission; next platform checkpoint is the Sunday programme and final package.",
+    "evidence_needed": "Owner confirmation recorded; platform count not rechecked.",
+    "owner": "Owner"
+  }
+]

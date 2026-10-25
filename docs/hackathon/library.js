@@ -1,6 +1,7 @@
 const views = [...document.querySelectorAll('article[data-doc]')];
 const header = document.querySelector('.reader-header');
 const checks = JSON.parse(document.getElementById('task-data').textContent);
+const productionTasks = window.productionTasks;
 const storageKey = 'lulu.review.completed-tasks.v1';
 let overrides = {};
 try { const saved = JSON.parse(localStorage.getItem(storageKey) || '{}'); if (saved && typeof saved === 'object' && !Array.isArray(saved)) overrides = saved; } catch {}
@@ -11,7 +12,8 @@ function showSubheader(group) {
   document.querySelectorAll('[data-sub]').forEach(el => el.hidden = el.dataset.sub !== group);
 }
 function navigate() {
-  const target = decodeURIComponent(location.hash.slice(1)) || 'canvas';
+  const requested = decodeURIComponent(location.hash.slice(1)) || 'canvas';
+  const target = requested === 'tasks-delivery' ? 'tasks-production' : requested;
   const view = views.find(el => el.id === target) || views.find(el => el.contains(document.getElementById(target))) || document.getElementById('canvas');
   views.forEach(el => el.hidden = el !== view);
   activeGroup = groupFor(view.id);
@@ -55,6 +57,21 @@ function renderTasks() {
     summary.textContent = complete+' of '+items.length+' checked off'+(next ? ' · Next: '+next.title+' — '+next.when : '');
   }
 }
+function renderProductionTasks() {
+  const mount = document.getElementById('production-task-list');
+  if (!mount || !productionTasks) return;
+  const escape = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  mount.innerHTML = productionTasks.sections.map(section => `
+    <section class="production-section" aria-labelledby="production-${escape(section.id)}">
+      <header><h2 id="production-${escape(section.id)}">${escape(section.title)}</h2><p>${escape(section.summary)}</p></header>
+      <div class="production-items">${section.tasks.map(task => `
+        <article class="production-item">
+          <div class="production-item-heading"><h3>${escape(task.title)}</h3><span>${escape(task.status)}</span></div>
+          <p>${escape(task.detail)}</p><p class="production-next"><strong>Next:</strong> ${escape(task.next)}</p>
+        </article>`).join('')}
+      </div>
+    </section>`).join('');
+}
 document.querySelectorAll('[data-check]').forEach(input => input.addEventListener('change', () => {
   overrides[input.dataset.check] = input.checked;
   try { localStorage.setItem(storageKey, JSON.stringify(overrides)); }
@@ -62,4 +79,5 @@ document.querySelectorAll('[data-check]').forEach(input => input.addEventListene
   renderTasks();
 }));
 renderTasks();
+renderProductionTasks();
 navigate();

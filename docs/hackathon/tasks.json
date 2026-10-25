@@ -52,8 +52,8 @@
     "title": "Post Saturday progress update",
     "date": "2026-10-25T00:00:00+02:00",
     "when": "Saturday 24 Oct · 23:00–00:00",
-    "done": false,
-    "note": "Describe implemented work, outstanding work and any reused functionality honestly."
+    "done": true,
+    "note": "Owner confirmed submission of the Saturday progress update. Final submitted wording was not independently compared with the local draft."
   },
   {
     "id": "canvas",
