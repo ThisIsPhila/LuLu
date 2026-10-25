@@ -11,6 +11,7 @@ import {
   Shield,
   Volume2,
   VolumeX,
+  Pencil,
 } from 'lucide-react';
 import { LuLuLogo } from './Logo';
 import type { Entry } from '../domain/journal';
@@ -60,6 +61,9 @@ export const ReaderView: React.FC<Props> = ({
           <span className="composer-label">Story View</span>
         </div>
         <div className="header-right-tools">
+          <button className="icon-btn-round" onClick={onEdit} title={entry.protected ? 'Protected entry editing is not available yet' : 'Edit entry'} aria-label={entry.protected ? 'Protected entry editing is not available yet' : 'Edit entry'}>
+            <Pencil size={16} />
+          </button>
           <button
             className={`icon-btn-round ${protectedMode ? 'active-green' : ''}`}
             onClick={protectedMode ? onExitProtected : onEnterProtected}

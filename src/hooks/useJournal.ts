@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { seed, type Entry } from '../domain/journal';
+import type { Entry } from '../domain/journal';
 import { initialEntities } from '../domain/transform';
 import { correctAlias, searchJournal } from '../domain/continuity';
 import { readJournal, writeJournal } from '../services/journalStorage';
 import type { JournalSnapshot } from '../services/journalStorage';
 
-const defaultSnapshot: JournalSnapshot = { version: 1, entries: seed, entities: initialEntities };
+const defaultSnapshot: JournalSnapshot = { version: 1, entries: [], entities: initialEntities };
 
 export function useJournal() {
   const [loaded] = useState(() => {

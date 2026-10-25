@@ -1,0 +1,80 @@
+
+> lulu-prototype@0.1.0 test:firebase-guard
+> node --test tests/firebase-guard.test.mjs
+
+TAP version 13
+# Subtest: allows the existing project and bounded Johannesburg function configuration
+ok 1 - allows the existing project and bounded Johannesburg function configuration
+  ---
+  duration_ms: 14.706333
+  type: 'test'
+  ...
+# Subtest: rejects project and region drift
+ok 2 - rejects project and region drift
+  ---
+  duration_ms: 12.492125
+  type: 'test'
+  ...
+# Subtest: rejects new Firebase services and function triggers or Admin services
+ok 3 - rejects new Firebase services and function triggers or Admin services
+  ---
+  duration_ms: 7.08175
+  type: 'test'
+  ...
+# Subtest: rejects unsupported keys inside existing Firebase service objects
+ok 4 - rejects unsupported keys inside existing Firebase service objects
+  ---
+  duration_ms: 5.825292
+  type: 'test'
+  ...
+# Subtest: rejects Hosting rewrites that route to backend or dynamic-link services
+ok 5 - rejects Hosting rewrites that route to backend or dynamic-link services
+  ---
+  duration_ms: 4.472083
+  type: 'test'
+  ...
+# Subtest: rejects unknown function options and non-literal option expressions
+ok 6 - rejects unknown function options and non-literal option expressions
+  ---
+  duration_ms: 3.895167
+  type: 'test'
+  ...
+# Subtest: rejects re-exports and export-list forms that could add functions indirectly
+ok 7 - rejects re-exports and export-list forms that could add functions indirectly
+  ---
+  duration_ms: 4.38175
+  type: 'test'
+  ...
+# Subtest: staged mode reads the index snapshot even when the working file is different
+ok 8 - staged mode reads the index snapshot even when the working file is different
+  ---
+  duration_ms: 67.889875
+  type: 'test'
+  ...
+# Subtest: rejects nonzero minimum instances and expanded function resources
+ok 9 - rejects nonzero minimum instances and expanded function resources
+  ---
+  duration_ms: 4.358666
+  type: 'test'
+  ...
+# Subtest: requires exception records to match a reviewed exact finding and makes accepted exceptions visible
+ok 10 - requires exception records to match a reviewed exact finding and makes accepted exceptions visible
+  ---
+  duration_ms: 2.75125
+  type: 'test'
+  ...
+# Subtest: rejects publishing the repository or another development output directory
+ok 11 - rejects publishing the repository or another development output directory
+  ---
+  duration_ms: 1.108375
+  type: 'test'
+  ...
+1..11
+# tests 11
+# suites 0
+# pass 11
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 381.168125

@@ -1,0 +1,22 @@
+TAP version 13
+# Subtest: catalogue mapping returns display-only synthetic fields and ignores source fields
+ok 1 - catalogue mapping returns display-only synthetic fields and ignores source fields
+  ---
+  duration_ms: 13.74075
+  type: 'test'
+  ...
+# Subtest: catalogue mapping refuses protected or malformed records
+ok 2 - catalogue mapping refuses protected or malformed records
+  ---
+  duration_ms: 0.174666
+  type: 'test'
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 89.361875

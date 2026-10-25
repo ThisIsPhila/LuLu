@@ -1,0 +1,42 @@
+{
+  "catalogueId": "johannesburg-v1",
+  "source": "fictional-demo-content",
+  "createdAtEncoding": "Convert each ISO 8601 createdAt value to a Firestore Timestamp when seeding.",
+  "manifest": {
+    "version": 1,
+    "label": "Fictional demo catalogue",
+    "entryIds": ["demo-quiet-morning", "demo-lantern-walk", "demo-small-rituals"]
+  },
+  "entries": [
+    {
+      "id": "demo-quiet-morning",
+      "title": "A quiet morning",
+      "body": "The courtyard was still cool after the night rain. I watered the small herb pots, made tea, and wrote down one thing I wanted to finish before lunch.",
+      "kind": "Journal",
+      "protected": false,
+      "perspective": "first",
+      "tags": ["Morning", "Reflection"],
+      "createdAt": "2026-10-25T07:40:00.000Z"
+    },
+    {
+      "id": "demo-lantern-walk",
+      "title": "The lantern walk",
+      "body": "Nia and Rowan met beneath the paper lanterns at Juniper Arcade, a made-up place in this sample story. They traded ideas for a tiny community garden and agreed to sketch a plan over the weekend.",
+      "kind": "Story",
+      "protected": false,
+      "perspective": "third",
+      "tags": ["People", "Places", "Story"],
+      "createdAt": "2026-10-24T17:20:00.000Z"
+    },
+    {
+      "id": "demo-small-rituals",
+      "title": "Small rituals",
+      "body": "A warm mug, a clear desk, and a few minutes without notifications made the afternoon feel spacious. I want to keep this simple routine for the next writing session.",
+      "kind": "Journal",
+      "protected": false,
+      "perspective": "first",
+      "tags": ["Writing", "Routine"],
+      "createdAt": "2026-10-23T14:05:00.000Z"
+    }
+  ]
+}

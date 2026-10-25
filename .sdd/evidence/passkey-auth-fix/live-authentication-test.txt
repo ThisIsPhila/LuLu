@@ -1,0 +1,1 @@
+result=pass uid=af659051-a60c-44cf-8e0f-b9c84f23528c credentialIdSha256=ebfb30433ffbc178e0740fc053bf04b6a664b7ea568cbe33829774f57b8b95c7 ledger=/tmp/lulu-webauthn-smoke-ledger-1792932586061-cf8fdda83f.json

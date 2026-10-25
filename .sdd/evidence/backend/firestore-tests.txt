@@ -1,0 +1,100 @@
+TAP version 13
+# Subtest: owner can create, read and query the actual journal shape
+ok 1 - owner can create, read and query the actual journal shape
+  ---
+  duration_ms: 300.786459
+  type: 'test'
+  ...
+# [2026-10-25T05:50:50.404Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabb8 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'create' @ L46, false for 'create' @ L61, false for 'update' @ L49, false for 'update' @ L61
+# [2026-10-25T05:50:50.470Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabba error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'create' @ L46, false for 'create' @ L61, false for 'update' @ L49, false for 'update' @ L61
+# [2026-10-25T05:50:50.504Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabbc error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L46:24 for 'create' @ L46, false for 'create' @ L61, evaluation error at L49:24 for 'update' @ L49, false for 'update' @ L61, Null value error. for 'create' @ L46, false for 'create' @ L61
+# Subtest: anonymous, another account, missing and expired sessions cannot access journal
+ok 2 - anonymous, another account, missing and expired sessions cannot access journal
+  ---
+  duration_ms: 199.084583
+  type: 'test'
+  ...
+# [2026-10-25T05:50:50.585Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabc0 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L46:24 for 'create' @ L46, false for 'create' @ L61, evaluation error at L49:24 for 'update' @ L49, false for 'update' @ L61, false for 'create' @ L46, false for 'create' @ L61
+# [2026-10-25T05:50:50.594Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabc1 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L46:24 for 'create' @ L46, false for 'create' @ L61, evaluation error at L49:24 for 'update' @ L49, false for 'update' @ L61, false for 'create' @ L46, false for 'create' @ L61
+# [2026-10-25T05:50:50.603Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabc2 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L46:24 for 'create' @ L46, false for 'create' @ L61, evaluation error at L49:24 for 'update' @ L49, false for 'update' @ L61, false for 'create' @ L46, false for 'create' @ L61
+# [2026-10-25T05:50:50.613Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabc3 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L46:24 for 'create' @ L46, false for 'create' @ L61, evaluation error at L49:24 for 'update' @ L49, false for 'update' @ L61, false for 'create' @ L46, false for 'create' @ L61
+# [2026-10-25T05:50:50.632Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabc4 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L46:24 for 'create' @ L46, false for 'create' @ L61, evaluation error at L49:24 for 'update' @ L49, false for 'update' @ L61, false for 'create' @ L46, false for 'create' @ L61
+# [2026-10-25T05:50:50.646Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabc5 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L46:24 for 'create' @ L46, false for 'create' @ L61, evaluation error at L49:24 for 'update' @ L49, false for 'update' @ L61, false for 'create' @ L46, false for 'create' @ L61
+# [2026-10-25T05:50:50.673Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabc6 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L46:24 for 'create' @ L46, false for 'create' @ L61, evaluation error at L49:24 for 'update' @ L49, false for 'update' @ L61, false for 'create' @ L46, false for 'create' @ L61
+# [2026-10-25T05:50:50.692Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabc7 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L49:24 for 'update' @ L49, false for 'update' @ L61, false for 'update' @ L49, false for 'update' @ L61
+# [2026-10-25T05:50:50.700Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabc8 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L49:24 for 'update' @ L49, false for 'update' @ L61, false for 'update' @ L49, false for 'update' @ L61
+# [2026-10-25T05:50:50.708Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabc9 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L49:24 for 'update' @ L49, false for 'update' @ L61, false for 'update' @ L49, false for 'update' @ L61
+# [2026-10-25T05:50:50.716Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabca error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L49:24 for 'update' @ L49, false for 'update' @ L61, false for 'update' @ L49, false for 'update' @ L61
+# [2026-10-25T05:50:50.726Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabcb error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L49:24 for 'update' @ L49, false for 'update' @ L61, false for 'update' @ L49, false for 'update' @ L61
+# [2026-10-25T05:50:50.734Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabcc error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L49:24 for 'update' @ L49, false for 'update' @ L61, false for 'update' @ L49, false for 'update' @ L61
+# [2026-10-25T05:50:50.741Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabcd error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'create' @ L46, false for 'create' @ L61, false for 'update' @ L49, false for 'update' @ L61
+# Subtest: strict schema prevents source leakage, ownership changes, type corruption, oversized input and update bypass
+ok 3 - strict schema prevents source leakage, ownership changes, type corruption, oversized input and update bypass
+  ---
+  duration_ms: 197.39425
+  type: 'test'
+  ...
+# [2026-10-25T05:50:50.801Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabd0 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L46:24 for 'create' @ L46, false for 'create' @ L61, evaluation error at L49:24 for 'update' @ L49, false for 'update' @ L61, false for 'create' @ L46, false for 'create' @ L61
+# [2026-10-25T05:50:50.807Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabcf error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L49:24 for 'update' @ L49, false for 'update' @ L61, false for 'update' @ L49, false for 'update' @ L61
+# Subtest: protected entries require a generic title on create and update
+ok 4 - protected entries require a generic title on create and update
+  ---
+  duration_ms: 74.880041
+  type: 'test'
+  ...
+# [2026-10-25T05:50:50.878Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabd4 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'create' @ L61, false for 'update' @ L61
+# [2026-10-25T05:50:50.913Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabd6 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'create' @ L61, false for 'update' @ L61
+# [2026-10-25T05:50:50.941Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabd8 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'create' @ L61, false for 'update' @ L61
+# [2026-10-25T05:50:50.965Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabda error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'create' @ L61, false for 'update' @ L61
+# Subtest: server credentials/challenges/sessions cannot be read, listed or modified by clients
+ok 5 - server credentials/challenges/sessions cannot be read, listed or modified by clients
+  ---
+  duration_ms: 154.487208
+  type: 'test'
+  ...
+# [2026-10-25T05:50:51.029Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabdc error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L58:32 for 'update' @ L58, false for 'update' @ L61, false for 'update' @ L58, false for 'update' @ L61
+# [2026-10-25T05:50:51.037Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabde error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L58:32 for 'update' @ L58, false for 'update' @ L61, false for 'update' @ L58, false for 'update' @ L61
+# [2026-10-25T05:50:51.082Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabe1 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L58:32 for 'create' @ L58, false for 'create' @ L61, evaluation error at L58:32 for 'update' @ L58, false for 'update' @ L61, false for 'update' @ L58, false for 'update' @ L61
+# [2026-10-25T05:50:51.089Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x19ccabe2 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# evaluation error at L59:24 for 'delete' @ L59, false for 'delete' @ L61, false for 'delete' @ L59, false for 'delete' @ L61
+# Subtest: private encrypted records require recent step-up, strict format and owner session
+ok 6 - private encrypted records require recent step-up, strict format and owner session
+  ---
+  duration_ms: 118.232917
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1355.422583

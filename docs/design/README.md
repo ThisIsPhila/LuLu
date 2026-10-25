@@ -17,6 +17,10 @@ The current task separates the app from the interactive demo and preserves these
 
 See the complete analysis and mapping of each Stitch direction in [STITCH_DIRECTIONS_REPORT.md](STITCH_DIRECTIONS_REPORT.md).
 
+## Current brand applied to screen studies
+
+The first three standalone UI aesthetic mockups follow the current brand baseline and existing mobile-first journal experience: [overview](resources/2026-10-25-ui-aesthetic-mockups/00-overview.png), [home](resources/2026-10-25-ui-aesthetic-mockups/01-home.png), [writing](resources/2026-10-25-ui-aesthetic-mockups/02-writing.png), and [reading](resources/2026-10-25-ui-aesthetic-mockups/03-reading.png). These are visual studies for review, not adopted functional requirements or app implementation.
+
 ## Earlier exploration
 
 The four boards in references/ are explorations, not approved specifications. Neutral monochrome, editorial typography, tactile restraint and inclusive multilingual use guide further design. Logo Direction 02 is preferred for refinement; Direction 04 is secondary. Optional pearl/soft themes are exploratory. Typefaces, tokens, copy and interface details pictured on a board are not automatically selected. In particular, security claims pictured in mockups are not implementation evidence.

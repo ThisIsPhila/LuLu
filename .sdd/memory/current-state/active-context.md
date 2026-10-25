@@ -1,5 +1,13 @@
 # Active context
 
+## Product implementation session — 25 October 2026
+
+Owner requested Sol Medium coordination with Luna High delegation, full product-discussion reconciliation and immediate implementation under the existing formal-SDD pause. Consolidated goal/current-code gap map: `docs/product/2026-10-25-product-direction.md`; complete owner/assistant source remains alongside it. No new phase or fabricated approval. Official OpenAI Decisions API contract verified; no provider transport or paid expansion added.
+
+Parent chat released shared app files after finishing per-account editable starters and main-app-only Hosting (reported version `0fd97059aa2ceb7c`). This session preserves those changes. New LOCAL implementation routes new private text saves to encrypted IndexedDB, adds bounded-session local record reopen/append-only revision history, paragraph-at-a-time concealment, an ordinary-new-draft private-entry action, and Escape/quick-exit cleanup. Existing cloud-backed protected records retain their old read path; no silent migration. Details and limits: `docs/implementation/2026-10-25-local-private-writing.md`; verification assessment: `../../reports/private-foundation/2026-10-25-local-slice.md`.
+
+Vault key is browser-held, not cryptographically passkey-bound; clearing/losing browser data can lose access. No backup/recovery, media capture, complete offline app/unlock, actual companion sharing, Trails or external interpretation integration is claimed. Quick exit closes unsaved drafts; save is explicit. Owner-device/authenticated acceptance remains pending. No deployment, commit, push or cloud mutation by this session.
+
 2026-10-23 — Codex
 
 ## Current direction
@@ -79,3 +87,43 @@ Owner requested discreet home categories, compact expandable card stacks, keyboa
 ## Categorized snapshot and UI owner handoff — 24 October
 
 Owner rejected the current card-stack interpretation and requested categorized commits plus implementation delegation to LuLu UI Design. Current UI remains unaccepted. Handoff: docs/handoffs/ui-design-2026-10-24.md. Main/demo builds pass; latest combined domain run is 9 passing / 6 failing (earlier all-green core evidence is historical). Preserve the snapshot and document contract drift for the functionality track; do not invent another visual replacement or recreate Firebase resources during this handoff.
+
+## Backend implementation — 25 October 2026
+
+Owner approved khora-lulu-2026 ID and Standard Firestore + second-gen functions in Johannesburg. DB created; custom-passkey Auth config and function deployed. Local app now uses verified passkey callbacks, owner-scoped cloud journal and encrypted private originals/contacts; no silent legacy migration. Deployment/runtime verification details and limitations: docs/implementation/backend-2026-10-25.md, .sdd/reports/backend/2026-10-25-review.md. Authenticated owner testing remains pending; do not infer acceptance. Firebase Hosting rejected the Johannesburg function rewrite; client now uses direct origin-restricted endpoint. Artifact cleanup-policy setup is still outstanding.
+
+Owner resource preference: delegate suitable implementation/review work to GPT-6 Luna High; parent GPT-6.1 Sol reviews and integrates. Do not spawn full inherited-model agents for routine subtasks. Two Luna High reviews completed in this turn after correcting model selection.
+
+## Firebase cost boundary and guardrails — 25 October 2026
+
+Owner clarified: KEEP Blaze and use its included free allowances; KEEP Johannesburg and second-generation functions. No Spark downgrade or architecture migration is needed or authorized by this cost clarification. Proposed downgrade was not applied. Do not confuse potential overages with an actual bill. Mandatory decision: ../governance/2026-10-25-firebase-cost-boundary.md. Repository guardrails and hooks are being added; they are local checks, not a hard spending cap. Artifact cleanup and actual billing usage remain unverified operational follow-ups.
+
+Firebase guardrails implemented and reviewed: `npm run guard:firebase`; pre-commit staged-config check and Hosting/Firestore/Functions/Auth predeploy hooks; policy in ../governance/firebase-guard-policy.json. Ten tests cover project/region/service drift, resource expansion, hidden extra exports, dynamic options, staged-vs-working changes, service configuration keys and Hosting backend rewrites. Guard/build/shell syntax checks pass. No live changes in this guardrail task. Guide: docs/operations/firebase-cost-and-guardrails.md; evidence/report in .sdd/evidence/firebase-guardrails and .sdd/reports/firebase-guardrails. Cleanup and actual usage remain unverified, and no hard spend cap is claimed.
+
+## Database-backed samples and hosted phone test — 25 October 2026
+
+Main app and current framed preview published at https://khora-lulu-2026.web.app/ and /demo/ (Hosting c351fa4f01598219). Three read-only fictional entries plus manifest created in demoCatalogues/johannesburg-v1 via create-only MCP writes; separate Personal/Sample journal controls; no sample-to-user copy. Root hardcoded entry fixture removed; compatibility local data preserved. Actual device passkey/save/reopen remains for owner testing. Internal document/media hosting access remains unanswered and is not publicly published. See docs/operations/phone-testing.md and .sdd/reports/phone-testing/2026-10-25-readiness.md.
+
+## Owner correction: ordinary editable starters; main app only
+
+The owner rejected the hosted interactive demo and shared read-only sample journal. Only the main app is hosted; demo/frame and internal library are strictly local. Starter template content is copied from Firestore once into each owner's ordinary private/unprotected journal; ordinary edit saves update the same ID. A one-time immutable initialization marker prevents duplicate creation, overwrite and restoring deletions on subsequent sign-ins. Real emulator tests cover concurrency and preservation. Read docs/operations/phone-testing.md; earlier phone readiness report remains historical and is superseded by this correction.
+
+New owner-requested chat LuLu Product Implementation (01a172e8-cc35-79a3-a15d-647d816ae1c2) uses GPT-6.1 Sol Medium with Luna High delegation. Complete source discussion and parent handoff preserved in docs/product/2026-10-25-product-discussion-source.txt and 2026-10-25-direction-handoff.md. Formal SDD phase ceremonies remain paused. New chat documents/consolidates that goal and starts independent foundations while parent finishes ordinary starters/hosting correction.
+
+## Passkey failure diagnosis and pending permission approval
+
+Owner reports device passkey creation completes but account entry fails. Existing Auth users/session docs plus register/login HTTP500 were observed. Runtime service-account Editor role lacks iam.serviceAccounts.signBlob; no service-account bindings and required APIs already enabled. Scoped self Token Creator permission fix prepared, but automatic approval review rejected executing it without specific owner authorization. No IAM change applied; pending async question names exact recipient/scope. Local diagnostic/recovery improvements pass8 policytests/guard/build but are not deployed. See .sdd/reports/passkey-auth-fix/2026-10-25-diagnosis.md. Do not mark auth fixed or repeat grant before approval.
+
+Owner subsequently explicitly approved the exact signing-permission fix. Applied Service Account Token Creator to runtime 687182197240-compute@developer.gserviceaccount.com on itself only; read-back verified. No project-wide grant/billing change/key export. Prior approval block is resolved. Existing deployed runtime picks up permission without redeploy; user must retry existing-passkey sign-in to confirm. Local auth diagnostic/recovery code is tested but not yet published. Evidence: .sdd/evidence/passkey-auth-fix/approved-signing-permission.json.
+
+Live authentication test subsequently passed after owner-specific approval for one temporary synthetic account: real deployed registration, Firebase custom-token exchange, /session, returning login and private step-up. Temporary account/credential/two sessions/three challenges removed and verified absent; real accounts untouched. Evidence .sdd/evidence/passkey-auth-fix/live-authentication-test.txt and test-account-cleanup.json. Owner's native phone passkey UI still needs a fresh existing-passkey sign-in after reload; no new key needed. Server-flow success is now observed, not merely inferred from options/IAM configuration.
+
+## Verified sign-in UX correction — 25 October 2026
+
+Owner confirms native sign-in works. Removed separate success/Continue screen: verified authenticate() result immediately opens journal. Removed permanent sign-out-only panel in final shared UI; Sign out is in home avatar menu. Preserved private-only Quick exit/Private writing controls and existing visuals. Build/22 private regression tests/guard pass; Hosting-only update in progress. No backend/IAM/billing changes. Details .sdd/reports/signin-ux/2026-10-25-streamlined-entry.md.
+
+Hosting-only correction succeeded, version cf2ca69e213e14dd. Live HTML asset hash matches the reviewed build. Refresh the hosted app to receive direct verified sign-in and avatar-menu Sign out.
+
+## Internal production progress view — 25 October 2026
+
+Local review HTML now includes Tasks → Production progress (#tasks-production), 31 read-only entries covering verified foundations, implemented/acceptance work and remaining goals. Legacy #tasks-delivery opens the same current view. Logo/Print/other library sections preserved. Current data in docs/hackathon/production-tasks.js mirrors docs/product/2026-10-25-task-status.md. Browser rendering verified; local only, no Firebase publication or paid service change.

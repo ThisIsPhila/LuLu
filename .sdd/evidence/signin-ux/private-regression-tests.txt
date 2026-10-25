@@ -1,0 +1,142 @@
+TAP version 13
+# Subtest: remote decision gate allows exact purpose, recipient, policy, and text snapshot
+ok 1 - remote decision gate allows exact purpose, recipient, policy, and text snapshot
+  ---
+  duration_ms: 6.391875
+  type: 'test'
+  ...
+# Subtest: remote decision gate fails closed without policy, strict authorization, or purpose approval
+ok 2 - remote decision gate fails closed without policy, strict authorization, or purpose approval
+  ---
+  duration_ms: 2.077542
+  type: 'test'
+  ...
+# Subtest: disclosure preparation and review bind source revisions, purpose, recipient, policy, and exact text
+ok 3 - disclosure preparation and review bind source revisions, purpose, recipient, policy, and exact text
+  ---
+  duration_ms: 1.451
+  type: 'test'
+  ...
+# Subtest: ordinary and starter content stay distinct from authentic evidence
+ok 4 - ordinary and starter content stay distinct from authentic evidence
+  ---
+  duration_ms: 0.121167
+  type: 'test'
+  ...
+# Subtest: paragraphs are concealed while locked and revealing another conceals the prior paragraph
+ok 5 - paragraphs are concealed while locked and revealing another conceals the prior paragraph
+  ---
+  duration_ms: 0.247084
+  type: 'test'
+  ...
+# Subtest: companion access requires matching owner and valid grant time, and is scoped, expiring, and revocable
+ok 6 - companion access requires matching owner and valid grant time, and is scoped, expiring, and revocable
+  ---
+  duration_ms: 0.164375
+  type: 'test'
+  ...
+# Subtest: companion statement remains a separate attributed contribution value
+ok 7 - companion statement remains a separate attributed contribution value
+  ---
+  duration_ms: 0.126958
+  type: 'test'
+  ...
+# Subtest: stores original and derived revisions encrypted, preserving the original
+ok 8 - stores original and derived revisions encrypted, preserving the original
+  ---
+  duration_ms: 21.753959
+  type: 'test'
+  ...
+# Subtest: locked or changed sessions fail closed for reads and writes
+ok 9 - locked or changed sessions fail closed for reads and writes
+  ---
+  duration_ms: 6.590875
+  type: 'test'
+  ...
+# Subtest: prevents synthetic records and invalid provenance from entering evidence
+ok 10 - prevents synthetic records and invalid provenance from entering evidence
+  ---
+  duration_ms: 1.958833
+  type: 'test'
+  ...
+# Subtest: atomically prevents duplicate originals and stale or duplicate revisions
+ok 11 - atomically prevents duplicate originals and stale or duplicate revisions
+  ---
+  duration_ms: 9.070125
+  type: 'test'
+  ...
+# Subtest: owner identity scopes records and authenticated encryption
+ok 12 - owner identity scopes records and authenticated encryption
+  ---
+  duration_ms: 3.539541
+  type: 'test'
+  ...
+# Subtest: pins owner identity for the lifetime of a vault instance
+ok 13 - pins owner identity for the lifetime of a vault instance
+  ---
+  duration_ms: 3.101958
+  type: 'test'
+  ...
+# Subtest: authenticated data is bound to owner, record and revision identity
+ok 14 - authenticated data is bound to owner, record and revision identity
+  ---
+  duration_ms: 5.79275
+  type: 'test'
+  ...
+# Subtest: rejects a row copied to another lookup key without changing its identity fields
+ok 15 - rejects a row copied to another lookup key without changing its identity fields
+  ---
+  duration_ms: 2.317708
+  type: 'test'
+  ...
+# Subtest: snapshots plain JSON once and rejects mutable or lossy values
+ok 16 - snapshots plain JSON once and rejects mutable or lossy values
+  ---
+  duration_ms: 1.839417
+  type: 'test'
+  ...
+# Subtest: snapshots record IDs and provenance before asynchronous encryption
+ok 17 - snapshots record IDs and provenance before asynchronous encryption
+  ---
+  duration_ms: 3.465792
+  type: 'test'
+  ...
+# Subtest: rejects late reads after exit and permits a fresh instance at a new generation
+ok 18 - rejects late reads after exit and permits a fresh instance at a new generation
+  ---
+  duration_ms: 2.311833
+  type: 'test'
+  ...
+# Subtest: detects missing revisions against the record head
+ok 19 - detects missing revisions against the record head
+  ---
+  duration_ms: 2.4925
+  type: 'test'
+  ...
+# Subtest: detects orphaned revision rows when a record head is missing
+ok 20 - detects orphaned revision rows when a record head is missing
+  ---
+  duration_ms: 2.8815
+  type: 'test'
+  ...
+# Subtest: private text capture and revision survive a new vault instance without network
+ok 21 - private text capture and revision survive a new vault instance without network
+  ---
+  duration_ms: 18.6465
+  type: 'test'
+  ...
+# Subtest: invalid private capture does not create a record
+ok 22 - invalid private capture does not create a record
+  ---
+  duration_ms: 2.2965
+  type: 'test'
+  ...
+1..22
+# tests 22
+# suites 0
+# pass 22
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 199.910917

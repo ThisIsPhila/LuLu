@@ -30,6 +30,8 @@ You are in a repo that uses the `.sdd/` directory. This is your brain.
     - `.sdd/coordination/progress/current-phase-status.md`
 6.  If the root `skills/` directory exists, read only the relevant `SKILL.md` files for the current task.
 
+For Firebase or associated Google Cloud work, first read `memory/governance/2026-10-25-firebase-cost-boundary.md` and run the repository Firebase guard before external changes. The owner retains Blaze for its included free allowances; do not infer that Blaze itself is prohibited or that passing local checks guarantees no charges.
+
 ### Step 2: Codebase Reconnaissance
 If the memory files are empty or sparse, you must fill the gaps yourself:
 1.  **Identify Tech Stack**: Look for `package.json`, `go.mod`, `Cargo.toml`, `requirements.txt`, etc.

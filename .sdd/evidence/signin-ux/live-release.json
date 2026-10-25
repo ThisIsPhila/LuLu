@@ -1,0 +1,10 @@
+{
+  "url": "https://khora-lulu-2026.web.app/",
+  "hostingVersion": "cf2ca69e213e14dd",
+  "script": "/assets/index-yjNOUhN3.js",
+  "matchesRecordedReviewedBuild": true,
+  "oldContinueScreenAbsent": true,
+  "verifiedAuthCallbackPresent": true,
+  "avatarMenuPresent": true,
+  "note": "Another local build changed dist/app after publication; verified against the recorded build.txt output rather than the current shared build directory."
+}

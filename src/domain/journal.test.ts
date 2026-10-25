@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readJournal, writeJournal, JOURNAL_STORAGE_KEY, type JournalSnapshot, type StoragePort } from '../services/journalStorage.ts';
 import { correctAlias, searchJournal } from './continuity.ts';
 import { transform, initialEntities } from './transform.ts';
+import { loadEntries } from './journal.ts';
 const defaults: JournalSnapshot = { version: 1, entities: initialEntities, entries: [
   { id: 'synthetic-1', title: 'Synthetic record', body: 'John went to the Nest.', originalBody: 'David went to my home.', kind: 'Journal', date: '2026-10-24T10:00:00Z', protected: true, favorite: false, perspective: 'first' },
   { id: 'synthetic-2', title: 'Ordinary record', body: 'David went home.', kind: 'Story', date: '2026-10-24T11:00:00Z', protected: false, favorite: false },
@@ -17,6 +18,14 @@ function read(storage: StoragePort) {
   if (!result.ok) throw new Error(result.error);
   return result.value;
 }
+
+test('legacy entry loader preserves valid records and uses an empty list for absent or invalid data', () => {
+  assert.deepEqual(loadEntries({ getItem: () => null }), []);
+  assert.deepEqual(loadEntries({ getItem: () => '[]' }), []);
+  assert.deepEqual(loadEntries({ getItem: () => '{broken' }), []);
+  assert.deepEqual(loadEntries({ getItem: () => JSON.stringify([{ ...defaults.entries[0], body: 4 }]) }), []);
+  assert.deepEqual(loadEntries({ getItem: () => JSON.stringify(defaults.entries) }), defaults.entries);
+});
 
 test('missing storage returns independent defaults without writing', () => {
   const storage = memory();

@@ -1,0 +1,9 @@
+{
+  "resource": "687182197240-compute@developer.gserviceaccount.com",
+  "role": "roles/iam.serviceAccountTokenCreator",
+  "member": "serviceAccount:687182197240-compute@developer.gserviceaccount.com",
+  "changed": true,
+  "verified": true,
+  "timestamp": "2026-10-25T12:38:33.669Z",
+  "scope": "Only this existing service account; no project-wide grant, no key export, no billing change."
+}

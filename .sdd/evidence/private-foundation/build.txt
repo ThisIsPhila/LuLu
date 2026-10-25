@@ -1,0 +1,25 @@
+
+> lulu-prototype@0.1.0 build:hosted
+> npm run build:app && node scripts/package-hosting.mjs
+
+
+> lulu-prototype@0.1.0 build:app
+> tsc -b && vite build --mode app
+
+vite v6.4.5 building for app...
+transforming...
+✓ 1647 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/app/index.html                                  0.91 kB │ gzip:   0.50 kB
+dist/app/assets/journal-writing-BwBp024s.jpg       438.06 kB
+dist/app/assets/journal-still-life-Db00lOk2.jpg    441.38 kB
+dist/app/assets/index-TrWIHc76.css                  58.43 kB │ gzip:  11.87 kB
+dist/app/assets/index-acifBI1_.js                1,023.46 kB │ gzip: 273.24 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 1.88s
+Main app hosting output verified; demo and internal documents excluded.

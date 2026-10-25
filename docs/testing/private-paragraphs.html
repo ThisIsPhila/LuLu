@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Local paragraph editor check</title></head>
+<body><h1>Local paragraph editor fixture</h1><p>Synthetic text only. Development check; not an authenticated application or hosted route.</p><div id="root"></div>
+<script type="module">
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import {PrivateParagraphEditor} from '/src/components/PrivateParagraphEditor.tsx';
+function Fixture(){
+ const [value,setValue]=React.useState('SYNTHETIC FIRST SECRET\n\nSYNTHETIC SECOND SECRET');
+ const [unlocked,setUnlocked]=React.useState(true);
+ return React.createElement(React.Fragment,null,
+ React.createElement('button',{onClick:()=>setUnlocked(v=>!v)},unlocked?'Lock fixture':'Unlock fixture'),
+ React.createElement(PrivateParagraphEditor,{value,onChange:setValue,sessionUnlocked:unlocked}));
+}
+createRoot(document.getElementById('root')).render(React.createElement(Fixture));
+</script></body></html>

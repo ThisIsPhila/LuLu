@@ -16,49 +16,54 @@ import {
 } from 'lucide-react';
 import { LuLuLogo } from './Logo';
 import type { Entity } from '../domain/transform';
+import type { Entry } from '../domain/journal';
 import { useWritingViewport } from '../hooks/useWritingViewport';
 import { transform, recognised } from '../domain/transform';
+import { PrivateParagraphEditor } from './PrivateParagraphEditor';
 
 type Props = {
   entities: Entity[];
+  protectedMode: boolean;
+  editingEntry?: Entry;
   onBack: () => void;
   onSaveProtected: (data: {
     title: string;
     body: string;
     originalBody: string;
     kind: 'Journal' | 'Story';
-  }) => void;
+  }) => Promise<void>;
   onOpenEntityInspector: () => void;
+  onEnterPrivate: () => void;
 };
 
 export const TransformProtectView: React.FC<Props> = ({
   entities,
+  protectedMode,
+  editingEntry,
   onBack,
   onSaveProtected,
   onOpenEntityInspector,
+  onEnterPrivate,
 }) => {
   const viewport = useWritingViewport();
-  const [naturalText, setNaturalText] = useState(
-    "David came to my place yesterday and threatened me. I'm worried about what might happen next..."
-  );
-  const [title, setTitle] = useState('An evening account');
-  const [isSaved, setIsSaved] = useState(false);
+  const [naturalText, setNaturalText] = useState(editingEntry?.body ?? '');
+  const [title, setTitle] = useState(editingEntry?.title ?? '');
+  const [busy,setBusy]=useState(false);
+  const [error,setError]=useState('');
+  const [showPreview,setShowPreview]=useState(false);
 
   // Derive transformed text
-  const transformedText = transform(naturalText, entities, {
+  const transformedText = protectedMode && !editingEntry ? transform(naturalText, entities, {
     perspectiveDistancing: true,
-  });
+  }) : naturalText;
 
   const wordsCount = naturalText.trim().split(/\s+/).filter(Boolean).length;
 
-  const handleSave = () => {
-    onSaveProtected({
-      title: title || 'An evening account',
-      body: transformedText,
-      originalBody: naturalText,
-      kind: 'Journal',
-    });
-    setIsSaved(true);
+  const handleSave = async () => {
+    setBusy(true);setError('');
+    try {await onSaveProtected({title:title || 'Journal entry',body:transformedText,originalBody:naturalText,kind:'Journal'});}
+    catch(e){setError(e instanceof Error?e.message:'Could not save. Your draft is still here.');}
+    finally{setBusy(false);}
   };
 
   return (
@@ -72,6 +77,7 @@ export const TransformProtectView: React.FC<Props> = ({
         <div className="header-avatar-circle">
           <User size={15} />
         </div>
+        {!protectedMode && !editingEntry && <button type="button" onClick={onEnterPrivate}>Write privately</button>}
       </header>
 
       {/* Main Flow */}
@@ -80,14 +86,18 @@ export const TransformProtectView: React.FC<Props> = ({
         <div className="composer-date-row">
           <div>
             <h2 className="composer-day">Today</h2>
-            <span className="composer-date-sub">Mon, 14 Apr 2025</span>
+            <span className="composer-date-sub">{new Date().toLocaleDateString('en-ZA',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}</span>
           </div>
           <button className="icon-btn-ghost">
             <MoreHorizontal size={18} />
           </button>
         </div>
 
-<div className="composer-processing-panel">        {/* 3. Protected Version Vault Card (Obsidian Dark) */}
+{protectedMode && <div className="composer-processing-panel">
+        <p>Private writing saves encrypted in this browser. No backup is configured.</p>
+        <p>Save to keep this draft. Quick exit or Escape closes unsaved writing.</p>
+        <button type="button" onClick={()=>setShowPreview(value=>!value)}>{showPreview?'Conceal preview':'Inspect representation preview'}</button>
+        {showPreview && <>
         <div className="protected-vault-card">
           <div className="vault-glow-ambient" />
           <div className="vault-card-header">
@@ -96,7 +106,7 @@ export const TransformProtectView: React.FC<Props> = ({
             </div>
             <div className="vault-titles">
               <h3>Protected Version</h3>
-              <p>Same meaning. Identifying details removed.</p>
+              <p>Preview with your configured representations.</p>
             </div>
           </div>
 
@@ -127,24 +137,28 @@ export const TransformProtectView: React.FC<Props> = ({
           ))}
         </details>
 
-</div><div className="composer-input-dock">        {/* 1. Original Entry Card (Warm Paper) */}
+</>}
+</div>}<div className="composer-input-dock">        {/* 1. Original Entry Card (Warm Paper) */}
         <div className="original-entry-card">
           <div className="card-top-meta">
             <div className="source-badge">
               <span className="dot-orange" />
-              <span>Original Entry · Your Natural Words</span>
+              <span>{editingEntry ? 'Edit your entry' : protectedMode?'Original Entry · Your Natural Words':'Your writing'}</span>
             </div>
             <span className="timestamp">{wordsCount} words</span>
           </div>
 
-          <textarea
+          <input aria-label="Entry title" placeholder="Title (optional)" value={title} onChange={e=>setTitle(e.target.value)} maxLength={200} style={{width:'100%',border:0,background:'transparent',padding:'12px 0',font:'inherit'}}/>
+          {error && <p role="alert">{error}</p>}
+          {protectedMode ? <PrivateParagraphEditor value={naturalText} sessionUnlocked
+            onChange={value=>{setNaturalText(value);setShowPreview(false);}} /> : <textarea
             className="original-natural-textarea"
             aria-label="Write your entry"
             value={naturalText}
             onChange={(e) => setNaturalText(e.target.value)}
             rows={4}
             placeholder="Write naturally in your own words..."
-          />
+          />}
 
           <div className="card-bottom-shelf">
             <div className="shelf-tools">
@@ -158,7 +172,7 @@ export const TransformProtectView: React.FC<Props> = ({
                 <MoreHorizontal size={15} />
               </button>
             </div>
-            <button className="save-protected-btn composer-save" onClick={handleSave} disabled={!naturalText.trim()}><ShieldCheck size={15} /><span>Save entry</span></button>
+            <button className="save-protected-btn composer-save" onClick={handleSave} disabled={busy || !naturalText.trim()}><ShieldCheck size={15} /><span>{busy?'Saving…':editingEntry?'Save changes':'Save entry'}</span></button>
           </div>
         </div>
 

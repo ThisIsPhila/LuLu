@@ -1,6 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { CircleAlert, X } from 'lucide-react';
 import type { Entry } from './domain/journal';
-import { loadEntries, persistEntries, seed } from './domain/journal';
+import { AuthBoundary } from './components/auth/AuthBoundary';
+import { watchEntries, saveEntry, readOriginal, updateEntry } from './services/backend/journal';
+import { ensureStarterEntries } from './services/backend/demoCatalogue';
+import { unlockPrivate, lockPrivate, logout, type AppSession } from './services/backend/passkeys';
 import type { Entity } from './domain/transform';
 import { initialEntities } from './domain/transform';
 import { JournalHome } from './components/JournalHome';
@@ -12,14 +16,26 @@ import { StoryLeavesView } from './components/StoryLeavesView';
 import { PrivateSanctuaryView } from './components/PrivateSanctuaryView';
 import { BottomNav } from './components/BottomNav';
 import { ProtectedGateModal } from './components/ProtectedGateModal';
+import { LocalPrivateJournal } from './components/LocalPrivateJournal';
+import { LocalVault } from './services/vault/localVault';
+import { capturePrivateText } from './services/privateCapture';
 
 export default function App() {
-  const [entries, setEntries] = useState<Entry[]>(() => loadEntries());
+  return <AuthBoundary>{(session,onSignedOut)=><JournalApp key={session.uid} session={session} onSignedOut={onSignedOut}/>}</AuthBoundary>;
+}
+function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>void}) {
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [personalState, setPersonalState] = useState<{ status: 'loading' | 'ready' | 'error'; message?: string }>({ status: 'loading' });
+  const [starterState, setStarterState] = useState<{ status: 'loading' | 'ready' | 'error'; message?: string }>({ status: 'loading' });
+  const [starterAttempt, setStarterAttempt] = useState(0);
+  const [watchAttempt, setWatchAttempt] = useState(0);
+  const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
+  const signingOut = useRef(false);
   const [entities, setEntities] = useState<Entity[]>(initialEntities);
 
   // Active view: 'home' | 'leaves' | 'compose' | 'enclave-writing' | 'vault' | 'inspector' | 'reader'
   const [currentView, setCurrentView] = useState<
-    'home' | 'leaves' | 'compose' | 'enclave-writing' | 'vault' | 'inspector' | 'reader'
+    'home' | 'leaves' | 'compose' | 'enclave-writing' | 'vault' | 'inspector' | 'reader' | 'local-private'
   >('home');
 
   const [activeCategoryTab, setActiveCategoryTab] = useState<string>('All');
@@ -30,10 +46,45 @@ export default function App() {
   const [isProtectedGateOpen, setIsProtectedGateOpen] = useState<boolean>(false);
   const [notice, setNotice] = useState<string>('');
 
-  // Persist entries
-  useEffect(() => {
-    persistEntries(entries);
-  }, [entries]);
+  const [backendError,setBackendError]=useState('');
+  const [privateUntil,setPrivateUntil]=useState(0);
+  const privateAuthority=useRef({until:0,generation:0});
+  const localVault=useRef<LocalVault | null>(null);
+  const privateUnlockAttempt=useRef(0);
+  const originalReadRequest=useRef(0);
+  const [pendingView,setPendingView]=useState<'vault'|'inspector'|null>(null);
+  useEffect(()=>watchEntries(session.uid,loaded=>{if(signingOut.current)return;setEntries(loaded);setPersonalState({status:'ready'});},e=>{if(signingOut.current)return;setPersonalState({status:'error',message:e.message});}),[session.uid,watchAttempt]);
+  useEffect(()=>{
+    let current=true;
+    setStarterState({status:'loading'});
+    ensureStarterEntries(session.uid).then(()=>{if(current)setStarterState({status:'ready'});}).catch(e=>{
+      if(current)setStarterState({status:'error',message:e instanceof Error?e.message:'Could not prepare your starter entries.'});
+    });
+    return()=>{current=false;};
+  },[session.uid,starterAttempt]);
+  useEffect(()=>{
+    const expire=setTimeout(()=>{signingOut.current=true;handleExitProtected();setEntries([]);void logout().catch(()=>{}).finally(onSignedOut);},Math.max(0,session.expiresAt-Date.now()));
+    return ()=>clearTimeout(expire);
+  },[session.expiresAt]);
+  useEffect(()=>{
+    if(!privateUntil)return;
+    const timer=setTimeout(()=>handleExitProtected(),Math.max(0,privateUntil-Date.now()));
+    return ()=>clearTimeout(timer);
+  },[privateUntil]);
+  useEffect(()=>{
+    const hide=()=>{if(document.hidden)handleExitProtected();};
+    const shortcut=(event:KeyboardEvent)=>{
+      if(event.key==='Escape' && privateAuthority.current.until>0){event.preventDefault();handleExitProtected();}
+    };
+    document.addEventListener('visibilitychange',hide);
+    document.addEventListener('keydown',shortcut,true);
+    return()=>{document.removeEventListener('visibilitychange',hide);document.removeEventListener('keydown',shortcut,true);};
+  },[]);
+  function navigatePrivate(view:'vault'|'inspector') {
+    if(protectedMode && Date.now()<privateUntil)setCurrentView(view);
+    else {setPendingView(view);setIsProtectedGateOpen(true);}
+  }
+
 
   // Notice auto-clear
   useEffect(() => {
@@ -43,62 +94,90 @@ export default function App() {
     }
   }, [notice]);
 
-  const handleSelectEntry = (entry: Entry) => {
-    setSelectedEntry(entry);
-    setCurrentView('reader');
+  const handleSelectEntry = async (entry:Entry) => {
+    const request=++originalReadRequest.current;
+    const generation=privateAuthority.current.generation;
+    setSelectedEntry(entry);setCurrentView('reader');
+    if(entry.protected && privateAuthority.current.until>Date.now()) {
+      try {const original=await readOriginal(session.uid,entry.id);
+        if(request===originalReadRequest.current && generation===privateAuthority.current.generation && Date.now()<privateAuthority.current.until)
+          setSelectedEntry({...entry,originalBody:original.originalBody});
+      }catch(e){if(request===originalReadRequest.current && generation===privateAuthority.current.generation)
+        setBackendError(e instanceof Error?e.message:'Could not open the original.');}
+    }
   };
-
-  const handleSaveProtectedEntry = (data: {
-    title: string;
-    body: string;
-    originalBody: string;
-    kind: 'Journal' | 'Story';
-  }) => {
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-    const newEntry: Entry = {
-      id: 'entry-' + Date.now(),
-      title: data.title,
-      body: data.body,
-      originalBody: data.originalBody,
-      kind: data.kind,
-      date: now.toISOString(),
-      timeStr,
-      wordsCount: data.body.trim().split(/\s+/).length,
-      groupDate: 'Today',
-      tags: ['Protected', 'Enclave'],
-      favorite: false,
-      protected: true,
-      perspective: 'third',
-      entitiesRecognized: ['John', 'Blue Moon'],
-    };
-
-    setEntries((prev) => [newEntry, ...prev]);
-    setProtectedMode(true);
-    setNotice('Protected entry encrypted with your personal passkey.');
-    setCurrentView('home');
+  const handleSaveProtectedEntry = async (data:{title:string;body:string;originalBody:string;kind:'Journal'|'Story'}) => {
+    const generation=privateAuthority.current.generation;
+    if(protectedMode && Date.now()>=privateUntil)throw new Error('Private session expired. Unlock again before saving.');
+    if(editingEntry) {
+      if(editingEntry.protected)throw new Error('Protected entries cannot be edited in this view. Open protected access to work with protected content.');
+      await updateEntry(session.uid,editingEntry.id,{title:data.title,body:data.body});
+      setSelectedEntry(null);setEditingEntry(null);
+    } else if(protectedMode) {
+      const vault=localVault.current;
+      if(!vault)throw new Error('Unlock private writing again before saving.');
+      await capturePrivateText(vault,data.title,data.originalBody);
+      if(generation!==privateAuthority.current.generation || Date.now()>=privateAuthority.current.until)return;
+      setNotice('Saved privately in this browser.');setCurrentView('local-private');return;
+    } else {
+      await saveEntry(session.uid,{...data,protected:protectedMode,entities});
+    }
+    setNotice('Entry saved.');setCurrentView('home');
   };
 
   const handleUpdateAlias = (id: string, newAlias: string) => {
+    if(Date.now()>=privateAuthority.current.until)return;
     setEntities((prev) =>
       prev.map((e) => (e.id === id ? { ...e, alias: newAlias } : e))
     );
     setNotice(`Updated representation to "${newAlias}".`);
   };
 
-  const handleProtectedSuccess = () => {
-    setProtectedMode(true);
-    setIsProtectedGateOpen(false);
-    setNotice('Biometric Passkey authenticated. Enclave memory active.');
+  const handleProtectedSuccess = async () => {
+    const attempt=++privateUnlockAttempt.current;
+    const generation=privateAuthority.current.generation;
+    const until=await unlockPrivate();
+    if(attempt!==privateUnlockAttempt.current || generation!==privateAuthority.current.generation){await lockPrivate();return;}
+    privateAuthority.current.until=until;
+    localVault.current=new LocalVault({
+      ownerId:session.uid,
+      generation:()=>privateAuthority.current.generation,
+      isUnlocked:()=>!signingOut.current && Date.now()<privateAuthority.current.until,
+    });
+    setPrivateUntil(until);setProtectedMode(true);setIsProtectedGateOpen(false);
+    if(pendingView){setCurrentView(pendingView);setPendingView(null);}
+    if(selectedEntry?.protected){
+      const request=originalReadRequest.current;
+      const generation=privateAuthority.current.generation;
+      try {const original=await readOriginal(session.uid,selectedEntry.id);
+        if(request===originalReadRequest.current && generation===privateAuthority.current.generation && Date.now()<privateAuthority.current.until)
+          setSelectedEntry(current=>current?.id===selectedEntry.id?{...current,originalBody:original.originalBody}:current);
+      }catch(e){if(request===originalReadRequest.current && generation===privateAuthority.current.generation)
+        setBackendError(e instanceof Error?e.message:'Could not open the original.');}
+    }
   };
-
-  const handleExitProtected = () => {
-    setProtectedMode(false);
-    setNotice('Protected session closed. Real-world mappings locked.');
-  };
+  function handleExitProtected() {
+    privateUnlockAttempt.current++;
+    originalReadRequest.current++;
+    privateAuthority.current={until:0,generation:privateAuthority.current.generation+1};
+    localVault.current=null;
+    setPrivateUntil(0);setProtectedMode(false);setEntities(initialEntities);
+    setSelectedEntry(null);setEditingEntry(null);setNotice('');setBackendError('');
+    setCurrentView('home');setIsProtectedGateOpen(false);setPendingView(null);
+    void lockPrivate().catch(()=>{});
+  }
+  async function signOutAccount(){
+    signingOut.current=true;
+    handleExitProtected();
+    setEntries([]);
+    setPersonalState({status:'ready'});setStarterState({status:'ready'});
+    try{await logout();}finally{onSignedOut();}
+  }
 
   return (
     <div className={`lulu-app-root ${currentView === 'vault' ? 'vault-dark-mode' : ''}`}>
+      {protectedMode&&<div className="account-actions"><button onClick={handleExitProtected}>Quick exit</button><button onClick={()=>setCurrentView('local-private')}>Private writing</button></div>}
+      {backendError&&<div className="backend-error" role="alert"><CircleAlert size={18} aria-hidden="true" /><span><strong>Something needs attention</strong>{backendError}</span><button type="button" onClick={()=>setBackendError('')} aria-label="Dismiss message"><X size={17} aria-hidden="true" /></button></div>}
       {/* Global Status Toast */}
       {notice && (
         <aside className="global-toast-stitch" role="status">
@@ -111,47 +190,66 @@ export default function App() {
 
       {/* Main Responsive Application Shell (Edge-to-Edge with clean Max-Width) */}
       <div className="lulu-viewport-shell">
+        {(currentView === 'home' || currentView === 'leaves' || currentView === 'reader') && (
+          <section className="journal-source-panel" aria-label="Journal status">
+            {(personalState.status === 'loading' || starterState.status === 'loading') && <p className="journal-source-status" role="status">Preparing your journal…</p>}
+            {personalState.status === 'error' && <p className="journal-source-status is-error" role="alert">Could not load your journal. {personalState.message || 'Check your connection and try again.'} <button type="button" onClick={()=>{setPersonalState({status:'loading'});setWatchAttempt(value=>value+1);}}>Try again</button></p>}
+            {starterState.status === 'error' && <p className="journal-source-status is-error" role="alert">Could not prepare your starter entries. {starterState.message || 'Check your connection and try again.'} <button type="button" onClick={()=>setStarterAttempt(value=>value+1)}>Try again</button></p>}
+            {personalState.status === 'ready' && starterState.status === 'ready' && entries.length === 0 && <p className="journal-source-status" role="status">Your journal is ready for your first entry.</p>}
+          </section>
+        )}
         {currentView === 'home' && (
           <JournalHome
             entries={entries}
             activeTab={activeCategoryTab}
             onTabChange={setActiveCategoryTab}
-            onNewEntry={() => setCurrentView('compose')}
+            onNewEntry={() => { setEditingEntry(null);setSelectedEntry(null);setCurrentView('compose'); }}
             onSelectEntry={handleSelectEntry}
             onOpenProtectedGate={() => setIsProtectedGateOpen(true)}
             protectedMode={protectedMode}
-            onOpenVault={() => setCurrentView('vault')}
+            onOpenVault={() => navigatePrivate('vault')}
+            onSignOut={() => void signOutAccount()}
           />
         )}
 
         {currentView === 'leaves' && (
-          <StoryLeavesView
-            entries={entries}
-            onSelectEntry={handleSelectEntry}
-            onOpenProtectedGate={() => setIsProtectedGateOpen(true)}
-          />
+            <StoryLeavesView
+              entries={entries}
+              onSelectEntry={handleSelectEntry}
+              onOpenProtectedGate={() => setIsProtectedGateOpen(true)}
+            />
         )}
 
         {currentView === 'compose' && (
           <TransformProtectView
+            key={`compose-${privateAuthority.current.generation}-${editingEntry?.id ?? 'new'}`}
             entities={entities}
+            protectedMode={protectedMode && !editingEntry}
+            editingEntry={editingEntry ?? undefined}
             onBack={() => setCurrentView('home')}
             onSaveProtected={handleSaveProtectedEntry}
-            onOpenEntityInspector={() => setCurrentView('inspector')}
+            onOpenEntityInspector={() => navigatePrivate('inspector')}
+            onEnterPrivate={() => setIsProtectedGateOpen(true)}
           />
+        )}
+
+        {currentView === 'local-private' && protectedMode && localVault.current && (
+          <LocalPrivateJournal key={privateAuthority.current.generation} vault={localVault.current}
+            onExit={handleExitProtected} onCompose={()=>{setEditingEntry(null);setSelectedEntry(null);setCurrentView('compose');}} />
         )}
 
         {currentView === 'enclave-writing' && (
           <ProtectedWritingView
             onBack={() => setCurrentView('home')}
-            onOpenEntityInspector={() => setCurrentView('inspector')}
+            onOpenEntityInspector={() => navigatePrivate('inspector')}
             onDone={() => setCurrentView('home')}
           />
         )}
 
         {currentView === 'vault' && (
           <PrivateSanctuaryView
-            onQuickExit={() => setCurrentView('home')}
+            uid={session.uid}
+            onQuickExit={handleExitProtected}
             onOpenJournal={() => setCurrentView('home')}
           />
         )}
@@ -162,25 +260,29 @@ export default function App() {
             onBack={() => setCurrentView('home')}
             onUpdateAlias={handleUpdateAlias}
             onConfirm={() => {
-              setNotice('Representations confirmed in Neural Enclave.');
+              setNotice('Representations updated for this session.');
               setCurrentView('home');
             }}
           />
         )}
 
         {currentView === 'reader' && selectedEntry && (
-          <ReaderView
-            entry={selectedEntry}
-            protectedMode={protectedMode}
-            entities={entities}
-            onBack={() => {
-              setSelectedEntry(null);
-              setCurrentView('home');
-            }}
-            onEdit={() => setCurrentView('compose')}
-            onEnterProtected={() => setIsProtectedGateOpen(true)}
-            onExitProtected={handleExitProtected}
-          />
+            <ReaderView
+              entry={selectedEntry}
+              protectedMode={protectedMode}
+              entities={entities}
+              onBack={() => {
+                originalReadRequest.current++;
+                setSelectedEntry(null);
+                setCurrentView('home');
+              }}
+              onEdit={() => {
+                if(selectedEntry.protected) {setBackendError('Protected entries cannot be edited in this view. Open protected access to work with protected content.');return;}
+                setEditingEntry(selectedEntry);setCurrentView('compose');
+              }}
+              onEnterProtected={() => setIsProtectedGateOpen(true)}
+              onExitProtected={handleExitProtected}
+            />
         )}
 
         {/* Bottom Floating Navigation Dock (Hidden on Reader and Compose) */}
@@ -189,7 +291,10 @@ export default function App() {
             currentView={currentView as any}
             onNavigate={(view) => {
               if (view === 'compose') {
+                setEditingEntry(null);setSelectedEntry(null);
                 setCurrentView('compose');
+              } else if(view === 'vault' || view === 'inspector') {
+                navigatePrivate(view);
               } else {
                 setCurrentView(view);
               }
@@ -202,8 +307,11 @@ export default function App() {
       {/* Biometric Passkey Modal (Screen C) */}
       <ProtectedGateModal
         isOpen={isProtectedGateOpen}
-        onClose={() => setIsProtectedGateOpen(false)}
-        onSuccess={handleProtectedSuccess}
+        onClose={() => {
+          if(privateAuthority.current.until>0){handleExitProtected();return;}
+          privateUnlockAttempt.current++;setIsProtectedGateOpen(false);setPendingView(null);
+        }}
+        onVerify={handleProtectedSuccess}
       />
     </div>
   );

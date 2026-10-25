@@ -25,3 +25,9 @@ dist/
 # Firebase local deployment cache and diagnostic logs.
 .firebase/
 firebase-debug.log*
+
+# Compiled backend output.
+functions/lib/
+
+# Local agent continuation state is not project source.
+.omo/
