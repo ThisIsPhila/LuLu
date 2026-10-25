@@ -20,7 +20,7 @@ export function isEntry(v: unknown): v is Entry {
 export function isEntity(v: unknown): v is Entity {
   return object(v) && typeof v.id === 'string' && !!v.id.trim() &&
     typeof v.original === 'string' && !!v.original.trim() && typeof v.alias === 'string' && !!v.alias.trim() &&
-    ['Person', 'Place', 'Time', 'Topic'].includes(String(v.type)) &&
+    ['Person', 'Place', 'Time', 'Topic', 'Pronoun'].includes(String(v.type)) &&
     (v.mentions === undefined || (typeof v.mentions === 'number' && Number.isInteger(v.mentions) && v.mentions >= 0));
 }
 const uniqueIds = (items: { id: string }[]) => new Set(items.map(x => x.id)).size === items.length;

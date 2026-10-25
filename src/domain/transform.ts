@@ -63,6 +63,9 @@ export const initialEntities: Entity[] = [
 export function applyPerspectiveDistancing(text: string): string {
   let out = text;
   const phraseMap: [RegExp, string][] = [
+    [/\bI['’]m\b/gi, 'she is'],
+    [/\bI['’]ve\b/gi, 'she has'],
+    [/\bI['’]ll\b/gi, 'she will'],
     [/\bmy the Nest\b/gi, 'the Nest'],
     [/\bmy place\b/gi, 'Blue Moon'],
     [/\bmy home\b/gi, 'the Nest'],
@@ -98,32 +101,22 @@ export function transform(
   entities: Entity[],
   options: { perspectiveDistancing?: boolean } = { perspectiveDistancing: true }
 ): string {
-  let out = text;
-
-  // Replace recognized entities
-  for (const e of entities) {
-    if (e.type === 'Pronoun') continue; // Handled by perspective distancing
-    const escaped = e.original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    out = out.replace(new RegExp('\\b' + escaped + '\\b', 'gi'), () => e.alias);
+  const spans = detectEntitySpans(text, entities);
+  let cursor = 0;
+  let out = '';
+  for (const span of spans) {
+    let prefix = text.slice(cursor, span.index);
+    if (span.type === 'Place' && span.original.toLowerCase() === 'home') prefix = prefix.replace(/\bmy\s+$/i, '');
+    out += prefix + span.alias;
+    cursor = span.index + span.length;
   }
-
-  if (options.perspectiveDistancing) {
-    out = applyPerspectiveDistancing(out);
-  }
-
-  return out;
+  out += text.slice(cursor);
+  return options.perspectiveDistancing ? applyPerspectiveDistancing(out) : out;
 }
 
 export function recognised(text: string, entities: Entity[]): Entity[] {
-  const lower = text.toLowerCase();
-  return entities
-    .map((e) => {
-      const escaped = e.original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const matches = lower.match(new RegExp('\\b' + escaped.toLowerCase() + '\\b', 'g'));
-      const count = matches ? matches.length : 0;
-      return { ...e, mentions: count };
-    })
-    .filter((e) => (e.mentions ?? 0) > 0);
+  const spans = resolveSpans(text, entities);
+  return entities.map(e => ({ ...e, mentions: spans.filter(s => s.entityId === e.id).length })).filter(e => e.mentions > 0);
 }
 
 export type DetectedSpan = {
@@ -134,22 +127,23 @@ export type DetectedSpan = {
   length: number;
 };
 
-export function detectEntitySpans(text: string, entities: Entity[]): DetectedSpan[] {
-  const spans: DetectedSpan[] = [];
+function resolveSpans(text: string, entities: Entity[]): (DetectedSpan & { entityId: string })[] {
+  const spans: (DetectedSpan & { entityId: string })[] = [];
   for (const e of entities) {
-    if (e.type === 'Pronoun') continue;
+    if (e.type === 'Pronoun' || !e.original.trim()) continue;
     const escaped = e.original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp('\\b' + escaped + '\\b', 'gi');
+    const regex = new RegExp('(?<![\\p{L}\\p{N}_])' + escaped + '(?![\\p{L}\\p{N}_])', 'giu');
     let match: RegExpExecArray | null;
-    while ((match = regex.exec(text)) !== null) {
-      spans.push({
-        original: match[0],
-        alias: e.alias,
-        type: e.type,
-        index: match.index,
-        length: match[0].length,
-      });
-    }
+    while ((match = regex.exec(text)) !== null) spans.push({ entityId: e.id, original: match[0], alias: e.alias, type: e.type, index: match.index, length: match[0].length });
   }
-  return spans.sort((a, b) => a.index - b.index);
+  const selected: typeof spans = [];
+  let end = 0;
+  for (const span of spans.sort((a,b) => a.index - b.index || b.length - a.length)) {
+    if (span.index < end) continue;
+    selected.push(span); end = span.index + span.length;
+  }
+  return selected;
+}
+export function detectEntitySpans(text: string, entities: Entity[]): DetectedSpan[] {
+  return resolveSpans(text, entities).map(({ entityId: _id, ...span }) => span);
 }
