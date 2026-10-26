@@ -10,12 +10,28 @@
     "guard:firebase": "node scripts/firebase-guard.mjs",
     "test:firebase-guard": "node --test tests/firebase-guard.test.mjs",
     "dev:demo": "vite --host 127.0.0.1 --port 5174",
-    "build:app": "tsc -b && vite build --mode app",
+    "build:app": "tsc -b && vite build --mode app && node scripts/verify-mobile-package.mjs",
     "build:demo": "tsc -b && vite build --mode demo",
     "test:demo": "node --experimental-strip-types --test demo/src/domain/transform.test.ts",
-    "build:hosted": "npm run build:app && node scripts/package-hosting.mjs"
+    "build:hosted": "npm run build:app && node scripts/package-hosting.mjs",
+    "native:sync": "npm run build:app && cap sync",
+    "native:ios": "npm run build:app && cap sync ios && cap build ios",
+    "native:android": "npm run build:app && cap sync android && cap build android",
+    "native:open:ios": "cap open ios",
+    "native:open:android": "cap open android"
   },
   "dependencies": {
+    "@aparajita/capacitor-secure-storage": "^8.0.1",
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/browser": "^8.0.5",
+    "@capacitor/camera": "^8.2.6",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/ios": "^8.5.3",
+    "@fontsource-variable/dm-sans": "^5.3.0",
+    "@fontsource-variable/inter-tight": "^5.3.0",
+    "@fontsource-variable/literata": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
     "@simplewebauthn/browser": "^14.0.0",
     "firebase": "^12.19.0",
     "lucide-react": "^0.468.0",
@@ -23,6 +39,7 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.3",
     "@firebase/rules-unit-testing": "^5.0.2",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

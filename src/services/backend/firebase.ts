@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, inMemoryPersistence, setPersistence } from 'firebase/auth';
+import { getAuth, indexedDBLocalPersistence, inMemoryPersistence, setPersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { isNativePlatform } from '../../platform/runtime';
 
 // Public application identifiers, never server credentials.
 const app = initializeApp({
@@ -10,5 +11,9 @@ const app = initializeApp({
   authDomain: 'khora-lulu-2026.firebaseapp.com',
 });
 export const auth = getAuth(app);
-export const authReady = setPersistence(auth, inMemoryPersistence);
+// The native shell must retain the verified Firebase session across a process
+// restart so the owner can reopen their account-owned Firestore journal.
+// Keep the web application's existing in-memory behavior unchanged.
+export const authReady = setPersistence(auth, isNativePlatform() ? indexedDBLocalPersistence : inMemoryPersistence)
+  .catch(() => setPersistence(auth, inMemoryPersistence));
 export const database = getFirestore(app); // Memory cache; private records never use disk cache.

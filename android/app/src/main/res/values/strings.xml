@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">LuLu</string>
+    <string name="title_activity_main">LuLu</string>
+    <string name="package_name">org.khora.lulu</string>
+    <string name="custom_url_scheme">org.khora.lulu</string>
+</resources>

@@ -1,0 +1,6 @@
+26 October 2026, local IAB browser. Production build served by vite preview on 127.0.0.1:5177.
+Opened actual app root and reloaded once with server available. No sign-in/account/auth action performed.
+Stopped exact preview process (session98734, exit130). Reloaded root: existing LuLu welcome screen rendered.
+Navigated to fresh /?screen=signin while origin server remained stopped: sign-in screen rendered with existing heading, logo, passkey button and copy. Screenshot server-stopped-signin.png.
+Browser tab closed. This is local static app-code availability, not successful offline authentication/private unlock/capture, not a deployed test or phone acceptance. Internet itself was not disabled; external fonts may still load. No auth/records/API cache was introduced.
+Read-only navigator service-worker inspection was unavailable in constrained browser evaluate; behavior above and generated-worker tests are the observed evidence.
