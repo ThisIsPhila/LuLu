@@ -102,6 +102,8 @@ Competitive and support-service claims in the pasted assistant response are rese
 
 The first local slice is now implemented and connected to the app: see [local private writing](../implementation/2026-10-25-local-private-writing.md). The baseline table above describes the starting point; the implementation note and dated evidence distinguish the new local capabilities from remaining gaps and historical deployment.
 
+The next bounded local slice adds [encrypted draft autosave and restart recovery](../implementation/2026-10-25-durable-private-capture.md), with atomic promotion and storage-failure handling. This advances durable text capture, not offline unlocking, key recovery, media or the rest of the backlog.
+
 1. Preserve the parent chat's ordinary-journal/starter/hosting work. Add independent local encrypted originals, append-only derived records and identity-bound integrity checks. Add typed privacy/interpretation/disclosure and scoped permission contracts. Test lock, tampering, concurrency and negative authorization cases locally.
 2. Integrate local text capture and reopening with existing passkey success/exit callbacks after shared-file ownership clears. Route new private saves locally; label older cloud-backed records accurately. Add paragraph concealment projection and editing. Test delayed authentication/read/save races against exit.
 3. Add real media capture and stop/save/exit handling, restart durability and offline app availability. Cover quota/storage failures and interrupted writes on target devices. Persist language metadata without assuming detection quality.
