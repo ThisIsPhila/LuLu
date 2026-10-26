@@ -52,8 +52,8 @@
     "title": "Post Saturday progress update",
     "date": "2026-10-25T00:00:00+02:00",
     "when": "Saturday 24 Oct · 23:00–00:00",
-    "done": true,
-    "note": "Owner confirmed submission of the Saturday progress update. Final submitted wording was not independently compared with the local draft."
+    "done": false,
+    "note": "The owner previously reported submitting a Saturday update, but the current Sonke team centre shows only one update with activity roughly 16 hours ago (likely Sunday afternoon). The date/content cannot be reconciled from the current view; treat this as unverified until inspected."
   },
   {
     "id": "canvas",
@@ -73,6 +73,16 @@
     "when": "Sunday 25 Oct · mentors through 17:00",
     "done": false,
     "note": "Opportunity before mentor support ends, rather than a required submission. Monday has no mentor support."
+  },
+  {
+    "id": "sunday-final-update",
+    "group": "platform",
+    "title": "Verify Sunday final-state progress update",
+    "date": "2026-10-25T17:30:00+02:00",
+    "when": "Sunday 25 Oct · 17:00–17:30",
+    "done": false,
+    "note": "Sonke currently shows one 6/10 update from roughly early Sunday afternoon. Text and exact time were not visible; inspect the existing update before posting to avoid duplication. A local draft is available.",
+    "link": "#progress-sunday"
   },
   {
     "id": "final",
