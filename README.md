@@ -6,9 +6,9 @@
 </p>
 
 <h1 align="center">Your story. Your safety. Your choice.</h1>
-<p align="center"><strong>An ordinary journal with an extraordinary purpose.</strong></p>
+<p align="center"><strong>A journal and storybook for everyday writing and protected personal documentation.</strong></p>
 <p align="center">
-  <a href="https://lulu.thisisphila.co.za/"><strong>Open LuLu</strong></a>
+  <a href="https://lulu.thisisphila.co.za/"><strong>Try the live web demo</strong></a>
   &nbsp;·&nbsp;
   <a href="#experience-lulu">Explore the experience</a>
   &nbsp;·&nbsp;
@@ -25,7 +25,7 @@
 
 Sometimes the first step is simply writing something down.
 
-LuLu brings **everyday journalling and protected personal documentation** into one familiar space. You can capture a thought, save an important moment and return to an ordinary journal. When something needs greater privacy, LuLu's protected-writing experience is designed to help preserve it without requiring you to decide immediately whether to disclose it or seek help.
+LuLu is a **journal and storybook for everyday writing and protected personal documentation**. You can capture a thought, save an important moment and return to an ordinary journal. When something needs greater privacy, LuLu's protected-writing experience is designed to help preserve it without requiring you to decide immediately whether to disclose it or seek help.
 
 The wider vision connects **capture → preservation → understanding → choice → support**: one continuous experience for people who may not yet know what to call what they're experiencing, what their options are, or when they will feel ready to act.
 
@@ -35,11 +35,11 @@ Created by **Team KHÔRA** for the **FNB App of the Year Hackathon 2026**, addre
 
 ## Experience LuLu
 
-### Start with the live application
+### For the demo, start with the live web app
 
-**[Launch LuLu in your browser](https://lulu.thisisphila.co.za/)**
+**[Open the live LuLu web app](https://lulu.thisisphila.co.za/)**
 
-The web release is the quickest way to explore the *currently deployed* experience. The application uses real device/browser passkey authentication; there is no shared demo password.
+This is the recommended way for judges and reviewers to try LuLu. It opens in a browser and does not require installing a native app. The web release uses device/browser passkeys or the configured account sign-in; there is no shared demo password.
 
 | Step | What to do | What you'll see |
 | --- | --- | --- |
@@ -48,7 +48,7 @@ The web release is the quickest way to explore the *currently deployed* experien
 | **3. Explore Stories** | Navigate to **Stories** in the ordinary experience. | A familiar, everyday writing surface. |
 | **4. Explore protected writing** | In a version exposing **Private** or **Write privately**, select that entry point. | Protected access is separate from signing in. Availability varies by release; see below. |
 
-**Release update — 26 October:** The main-app source is now published at the custom domain. Login opens directly and **Onboarding** is optional. Live synthetic email/password and passkey registration, returning sign-in and application-session tests passed, including private passkey step-up; both temporary accounts and seven test documents were removed. Product Implementation corrected the missing Google OAuth callback; interactive Google/native acceptance remains open. Broader private/mobile features have local evidence and still need owner-device acceptance. See the [release verification](docs/implementation/2026-10-26-auth-domain-release.md).
+**Release update — 26 October:** The web app is hosted at the custom domain. Login opens directly and **Onboarding** is optional. Live synthetic email/password and passkey registration, returning sign-in and application-session tests passed, including private passkey step-up; both temporary accounts and seven test documents were removed. Product Implementation corrected the missing Google OAuth callback; interactive Google/native acceptance remains open. Broader private/mobile work is still local and needs owner-device acceptance. See the [release verification](docs/implementation/2026-10-26-auth-domain-release.md).
 
 ### The experience we're building
 
@@ -73,11 +73,11 @@ Rather than treating a design concept, a local implementation and a deployed rel
 | Optional onboarding | **Available from login** | Fourteen-screen flow |
 | Account-owned ordinary journal (Firestore) | **Available** | Available |
 | Three editable fictional starter entries | **Available** | Available |
-| Encrypted browser-local private text and media | Source deployed; device acceptance pending | Implemented; locally tested |
-| Private drafts, revisions and autosave | Source deployed; device acceptance pending | Implemented; locally tested |
-| Image/audio private attachments; export and deletion | Source deployed; device acceptance pending | Implemented; locally tested |
-| Password-encrypted per-record backup/restore | Source deployed; device acceptance pending | Implemented; locally tested |
-| Configured substitutions and narrative distancing | Source deployed; broader detection remains planned | Implemented |
+| Encrypted browser-local private text and media | Not in the current deployed web release | Implemented locally; device acceptance pending |
+| Private drafts, revisions and autosave | Not in the current deployed web release | Implemented locally; device acceptance pending |
+| Image/audio private attachments; export and deletion | Not in the current deployed web release | Implemented locally; device acceptance pending |
+| Password-encrypted per-record backup/restore | Not in the current deployed web release | Implemented locally; device acceptance pending |
+| Configured substitutions and narrative distancing | Not in the current deployed web release | Limited implementation; broader detection remains planned |
 | General contextual PII screening / OpenAI Decisions API integration | Not available | Planned |
 | Companion permissions and evidence sharing | Not available | Planned |
 | Safety Trails / live location sharing | Not available | Planned |
@@ -91,12 +91,24 @@ For detailed and dated engineering evidence, see the [implementation tracker](do
 
 | Platform | How to access | Status |
 | --- | --- | --- |
-| **Web** | **[Open the live app](https://lulu.thisisphila.co.za/)** | Hosted release available. |
-| **PWA** | Install from a supported browser when offered. | Installability and offline behaviour must still be validated before publishing installation instructions. |
-| **Android** | Capacitor 8 Android project in source. | Builds have succeeded; no device-accepted APK download is currently published. |
-| **iOS** | Capacitor 8 iOS project in source. | Physical iPhone startup repaired; full device journey acceptance remains outstanding; no IPA/TestFlight link published. |
+| **Web** | **[Open the live demo](https://lulu.thisisphila.co.za/)** | Recommended for demos and reviews; hosted release available. |
+| **PWA install** | Not available yet; use the regular web link above. | LuLu does not currently provide a web manifest/install prompt. Offline account access and private-vault recovery are not guaranteed. |
+| **Android** | Build the Capacitor 8 project from source (instructions below). | No signed APK or Play Store download has been published. A source build is not a released app. |
+| **iOS** | Build the Capacitor 8 project from source (instructions below). | iPhone startup and passkey return to the app were confirmed; full journal create/edit/restart persistence has not been verified. No TestFlight or App Store download has been published. |
 
-APK and iOS installation links will appear here **after** testable, signed builds exist. A successful project build alone is not evidence of a working mobile release.
+### Build a mobile version from source
+
+These steps are for developers with the platform toolchain. For a demo, use the **live web app** above.
+
+```bash
+npm install
+npm run native:sync
+```
+
+- **Android:** install Android Studio and the Android SDK, connect a physical Android device with developer debugging enabled, then run `npm run native:open:android`. Select the device in Android Studio and run the `app` configuration. Android signing is required before distributing a release APK/AAB.
+- **iOS:** on macOS, install Xcode, connect an iPhone, then run `npm run native:open:ios`. Select a signing team and the connected device in Xcode, then run the app. Apple signing is required before distributing an IPA or TestFlight build.
+
+There are currently no public APK, IPA, Play Store or TestFlight download links. We will add them here once signed release builds and their real-device journeys are ready.
 
 ## Behind the project
 
