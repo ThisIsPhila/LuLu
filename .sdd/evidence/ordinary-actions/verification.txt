@@ -1,0 +1,22 @@
+LuLu ordinary saved-entry actions — local verification evidence
+Observed: 2026-10-26 06:53 SAST
+Source: local working tree; emulator project demo-lulu-journal-writes; no live Firebase project used.
+
+TypeScript:
+  npx tsc -b --pretty false
+  exit 0
+
+Export tests:
+  node --experimental-strip-types --test tests/ordinary-entry-export.test.mjs
+  tests 2; pass 2; fail 0; exit 0
+
+Firestore emulator:
+  PATH=/opt/homebrew/opt/openjdk@21/bin:$PATH firebase emulators:start --only firestore --project demo-lulu-journal-writes
+  Ready: Firestore at 127.0.0.1:8080; emulator was stopped cleanly after tests.
+
+Journal write/delete tests:
+  FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 node --test tests/backend/journalWrites.test.mjs
+  tests 8; pass 8; fail 0; exit 0
+  Includes expected PERMISSION_DENIED logs for negative authorization checks.
+
+Scope limitation: no browser/device UI test or deployment in this run. Emulator data was synthetic and local.

@@ -10,7 +10,7 @@ Updated 26 October 2026 (SAST). Build-first tracker, not an SDD phase. Keep impl
 | Passkey registration and returning sign-in | Runtime signing permission repaired; isolated live register/login/private-step-up test passed and temporary test account cleaned. Owner confirms native sign-in works. |
 | Enter journal immediately after verified auth | Success/Continue gate removed and Hosting release verified. |
 | Put sign-out in account/avatar menu | No permanent sign-out-only panel. Private exit controls preserved. |
-| Owner-scoped Firestore ordinary journal | Save, load, add and same-ID ordinary edit implemented; owner/access/shape rules tested. |
+| Owner-scoped Firestore ordinary journal | Save, load, add, same-ID edit/reclassification, single ordinary-entry deletion, and saved-source export implemented; emulator and export whitelist tests pass. Not deployed or device-accepted in this slice. |
 | Database-backed starter content | Three fictional templates copied once into each account as editable private/unprotected entries. No shared read-only Sample journal UI. |
 | Preserve starter changes across sign-ins | Real emulator tests cover concurrent initialization, edits/deletions and preexisting target IDs. |
 | Keep real logo/branding assets | Main app serves the chosen logo assets. Full visual design acceptance is separate. |
@@ -84,3 +84,7 @@ Existing detail now confirms scoped permanent deletion of a local original/histo
 ### Encrypted per-record backup and restore — 26 October
 
 Existing private journal flow now exports one saved text history or media original into a password-encrypted `.lulubackup` file. Restore requires the same authenticated account and re-encrypts under the current device key; identical history is idempotent and conflicting IDs are not overwritten. Nine backup-focused cases are included in 127 passing combined regressions; hosted build and Firebase guard pass. Browser download and synthetic-record restore/reopen were observed. Fresh-key loss/restore and exact media bytes/metadata are covered by fake-IndexedDB tests, not a physical-phone test. Per-record backups exclude drafts, unsaved edits, the full vault, passkeys and device keys. No deployment or cloud mutation. See [implementation](../implementation/2026-10-26-private-backup.md) and [.sdd review](../../.sdd/reports/private-backup/2026-10-26-review.md).
+
+### Ordinary saved-entry actions — 26 October
+
+The existing composer More/Options controls now select Journal or Story for new writing and same-ID edits, export a saved-source JSON copy using a field allowlist, and permanently delete one ordinary entry after explicit acknowledgement. Backend deletion checks the requested owner and `protected === false`; Firestore session rules remain authoritative. Eight local Firestore emulator cases cover kind persistence, protected/foreign-owner/anonymous/expired-session denial, selected-record scope, and starter non-reseeding; two export tests check the whitelist and protected-record rejection; TypeScript passes. Browser/device acceptance and deployment remain pending. No private-record or cloud-collection lifecycle is added. See [.sdd review](../../.sdd/reports/ordinary-actions/2026-10-26-review.md).

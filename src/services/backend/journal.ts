@@ -1,4 +1,4 @@
-import { collection, doc, onSnapshot, query, orderBy, limit, writeBatch, serverTimestamp, getDoc, updateDoc, type Firestore } from 'firebase/firestore';
+import { collection, doc, onSnapshot, query, orderBy, limit, writeBatch, serverTimestamp, getDoc, updateDoc, deleteDoc, type Firestore } from 'firebase/firestore';
 import { database } from './firebase.ts';
 import { encryptPrivate, decryptPrivate, type Envelope } from './deviceVault.ts';
 import type { Entry } from '../../domain/journal';
@@ -56,6 +56,21 @@ export async function updateEntry(uid: string, id: string, data: {title:string;b
     ...(data.kind === undefined ? {} : { kind: data.kind }),
     updatedAt: serverTimestamp(),
   });
+}
+
+/** Permanently delete only one owner-scoped ordinary entry. */
+export async function deleteEntry(uid: string, id: string, firestore: Firestore = database): Promise<void> {
+  if (typeof uid !== 'string' || !uid.trim() || uid.length > 128 || uid.includes('/') ||
+      typeof id !== 'string' || !id.trim() || id.length > 200 || id.includes('/')) {
+    throw new TypeError('A valid account and ordinary entry ID are required.');
+  }
+  const ref = doc(firestore, 'users', uid, 'entries', id);
+  const existing = await getDoc(ref);
+  if (!existing.exists()) throw new Error('This entry is no longer available.');
+  const data = existing.data();
+  if (data.ownerId !== uid) throw new Error('This entry does not belong to the active account.');
+  if (data.protected !== false) throw new Error('Protected entries cannot be deleted through ordinary journal actions.');
+  await deleteDoc(ref);
 }
 
 export async function readOriginal(uid: string, id: string) {

@@ -4,7 +4,8 @@ import { before, after, beforeEach, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { initializeTestEnvironment } from '@firebase/rules-unit-testing';
 import { collection, doc, getDoc, getDocs, limit, query, serverTimestamp, setDoc } from 'firebase/firestore';
-import { saveEntry, updateEntry } from '../../src/services/backend/journal.ts';
+import { deleteEntry, saveEntry, updateEntry } from '../../src/services/backend/journal.ts';
+import { ensureStarterEntries } from '../../src/services/backend/demoCatalogue.ts';
 
 let env;
 const [emulatorHost, emulatorPort] = (process.env.FIRESTORE_EMULATOR_HOST || '127.0.0.1:8085').split(':');
@@ -121,4 +122,72 @@ test('protected entries cannot be reclassified through the ordinary update path'
 
   await assert.rejects(updateEntry('alice', 'protected', { title: 'Story title', body: 'Changed.', kind: 'Story' }, firestore), /Protected entries/);
   assert.equal((await getDoc(ref)).data().kind, 'Journal');
+});
+
+test('deleteEntry removes only the selected ordinary document and never reseeds a deleted starter', async () => {
+  const firestore = db();
+  const selected = doc(firestore, 'users/alice/entries/selected');
+  const kept = doc(firestore, 'users/alice/entries/kept');
+  const starterId = 'starter-johannesburg-v1-one';
+  const starter = doc(firestore, 'users/alice/entries', starterId);
+  for (const ref of [selected, kept, starter]) {
+    await setDoc(ref, {
+      ownerId: 'alice', title: ref.id, body: 'Ordinary saved words.', kind: 'Journal', protected: false,
+      perspective: 'first', createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+    });
+  }
+  const marker = doc(firestore, 'users/alice/starterCatalogues/johannesburg-v1');
+  await env.withSecurityRulesDisabled(context => setDoc(doc(context.firestore(), 'users/alice/starterCatalogues/johannesburg-v1'), {
+    catalogueId: 'johannesburg-v1', version: 1, entryIds: [starterId], completedAt: serverTimestamp(),
+  }));
+
+  await deleteEntry('alice', selected.id, firestore);
+  assert.equal((await getDoc(selected)).exists(), false);
+  assert.equal((await getDoc(kept)).exists(), true);
+  assert.equal((await getDoc(starter)).exists(), true);
+
+  await deleteEntry('alice', starterId, firestore);
+  assert.equal(await ensureStarterEntries('alice', firestore), 0);
+  assert.equal((await getDoc(starter)).exists(), false);
+  assert.equal((await getDoc(marker)).exists(), true);
+  assert.equal((await getDoc(kept)).exists(), true);
+});
+
+test('deleteEntry rejects protected, foreign-owner, anonymous, expired and missing records', async () => {
+  const firestore = db();
+  const ordinaryRef = doc(firestore, 'users/alice/entries/ordinary-delete-denial');
+  const protectedRef = doc(firestore, 'users/alice/entries/protected-delete-denial');
+  const mismatchedRef = doc(firestore, 'users/alice/entries/owner-mismatch');
+  await env.withSecurityRulesDisabled(async context => {
+    const admin = context.firestore();
+    await setDoc(doc(admin, 'users/alice/entries/ordinary-delete-denial'), {
+      ownerId: 'alice', title: 'Ordinary', body: 'Keep until authorized.', kind: 'Journal', protected: false,
+      perspective: 'first', createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+    });
+    await setDoc(doc(admin, 'users/alice/entries/protected-delete-denial'), {
+      ownerId: 'alice', title: 'Journal entry', body: 'Protected text.', kind: 'Journal', protected: true,
+      perspective: 'third', createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+    });
+    await setDoc(doc(admin, 'users/alice/entries/owner-mismatch'), {
+      ownerId: 'bob', title: 'Foreign owner', body: 'Keep protected.', kind: 'Journal', protected: false,
+      perspective: 'first', createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+    });
+  });
+
+  await assert.rejects(deleteEntry('alice', protectedRef.id, firestore), /Protected entries/);
+  await assert.rejects(deleteEntry('alice', mismatchedRef.id, firestore), /does not belong/);
+  await assert.rejects(deleteEntry('alice', 'missing-entry', firestore), /no longer available/);
+  await assert.rejects(deleteEntry('alice', ordinaryRef.id, db('bob', 'bob-session')));
+  await assert.rejects(deleteEntry('alice', ordinaryRef.id, env.unauthenticatedContext().firestore()));
+  await env.withSecurityRulesDisabled(context => setDoc(doc(context.firestore(), '_sessions/session'), {
+    ...session, expiresAt: Date.now() - 1,
+  }));
+  await assert.rejects(deleteEntry('alice', ordinaryRef.id, firestore));
+
+  await env.withSecurityRulesDisabled(async context => {
+    const admin = context.firestore();
+    assert.equal((await getDoc(doc(admin, 'users/alice/entries/ordinary-delete-denial'))).exists(), true);
+    assert.equal((await getDoc(doc(admin, 'users/alice/entries/protected-delete-denial'))).exists(), true);
+    assert.equal((await getDoc(doc(admin, 'users/alice/entries/owner-mismatch'))).exists(), true);
+  });
 });

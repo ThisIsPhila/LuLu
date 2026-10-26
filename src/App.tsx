@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useLayoutEffect } from 'react';
 import { CircleAlert, X } from 'lucide-react';
 import type { Entry } from './domain/journal';
 import { filterOrdinaryEntries } from './domain/ordinaryBrowse';
 import { AuthBoundary } from './components/auth/AuthBoundary';
-import { watchEntries, saveEntry, readOriginal, updateEntry } from './services/backend/journal';
+import { watchEntries, saveEntry, readOriginal, updateEntry, deleteEntry } from './services/backend/journal';
 import { ensureStarterEntries } from './services/backend/demoCatalogue';
 import { unlockPrivate, lockPrivate, logout, type AppSession } from './services/backend/passkeys';
 import type { Entity } from './domain/transform';
@@ -49,6 +49,18 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
 
   // Protected Mode & Modals
   const [protectedMode, setProtectedMode] = useState<boolean>(false);
+  const composeRouteSignature = useMemo(
+    () => JSON.stringify([currentView, editingEntry?.id ?? null, composingKind, protectedMode]),
+    [currentView, editingEntry?.id, composingKind, protectedMode],
+  );
+  const composeRouteRef = useRef({ signature: composeRouteSignature, generation: 0 });
+  useLayoutEffect(() => {
+    if (composeRouteRef.current.signature !== composeRouteSignature) {
+      composeRouteRef.current = { signature: composeRouteSignature, generation: composeRouteRef.current.generation + 1 };
+    }
+  }, [composeRouteSignature]);
+  const currentComposeRouteToken = () => `${composeRouteRef.current.generation}:${composeRouteRef.current.signature}`;
+  const accountSessionActive = () => !signingOut.current && Date.now() < session.expiresAt;
   const [isProtectedGateOpen, setIsProtectedGateOpen] = useState<boolean>(false);
   const [notice, setNotice] = useState<string>('');
 
@@ -125,17 +137,28 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     }
   };
   const handleSaveProtectedEntry = async (data:{title:string;body:string;originalBody:string;kind:'Journal'|'Story'}) => {
+    const routeToken = currentComposeRouteToken();
+    if (!accountSessionActive()) throw new Error('Account session expired. Sign in again before saving.');
     if(protectedMode && Date.now()>=privateUntil)throw new Error('Private session expired. Unlock again before saving.');
     if(editingEntry) {
       if(editingEntry.protected)throw new Error('Protected entries cannot be edited in this view. Open protected access to work with protected content.');
       await updateEntry(session.uid,editingEntry.id,{title:data.title,body:data.body,kind:data.kind});
-      setSelectedEntry(null);setEditingEntry(null);
     } else if(protectedMode) {
       throw new Error('Save through the encrypted private draft editor.');
     } else {
       await saveEntry(session.uid,{...data,protected:protectedMode,entities});
     }
+    if (currentComposeRouteToken() !== routeToken || !accountSessionActive()) return;
+    if(editingEntry) {setSelectedEntry(null);setEditingEntry(null);}
     setNotice('Entry saved.');setCurrentView('home');
+  };
+
+  const handleDeleteOrdinaryEntry = async (id: string) => {
+    const routeToken = currentComposeRouteToken();
+    if (!accountSessionActive()) throw new Error('Account session expired. Sign in again before deleting an entry.');
+    await deleteEntry(session.uid, id);
+    if (currentComposeRouteToken() !== routeToken || !accountSessionActive()) return;
+    setSelectedEntry(null);setEditingEntry(null);setCurrentView('home');setNotice('Entry permanently deleted.');
   };
 
   const handleUpdateAlias = (id: string, newAlias: string) => {
@@ -238,13 +261,15 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
 
         {currentView === 'compose' && (
           <TransformProtectView
-            key={`compose-${privateAuthority.current.generation}-${editingEntry?.id ?? 'new'}`}
+            key={`compose-${privateAuthority.current.generation}-${editingEntry?.id ?? `new-${composingKind}`}`}
             entities={entities}
             protectedMode={protectedMode && !editingEntry}
             editingEntry={editingEntry ?? undefined}
             initialKind={composingKind}
             onBack={() => setCurrentView('home')}
             onSaveProtected={handleSaveProtectedEntry}
+            onDeleteOrdinary={handleDeleteOrdinaryEntry}
+            isOrdinarySessionActive={()=>!signingOut.current && Date.now()<session.expiresAt}
             onOpenEntityInspector={() => navigatePrivate('inspector')}
             onEnterPrivate={() => setIsProtectedGateOpen(true)}
             privateVault={localVault.current ?? undefined}

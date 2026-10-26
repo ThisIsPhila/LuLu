@@ -24,8 +24,8 @@ window.productionTasks = {
         {
           "title": "Owner-scoped ordinary journal",
           "status": "Implemented",
-          "detail": "Cloud save, load, add and same-ID edit are implemented with owner and record-shape checks. Local collection persistence supports Journal/Story; Stories → existing Write creates a Story and Story edits retain their kind. Nine emulator tests cover writes and starter preservation.",
-          "next": "Continue acceptance on the owner’s device.",
+          "detail": "Cloud save, load, add and same-ID edit/reclassification are implemented with owner and record-shape checks. Existing composer Options select Journal/Story, export a whitelisted saved-source JSON copy, and confirm deletion of one ordinary entry. Eight local emulator cases cover write/delete scope and denial paths; two export whitelist tests pass.",
+          "next": "Verify the existing Options flow and ordinary entry lifecycle on the owner’s device; this slice is local and not deployed.",
           "done": true
         },
         {
@@ -164,8 +164,8 @@ window.productionTasks = {
         {
           "title": "Export, deletion, retention and recovery",
           "status": "Local export/deletion and per-record encrypted backup implemented; acceptance pending",
-          "detail": "Existing private journal flow exports readable copies, confirms scoped local deletion, and backs up/restores one saved text history or media original in a password-encrypted file. Restore is same-account, re-encrypts with the current device key and never overwrites conflicting IDs. 127 combined regressions, hosted build and Firebase guard pass; synthetic browser download/restore observed.",
-          "next": "Verify native phones; implement ordinary/cloud lifecycle and scheduled retention. Backups exclude drafts, unsaved edits, the whole vault, passkeys and device keys. No deployment or cloud mutation.",
+          "detail": "Existing private journal flow exports readable copies, confirms scoped local deletion, and backs up/restores one saved text history or media original in a password-encrypted file. Restore is same-account, re-encrypts with the current device key and never overwrites conflicting IDs. Ordinary composer options now export a whitelisted saved-source copy and delete one owner-scoped ordinary entry after acknowledgement; local emulator and export tests pass. Private backup still excludes drafts, unsaved edits, the whole vault, passkeys and device keys.",
+          "next": "Verify both flows on native phones; scheduled retention and broader cloud lifecycle remain open. This ordinary-actions slice is local and not deployed.",
           "done": false
         },
         {
