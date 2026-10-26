@@ -4,7 +4,7 @@
 
 The existing onboarding now offers passkey, email/password, and Google sign-in. Email/password uses Firebase Authentication directly and exchanges the verified Firebase identity for the same short-lived LuLu API session used by the journal. Google sign-in on native opens the trusted LuLu HTTPS bridge, uses Firebase redirect auth there, and returns only through the bound one-time exchange; no Firebase token appears in the app callback URL. Web keeps its Firebase email/password and Google popup flows. The hosted origin remains the WebAuthn RP origin, and private writing still requires passkey verification.
 
-The local Firebase auth config enables email/password and keeps anonymous auth disabled. An owner-reviewed, expiring Firebase guard exception records that intentional provider change. Google OAuth metadata is not set in source because Firebase requires the project's chosen support email; enable Google in the existing Firebase Authentication settings with that address before release.
+The local Firebase auth config enables email/password and Google sign-in, keeps anonymous auth disabled, and sets the Google OAuth brand to LuLu with the owner-provided support email `lulu@thisisphila.co.za`. An owner-reviewed, expiring Firebase guard exception records these intentional provider settings. They remain local until deployment.
 
 ## Verification
 
@@ -17,7 +17,7 @@ The local Firebase auth config enables email/password and keeps anonymous auth d
 
 ## Release and account limits
 
-No Firebase Hosting, Functions, or Auth configuration was deployed. For live sign-in, configure Email/Password and Google in Firebase Authentication; choose the existing project's support email for Google's OAuth consent, then deploy the reviewed hosted bridge and `lulu` Functions changes to `khora-lulu-2026`. Google is handled on the trusted hosted origin, so no Android SHA fingerprint or iOS Google URL scheme is needed for this relay.
+No Firebase Hosting, Functions, or Auth configuration was deployed. For live sign-in, deploy the reviewed Auth configuration, hosted bridge, and `lulu` Functions changes to `khora-lulu-2026`. Google is handled on the trusted hosted origin, so no Android SHA fingerprint or iOS Google URL scheme is needed for this relay.
 
 `org.khora.lulu` is the native app identifier in `capacitor.config.ts`; it is not an organization name or a deployment prerequisite. Xcode provisioned it successfully. The free-profile slot was released by the owner, and LuLu is now installed on the iPhone.
 
