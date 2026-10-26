@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content"><title>LuLu private writing — local synthetic visual fixture</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,300..800;1,300..800&family=JetBrains+Mono:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,300..700;1,7..72,300..700&display=swap" rel="stylesheet">
+
+<style>.fixture-label{position:fixed;left:8px;bottom:1px;z-index:9999;padding:2px 7px;border-radius:5px;background:#e5dece;color:#544c40;font:9px/1.3 sans-serif;pointer-events:none}</style></head>
+<body><aside class="fixture-label">Local synthetic fixture · no account authentication</aside><div id="root"></div>
+<script type="module">
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import '/src/styles.css';
+import '/src/app-layout.css';
+import '/src/components/auth/auth.css';
+import {LocalVault} from '/src/services/vault/localVault.ts';
+import {LocalMediaVault} from '/src/services/vault/localMediaVault.ts';
+import {LocalPrivateJournal} from '/src/components/LocalPrivateJournal.tsx';
+import {BottomNav} from '/src/components/BottomNav.tsx';
+import {PrivateDraftComposer} from '/src/components/PrivateDraftComposer.tsx';
+const authority={generation:1,unlocked:true};
+const vault=new LocalVault({ownerId:'local-visual-fixture-only',generation:()=>authority.generation,isUnlocked:()=>authority.unlocked});
+const mediaVault=new LocalMediaVault({ownerId:'local-visual-fixture-only',generation:()=>authority.generation,isUnlocked:()=>authority.unlocked});
+const payload=(title,body)=>({format:'lulu-private-text-v1',mediaType:'text/plain',title,body,languages:[]});
+// This origin/owner is isolated synthetic test data, never an authenticated account or hosted route.
+if(!await vault.getLatest('visual-entry')) await vault.createOriginal({recordId:'visual-entry',revisionId:'visual-original',provenance:'user-authored',content:payload('An afternoon reflection','Today I made a little room for myself.\n\nA few unhurried words, and a moment to breathe.')});
+if(!await vault.getDraft('visual-draft')) await vault.saveDraft({draftId:'visual-draft',expectedVersion:null,content:payload('A thought to return to','There are a few things I want to write down, in my own time.')});
+function Fixture(){
+ const [view,setView]=React.useState('list');
+ function exit(){authority.generation++;authority.unlocked=false;setView('locked');}
+ return React.createElement('div',{className:'lulu-app-root'},
+  view!=='locked'?React.createElement('div',{className:'account-actions'},React.createElement('button',{onClick:exit},'Quick exit'),React.createElement('button',{onClick:()=>setView('list')},'Private writing')):null,
+  React.createElement('div',{className:'lulu-viewport-shell'},
+  view==='list'?React.createElement(LocalPrivateJournal,{vault,mediaVault,onExit:exit,onCompose:()=>setView('compose')}):
+  view==='compose'?React.createElement(PrivateDraftComposer,{vault,mediaVault,initialTitle:'',initialBody:'',entities:[],onBack:()=>setView('list'),onSaved:()=>setView('list'),onOpenEntityInspector:()=>{}}):
+  React.createElement('p',null,'Fixture locked. Reload to begin a new synthetic session.'),
+  view==='list'?React.createElement(BottomNav,{currentView:'local-private',protectedMode:true,onNavigate:next=>setView(next==='compose'?'compose':'list')}):null));
+}
+createRoot(document.getElementById('root')).render(React.createElement(React.StrictMode,null,React.createElement(Fixture)));
+</script></body></html>

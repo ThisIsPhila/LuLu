@@ -1,0 +1,8 @@
+Private per-record backup/restore browser check — 26 October 2026
+
+- Downloaded `lulu-private-record.lulubackup` through the existing private-journal flow. The encrypted file was verified to decrypt to `lulu-record-backup-v1`, contain the expected source/original record, and omit its plaintext title. See `download-verification.json`.
+- Generated a separate synthetic two-version record backup for the same test account using a different fake IndexedDB/device key. Selected `synthetic-fresh-record.lulubackup` through the browser file picker, entered the passphrase, prepared the restore and confirmed it.
+- The new synthetic record reopened with its original and revision and original timestamps. Screenshots: `restore-confirmation.png` and `restored-history.png`.
+- Quick exit locked the restored fixture. Browser tab closed and local preview server stopped.
+
+Scope: observed browser verification with synthetic content. No real user journal record, cloud write, deployment, physical phone, or native key store was involved. Fresh-key text/media restore is also covered by fake-IndexedDB tests.

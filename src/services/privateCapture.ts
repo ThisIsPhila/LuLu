@@ -10,7 +10,11 @@ export type PrivateText = {
 };
 
 export function readPrivateText(revision: LocalVaultRevision): PrivateText {
-  const value = revision.content as Partial<PrivateText> | null;
+  return readPrivateTextContent(revision.content);
+}
+
+export function readPrivateTextContent(content: unknown): PrivateText {
+  const value = content as Partial<PrivateText> | null;
   if (!value || value.format !== 'lulu-private-text-v1' || value.mediaType !== 'text/plain' ||
       typeof value.title !== 'string' || typeof value.body !== 'string' ||
       !Array.isArray(value.languages) || !value.languages.every(item => typeof item === 'string')) {

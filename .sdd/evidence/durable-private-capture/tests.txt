@@ -1,0 +1,346 @@
+TAP version 13
+# Subtest: remote decision gate allows exact purpose, recipient, policy, and text snapshot
+ok 1 - remote decision gate allows exact purpose, recipient, policy, and text snapshot
+  ---
+  duration_ms: 8.459667
+  type: 'test'
+  ...
+# Subtest: remote decision gate fails closed without policy, strict authorization, or purpose approval
+ok 2 - remote decision gate fails closed without policy, strict authorization, or purpose approval
+  ---
+  duration_ms: 2.97
+  type: 'test'
+  ...
+# Subtest: disclosure preparation and review bind source revisions, purpose, recipient, policy, and exact text
+ok 3 - disclosure preparation and review bind source revisions, purpose, recipient, policy, and exact text
+  ---
+  duration_ms: 1.98625
+  type: 'test'
+  ...
+# Subtest: ordinary and starter content stay distinct from authentic evidence
+ok 4 - ordinary and starter content stay distinct from authentic evidence
+  ---
+  duration_ms: 0.136542
+  type: 'test'
+  ...
+# Subtest: paragraphs are concealed while locked and revealing another conceals the prior paragraph
+ok 5 - paragraphs are concealed while locked and revealing another conceals the prior paragraph
+  ---
+  duration_ms: 0.318459
+  type: 'test'
+  ...
+# Subtest: companion access requires matching owner and valid grant time, and is scoped, expiring, and revocable
+ok 6 - companion access requires matching owner and valid grant time, and is scoped, expiring, and revocable
+  ---
+  duration_ms: 0.223292
+  type: 'test'
+  ...
+# Subtest: companion statement remains a separate attributed contribution value
+ok 7 - companion statement remains a separate attributed contribution value
+  ---
+  duration_ms: 0.141584
+  type: 'test'
+  ...
+# Subtest: acknowledged autosave reopens only through a fresh unlocked session and promotes exact text
+ok 8 - acknowledged autosave reopens only through a fresh unlocked session and promotes exact text
+  ---
+  duration_ms: 23.574042
+  type: 'test'
+  ...
+# Subtest: exit drops queued changes and late callbacks, preserving the last completed encrypted snapshot
+ok 9 - exit drops queued changes and late callbacks, preserving the last completed encrypted snapshot
+  ---
+  duration_ms: 5.154542
+  type: 'test'
+  ...
+# Subtest: a lost finalization acknowledgement leaves exactly one record and no orphan draft
+ok 10 - a lost finalization acknowledgement leaves exactly one record and no orphan draft
+  ---
+  duration_ms: 7.145167
+  type: 'test'
+  ...
+# Subtest: recovered edit autosaves then appends while exact original remains unchanged
+ok 11 - recovered edit autosaves then appends while exact original remains unchanged
+  ---
+  duration_ms: 7.662292
+  type: 'test'
+  ...
+# Subtest: stores original and derived revisions encrypted, preserving the original
+ok 12 - stores original and derived revisions encrypted, preserving the original
+  ---
+  duration_ms: 18.849458
+  type: 'test'
+  ...
+# Subtest: locked or changed sessions fail closed for reads and writes
+ok 13 - locked or changed sessions fail closed for reads and writes
+  ---
+  duration_ms: 3.576333
+  type: 'test'
+  ...
+# Subtest: prevents synthetic records and invalid provenance from entering evidence
+ok 14 - prevents synthetic records and invalid provenance from entering evidence
+  ---
+  duration_ms: 2.458333
+  type: 'test'
+  ...
+# Subtest: atomically prevents duplicate originals and stale or duplicate revisions
+ok 15 - atomically prevents duplicate originals and stale or duplicate revisions
+  ---
+  duration_ms: 7.75725
+  type: 'test'
+  ...
+# Subtest: owner identity scopes records and authenticated encryption
+ok 16 - owner identity scopes records and authenticated encryption
+  ---
+  duration_ms: 3.137709
+  type: 'test'
+  ...
+# Subtest: pins owner identity for the lifetime of a vault instance
+ok 17 - pins owner identity for the lifetime of a vault instance
+  ---
+  duration_ms: 3.514125
+  type: 'test'
+  ...
+# Subtest: authenticated data is bound to owner, record and revision identity
+ok 18 - authenticated data is bound to owner, record and revision identity
+  ---
+  duration_ms: 4.374541
+  type: 'test'
+  ...
+# Subtest: rejects a row copied to another lookup key without changing its identity fields
+ok 19 - rejects a row copied to another lookup key without changing its identity fields
+  ---
+  duration_ms: 2.310542
+  type: 'test'
+  ...
+# Subtest: snapshots plain JSON once and rejects mutable or lossy values
+ok 20 - snapshots plain JSON once and rejects mutable or lossy values
+  ---
+  duration_ms: 2.270791
+  type: 'test'
+  ...
+# Subtest: snapshots record IDs and provenance before asynchronous encryption
+ok 21 - snapshots record IDs and provenance before asynchronous encryption
+  ---
+  duration_ms: 3.035417
+  type: 'test'
+  ...
+# Subtest: rejects late reads after exit and permits a fresh instance at a new generation
+ok 22 - rejects late reads after exit and permits a fresh instance at a new generation
+  ---
+  duration_ms: 4.990708
+  type: 'test'
+  ...
+# Subtest: detects missing revisions against the record head
+ok 23 - detects missing revisions against the record head
+  ---
+  duration_ms: 3.144417
+  type: 'test'
+  ...
+# Subtest: detects orphaned revision rows when a record head is missing
+ok 24 - detects orphaned revision rows when a record head is missing
+  ---
+  duration_ms: 1.86925
+  type: 'test'
+  ...
+# Subtest: serializes writes, coalesces rapid edits, and flush waits for the latest accepted snapshot
+ok 25 - serializes writes, coalesces rapid edits, and flush waits for the latest accepted snapshot
+  ---
+  duration_ms: 4.700708
+  type: 'test'
+  ...
+# Subtest: stop drops queued snapshots and ignores late vault acknowledgements and callbacks
+ok 26 - stop drops queued snapshots and ignores late vault acknowledgements and callbacks
+  ---
+  duration_ms: 1.870709
+  type: 'test'
+  ...
+# Subtest: quota error keeps the newest snapshot in memory for an explicit retry and exposes no text
+ok 27 - quota error keeps the newest snapshot in memory for an explicit retry and exposes no text
+  ---
+  duration_ms: 1.511916
+  type: 'test'
+  ...
+# Subtest: a compare-and-swap conflict is surfaced and never blindly retried
+ok 28 - a compare-and-swap conflict is surfaced and never blindly retried
+  ---
+  duration_ms: 0.738208
+  type: 'test'
+  ...
+# Subtest: finalization retains the draft after failure and clears it only after storage acknowledgement
+ok 29 - finalization retains the draft after failure and clears it only after storage acknowledgement
+  ---
+  duration_ms: 2.044375
+  type: 'test'
+  ...
+# Subtest: blank-body drafts autosave, but finalization refuses them without deleting their draft
+ok 30 - blank-body drafts autosave, but finalization refuses them without deleting their draft
+  ---
+  duration_ms: 0.409459
+  type: 'test'
+  ...
+# Subtest: resuming requires the persisted version that protects against blind replacement
+ok 31 - resuming requires the persisted version that protects against blind replacement
+  ---
+  duration_ms: 0.124708
+  type: 'test'
+  ...
+# Subtest: invalid latest snapshot blocks flush and finalize after an earlier snapshot was saved, then a valid edit recovers
+ok 32 - invalid latest snapshot blocks flush and finalize after an earlier snapshot was saved, then a valid edit recovers
+  ---
+  duration_ms: 0.315209
+  type: 'test'
+  ...
+# Subtest: invalid latest snapshot during an earlier in-flight save never reports that older write as saved
+ok 33 - invalid latest snapshot during an earlier in-flight save never reports that older write as saved
+  ---
+  duration_ms: 1.539292
+  type: 'test'
+  ...
+# Subtest: record-stage failures route through finalize again instead of retrying draft save
+ok 34 - record-stage failures route through finalize again instead of retrying draft save
+  ---
+  duration_ms: 0.5905
+  type: 'test'
+  ...
+# Subtest: snapshot copying rejects accessors without invoking them
+ok 35 - snapshot copying rejects accessors without invoking them
+  ---
+  duration_ms: 0.199417
+  type: 'test'
+  ...
+# Subtest: valid edits after a record-stage quota failure clear the record error and autosave the mutable draft
+ok 36 - valid edits after a record-stage quota failure clear the record error and autosave the mutable draft
+  ---
+  duration_ms: 0.193583
+  type: 'test'
+  ...
+# Subtest: valid edits after stale-target promotion conflict still autosave the retained draft
+ok 37 - valid edits after stale-target promotion conflict still autosave the retained draft
+  ---
+  duration_ms: 0.612209
+  type: 'test'
+  ...
+# Subtest: lost finalize acknowledgement reconciles only an exact existing revision
+ok 38 - lost finalize acknowledgement reconciles only an exact existing revision
+  ---
+  duration_ms: 0.218625
+  type: 'test'
+  ...
+# Subtest: finalization IDs are captured before flush yields and content comparison ignores object key order
+ok 39 - finalization IDs are captured before flush yields and content comparison ignores object key order
+  ---
+  duration_ms: 0.158042
+  type: 'test'
+  ...
+# Subtest: resumed targeted draft uses its actual storage version in the default revision ID
+ok 40 - resumed targeted draft uses its actual storage version in the default revision ID
+  ---
+  duration_ms: 0.083333
+  type: 'test'
+  ...
+# Subtest: a later record-stage error replaces an earlier quota classification
+ok 41 - a later record-stage error replaces an earlier quota classification
+  ---
+  duration_ms: 0.207333
+  type: 'test'
+  ...
+# Subtest: lost finalize acknowledgement with mismatched stored content remains an error
+ok 42 - lost finalize acknowledgement with mismatched stored content remains an error
+  ---
+  duration_ms: 0.148459
+  type: 'test'
+  ...
+# Subtest: stopping during lost-ack lookup suppresses reconciliation success and later status callbacks
+ok 43 - stopping during lost-ack lookup suppresses reconciliation success and later status callbacks
+  ---
+  duration_ms: 0.155833
+  type: 'test'
+  ...
+# Subtest: private text capture and revision survive a new vault instance without network
+ok 44 - private text capture and revision survive a new vault instance without network
+  ---
+  duration_ms: 23.174875
+  type: 'test'
+  ...
+# Subtest: invalid private capture does not create a record
+ok 45 - invalid private capture does not create a record
+  ---
+  duration_ms: 2.155042
+  type: 'test'
+  ...
+# Subtest: drafts survive a new vault instance with the same browser key and remain encrypted at rest
+ok 46 - drafts survive a new vault instance with the same browser key and remain encrypted at rest
+  ---
+  duration_ms: 13.695167
+  type: 'test'
+  ...
+# Subtest: adds the draft store through a version-2 upgrade without replacing existing stores or rows
+ok 47 - adds the draft store through a version-2 upgrade without replacing existing stores or rows
+  ---
+  duration_ms: 3.565208
+  type: 'test'
+  ...
+# Subtest: closes a database connection that succeeds after an already-rejected blocked upgrade
+ok 48 - closes a database connection that succeeds after an already-rejected blocked upgrade
+  ---
+  duration_ms: 14.571791
+  type: 'test'
+  ...
+# Subtest: draft saves use compare-and-swap and reject locked or stale generations
+ok 49 - draft saves use compare-and-swap and reject locked or stale generations
+  ---
+  duration_ms: 5.846417
+  type: 'test'
+  ...
+# Subtest: oversized snapshots fail without an acknowledgement or partial stored draft
+ok 50 - oversized snapshots fail without an acknowledgement or partial stored draft
+  ---
+  duration_ms: 5.775125
+  type: 'test'
+  ...
+# Subtest: preserves quota errors on a failed update and keeps the prior draft available for retry
+ok 51 - preserves quota errors on a failed update and keeps the prior draft available for retry
+  ---
+  duration_ms: 4.982583
+  type: 'test'
+  ...
+# Subtest: new draft promotion atomically creates an original and removes only the draft
+ok 52 - new draft promotion atomically creates an original and removes only the draft
+  ---
+  duration_ms: 4.60025
+  type: 'test'
+  ...
+# Subtest: finalization snapshots requested record and revision IDs before asynchronous reads
+ok 53 - finalization snapshots requested record and revision IDs before asynchronous reads
+  ---
+  duration_ms: 6.150667
+  type: 'test'
+  ...
+# Subtest: promotion abort preserves the draft and creates no partial original or head; retry commits once
+ok 54 - promotion abort preserves the draft and creates no partial original or head; retry commits once
+  ---
+  duration_ms: 6.399583
+  type: 'test'
+  ...
+# Subtest: targeted draft promotion appends without changing the exact original
+ok 55 - targeted draft promotion appends without changing the exact original
+  ---
+  duration_ms: 6.122459
+  type: 'test'
+  ...
+# Subtest: stale target or changed draft fails finalization and preserves the recovery snapshot
+ok 56 - stale target or changed draft fails finalization and preserves the recovery snapshot
+  ---
+  duration_ms: 6.243125
+  type: 'test'
+  ...
+1..56
+# tests 56
+# suites 0
+# pass 56
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 216.203125
