@@ -33,6 +33,17 @@ function returnToApp(params: { requestId: string; state: string; operation: stri
   window.location.assign(callback.toString());
 }
 
+function otherPasskeyAddress(request: RelayRequest): URL | null {
+  if (request.operation !== 'login' && request.operation !== 'stepup') return null;
+  const otherOrigin = window.location.origin === 'https://khora-lulu-2026.web.app'
+    ? 'https://lulu.thisisphila.co.za'
+    : window.location.origin === 'https://lulu.thisisphila.co.za' ? 'https://khora-lulu-2026.web.app' : null;
+  if (!otherOrigin) return null;
+  const url = new URL('/native-auth-bridge', otherOrigin);
+  for (const [key, value] of Object.entries(request)) url.searchParams.set(key, value);
+  return url;
+}
+
 function readRelayRequest(): RelayRequest | null {
   const params = new URLSearchParams(window.location.search);
   const exchangeId = params.get('exchangeId');
@@ -63,6 +74,9 @@ export function NativeAuthBridge() {
   const [request] = useState<RelayRequest | null>(initialRelayRequest);
   const [stage, setStage] = useState<RelayStage>('working');
   const [message, setMessage] = useState('Connecting securely to LuLu…');
+  const [attempt, setAttempt] = useState(0);
+  const [failedStatus, setFailedStatus] = useState<'error' | 'cancelled'>('error');
+  const otherAddress = request ? otherPasskeyAddress(request) : null;
 
   useEffect(() => {
     const incoming = readRelayRequest();
@@ -109,6 +123,8 @@ export function NativeAuthBridge() {
       return;
     }
     let active = true;
+    setStage('working');
+    setMessage('Opening your LuLu passkey…');
     void (async () => {
       let operation = request.operation;
       try {
@@ -124,13 +140,13 @@ export function NativeAuthBridge() {
       } catch (error) {
         if (!active) return;
         const cancelled = error instanceof Error && error.name === 'NotAllowedError';
-        setStage('returning');
-        setMessage(cancelled ? 'Passkey verification was cancelled. Returning to LuLu…' : 'Sign-in could not be completed. Returning to LuLu…');
-        returnToApp({ requestId: request.requestId, state: request.state, operation, status: cancelled ? 'cancelled' : 'error' });
+        setStage('error');
+        setFailedStatus(cancelled ? 'cancelled' : 'error');
+        setMessage(cancelled ? 'The passkey prompt was cancelled or no matching passkey was found. You can try again or return to LuLu.' : error instanceof Error ? error.message : 'Sign-in could not be completed. Return to LuLu and try again.');
       }
     })();
     return () => { active = false; };
-  }, [request]);
+  }, [request, attempt]);
 
   async function startGoogleSignIn() {
     if (!request || stage === 'working') return;
@@ -152,7 +168,12 @@ export function NativeAuthBridge() {
       <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, fontWeight: 500, margin: '0 0 12px' }}>LuLu sign-in</h1>
       <p>{message}</p>
       {request?.operation === 'google-login' && stage === 'choose' && <button type="button" onClick={() => void startGoogleSignIn()} style={{ minHeight: 48, padding: '0 22px', border: '1px solid #d9d1c3', borderRadius: 999, color: '#343830', background: '#fffefa', fontWeight: 700 }}>Continue with Google</button>}
-      {stage === 'error' && <a href="https://khora-lulu-2026.web.app" style={{ color: '#405b45' }}>Open LuLu</a>}
+      {stage === 'error' && request && <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+        {request.operation !== 'google-login' && <button type="button" onClick={() => setAttempt(value => value + 1)}>Try passkey again</button>}
+        <button type="button" onClick={() => returnToApp({ requestId: request.requestId, state: request.state, operation: request.operation, status: failedStatus })}>Return to LuLu</button>
+      </div>}
+      {stage === 'error' && otherAddress && <p><a href={otherAddress.toString()} rel="noreferrer" style={{ color: '#405b45' }}>Use a passkey saved on {otherAddress.hostname}</a></p>}
+      {stage === 'error' && !request && <a href="https://khora-lulu-2026.web.app" style={{ color: '#405b45' }}>Open LuLu</a>}
     </section>
   </main>;
 }

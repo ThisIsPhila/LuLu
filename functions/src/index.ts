@@ -6,13 +6,12 @@ import { onRequest } from 'firebase-functions/v2/https';
 import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from '@simplewebauthn/server';
 import type { RegistrationResponseJSON, AuthenticationResponseJSON, AuthenticatorTransportFuture } from '@simplewebauthn/server';
 import { ApiError, assertChallenge, assertSession, canOfferRegistrationSignInRecovery, documentId, failureDiagnostic, mintBeforePersist, withCompensation, CHALLENGE_TTL, SESSION_TTL, PRIVATE_TTL, type Challenge, type FailureStage } from './policy.js';
-import { assertExchangeProof, assertExchangeRedeemable, assertExchangeState, isNativeOpaqueValue, isNativeOperation, type NativeOperation } from './native-exchange-policy.js';
+import { assertExchangeProof, assertExchangeRedeemable, assertExchangeState, isNativeOpaqueValue, isNativeOperation, storedWebAuthnOptions, type NativeOperation } from './native-exchange-policy.js';
+import { browserOrigins as origins, nativeOrigins, isAllowedApiOrigin } from './origin-policy.js';
 
 initializeApp();
 const db = getFirestore();
 const identity = getAuth();
-const origins = new Set(['https://khora-lulu-2026.web.app', 'https://khora-lulu-2026.firebaseapp.com', 'https://lulu.thisisphila.co.za', 'http://localhost:5173', 'http://127.0.0.1:5173']);
-const nativeOrigins = new Set(['capacitor://localhost', 'https://localhost']);
 const knownRoutes = new Set(['/auth/register/options', '/auth/register/verify', '/auth/login/options', '/auth/login/verify', '/auth/stepup/options', '/auth/stepup/verify', '/auth/provider/session', '/auth/lock', '/auth/logout', '/session', '/native/exchange/create', '/native/exchange/options', '/native/exchange/complete', '/native/exchange/provider-complete', '/native/exchange/redeem', '/native/exchange/cancel']);
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
 const sessions = db.collection('_sessions');
@@ -20,7 +19,7 @@ const challenges = db.collection('_challenges');
 const credentials = db.collection('_credentials');
 const nativeExchanges = db.collection('_nativeExchanges');
 type Session = {uid: string; expiresAt: number; privateUntil: number; authMethod?: 'passkey'|'email'|'google'};
-type NativeExchange = {requestId:string; stateHash:string; proofHash:string; operation:NativeOperation; uid:string|null; sid:string|null; status:'pending'|'challenge'|'complete'|'redeemed'|'cancelled'; expiresAt:number; challengeId?:string; challengeOptions?:unknown; customToken?:string; privateUntil?:number; purgeAfter:Timestamp};
+type NativeExchange = {requestId:string; stateHash:string; proofHash:string; operation:NativeOperation; uid:string|null; sid:string|null; status:'pending'|'challenge'|'complete'|'redeemed'|'cancelled'; expiresAt:number; challengeId?:string; challengeOrigin?:string; challengeOptions?:unknown; customToken?:string; privateUntil?:number; purgeAfter:Timestamp};
 const nativeTtl = 5 * 60_000;
 
 async function sessionFor(header: string | undefined, requirePrivate = false, requirePasskey = false) {
@@ -84,8 +83,7 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
   const origin = request.get('origin') || '';
   const rawRoute = request.path.replace(/^\/api/, '');
   const route = knownRoutes.has(rawRoute) ? rawRoute : 'unknown';
-  const nativeOnlyRoute = route === '/auth/provider/session' || route === '/native/exchange/create' || route === '/native/exchange/redeem' || route === '/native/exchange/cancel';
-  if (!origins.has(origin) && !(nativeOnlyRoute && nativeOrigins.has(origin))) { response.status(403).json({error:'This origin is not allowed.'}); return; }
+  if (!isAllowedApiOrigin(origin, route)) { response.status(403).json({error:'This origin is not allowed.'}); return; }
   response.set('Access-Control-Allow-Origin', origin);
   response.set('Vary', 'Origin');
   response.set('Access-Control-Allow-Headers', 'Authorization, Content-Type');
@@ -121,7 +119,7 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
       const {ref, exchange} = await loadNativeExchange(body.exchangeId, body.state);
       if (!['register','login','stepup'].includes(exchange.operation)) throw new ApiError(400, 'This authentication request does not use a passkey.');
       if (exchange.status !== 'pending' && exchange.status !== 'challenge') throw new ApiError(409, 'This authentication request is no longer active.');
-      if (exchange.challengeOptions && exchange.challengeId) {
+      if (exchange.challengeOptions && exchange.challengeId && exchange.challengeOrigin === origin) {
         response.json({options: exchange.challengeOptions, challengeId: exchange.challengeId, operation: exchange.operation}); return;
       }
       if (exchange.operation === 'stepup' && (!exchange.uid || !exchange.sid)) throw new ApiError(401, 'Please sign in again.');
@@ -133,7 +131,10 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
       const challengeId = randomUUID();
       const expiresAt = Math.min(exchange.expiresAt, Date.now() + CHALLENGE_TTL);
       await challenges.doc(challengeId).create({challenge:options.challenge,kind,uid,sid:exchange.sid,origin,rpID,expiresAt,used:false,exchangeId:body.exchangeId});
-      await ref.update({status:'challenge', challengeId, challengeOptions:options, ...(kind === 'register' && !exchange.uid ? {uid} : {})});
+      // A user may explicitly choose the other trusted LuLu hostname where their
+      // passkey was created. Issue a new origin-bound challenge for that browser;
+      // completion still rejects every previously superseded challenge ID.
+      await ref.update({status:'challenge', challengeId, challengeOrigin:origin, challengeOptions:storedWebAuthnOptions(options), ...(kind === 'register' && !exchange.uid ? {uid} : {})});
       response.json({options, challengeId, operation:kind}); return;
     }
     if (route === '/native/exchange/complete') {

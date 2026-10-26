@@ -2,7 +2,23 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { ApiError } from './policy.js';
-import { assertExchangeProof, assertExchangeRedeemable, assertExchangeState, isNativeOperation, isNativeOpaqueValue, type NativeExchangeBinding } from './native-exchange-policy.js';
+import { generateAuthenticationOptions, generateRegistrationOptions } from '@simplewebauthn/server';
+import { assertExchangeProof, assertExchangeRedeemable, assertExchangeState, isNativeOperation, isNativeOpaqueValue, storedWebAuthnOptions, type NativeExchangeBinding } from './native-exchange-policy.js';
+
+test('real login and registration options can be persisted without Firestore-rejected undefined fields', async () => {
+  const login = await generateAuthenticationOptions({ rpID: 'lulu.thisisphila.co.za', userVerification: 'required' });
+  const registration = await generateRegistrationOptions({ rpName: 'LuLu', rpID: 'lulu.thisisphila.co.za', userID: new TextEncoder().encode('synthetic'), userName: 'synthetic' });
+  function assertDefined(value: unknown): void {
+    assert.notEqual(value, undefined);
+    if (value && typeof value === 'object') for (const child of Object.values(value)) assertDefined(child);
+  }
+  for (const options of [login, registration]) {
+    const stored = storedWebAuthnOptions(options);
+    assertDefined(stored);
+    assert.deepEqual(stored, JSON.parse(JSON.stringify(options)));
+    assert.equal(stored.challenge, options.challenge);
+  }
+});
 
 const state = 's'.repeat(43);
 const proof = 'p'.repeat(43);

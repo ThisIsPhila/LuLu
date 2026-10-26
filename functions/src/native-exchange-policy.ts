@@ -16,6 +16,12 @@ const digest = (value: string) => createHash('sha256').update(value).digest('hex
 export const isNativeOperation = (value: unknown): value is NativeOperation => value === 'register' || value === 'login' || value === 'stepup' || value === 'google-login';
 export const isNativeOpaqueValue = (value: unknown): value is string => typeof value === 'string' && /^[A-Za-z0-9_-]{32,128}$/.test(value);
 
+/** Store the same JSON payload sent to the browser. SimpleWebAuthn includes
+ * optional undefined fields, which Firestore rejects when options are cached. */
+export function storedWebAuthnOptions<T>(options: T): T {
+  return JSON.parse(JSON.stringify(options)) as T;
+}
+
 function equalsHash(expected: unknown, value: string): boolean {
   if (typeof expected !== 'string' || !/^[a-f0-9]{64}$/i.test(expected)) return false;
   const left = Buffer.from(expected, 'hex');
