@@ -1,0 +1,15 @@
+Date: 2026-10-26 (Africa/Johannesburg)
+Tree: local workspace on codex/lulu-development-commits
+
+Commands and results:
+- npm run native:sync — PASS; app package verifier accepted 24 application files; Capacitor synced iOS and Android.
+- npm --prefix functions run build — PASS.
+- npm --prefix functions test — PASS; 12/12 tests.
+- npm run guard:firebase — PASS; owner-reviewed email/password auth provider exception matched.
+- JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home ./gradlew --console=plain assembleDebug — PASS; BUILD SUCCESSFUL.
+- adb install -r android/app/build/outputs/apk/debug/app-debug.apk — PASS; streamed install succeeded.
+- adb shell monkey -p org.khora.lulu 1 — PASS; launch event injected.
+- xcodebuild for connected iPhone with DEVELOPMENT_TEAM=98VDV7Q934 -allowProvisioningUpdates — PASS; signed debug app built.
+- xcrun devicectl device install app — BLOCKED by iOS free-profile limit: three existing apps are already installed for that profile. No app was uninstalled.
+
+Cloud state: no Firebase deployment or Auth provider mutation performed. Email/password is enabled in local firebase.json only. Google OAuth support email and provider enablement remain release configuration.

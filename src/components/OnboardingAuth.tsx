@@ -25,6 +25,8 @@ export type OnboardingAuthProps = {
   passkeySupport?: 'supported' | 'unsupported';
   onRegister: () => Promise<AuthActionResult>;
   onSignIn: () => Promise<AuthActionResult>;
+  onEmailAuth: (email: string, password: string, create: boolean) => Promise<AuthActionResult>;
+  onGoogleSignIn: () => Promise<AuthActionResult>;
   onHelpSigningIn?: () => void;
   /** Called immediately after the host reports a verified server session. */
   onAuthenticated: () => void;
@@ -32,6 +34,7 @@ export type OnboardingAuthProps = {
 
 type Screen = OnboardingAuthScreen | 'orientation-one' | 'orientation-two';
 type Action = 'register' | 'signin';
+type BusyAction = Action | 'email' | 'google';
 
 const reasonCopy: Record<AuthFailureReason, string> = {
   'credential-missing': 'We couldn’t find a passkey for this account on this device. Try another device or get help signing in.',
@@ -53,12 +56,17 @@ export function OnboardingAuth({
   passkeySupport,
   onRegister,
   onSignIn,
+  onEmailAuth,
+  onGoogleSignIn,
   onHelpSigningIn,
   onAuthenticated,
 }: OnboardingAuthProps) {
   const [screen, setScreen] = useState<Screen>(initialScreen);
-  const [busy, setBusy] = useState<Action | null>(null);
+  const [busy, setBusy] = useState<BusyAction | null>(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [providerMessage, setProviderMessage] = useState('');
   const [failureReason, setFailureReason] = useState<AuthFailureReason | null>(null);
   const [wasCancelled, setWasCancelled] = useState(false);
   const [recoveryAction, setRecoveryAction] = useState<'sign-in' | null>(null);
@@ -68,6 +76,7 @@ export function OnboardingAuth({
     if (!canUsePasskeys || busy) return;
     setBusy(action);
     setMessage('');
+    setProviderMessage('');
     setFailureReason(null);
     setWasCancelled(false);
     setRecoveryAction(null);
@@ -89,10 +98,35 @@ export function OnboardingAuth({
     }
   }
 
-  const goSignin = () => { setMessage(''); setFailureReason(null); setWasCancelled(false); setRecoveryAction(null); setScreen('signin'); };
-  const goCreate = () => { setMessage(''); setFailureReason(null); setWasCancelled(false); setRecoveryAction(null); setScreen('create'); };
+  async function runEmailAuth(create: boolean) {
+    if (busy) return;
+    setBusy('email'); setProviderMessage(''); setMessage(''); setWasCancelled(false); setRecoveryAction(null);
+    try {
+      const result = await onEmailAuth(email.trim(), password, create);
+      if (result.status === 'authenticated') { setPassword(''); onAuthenticated(); }
+      else if (result.status === 'cancelled') setWasCancelled(true);
+      else { setProviderMessage(result.message?.trim() || reasonCopy[result.reason]); }
+    } catch { setProviderMessage(reasonCopy.unknown); }
+    finally { setBusy(null); }
+  }
+
+  async function runGoogleSignIn() {
+    if (busy) return;
+    setBusy('google'); setProviderMessage(''); setMessage(''); setWasCancelled(false); setRecoveryAction(null);
+    try {
+      const result = await onGoogleSignIn();
+      if (result.status === 'authenticated') onAuthenticated();
+      else if (result.status === 'cancelled') setWasCancelled(true);
+      else { setProviderMessage(result.message?.trim() || reasonCopy[result.reason]); }
+    } catch { setProviderMessage(reasonCopy.unknown); }
+    finally { setBusy(null); }
+  }
+
+  const goSignin = () => { setMessage(''); setProviderMessage(''); setFailureReason(null); setWasCancelled(false); setRecoveryAction(null); setPassword(''); setScreen('signin'); };
+  const goCreate = () => { setMessage(''); setProviderMessage(''); setFailureReason(null); setWasCancelled(false); setRecoveryAction(null); setPassword(''); setScreen('create'); };
   const headerBack = () => {
     setMessage('');
+    setProviderMessage('');
     setFailureReason(null);
     setWasCancelled(false);
     setRecoveryAction(null);
@@ -143,24 +177,28 @@ export function OnboardingAuth({
 
           {screen === 'create' && <>
             <span className="oa-kicker">Your way in</span>
-            <h1>Create your<br />passkey.</h1>
-            <p className="oa-intro">Use a passkey to return to your journal. Your browser or device handles Face ID, Touch ID, a device PIN, or a security key.</p>
+            <h1>Create your<br />account.</h1>
+            <p className="oa-intro">Choose a passkey, email and password, or Google to keep your journal close.</p>
             <PasskeyAction
               action="register" busy={busy} message={message} failureReason={failureReason} wasCancelled={wasCancelled}
               canUsePasskeys={canUsePasskeys} onTry={() => void runAuth('register')}
               onHelp={onHelpSigningIn} secondaryLabel={recoveryAction === 'sign-in' ? 'Sign in with existing passkey' : 'I already have an account'} onSecondary={goSignin}
             />
+            <ProviderActions create email={email} password={password} busy={busy} message={providerMessage}
+              onEmailChange={setEmail} onPasswordChange={setPassword} onEmailSubmit={() => void runEmailAuth(true)} onGoogle={() => void runGoogleSignIn()} />
           </>}
 
           {screen === 'signin' && <>
             <span className="oa-kicker">Welcome back</span>
             <h1>Pick up where<br />you left off.</h1>
-            <p className="oa-intro">Continue with a passkey on this device or choose another device or security key in your browser’s prompt.</p>
+            <p className="oa-intro">Continue with a passkey, email and password, or Google.</p>
             <PasskeyAction
               action="signin" busy={busy} message={message} failureReason={failureReason} wasCancelled={wasCancelled}
               canUsePasskeys={canUsePasskeys} onTry={() => void runAuth('signin')}
               onHelp={onHelpSigningIn} secondaryLabel="I’m new to LuLu" onSecondary={goCreate}
             />
+            <ProviderActions email={email} password={password} busy={busy} message={providerMessage}
+              onEmailChange={setEmail} onPasswordChange={setPassword} onEmailSubmit={() => void runEmailAuth(false)} onGoogle={() => void runGoogleSignIn()} />
           </>}
 
           {(screen === 'create' || screen === 'signin') && <div className="oa-footnote"><ShieldCheck size={15} aria-hidden="true" /><span>Your device handles passkey verification. LuLu does not receive your face or fingerprint.</span></div>}
@@ -168,6 +206,35 @@ export function OnboardingAuth({
       </div>
     </main>
   );
+}
+
+function ProviderActions({
+  create = false, email, password, busy, message, onEmailChange, onPasswordChange, onEmailSubmit, onGoogle,
+}: {
+  create?: boolean;
+  email: string;
+  password: string;
+  busy: BusyAction | null;
+  message: string;
+  onEmailChange: (value: string) => void;
+  onPasswordChange: (value: string) => void;
+  onEmailSubmit: () => void;
+  onGoogle: () => void;
+}) {
+  return <div className="oa-provider-actions">
+    <div className="oa-provider-divider"><span>or use another sign-in</span></div>
+    {message && <div className="oa-status oa-status-error" role="alert"><CircleAlert size={18} aria-hidden="true" /><span><strong>Couldn’t complete sign-in</strong>{message}</span></div>}
+    <button className="oa-provider-button" type="button" onClick={onGoogle} disabled={busy !== null}>
+      {busy === 'google' ? <><LoaderCircle className="oa-spinner" size={16} aria-hidden="true" />Connecting to Google…</> : 'Continue with Google'}
+    </button>
+    <form className="oa-email-form" onSubmit={event => { event.preventDefault(); onEmailSubmit(); }}>
+      <label>Email address<input type="email" autoComplete="email" inputMode="email" value={email} onChange={event => onEmailChange(event.target.value)} required disabled={busy !== null} /></label>
+      <label>Password<input type="password" autoComplete={create ? 'new-password' : 'current-password'} minLength={create ? 6 : undefined} value={password} onChange={event => onPasswordChange(event.target.value)} required disabled={busy !== null} /></label>
+      <button className="oa-primary" type="submit" disabled={busy !== null}>
+        {busy === 'email' ? <><LoaderCircle className="oa-spinner" size={16} aria-hidden="true" />Checking your account…</> : create ? 'Create account with email' : 'Continue with email'}
+      </button>
+    </form>
+  </div>;
 }
 
 function Orientation({ step, onSkip, onNext }: { step: 1 | 2; onSkip: () => void; onNext: () => void }) {
@@ -189,7 +256,7 @@ function PasskeyAction({
   action, busy, message, failureReason, wasCancelled, canUsePasskeys, onTry, onHelp, secondaryLabel, onSecondary,
 }: {
   action: Action;
-  busy: Action | null;
+  busy: BusyAction | null;
   message: string;
   failureReason: AuthFailureReason | null;
   wasCancelled: boolean;
@@ -205,7 +272,7 @@ function PasskeyAction({
     {message && <div className="oa-status oa-status-error" role="alert"><CircleAlert size={18} aria-hidden="true" /><span><strong>{failureReason === 'local-origin' ? 'Open the local passkey preview' : 'Couldn’t complete passkey access'}</strong>{message}{failureReason === 'local-origin' && <a href={`http://localhost:${window.location.port || '5173'}${window.location.pathname}?screen=${action === 'signin' ? 'signin' : 'create'}`}>Open LuLu on localhost <ArrowRight size={14} aria-hidden="true" /></a>}</span></div>}
     {wasCancelled && <div className="oa-status" role="status"><Info size={18} aria-hidden="true" /><span>Passkey prompt closed. You can try again whenever you’re ready.</span></div>}
     <button className="oa-primary" type="button" onClick={onTry} disabled={!canUsePasskeys || busy !== null}>
-      {busy ? <><LoaderCircle className="oa-spinner" size={17} aria-hidden="true" />{busy === 'register' ? 'Waiting for your device…' : 'Waiting for your passkey…'}</> : <><ScanFace className="oa-passkey-icon" size={19} strokeWidth={1.8} aria-hidden="true" />{label}</>}
+      {busy === 'register' || busy === 'signin' ? <><LoaderCircle className="oa-spinner" size={17} aria-hidden="true" />{busy === 'register' ? 'Waiting for your device…' : 'Waiting for your passkey…'}</> : <><ScanFace className="oa-passkey-icon" size={19} strokeWidth={1.8} aria-hidden="true" />{label}</>}
     </button>
     <button className="oa-secondary" type="button" onClick={onSecondary} disabled={busy !== null}>{secondaryLabel}</button>
     {action === 'signin' && onHelp && <button className="oa-help" type="button" onClick={onHelp} disabled={busy !== null}>Need help signing in?</button>}

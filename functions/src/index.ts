@@ -13,22 +13,24 @@ const db = getFirestore();
 const identity = getAuth();
 const origins = new Set(['https://khora-lulu-2026.web.app', 'https://khora-lulu-2026.firebaseapp.com', 'http://localhost:5173', 'http://127.0.0.1:5173']);
 const nativeOrigins = new Set(['capacitor://localhost', 'https://localhost']);
-const knownRoutes = new Set(['/auth/register/options', '/auth/register/verify', '/auth/login/options', '/auth/login/verify', '/auth/stepup/options', '/auth/stepup/verify', '/auth/lock', '/auth/logout', '/session', '/native/exchange/create', '/native/exchange/options', '/native/exchange/complete', '/native/exchange/redeem', '/native/exchange/cancel']);
+const knownRoutes = new Set(['/auth/register/options', '/auth/register/verify', '/auth/login/options', '/auth/login/verify', '/auth/stepup/options', '/auth/stepup/verify', '/auth/provider/session', '/auth/lock', '/auth/logout', '/session', '/native/exchange/create', '/native/exchange/options', '/native/exchange/complete', '/native/exchange/provider-complete', '/native/exchange/redeem', '/native/exchange/cancel']);
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
 const sessions = db.collection('_sessions');
 const challenges = db.collection('_challenges');
 const credentials = db.collection('_credentials');
 const nativeExchanges = db.collection('_nativeExchanges');
-type Session = {uid: string; expiresAt: number; privateUntil: number};
+type Session = {uid: string; expiresAt: number; privateUntil: number; authMethod?: 'passkey'|'email'|'google'};
 type NativeExchange = {requestId:string; stateHash:string; proofHash:string; operation:NativeOperation; uid:string|null; sid:string|null; status:'pending'|'challenge'|'complete'|'redeemed'|'cancelled'; expiresAt:number; challengeId?:string; challengeOptions?:unknown; customToken?:string; privateUntil?:number; purgeAfter:Timestamp};
 const nativeTtl = 5 * 60_000;
 
-async function sessionFor(header: string | undefined, requirePrivate = false) {
+async function sessionFor(header: string | undefined, requirePrivate = false, requirePasskey = false) {
   if (!header?.startsWith('Bearer ')) throw new ApiError(401, 'Please sign in.');
   let token;
   try { token = await identity.verifyIdToken(header.slice(7), true); }
   catch { throw new ApiError(401, 'Please sign in again.'); }
-  if (token.passkey !== true || typeof token.sid !== 'string') throw new ApiError(401, 'Please verify your passkey.');
+  const passkeySession = token.passkey === true;
+  if (typeof token.sid !== 'string' || !(passkeySession || token.luluSession === true)) throw new ApiError(401, 'Please sign in again.');
+  if (requirePasskey && !passkeySession) throw new ApiError(403, 'A passkey is required to open private writing.');
   const sid = documentId(token.sid);
   const snap = await sessions.doc(sid).get();
   const session = snap.data() as Session | undefined;
@@ -55,12 +57,12 @@ async function takeChallenge(id: unknown, kind: Challenge['kind'], origin: strin
     return challenge!;
   });
 }
-async function issueSession(uid: string, setStage: (stage: FailureStage) => void) {
+async function issueSession(uid: string, setStage: (stage: FailureStage) => void, authMethod: 'passkey'|'email'|'google' = 'passkey') {
   const sid = randomUUID();
   const expiresAt = Date.now() + SESSION_TTL;
   const customToken = await mintBeforePersist(
-    () => { setStage('mint-token'); return identity.createCustomToken(uid, {sid, passkey: true}); },
-    () => { setStage('persist-session'); return sessions.doc(sid).create({uid, expiresAt, privateUntil: 0, purgeAfter: Timestamp.fromMillis(expiresAt)}); },
+    () => { setStage('mint-token'); return identity.createCustomToken(uid, {sid, luluSession: true, authMethod, ...(authMethod === 'passkey' ? {passkey: true} : {})}); },
+    () => { setStage('persist-session'); return sessions.doc(sid).create({uid, expiresAt, privateUntil: 0, authMethod, purgeAfter: Timestamp.fromMillis(expiresAt)}); },
   );
   return {customToken, expiresAt};
 }
@@ -82,7 +84,7 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
   const origin = request.get('origin') || '';
   const rawRoute = request.path.replace(/^\/api/, '');
   const route = knownRoutes.has(rawRoute) ? rawRoute : 'unknown';
-  const nativeOnlyRoute = route === '/native/exchange/create' || route === '/native/exchange/redeem' || route === '/native/exchange/cancel';
+  const nativeOnlyRoute = route === '/auth/provider/session' || route === '/native/exchange/create' || route === '/native/exchange/redeem' || route === '/native/exchange/cancel';
   if (!origins.has(origin) && !(nativeOnlyRoute && nativeOrigins.has(origin))) { response.status(403).json({error:'This origin is not allowed.'}); return; }
   response.set('Access-Control-Allow-Origin', origin);
   response.set('Vary', 'Origin');
@@ -117,6 +119,7 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
     if (route === '/native/exchange/options') {
       if (!origins.has(origin)) throw new ApiError(403, 'This origin is not allowed.');
       const {ref, exchange} = await loadNativeExchange(body.exchangeId, body.state);
+      if (!['register','login','stepup'].includes(exchange.operation)) throw new ApiError(400, 'This authentication request does not use a passkey.');
       if (exchange.status !== 'pending' && exchange.status !== 'challenge') throw new ApiError(409, 'This authentication request is no longer active.');
       if (exchange.challengeOptions && exchange.challengeId) {
         response.json({options: exchange.challengeOptions, challengeId: exchange.challengeId, operation: exchange.operation}); return;
@@ -137,7 +140,8 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
       if (!origins.has(origin)) throw new ApiError(403, 'This origin is not allowed.');
       const {ref:exchangeRef, exchange} = await loadNativeExchange(body.exchangeId, body.state);
       if (exchange.status !== 'challenge' || exchange.challengeId !== body.challengeId) throw new ApiError(409, 'This authentication request is no longer active.');
-      const kind = exchange.operation;
+      if (!['register','login','stepup'].includes(exchange.operation)) throw new ApiError(400, 'This authentication request does not use a passkey.');
+      const kind = exchange.operation as Challenge['kind'];
       const challenge = await takeChallenge(body.challengeId, kind, origin) as Challenge & {exchangeId?:string};
       if (challenge.exchangeId !== body.exchangeId || challenge.uid !== exchange.uid || challenge.sid !== exchange.sid) throw new ApiError(401, 'This authentication request is not valid.');
       let customToken: string | undefined;
@@ -189,6 +193,30 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
         const value = current.data() as NativeExchange | undefined;
         if (!value || value.status !== 'challenge' || value.challengeId !== body.challengeId || value.expiresAt <= Date.now()) throw new ApiError(409, 'This authentication request is no longer active.');
         tx.update(exchangeRef,{status:'complete', ...(customToken ? {customToken} : {}), ...(privateUntil ? {privateUntil} : {})});
+      });
+      response.json({success:true}); return;
+    }
+    if (route === '/native/exchange/provider-complete') {
+      if (!origins.has(origin)) throw new ApiError(403, 'This origin is not allowed.');
+      const {ref, exchange} = await loadNativeExchange(body.exchangeId, body.state);
+      if (exchange.operation !== 'google-login' || exchange.status !== 'pending') {
+        throw new ApiError(409, 'This authentication request is no longer active.');
+      }
+      if (typeof body.idToken !== 'string' || body.idToken.length > 12_000) throw new ApiError(400, 'The sign-in response is invalid.');
+      const decoded = await identity.verifyIdToken(body.idToken, true);
+      const provider = (decoded.firebase as {sign_in_provider?: string} | undefined)?.sign_in_provider;
+      const method = provider === 'password' ? 'email' : provider === 'google.com' ? 'google' : null;
+      if (!method || method !== 'google') {
+        throw new ApiError(401, 'Use the sign-in method requested by LuLu.');
+      }
+      const customToken = (await issueSession(decoded.uid, next => {stage = next;}, method)).customToken;
+      await db.runTransaction(async tx => {
+        const current = await tx.get(ref);
+        const value = current.data() as NativeExchange | undefined;
+        if (!value || value.status !== 'pending' || value.expiresAt <= Date.now() || value.operation !== exchange.operation) {
+          throw new ApiError(409, 'This authentication request is no longer active.');
+        }
+        tx.update(ref, {status:'complete', uid:decoded.uid, customToken});
       });
       response.json({success:true}); return;
     }
@@ -296,6 +324,15 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
         response.json({privateUntil}); return;
       }
       response.json(await issueSession(credential.uid, next => {stage = next;})); return;
+    }
+    if (route === '/auth/provider/session') {
+      const authorization = request.get('authorization');
+      if (!authorization?.startsWith('Bearer ')) throw new ApiError(401, 'Please sign in first.');
+      const decoded = await identity.verifyIdToken(authorization.slice(7), true);
+      const provider = (decoded.firebase as {sign_in_provider?: string} | undefined)?.sign_in_provider;
+      const method = provider === 'password' ? 'email' : provider === 'google.com' ? 'google' : null;
+      if (!method) throw new ApiError(401, 'Use email or Google to sign in.');
+      response.json(await issueSession(decoded.uid, next => {stage = next;}, method)); return;
     }
     stage = 'session-lookup';
     const current = await sessionFor(request.get('authorization'));

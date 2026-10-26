@@ -1,3 +1,14 @@
 {
-  "exceptions": []
+  "exceptions": [
+    {
+      "id": "native-email-password-sign-in",
+      "findingCode": "AUTH_PROVIDERS",
+      "observedValue": "{\"anonymous\":false,\"emailPassword\":true}",
+      "reviewedBy": "project-owner",
+      "reviewedAt": "2026-10-26",
+      "reviewReference": "Owner request to implement email and Google sign-in as alternatives to native passkeys, 2026-10-26",
+      "rationale": "Enable Firebase email/password authentication for the requested native sign-in alternative. Anonymous sign-in remains disabled. Google OAuth settings require the project's current support email and remain a hosted provider configuration step.",
+      "expiresAt": "2026-11-02T00:00:00.000Z"
+    }
+  ]
 }

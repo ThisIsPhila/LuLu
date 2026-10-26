@@ -54,7 +54,7 @@
     ],
     "providers": {
       "anonymous": false,
-      "emailPassword": false
+      "emailPassword": true
     }
   }
 }

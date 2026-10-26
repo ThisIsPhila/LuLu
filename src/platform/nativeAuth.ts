@@ -13,7 +13,7 @@ const callbackHost = 'auth-callback';
 const bridgeUrl = 'https://khora-lulu-2026.web.app/native-auth-bridge';
 const authTimeoutMs = 180_000;
 
-type NativeOperation = 'register' | 'login' | 'stepup';
+type NativeOperation = 'register' | 'login' | 'stepup' | 'google-login';
 type PendingNativeAuth = {
   requestId: string;
   state: string;
@@ -44,7 +44,7 @@ async function readPending(): Promise<PendingNativeAuth | null> {
     if (typeof pending.requestId !== 'string' || !/^[0-9a-f-]{36}$/i.test(pending.requestId) ||
         !isOpaqueValue(pending.state) || !isOpaqueValue(pending.proof) ||
         typeof pending.exchangeId !== 'string' || !/^[0-9a-f-]{36}$/i.test(pending.exchangeId) ||
-        !['register','login','stepup'].includes(String(pending.operation)) || !Number.isSafeInteger(pending.expiresAt)) return null;
+        !['register','login','stepup','google-login'].includes(String(pending.operation)) || !Number.isSafeInteger(pending.expiresAt)) return null;
     return pending as PendingNativeAuth;
   } catch { return null; }
 }
