@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, indexedDBLocalPersistence, inMemoryPersistence, setPersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { isNativePlatform } from '../../platform/runtime';
+import { isNativePlatform } from '../../platform/runtime.ts';
 
 // Public application identifiers, never server credentials.
 const app = initializeApp({
