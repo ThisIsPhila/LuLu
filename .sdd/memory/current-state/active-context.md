@@ -1,5 +1,9 @@
 # Active context
 
+## Physical iPhone startup repair — 26 October 2026
+
+Owner-reported blank white screen reproduced on the connected iPhone. WebView/React loaded and secure storage returned, but Firebase auth initialization stalled. Native now uses explicit initializeAuth without the browser redirect resolver; iOS auth persistence uses localStorage with in-memory fallback following Confessions; Android retains IndexedDB and web retains in-memory auth. Existing loading status is visible inside safe areas. Encrypted vault/draft/media records and key storage are unchanged. App build/package verification/sync, Firebase guard, simulator and signed device builds pass. Updated iPhone app renders complete onboarding on two cold launches; simulator and localhost web preview also render onboarding. Evidence/report: ../../evidence/ios-startup/ and ../../reports/ios-startup/2026-10-26-fix.md. Startup acceptance only; live provider sign-in and journal persistence remain open. No Firebase deployment or push. Concurrent product/status docs preserved.
+
 ## Durable private text delivery — 25 October 2026
 
 Bounded goal requested by owner, coordinated here with Luna High implementation/review. New LOCAL source autosaves encrypted mutable drafts separately from originals; recovery is private-session-only after restart/reload. Save atomically creates an original or appends a revision and removes the draft. Includes version conflict protection, quota/abort retry, invalid-snapshot guards and exact-record reconciliation after a lost finalization acknowledgement. Quick exit still locks immediately and drops controller callbacks/queued references. Completed autosaves survive the tested reload; uncommitted edits/eviction/key loss cannot be guaranteed.

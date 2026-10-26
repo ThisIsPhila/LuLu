@@ -1,0 +1,6 @@
+4988bbfb141161015988224469710f9a272f72be7979cd4d72742b40e18293f7  src/services/backend/firebase.ts
+fdaa162957b4ef449910cedfdba0d6ab6d2e64790a0159a67eacda9490ce2566  src/components/auth/auth.css
+deb9611a8f10ef9dcd819b41602b896a52f26ce79db579e0042d337b353430f2  dist/app/index.html
+bb6e4a6949bb5c67b931fd0f06aeb5fd181545c47d70cdda8ea60e3aebc1078c  dist/app/assets/index-O-w1b-DA.js
+47b213f67a35fed2ff3e816c40c3aeda53f98c613c01585f2da54cf0a5854769  .sdd/evidence/ios-startup/iphone-before.png
+47b6abb999756b33423abf0e860bdef31fe532cdf525a808107e88fdcbeb4ca4  .sdd/evidence/ios-startup/iphone-after-relaunch.png

@@ -15,7 +15,7 @@ The native key adapter uses protected platform storage for newly created key mat
 - `npm --prefix functions run build` completed; `npm --prefix functions test` passed all 12 tests, including native-exchange policy checks.
 - The focused private media, durable capture, private draft/autosave, and offline-shell tests passed (65 tests).
 - Android debug APK build completed using JDK 21 and the project Gradle wrapper (`BUILD SUCCESSFUL`).
-- iOS generic device build completed with signing disabled (`BUILD SUCCEEDED`); an iPhone 18 Pro simulator build also completed (`BUILD SUCCEEDED`). The app installed and launched on the simulator (bundle `org.khora.lulu`), but the WebView rendered a black screen after syncing the current bundle. Startup rendering remains unresolved, so no functional UI or authenticated runtime pass is claimed. A screenshot is recorded in `.sdd/evidence/native-mobile/ios-simulator-black-screen.png`.
+- Initial iOS generic device and simulator builds passed but startup rendered blank. That startup defect was subsequently repaired by explicit native Firebase Auth initialization and iOS localStorage auth persistence. The updated app rendered onboarding on the physical iPhone 13 Pro Max twice, including a cold relaunch, and on the iPhone 18 Pro simulator. See `.sdd/reports/ios-startup/2026-10-26-fix.md` and `.sdd/evidence/ios-startup/`. Authenticated journal persistence remains pending.
 
 ## Runtime and release gates
 
