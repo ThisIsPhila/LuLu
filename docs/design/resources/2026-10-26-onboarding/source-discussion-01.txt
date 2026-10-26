@@ -1,0 +1,293 @@
+User attachment
+User attachment
+User attachment
+User attachment
+have a look at these examples of the sort of output I'm looking for
+These references clarify the output you're after considerably. The common element is high-fidelity mobile UI design presented as a collection of individual screens, with the design itself taking priority over the surrounding presentation.
+
+There are several distinctions worth carrying into LuLu.
+
+Four Hundred Feet Brand Identity — Studio Mammmal
+Dronea: composition and negative space
+
+Strong typographic hierarchy, expansive empty areas and deliberate positioning. Visual elements are used selectively. A screen can be almost entirely typography and still feel complete.
+
+Monte: depth and visual transitions
+
+The interface itself becomes the visual composition. Layered cards, controlled blur, soft colour transitions and overlapping elements communicate movement without requiring decorative imagery.
+
+Dark onboarding reference: feature storytelling
+
+Each screen introduces one capability through a small, focused interface demonstration. The content remains legible, the primary action is predictable, and the experience has a consistent rhythm.
+
+Pawstar: cohesive screen family
+
+Shared typography, spacing, illustration treatment and components make the screens feel like one application, even though their layouts and content differ.
+
+The key difference from my previous generations is that the screen content should create the composition. We shouldn't need a cinematic room, plant or decorative backdrop to make the design interesting.
+
+For LuLu's first batch, I'd carry these principles into the three previously agreed screens:
+
+Screen
+
+Design treatment
+
+01 · Meet LuLu
+
+A striking, largely typographic introduction with the white LuLu wordmark, considerable negative space and potentially one carefully integrated photographic element.
+
+02 · What should we call you?
+
+An exceptionally clean naming interaction. Large, readable typography, an obvious text field and a concise on-device privacy reassurance.
+
+03 · What brings you here today?
+
+A polished multi-select experience where the cards, selection states and typographic hierarchy provide the visual interest.
+
+All three would be flat, full-height mobile screens arranged side by side on one unobtrusive 16:9 review canvas, without phones, app docks or unrelated presentation elements.
+
+The LuLu design kit remains the source for its own typography, palette, materials and visual identity. These new references contribute composition, restraint, UI depth and screen-to-screen rhythm, rather than replacing LuLu's identity.
+
+The most useful takeaway is that we can give each screen a distinctly different composition while keeping them part of one coherent onboarding experience. I'll use that interpretation when you direct the next generation.
+
+Let's give it a shot, with the knowledge of this being just the first batch of 3 screens
+
+Good, that's exactly what we needed, though the designs are enlarged and not proportional, its fine, also the 3 page progress is misleading because there's more than 3 screens in total but let's move on to the next batch. What's the plan
+The next batch covers screens 4–6 of LuLu's 14-step onboarding. This is where we move from personalisation into the user's first practical experience of the application.
+
+The sequence is: personalised welcome → choose a writing prompt → create your first entry.
+
+Screen 04: You're in the right place, [Name].
+Purpose: Connect the intentions selected on screen 3 to a personalised experience.
+
+Content
+
+Headline: “Alex, you're in the right place.”
+
+Supporting copy: “Whatever brings you here, there's room for your story.”
+
+A short, personalised introduction reflecting the user's selected intentions.
+
+Primary action: Let's begin
+
+Visual direction: A spacious, typography-led screen. A subtle atmospheric image or layered editorial element could work here because the content is minimal. The name should be the focal point.
+
+This screen marks the transition from LuLu introducing itself to LuLu addressing the user personally.
+
+Screen 05: Every story starts somewhere.
+Purpose: Help the user begin writing without requiring them to invent a topic.
+
+Content
+
+Headline: “What would you like to write about?”
+
+A selection of writing prompts, with examples such as:
+
+“What feels important to you today?”
+
+“Is there something you'd like to remember?”
+
+“What's been on your mind lately?”
+
+“I'd rather start with a blank page.”
+
+The prompts can vary according to screen 3's selections. A user interested in documentation might see “Is there something you want to keep a record of?”, for example.
+
+Visual direction: Clean, spacious selectable cards, with strong typography and restrained supporting visuals. The prompts are the primary focus.
+
+Interaction: Choosing a prompt opens the writing experience.
+
+Screen 06: Your first entry
+Purpose: Demonstrate LuLu's ordinary writing experience and let the user create something.
+
+Content
+
+A simplified but functional editor with:
+
+The selected writing prompt as an optional starting point.
+
+A writing area with a visible text cursor.
+
+Minimal formatting controls.
+
+An optional attachment affordance, introduced without immediately requesting permissions.
+
+Save entry as the primary action.
+
+After saving, a subtle confirmation appears: “Saved on this device.”
+
+Visual direction: The interface itself provides the composition. No cinematic photograph is needed behind the editor. The typography, writing canvas and controls should closely follow the supplied LuLu component kit.
+
+This is also where we introduce the first restrained haptic confirmation, signalling that an entry has been saved.
+
+How the three screens work together
+04 · Welcome
+
+Personal connection
+05 · Prompt
+
+Choose a starting point
+06 · Write
+
+First saved entry
+Changes carried forward from batch one
+For the next image, we'll maintain three distinct portrait screens on one 16:9 canvas, but use more realistic mobile proportions, with greater height relative to width and less oversized UI typography.
+
+The progress indicator will represent the complete onboarding journey, not three screens. We can use a subtle chapter-based progress bar rather than fourteen tiny dots.
+
+The surrounding canvas remains neutral, while each screen uses imagery only where it serves the content. The white LuLu logo, typography, colours and component treatment remain consistent with our established design direction.
+
+One important implementation detail: since the user has not yet completed protected-access setup, the first entry should be treated as a local onboarding draft. If it contains personal information, it must not be exposed through ordinary sample entries or previews. Its final storage state should be established when the user completes security setup.
+
+The next batch therefore ends with a tangible result: the user has written something, and LuLu has demonstrated that it can preserve it. Batch three can then introduce the private layer, paragraph concealment and quick exit using a safe example.
+
+Usin the first batch as reference (not to be duplicated), let create this batch according to plan
+
+Looks good, for the next batch, let's try 4 screens, let's draft that
+For the third batch, we'll design four screens, 7–10 of LuLu's 14-step onboarding.
+
+This is the most important transition so far. The user has written their first entry. Now we introduce LuLu's protected environment and let them experience how it works.
+
+The progression is:
+
+Discover private mode → Enter private mode → Protect a paragraph → Practise quick exit.
+
+Screen 07: Some things are just yours.
+Private mode introduction
+
+Purpose: Introduce the distinction between everyday writing and the protected space.
+
+Headline: Some things are just yours.
+
+Supporting copy: “LuLu gives you a private space for experiences you'd rather keep to yourself.”
+
+Visual composition: A spacious editorial design with a visual representation of an ordinary journal entry transitioning into a protected one. The same entry remains recognisable, but its sensitive content becomes concealed. A restrained contrast between warm paper and deeper charcoal or sage surfaces can communicate the change of state.
+
+Action: Discover private mode.
+
+The screen should make it clear that the original content is preserved, even when it isn't visible.
+
+Screen 08: Your private space, one gesture away.
+Protected entry demonstration
+
+Purpose: Show how the user enters private mode and how access is protected.
+
+Headline: Your private space, one gesture away.
+
+Supporting copy: “Use your private shortcut to enter a protected space. LuLu verifies it's you before revealing private content.”
+
+Visual composition: An illustrated interaction sequence using the actual LuLu writing surface.
+
+The demonstration shows a deliberate private-entry trigger, followed by a compact system-style passkey authentication sheet and the transition into protected content.
+
+Interaction: Try the private-entry gesture on sample content. The passkey portion is a demonstration at this stage; actual enrolment comes later.
+
+Action: Continue.
+
+Screen 09: Protect what matters.
+Paragraph-level concealment
+
+Purpose: Teach the user how to protect individual passages without losing their original writing.
+
+Headline: Protect what matters.
+
+Supporting copy: “Choose what stays visible. Your original words remain preserved.”
+
+Visual composition: A simplified writing interface containing three short paragraphs. The middle paragraph is concealed, while the surrounding paragraphs remain legible.
+
+The protected passage appears as a soft blurred or masked block, with a subtle lock indicator. The contrast should communicate that the content still exists but is temporarily hidden.
+
+Interaction: Select a paragraph → conceal → reveal while authenticated.
+
+Action: Continue.
+
+This is the ideal screen for the first visual and haptic demonstration of an actual privacy boundary.
+
+Screen 10: Leave in an instant.
+Quick exit demonstration
+
+Purpose: Teach the critical shortcut for immediately returning to LuLu's ordinary interface.
+
+Headline: Leave in an instant.
+
+Supporting copy: “One quick action conceals your private space and returns you to your everyday journal.”
+
+Visual composition: A clear before-and-after transition, represented through two overlapping interface states.
+
+The foreground shows an ordinary journal or task screen. Behind it is a partially concealed private writing interface, illustrating the transition without displaying actual sensitive information.
+
+Interaction: Tap the demonstration's Quick Exit control. The private interface disappears, the session locks, and the ordinary journal replaces it.
+
+Action: Continue.
+
+This is another meaningful haptic moment: a brief, distinct confirmation that the privacy state has changed.
+
+Shared design treatment
+07
+
+08
+
+09
+
+10
+
+Main emphasis
+
+Privacy concept
+
+Entry gesture
+
+Paragraph control
+
+Quick exit
+
+Composition
+
+Spacious, editorial
+
+Interaction sequence
+
+Writing interface
+
+State transition
+
+Content density
+
+Low
+
+Moderate
+
+Moderate
+
+Low
+
+Colour treatment
+
+Warm neutral → charcoal
+
+Protected-state contrast
+
+Paper and muted sage
+
+Ordinary neutral restored
+
+Demonstration
+
+Protected representation
+
+Authentication
+
+Conceal/reveal
+
+Exit and lock
+
+For this four-screen batch, use a 16:9 review canvas with four narrower, correctly proportioned portrait screens, consistent with batches one and two.
+
+The background outside the screens stays quiet and unobtrusive. Each screen uses typography, interactive interface elements and controlled contrast as its primary visual language. Photography is optional on screen 7, but I wouldn't introduce cinematic imagery into the three interaction-heavy screens.
+
+We should also maintain the actual white LuLu wordmark wherever the background supports it, and use a contrasting wordmark treatment on lighter surfaces so it remains legible.
+
+The progress labels will identify 7/14, 8/14, 9/14 and 10/14, ensuring this is recognisably part of the larger journey.
+
+The intended result: by the end of screen 10, a user understands how to enter a protected space, hide individual content and immediately return to ordinary LuLu. The next batch can then explore multimodal capture, preservation and contextual understanding.
+
