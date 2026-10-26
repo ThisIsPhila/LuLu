@@ -10,6 +10,8 @@ Commands and results:
 - adb install -r android/app/build/outputs/apk/debug/app-debug.apk — PASS; streamed install succeeded.
 - adb shell monkey -p org.khora.lulu 1 — PASS; launch event injected.
 - xcodebuild for connected iPhone with DEVELOPMENT_TEAM=98VDV7Q934 -allowProvisioningUpdates — PASS; signed debug app built.
-- xcrun devicectl device install app — BLOCKED by iOS free-profile limit: three existing apps are already installed for that profile. No app was uninstalled.
+- First xcrun devicectl device install app — BLOCKED by iOS free-profile limit: three apps were already installed for that profile.
+- After the owner removed multica, xcrun devicectl device install app — PASS; app installed with bundle ID org.khora.lulu.
+- xcrun devicectl device process launch --device 00008110-000204493CBA401E org.khora.lulu — PASS; launched on the iPhone.
 
 Cloud state: no Firebase deployment or Auth provider mutation performed. Email/password is enabled in local firebase.json only. Google OAuth support email and provider enablement remain release configuration.
