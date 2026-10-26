@@ -1,0 +1,77 @@
+i  emulators: Starting emulators: firestore
+i  emulators: Detected demo project ID "demo-lulu-journal-writes", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail.
+i  firestore: Firestore Emulator logging to firestore-debug.log
+✔  firestore: Firestore Emulator was started in standard edition.
+✔  firestore: Firestore Emulator UI websocket is running on 9150.
+i  Running script: node --experimental-strip-types --test tests/backend/journalWrites.test.mjs tests/backend/starterEntries.test.mjs
+TAP version 13
+# Subtest: saveEntry stores the chosen ordinary kind and defaults older callers to Journal
+ok 1 - saveEntry stores the chosen ordinary kind and defaults older callers to Journal
+  ---
+  duration_ms: 1925.352583
+  type: 'test'
+  ...
+# Subtest: updateEntry can reclassify an ordinary entry and omission preserves its current kind
+ok 2 - updateEntry can reclassify an ordinary entry and omission preserves its current kind
+  ---
+  duration_ms: 137.035208
+  type: 'test'
+  ...
+# Subtest: unsupported kinds are rejected before writes
+ok 3 - unsupported kinds are rejected before writes
+  ---
+  duration_ms: 47.922958
+  type: 'test'
+  ...
+# Subtest: protected records retain generic display fields and keep source material in ciphertext
+ok 4 - protected records retain generic display fields and keep source material in ciphertext
+  ---
+  duration_ms: 79.808458
+  type: 'test'
+  ...
+# [2026-10-26T03:32:15.402Z]  @firebase/firestore: Firestore (13.1.0): GrpcConnection RPC 'Write' stream 0x4b956c9d error. Code: 7 Message: 7 PERMISSION_DENIED: 
+# false for 'create' @ L64, false for 'create' @ L114, false for 'update' @ L67, false for 'update' @ L114
+# Subtest: another account cannot save into or reclassify the owner journal
+ok 5 - another account cannot save into or reclassify the owner journal
+  ---
+  duration_ms: 95.700542
+  type: 'test'
+  ...
+# Subtest: protected entries cannot be reclassified through the ordinary update path
+ok 6 - protected entries cannot be reclassified through the ordinary update path
+  ---
+  duration_ms: 65.495
+  type: 'test'
+  ...
+# Subtest: concurrent initializations create each starter once and record one marker
+ok 7 - concurrent initializations create each starter once and record one marker
+  ---
+  duration_ms: 2754.650209
+  type: 'test'
+  ...
+# Subtest: reinitialization preserves an edit and does not restore a deleted starter
+ok 8 - reinitialization preserves an edit and does not restore a deleted starter
+  ---
+  duration_ms: 156.831375
+  type: 'test'
+  ...
+# Subtest: a preexisting record at a starter ID is preserved while other starters are added
+ok 9 - a preexisting record at a starter ID is preserved while other starters are added
+  ---
+  duration_ms: 123.350834
+  type: 'test'
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3408.854708
+✔  Script exited successfully (code 0)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator

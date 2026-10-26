@@ -16,32 +16,46 @@ export function watchEntries(uid: string, receive: (entries: Entry[]) => void, f
     }));
   },fail);
 }
-export async function saveEntry(uid: string, data: {title:string;body:string;originalBody:string;protected:boolean;entities:Entity[]}) {
+type EntryKind = Entry['kind'];
+const validEntryKind = (value: unknown): value is EntryKind => value === 'Journal' || value === 'Story';
+
+export async function saveEntry(
+  uid: string,
+  data: {title:string;body:string;originalBody:string;protected:boolean;entities:Entity[];kind?:EntryKind},
+  firestore: Firestore = database,
+) {
+  if (data.kind !== undefined && !validEntryKind(data.kind)) throw new Error('Choose Journal or Story for this entry.');
   if(!data.body.trim() || data.body.length>50000 || data.originalBody.length>50000) throw new Error('Write between 1 and 50,000 characters.');
-  const ref=doc(collection(database,'users',uid,'entries'));
-  const batch=writeBatch(database);
+  const ref=doc(collection(firestore,'users',uid,'entries'));
+  const batch=writeBatch(firestore);
   // Explicit whitelist prevents originalBody, source titles, and entity mappings leaking into display documents.
-  batch.set(ref,{ownerId:uid,title:data.protected?'Journal entry':data.title.slice(0,200),body:data.body,kind:'Journal',protected:data.protected,
+  batch.set(ref,{ownerId:uid,title:data.protected?'Journal entry':data.title.slice(0,200),body:data.body,kind:data.protected?'Journal':data.kind ?? 'Journal',protected:data.protected,
     perspective:data.protected?'third':'first',createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
   if(data.protected) {
     const envelope=await encryptPrivate(uid,ref.id,{originalBody:data.originalBody,title:data.title,entities:data.entities});
-    batch.set(doc(database,'users',uid,'private',ref.id),{...envelope,updatedAt:serverTimestamp()});
+    batch.set(doc(firestore,'users',uid,'private',ref.id),{...envelope,updatedAt:serverTimestamp()});
   }
   await batch.commit();
 }
 
 /** Update an ordinary display entry without touching any protected payload. */
-export async function updateEntry(uid: string, id: string, data: {title:string;body:string}, firestore: Firestore = database) {
+export async function updateEntry(uid: string, id: string, data: {title:string;body:string;kind?:EntryKind}, firestore: Firestore = database) {
   if (typeof uid !== 'string' || !uid || typeof id !== 'string' || !id || id.includes('/') ||
       typeof data?.title !== 'string' || data.title.length > 200 ||
-      typeof data?.body !== 'string' || !data.body.trim() || data.body.length > 50000) {
-    throw new Error('Use a title up to 200 characters and write between 1 and 50,000 characters.');
+      typeof data?.body !== 'string' || !data.body.trim() || data.body.length > 50000 ||
+      (data.kind !== undefined && !validEntryKind(data.kind))) {
+    throw new Error('Use a title up to 200 characters, write between 1 and 50,000 characters, and choose Journal or Story.');
   }
   const ref = doc(firestore, 'users', uid, 'entries', id);
   const existing = await getDoc(ref);
   if (!existing.exists()) throw new Error('This entry is no longer available.');
   if (existing.data().protected !== false) throw new Error('Protected entries must be edited through protected access.');
-  await updateDoc(ref, { title: data.title, body: data.body, updatedAt: serverTimestamp() });
+  await updateDoc(ref, {
+    title: data.title,
+    body: data.body,
+    ...(data.kind === undefined ? {} : { kind: data.kind }),
+    updatedAt: serverTimestamp(),
+  });
 }
 
 export async function readOriginal(uid: string, id: string) {

@@ -36,7 +36,7 @@ export function EntryStack({ title, entries, expanded, onToggle, controls }: {
 }
 
 export function EntrySpread({ title, entries, onSelectEntry, id }: {
-  title: Collection;
+  title: Collection | 'Search results';
   entries: Entry[];
   onSelectEntry: (entry: Entry) => void;
   id: string;
@@ -55,7 +55,7 @@ export function EntrySpread({ title, entries, onSelectEntry, id }: {
             </button>
           ))}
         </div>
-      ) : <p className="collection-spread-empty">Your first {title === 'Journal' ? 'journal entry' : 'story'} will appear here.</p>}
+      ) : <p className="collection-spread-empty">{title === 'Search results' ? 'No entries match your search.' : `Your first ${title === 'Journal' ? 'journal entry' : 'story'} will appear here.`}</p>}
     </section>
   );
 }
