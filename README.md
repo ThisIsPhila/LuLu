@@ -8,7 +8,7 @@
 <h1 align="center">A journal for words that matter.</h1>
 
 <p align="center">
-  <a href="https://khora-lulu-2026.web.app/">Open the live LuLu app</a>
+  <a href="https://lulu.thisisphila.co.za/">Open the live LuLu app</a>
 </p>
 
 LuLu is Team KHÔRA’s FNB AOTY Hackathon 2026 project for safer communities and GBV response. It brings everyday journaling and private writing into one thoughtful experience, with room to preserve a person’s own words and choose what they keep protected.
@@ -19,13 +19,13 @@ LuLu is Team KHÔRA’s FNB AOTY Hackathon 2026 project for safer communities an
 
 ## Try LuLu
 
-**Live app:** [https://khora-lulu-2026.web.app/](https://khora-lulu-2026.web.app/)
+**Live app:** [https://lulu.thisisphila.co.za/](https://lulu.thisisphila.co.za/)
 
-1. Create an account or sign in with a passkey. The browser or device shows its real passkey prompt; there is no shared demo password or assessor account.
+1. Create an account or sign in with a passkey, email/password, or Google. The browser or device shows its real passkey prompt; there is no shared demo password or assessor account.
 2. Explore the ordinary journal and Stories. New accounts receive three fictional starter entries that can be edited and saved to that account.
 3. Use the app’s private-writing entry point to explore protected access where it is available in the deployed release. A passkey sign-in and private-access check are separate steps.
 
-The live site hosts the main app only. Its last recorded Hosting release is `cf2ca69e213e14dd`; newer work in this repository is local source and should not be assumed to be live. The hosted app is the quickest way to assess passkey access and the account-owned ordinary journal. The current source also contains newer private-writing and mobile work described below.
+The live site hosts the main app only. Authentication and the custom domain were updated on 26 October. Live synthetic email/password and passkey registration, returning sign-in and application sessions passed, including passkey private step-up. Product Implementation corrected the missing Google OAuth callback; interactive Google/native acceptance remains open. See the [current release note](docs/implementation/2026-10-26-auth-domain-release.md) for the exact verified boundary.
 
 For a walkthrough of the newer private-writing implementation, run the current source locally, sign in using the passkey flow, choose **Private** or **Write privately**, then save and reopen a private record and use **Quick exit**. That exercises browser-local storage in the current source; it is not a walkthrough of the last hosted release or physical-device acceptance.
 
@@ -34,10 +34,10 @@ For a walkthrough of the newer private-writing implementation, run the current s
 | Area | Current state |
 | --- | --- |
 | Ordinary journal | Passkey registration/sign-in and an owner-scoped Firestore journal are deployed. Starter entries are fictional, editable, and copied into each account once. |
-| Private writing | The current local source includes encrypted browser storage for private text, revisions, autosaved drafts, image/audio media, export, deletion, and password-encrypted per-record backup/restore. Newer work has local regression and synthetic-browser evidence; it has not been accepted on a physical phone or included in the last recorded Hosting release. |
+| Private writing | The current local source includes encrypted browser storage for private text, revisions, autosaved drafts, image/audio media, export, deletion, and password-encrypted per-record backup/restore. Newer work has local regression and synthetic-browser evidence; the current source is included in the 26 October main-app release, while full physical-phone acceptance remains open. |
 | Privacy boundaries | Private originals and media use AES-GCM encryption in IndexedDB. The key is held by the browser and is not cryptographically bound to the passkey; losing or clearing browser data can mean losing access. This is not a complete offline unlock or account-recovery system. |
 | Transformation | Configured entity substitutions and narrative distancing exist. General contextual/PII detection, Decisions API transport, real companion sharing, and Trails are not implemented. |
-| Mobile | Capacitor 8 iOS and Android shells and platform adapters are in the repository. Builds succeeded, but the iOS simulator currently opens to a black screen; hosted bridge/function changes and authenticated device acceptance are still outstanding. |
+| Mobile | Capacitor 8 iOS and Android shells and platform adapters are in the repository. Builds succeeded, the physical iPhone startup issue was repaired; the hosted bridge/API are deployed; full authenticated device acceptance remains outstanding. |
 
 Older cloud-backed protected records retain their existing read path; they are distinct from newer browser-local private records. Local implementation, hosted behavior, and physical-device acceptance are tracked separately in the [implementation status](docs/product/2026-10-25-task-status.md) and the dated [mobile report](docs/implementation/2026-10-26-capacitor-mobile.md). The wider product direction includes safer documentation, evidence continuity, selective disclosure, and support; the features above are a partial implementation, not a claim that the full product is complete.
 
@@ -117,3 +117,7 @@ npm --prefix .sdd-framework/visual run workspace -- --project "$PWD"
 
 Keep the generated local launch credential private.
 </details>
+
+### Development access
+
+Local Vite development opens a single **Open development app** button. Its separate fictional journal stays in browser storage; it does not grant Firebase account access. Production and native builds retain authentication. The login page has an optional **Onboarding** button; onboarding no longer opens automatically.
