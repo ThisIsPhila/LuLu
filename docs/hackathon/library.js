@@ -65,9 +65,16 @@ function renderProductionTasks() {
   const completeCount = allTasks.filter(task => task.done === true).length;
   const statusFor = (section, task) => {
     if (task.done === true) return {label: 'Done', kind: 'done'};
-    if (task.status.toLowerCase() === 'partial') return {label: 'Partial', kind: 'partial'};
-    if (section.id === 'planned') return {label: 'Not started', kind: 'not-started'};
-    return {label: 'Needs verification', kind: 'needs-verification'};
+    const states = {
+      verification: {label: 'Needs verification', kind: 'needs-verification'},
+      partial: {label: 'Partial', kind: 'partial'},
+      design: {label: 'Ready for design', kind: 'partial'},
+      next: {label: 'Next', kind: 'partial'},
+      decision: {label: 'Decision needed', kind: 'partial'},
+      later: {label: 'Later', kind: 'not-started'},
+      planned: {label: 'Not started', kind: 'not-started'}
+    };
+    return states[task.state] || {label: 'Needs verification', kind: 'needs-verification'};
   };
   const overview = `<div class="production-overview"><p class="production-count"><strong>${completeCount} of ${allTasks.length}</strong> tracker items complete</p><p>Read-only checkboxes mark completion of that specific tracker item. Work awaiting device or owner acceptance stays unchecked.</p></div>`;
   mount.innerHTML = productionTasks.sections.map(section => `

@@ -1,5 +1,7 @@
 # Capacitor mobile implementation (2026-10-26)
 
+> Later evidence on 26 October supersedes the installation limitations below: Android debug install/launch commands passed, and a signed build installed and launched on the physical iPhone after a free-profile slot was released. These are install/process results; usable UI and authenticated journeys remain unverified. The earlier simulator black screen is a separate observation. New email/password and Google/provider code is local and not deployed. See the current progress assessment and the native-auth-provider implementation report.
+
 ## Scope delivered in source
 
 LuLu now has Capacitor 8 iOS and Android shells around the existing React/Vite app. The shell loads the local `dist/app` bundle; no production `server.url` is configured. `build:app` packages only the application, while `native:sync`, `native:ios`, and `native:android` provide repeatable native workflows. The package verifier rejects demo, review, documentation, and fixture content from the app bundle. Web mode retains its offline-shell registration; native mode skips service-worker registration.

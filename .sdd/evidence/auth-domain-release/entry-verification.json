@@ -1,0 +1,10 @@
+{
+  "sourceCommit": "7b6c85b",
+  "mainAsset": "index-CtcA2kav.js",
+  "productionLoginDefault": true,
+  "productionOnboardingButtonOpens14ScreenJourney": true,
+  "localEntryOpensMainApp": true,
+  "productionDevelopmentMarkersAbsent": true,
+  "hostingMainOnlyPackageVerified": true,
+  "googleOAuthCallback": "saved and read back by Product Implementation; interactive completion unverified"
+}

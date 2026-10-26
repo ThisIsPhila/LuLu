@@ -1,13 +1,14 @@
 # LuLu implementation tracker
 
-Updated 26 October 2026 (SAST). Build-first tracker, not an SDD phase. Keep implementation, deployment and phone acceptance separate. The owner confirms native sign-in works. Latest parent Hosting release: cf2ca69e213e14dd. A subsequent bounded durable-private-text slice is implemented and verified locally; it has not been deployed or accepted on the owner's phone. See [delivery and limits](../implementation/2026-10-25-durable-private-capture.md).
+**Latest release update:** Login is the default entry with optional Onboarding; localhost has isolated development entry. Email/passkey live checks passed on `lulu.thisisphila.co.za`; Product Implementation on Luna High saved the missing Google OAuth callback; interactive Google/native acceptance remains open. See [current release and verification](../implementation/2026-10-26-auth-domain-release.md). Older snapshot statements below are historical where superseded by this release.
+Updated 26 October 2026 (SAST). Build-first tracker, not an SDD phase. Keep implementation, deployment and phone acceptance separate. The owner confirms the existing hosted passkey sign-in works. Latest recorded parent Hosting release: cf2ca69e213e14dd. New email/password and Google provider code remains local. Later private capture and native work have not been accepted as a complete phone journey. See [latest progress assessment](../implementation/progress-assessment-2026-10-26.md).
 
 ## Completed foundation
 
 | Task | Evidence / practical boundary |
 | --- | --- |
 | Host only the main app on Firebase | Main site deployed; demo/frame and internal review library stay local. |
-| Passkey registration and returning sign-in | Runtime signing permission repaired; isolated live register/login/private-step-up test passed and temporary test account cleaned. Owner confirms native sign-in works. |
+| Passkey registration and returning sign-in | Runtime signing permission repaired; isolated live register/login/private-step-up test passed and temporary test account cleaned. Owner confirms the existing hosted passkey sign-in works. |
 | Enter journal immediately after verified auth | Success/Continue gate removed and Hosting release verified. |
 | Put sign-out in account/avatar menu | No permanent sign-out-only panel. Private exit controls preserved. |
 | Owner-scoped Firestore ordinary journal | Save, load, add, same-ID edit/reclassification, single ordinary-entry deletion, and saved-source export implemented; emulator and export whitelist tests pass. Not deployed or device-accepted in this slice. |
@@ -59,11 +60,12 @@ Recommended next implementation order: device acceptance → durable/offline tex
 - Ordinary Home/Leaves now exclude legacy protected records from lists, counts, weekly totals and search. Leaves search/type filters work; Home tag search directly opens results. Removed invented Leaves deck/count/read-time metadata and the fixed “7 entries / 100% on-device” claim. Curated content is shown only when backed by matching ordinary records.
 - 60 focused regression tests and hosted main-only build pass. Synthetic browser checks confirm Home tag search/open, Stories filtering and no protected search matches under All. Local fixture verification is not authenticated app or phone acceptance. No deployment.
 - Ordinary Story creation now uses the existing Home Stories filter → lower Write action; editing preserves kind. Reclassification UI remains open. Offline authorization/capture, media and export/backup/recovery remain open in the order above.
+- The private representation inspector now lists only user-configured references, stages Add/Change/Keep and encrypts Confirmed data in an owner/session-bound local store. It returns to the still-mounted private composer with the current draft intact; counts shown there derive from the draft text. TypeScript passes; no tests/browser verification were run for this slice. Manual working-app acceptance remains pending. See `.sdd/reports/representation-inspector/2026-10-26-review.md`.
 - Usage tool reading conflicted with owner-visible usage. Do not use that source for pacing until independently reconciled; latest owner screenshot shows 85% session and 58% weekly remaining, not a continuing live reading.
 
 ### Collection persistence and UI correction — 26 October
 
-Backend ordinary Story save/reclassification support and kind-preserving edits now pass nine emulator tests including starter preservation. Reader metadata reflects actual records. The new composer collection-selector controls were removed after owner rejected further UI changes; the later existing-filter/Write integration enables new Stories without that selector; reclassification UI remains open. Synthetic fixture screenshots are historical and unaccepted. Preserve the established interface; do not invent page layouts, side panels or controls. Local changes only; no deployment/phone acceptance. See `.sdd/reports/ordinary-collections/2026-10-26-review.md`.
+Backend ordinary Story save/reclassification support and kind-preserving edits pass local Firestore emulator coverage including starter preservation. Reader metadata reflects actual records. New Stories use the existing Home Stories filter → Write action; existing composer Options support reclassification. The ordinary-actions synthetic browser review confirms Story editing, saved-source export and the scoped delete-confirmation screen; it did not click the destructive action. Preserve the established interface; do not invent page layouts, side panels or controls. Local changes only; owner-device acceptance and deployment remain pending. See `.sdd/reports/ordinary-collections/2026-10-26-review.md` and `.sdd/reports/ordinary-actions/2026-10-26-review.md`.
 
 ### Offline startup prerequisite — 26 October
 
@@ -87,4 +89,16 @@ Existing private journal flow now exports one saved text history or media origin
 
 ### Ordinary saved-entry actions — 26 October
 
-The existing composer More/Options controls now select Journal or Story for new writing and same-ID edits, export a saved-source JSON copy using a field allowlist, and permanently delete one ordinary entry after explicit acknowledgement. Backend deletion checks the requested owner and `protected === false`; Firestore session rules remain authoritative. Eight local Firestore emulator cases cover kind persistence, protected/foreign-owner/anonymous/expired-session denial, selected-record scope, and starter non-reseeding; two export tests check the whitelist and protected-record rejection; TypeScript passes. Browser/device acceptance and deployment remain pending. No private-record or cloud-collection lifecycle is added. See [.sdd review](../../.sdd/reports/ordinary-actions/2026-10-26-review.md).
+The existing composer More/Options controls now select Journal or Story for new writing and same-ID edits, export a saved-source JSON copy using a field allowlist, and permanently delete one ordinary entry after explicit acknowledgement. Backend deletion checks the requested owner and `protected === false`; Firestore session rules remain authoritative. Eight local Firestore emulator cases cover kind persistence, protected/foreign-owner/anonymous/expired-session denial, selected-record scope, and starter non-reseeding; two export tests check the whitelist and protected-record rejection; TypeScript passes. Local synthetic browser evidence verifies Story edit, saved-source download with private fields excluded, and the scoped deletion confirmation screen; no destructive browser click was recorded. Owner-device acceptance and deployment remain pending. No private-record or cloud-collection lifecycle is added. See [.sdd review](../../.sdd/reports/ordinary-actions/2026-10-26-review.md) and [browser evidence](../../.sdd/evidence/ordinary-actions/browser-check.txt).
+
+### Native providers and device installation — 26 October
+
+Local auth now offers passkey, email/password and Google paths. The local Firebase configuration enables the additional providers and records LuLu's support email; no Auth, Hosting or Functions deployment was performed. The native Google/passkey bridge and API exchange therefore still need an authorized release and live verification. Private access continues to require passkey step-up.
+
+A refreshed Android debug package installed and its launch command passed. LuLu also built, installed and launched on the owner's iPhone after a free-profile slot was released. These are installation/process results; no usable screen, successful native login, account-owned journal restart/persistence or private-capture journey is evidenced on either device. The earlier black iPhone simulator screen remains a separate recorded observation. See the native-auth report and current progress assessment.
+
+### Current product batch and UI handoff — 26 October
+
+The ordinary saved-entry batch has local emulator evidence and synthetic browser review of Story edit, saved-source export and scoped delete confirmation; the browser did not execute the destructive delete action. The next gap is the representation inspector's fictional values/counts and non-working Add reference, now being replaced by account-scoped encrypted local references. No authenticated owner/device acceptance or deployment is implied.
+
+The screen plan maps this work to Journal/Write and contextual People/representation controls. The fourteen-screen onboarding is documented but not integrated; it conflicts with the current sign-in-first order by creating an entry before enrollment. UI Design's upcoming handoff and this flow decision are rendered in the internal reader. Current post-login page critique remains distinct from the previously approved welcome screen.

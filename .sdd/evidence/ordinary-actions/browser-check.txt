@@ -1,0 +1,13 @@
+Local synthetic browser review — ordinary saved-entry Options
+Evidence used: options-confirmation.png and download-verification.json in this directory.
+No browser fixture was rerun for this closeout.
+
+Observed in the existing browser evidence:
+- An ordinary Story opened in the existing composer edit flow; the source badge identified it as a Story.
+- A saved-copy download was requested from Options. The downloaded JSON verification reports `savedBodyOnly: true` and `privateFieldsExcluded: true`; the visible unsaved editor text was not the exported body.
+- The inline delete review was visible with a one-entry ordinary scope, the warning that unsaved edits would be discarded, an explicit acknowledgement checkbox, and separate Delete permanently / Cancel deletion actions.
+
+Limits:
+- The browser evidence stops at the deletion confirmation screen. No destructive delete click or post-delete browser read-back was recorded.
+- The eight passing local Firestore emulator tests cover selected-document deletion and protected/foreign-owner/anonymous/expired-session denials. This is not authenticated owner acceptance or a phone check.
+- No deployment or live cloud mutation occurred.
