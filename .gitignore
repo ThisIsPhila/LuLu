@@ -31,3 +31,8 @@ functions/lib/
 
 # Local agent continuation state is not project source.
 .omo/
+
+# Generated emulator logs and synthetic downloaded private-record artifacts.
+.sdd/evidence/**/firestore-debug.log
+.sdd/evidence/private-backup/synthetic-fresh-record.lulubackup
+.sdd/evidence/private-export/downloaded-text.json

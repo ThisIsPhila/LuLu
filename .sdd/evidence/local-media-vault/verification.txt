@@ -1,0 +1,32 @@
+LuLu local encrypted media vault — local verification
+Recorded: 2026-10-26 03:49 UTC
+Tree: shared working tree; uncommitted changes. No cloud calls or transport.
+
+Command: node --test tests/local-media-vault.test.mjs
+
+TAP result:
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+
+The ten tests cover exact binary round-trip, separately encrypted metadata,
+audio codec normalization, active-content/MIME rejection, capture-source matching,
+25 MiB and empty-content limits, concurrent duplicate IDs, owner/id/ciphertext tampering,
+metadata-only listing, delayed session lock/generation invalidation, and aborting a
+pending IndexedDB transaction when the session locks before commit.
+
+Command: npx tsc -b --pretty false
+Observed result: passed.
+
+Command: npm run build:app
+Observed result: `tsc -b` and Vite 6.4.5 production app build passed. Existing bundle-size
+warning remains; no deployment or Hosting package operation was performed for this task.
+
+Limits: MIME types are allowlisted from declared Blob metadata; bytes are not sniffed,
+decoded, or certified as valid media. Browser-native device acceptance and quota behavior
+are not established by this fake IndexedDB test environment.

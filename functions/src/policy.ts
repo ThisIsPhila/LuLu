@@ -1,7 +1,7 @@
 export const CHALLENGE_TTL = 5 * 60_000;
 export const SESSION_TTL = 12 * 60 * 60_000;
 export const PRIVATE_TTL = 10 * 60_000;
-export type Challenge = { challenge: string; kind: 'register' | 'login' | 'stepup'; uid: string | null; sid: string | null; origin: string; rpID: string; expiresAt: number; used: boolean };
+export type Challenge = { challenge: string; kind: 'register' | 'login' | 'stepup'; uid: string | null; sid: string | null; origin: string; rpID: string; expiresAt: number; used: boolean; exchangeId?: string };
 export type FailureStage = 'request-validation' | 'rate-limit' | 'register-options' | 'login-options' | 'verify-registration' | 'persist-credential' | 'create-auth-user' | 'mint-token' | 'persist-session' | 'verify-authentication' | 'persist-counter' | 'update-session' | 'session-lookup' | 'unknown';
 export type FailureRoute = '/auth/register/options' | '/auth/register/verify' | '/auth/login/options' | '/auth/login/verify' | '/auth/stepup/options' | '/auth/stepup/verify' | '/auth/lock' | '/auth/logout' | '/session' | 'unknown';
 

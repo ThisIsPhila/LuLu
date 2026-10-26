@@ -1,0 +1,6 @@
+26 October 2026 · IAB · localhost5176 · explicitly labelled synthetic fixture, no account authentication.
+Used actual PrivateDraftComposer/PrivateMediaCapture and LocalPrivateJournal plus real LocalVault/LocalMediaVault and isolated owner local-visual-fixture-only.
+Selected /tmp/lulu-media-fixture.png (68-byte synthetic 1×1 PNG) via real filechooser. UI acknowledged encrypted save. Private record list contained the filename; ordinary state was never used.
+Reloaded fixture; stored media remained. Opened metadata detail with no blob image/audio element. Reveal media produced a blob URL and decoded image naturalWidth1. Conceal removed the image; DOM media elements0. Revealed again, Quick exit unmounted private content; DOM media elements0. Screenshots recorded.
+After synchronous layout cleanup hardening, reopened the fixture and repeated reveal→Quick exit; result media elements0. Test tabs closed; local dev server stopped.
+No real camera/microphone permission or private owner data used. Recorder permission/stop/error/late-response behavior is dependency-injected Node test evidence, not physical-device evidence. Authenticated app integration and phone hardware/codec/safe-area acceptance remain pending.

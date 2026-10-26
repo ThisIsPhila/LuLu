@@ -1,0 +1,38 @@
+LuLu static offline app shell — local verification
+Recorded: 2026-10-26 03:38 UTC
+Tree: shared working tree; uncommitted changes. No cloud calls or deployment.
+
+Command: node --test tests/offline-shell-worker.test.mjs
+
+TAP result from the passing run:
+1..8
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+
+The eight tests cover the generated asset allowlist, deterministic build fingerprint,
+install/activate cache scope, failed-precache cleanup preserving the prior cache,
+network-first root/index navigation, route/API exclusion, cache-first generated assets,
+and the normal service-worker waiting lifecycle without forced activation or reload.
+
+Command: npm run build:app
+
+Observed result: TypeScript passed; Vite 6.4.5 completed the production app build.
+Output included dist/app/index.html, dist/app/offline-shell-worker.js,
+dist/app/assets/index-D1FLNheQ.css, and dist/app/assets/index-Bi7ju3Jo.js.
+The existing Vite large-chunk advisory remains. The generated worker was checked to
+contain /index.html, the current built JS/CSS names, and the four allowlisted local
+brand images; it contained no Google Fonts host or Cloud Functions host.
+
+Command: node scripts/package-hosting.mjs
+Observed result: Main app hosting output verified; demo and internal documents excluded.
+
+Limits: This verifies worker source behavior with mocked CacheStorage/network and the
+production build/package output. It does not establish browser offline acceptance,
+offline authentication/unlock/capture, data availability, or hosting deployment.
+
+Follow-up: same-fingerprint failed reinstall preserves existing cache; final focused worker test count9. Final raw worker TAP: worker-tests.txt; combined regressions: regression-tests.txt; final hosted build: build.txt.

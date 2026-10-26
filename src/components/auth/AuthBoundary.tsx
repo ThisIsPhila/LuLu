@@ -1,10 +1,27 @@
-import { useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { OnboardingAuth, type AuthActionResult } from '../OnboardingAuth';
-import { authenticate, authError, BackendRequestError, type AppSession } from '../../services/backend/passkeys';
+import { authenticate, authError, BackendRequestError, restoreNativeAppSession, restorePendingNativeAuth, type AppSession } from '../../services/backend/passkeys';
+import { isNativePlatform } from '../../platform/runtime';
 import './auth.css';
 export function AuthBoundary({children}: {children:(session:AppSession,onSignedOut:()=>void)=>ReactNode}) {
   const [session,setSession]=useState<AppSession|null>(null);
+  const [restoring,setRestoring]=useState(isNativePlatform());
   const verified=useRef<AppSession|null>(null);
+  useEffect(()=>{
+    if(!isNativePlatform())return;
+    let active=true;
+    void (async()=>{
+      let restored:AppSession|null=null;
+      try {
+        const resumed=await restorePendingNativeAuth();
+        restored=resumed?.session ?? null;
+      } catch { /* A stale pending exchange must not prevent ordinary session recovery. */ }
+      if(!restored){try{restored=await restoreNativeAppSession();}catch{/* Reauthentication remains available. */}}
+      if(active && restored){verified.current=restored;setSession(restored);}
+      if(active)setRestoring(false);
+    })();
+    return()=>{active=false;};
+  },[]);
   async function begin(create:boolean):Promise<AuthActionResult> {
     if(window.location.hostname==='127.0.0.1')return {status:'error',reason:'local-origin'};
     try {verified.current=await authenticate(create);return {status:'authenticated'};}
@@ -16,6 +33,7 @@ export function AuthBoundary({children}: {children:(session:AppSession,onSignedO
     }
   }
   if(session) return children(session,()=>{verified.current=null;setSession(null);});
+  if(restoring)return <div className="auth-restore" role="status">Opening your LuLu journal…</div>;
   return <OnboardingAuth
     initialScreen={new URLSearchParams(window.location.search).get('screen') === 'signin' ? 'signin' : new URLSearchParams(window.location.search).get('screen') === 'create' ? 'create' : 'welcome'}
     onRegister={()=>begin(true)}

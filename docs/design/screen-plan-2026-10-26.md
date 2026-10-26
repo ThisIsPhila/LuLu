@@ -1,0 +1,69 @@
+# LuLu screen plan
+
+26 October 2026 · Working screen and flow map for owner review
+
+The separate [14-screen onboarding flow](onboarding-flow-2026-10-26.md) and its [four original screen boards](resources/2026-10-26-onboarding/) capture the owner’s onboarding-specific sequence, copy, controls and unresolved implementation decisions. This broader product screen plan remains the destination and capability map; the onboarding boards do not replace it or imply that their pictured features are implemented.
+
+The light-warm component board is retained as a useful visual reference. This plan organizes the whole product direction into a small set of destinations and contextual flows; it is not approval of page layouts or a claim that planned capabilities exist. Formal SDD progression remains paused. See the [product direction](../product/2026-10-25-product-direction.md) and [implementation tracker](../product/2026-10-25-task-status.md) for the source of feature status.
+
+## Visual and navigation frame
+
+- Warm ivory, paper, sand, stone and restrained sage, with tactile depth, organic imagery and editorial type. The owner prefers the existing white logo for digital surfaces: give it a sufficiently contrasting image or shaded sage/stone treatment, rather than white-on-white or a black-led redesign. Preserve the final brand assets; any alternative logo treatment needs review.
+- Keep the everyday surface calm and useful. Do not expose “Private”, “Protected”, incident labels or private previews in ordinary categories, search results, recents or notification-like feedback.
+- Shared header: logo, search and avatar/account actions; no plus button. Shared lower navigation: Home, Journal, a reachable Write action, Stories and Library. Search opens from the header; it does not need a permanent destination. Avatar contains profile/settings/sign-out.
+- Use full screens for durable destinations and focused tasks. Use sheets for quick actions, filters, representations, history/recovery choice, permission detail and confirmations. Sheets must fit above the keyboard, support dismissal/return, and never imply a save that did not finish.
+- On narrow screens, keep primary actions thumb-reachable, writing controls above the keyboard, respect safe areas, and let long lists scroll independently. On wide screens, use a centered readable column with optional side context; retain the same hierarchy and actions. Avoid a phone frame in the product web app.
+
+## Destinations
+
+| Screen | Purpose and layout | Access and roadmap status |
+| --- | --- | --- |
+| Welcome / Sign in | Image-led warm introduction, real brand mark, passkey setup or sign-in, clear return path. Successful sign-in opens Home directly. | Public entry, then account-authenticated. Passkey registration/sign-in and direct entry exist; visual redesign is planned. |
+| Home | Recent ordinary writing, compact collections, quick note/task affordances, discreet Write entry, search/profile in header. No private category or preview. | Authenticated ordinary space. Account-owned editable starters exist; recent overview and useful notes/tasks organization are incomplete. |
+| Journal | Complete dated ordinary timeline with compact rows/cards, ordinary filters and entry actions. | Authenticated ordinary space. Ordinary CRUD and browse/filter surfaces exist; boundary review and final layout remain. |
+| Write | One composing system for ordinary writing and deliberately entered private writing. Title and active paragraph stay near keyboard; show representation/recognition context above the text and save state below. Private mode adds paragraph conceal/reveal, quick capture and discreet exit only after step-up. | Ordinary editor is the core immediate journey; private text save/reopen, paragraph controls and quick exit are implemented locally but await target-device/app acceptance. Image, voice and full offline capture are planned. |
+| Read entry | Editorial reading view with quiet metadata, source-aware actions and explicit history/reveal controls when authorized. Ordinary and private records remain distinguishable by access context, not a public label. | Ordinary entries are account-authenticated; private originals and history require an active private session. Revisions/history and local record access exist; richer evidence metadata and media lifecycle remain planned. |
+| Stories | Curated groupings and narrative reading across selected entries, with cover/description and clear source links. | Authenticated ordinary surface; curated story organization is planned. A story does not silently convert or disclose private originals. |
+| Library | Unified browse and organization for entries, collections, notes and lightweight tasks, with ordinary search/filter. A private-record library appears only inside the private session, with drafts and records scoped to that session. | Ordinary area is account-authenticated. Browse/search/filter exists; notes/tasks completion and privacy-boundary validation remain. Private record list and encrypted draft recovery exist locally; target-device acceptance remains. |
+| Profile / Settings | Avatar opens account and appearance, language, accessibility, storage/recovery, privacy explanations and sign-out. Security-sensitive actions open a focused screen or confirmed sheet. | Account-authenticated. Sign-out is in avatar menu; most settings, language options, retention, export and recovery are planned. |
+| Private support and sharing | A calm private hub reached from a chosen record or private settings: prepare a disclosure, choose a named recipient/purpose, review included material, and manage trusted people. Keep the review step explicit. | Requires active private session. Local disclosure/permission contracts and encrypted contact details exist; user-facing review, recipient/key delivery, actual invitations, fine-grained grants, audit and revocation remain planned. |
+
+## Contextual sheets and subflows
+
+| Sheet or flow | Contents and handling |
+| --- | --- |
+| Search and filters | Search ordinary content from the header with ordinary scope by default. Private search is entered only from within the unlocked private library. Keep private query/results out of ordinary recents; provide clear no-results and clear-query actions. |
+| Quick capture | From Write, choose text, image/camera or voice. Ask only what is needed to capture; show recording/camera active state, explicit stop, local save confirmation and retry. Text is the current foundation; image and voice capture, exact-byte lifecycle and transcript/translation are planned. Never show success before durable save. |
+| Draft recovery | On entering the private editor, offer recoverable completed autosaves with timestamp and preview minimized; resume, discard, or defer. Show pending/retrying/save-failed states in the editor. Autosave snapshots/recovery are implemented locally; interrupted newest edits, browser eviction and device acceptance remain limitations. |
+| History and source detail | Show original, appended revisions, annotations and actor/source relationship, with explicit reveal while authorized. Preserve the original and link each derived representation, contribution, transcript or translation to its source. Current revision support exists; export/deletion/retention and richer provenance remain. |
+| People / representation editor | Contextual sheet over the current record: identified reference, replacement, mention scope and edit/correction choices. Preview impact before applying; provide undo/keep/dismiss. Configured replacements exist; general direct/indirect PII and context detection, correction continuity and language quality remain planned. |
+| Understand / interpretation | Optional, record-selected view of possible themes with the supporting passages and grounded resources, uncertainty and a clear return to the source. Keep derived interpretation versioned and separate from originals. Decisions API operations require approved scope, policy, evaluation and cost authorization; no provider transport exists. Never send raw records merely because interpretation is offered. No diagnosis or population counts. |
+| Privacy review / disclosure | Choose source records, a named recipient and purpose; show each redaction and the exact separate copy before confirmation. Explain uncertainty without claiming anonymization. Local typed contracts exist; enforcement, recipients, key delivery and audit integration remain planned. Approved Decisions API operations may support optional interpretation later; no provider transport is implemented or assumed in this screen plan. |
+| Companion permissions | Invitation/acceptance followed by separate grants for viewing, contributing statements, receiving voice, backup custody and Trails. Show scope, duration, history access and revoke action independently. Actual sharing, permission enforcement, audit and revocation are planned. |
+| Trails | Explicit start, recipient selection, active indicator, stop/expiry and history retention choice; separate live-location access from historical access. Opt-in location capture and recipient permissions are planned, not part of the hackathon core. |
+| Help and referral | Search a maintained, verified support directory by language/location/service; review source and verification date; choose call, referral or selected-material preparation. A phone link is not integrated professional access. Directory, referral flow and verified professional integration are future work; no emergency dispatch is implied. |
+| Language choice | Settings or the relevant capture/understanding step makes the interface language and any translation/transcription choice explicit. Preserve original-language material and link every translation/transcript to its source; mixed-language handling and quality evaluation are planned. |
+| Export / backup / recovery / delete | Settings flow distinguishes readable user export from encrypted backup, checks destination and scope, then verifies result. Recovery explains account access versus key recovery and restore/cross-device transfer. Deletion states what is removed and retention limits before confirmation. All remain planned; do not promise a service or paid storage. |
+
+## States, interruptions and privacy
+
+- Every list has loading, populated, genuinely empty and recoverable error states. Empty states offer a discreet next step; they never seed additional generated history. Starter provenance remains identifiable and excluded from evidence/research.
+- Editors distinguish unsaved, saving, saved, offline/pending, retryable failure and unrecoverable interruption. A quick exit locks immediately and reports pending completion truthfully on return; it does not flush plaintext after lock. Only completed private autosaves are recoverable today.
+- Passkey cancellation/failure, expired private session, backgrounding, connectivity loss, quota exhaustion, conflict and late async completion return to a safe state without exposing private content. Provide retry or return paths where meaningful; do not claim the UI controls OS history or app-switcher screenshots.
+- Confirmation sheets name the consequence for discard, deletion, disclosure, permission grant/revoke, location start/stop, export and restore. Destructive actions never share a generic confirmation.
+- Respect reduced motion, screen readers, visible focus, contrast, dynamic text and keyboard overlap. Conceal/reveal needs a non-color cue and accessible label. Do not announce sensitive content in transient toasts.
+
+## Priorities and scope markers
+
+**Hackathon core:** sign in → useful ordinary Home/Journal → Write → deliberate private entry and passkey step-up → write and conceal paragraphs → save/reopen/history → quick exit. Preserve actual logos and warm tactile direction. Current passkey, ordinary CRUD, local private records/revisions, paragraph privacy and durable text draft foundations have differing acceptance boundaries; the full path is not yet owner-device accepted.
+
+**Planned product flows:** offline startup/unlock/capture; image and voice; contextual PII/risk editing; user-controlled disclosure; optional evidence-linked interpretation and Decisions API integration after policy, evaluation and cost authorization; companion invitations/permissions/audit/revocation; encrypted export/backup/recovery/deletion; multilingual/mixed-language operation with source-language preservation; maintained support directory and referrals; ordinary notes/tasks/settings.
+
+**Later extensions:** verified professional integration and access; properly governed genuine aggregate research; alternate native app icons. Do not add these to the core journey or imply they are implemented.
+
+## Decisions for owner review
+
+1. Confirm the discreet route into private writing and the private library: current “Write privately” after step-up is the working basis, but the ordinary navigation label and activation affordance need owner acceptance.
+2. Confirm lower navigation labels/destinations and whether Stories belongs in the first visible set before page layouts are drawn.
+3. Confirm which private sharing/support paths belong in the initial product shell versus being introduced only when their underlying services and controls are ready.
+

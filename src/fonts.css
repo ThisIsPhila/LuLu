@@ -1,0 +1,66 @@
+@font-face {
+  font-family: 'Inter Tight';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../node_modules/@fontsource-variable/inter-tight/files/inter-tight-latin-wght-normal.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Inter Tight';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../node_modules/@fontsource-variable/inter-tight/files/inter-tight-latin-ext-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Literata';
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url('../node_modules/@fontsource-variable/literata/files/literata-latin-wght-normal.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Literata';
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url('../node_modules/@fontsource-variable/literata/files/literata-latin-ext-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 100 1000;
+  font-display: swap;
+  src: url('../node_modules/@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 100 1000;
+  font-display: swap;
+  src: url('../node_modules/@fontsource-variable/dm-sans/files/dm-sans-latin-ext-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-600-normal.woff2') format('woff2');
+}

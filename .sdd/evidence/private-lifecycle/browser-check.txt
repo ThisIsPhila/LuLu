@@ -1,0 +1,3 @@
+26 October2026, actual-component local synthetic fixture, IAB; no owner records.
+Opened text record→Delete this private record: scope1original/0derived revisions/0linked drafts; downloadedcopies/cloud/keys excluded. Delete permanently disabled before acknowledgement, enabled after checkbox. Clicked Cancel deletion (not Delete permanently), returned tolist and original stillpresent.
+Opened media→Delete this private media: scope1original file, confirmationdisabled. Quick exit clearedprivateUI; zero deletecontrols remained. No browser permanent-deletion action performed. NodefakeIndexedDB tests exercise actual atomic deletion/rollback/races instead. Screenshot deletion-confirmation.png. Closed testtab/stoppedserver.

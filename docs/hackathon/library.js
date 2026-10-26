@@ -61,16 +61,32 @@ function renderProductionTasks() {
   const mount = document.getElementById('production-task-list');
   if (!mount || !productionTasks) return;
   const escape = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  const allTasks = productionTasks.sections.flatMap(section => section.tasks);
+  const completeCount = allTasks.filter(task => task.done === true).length;
+  const statusFor = (section, task) => {
+    if (task.done === true) return {label: 'Done', kind: 'done'};
+    if (task.status.toLowerCase() === 'partial') return {label: 'Partial', kind: 'partial'};
+    if (section.id === 'planned') return {label: 'Not started', kind: 'not-started'};
+    return {label: 'Needs verification', kind: 'needs-verification'};
+  };
+  const overview = `<div class="production-overview"><p class="production-count"><strong>${completeCount} of ${allTasks.length}</strong> tracker items complete</p><p>Read-only checkboxes mark completion of that specific tracker item. Work awaiting device or owner acceptance stays unchecked.</p></div>`;
   mount.innerHTML = productionTasks.sections.map(section => `
     <section class="production-section" aria-labelledby="production-${escape(section.id)}">
       <header><h2 id="production-${escape(section.id)}">${escape(section.title)}</h2><p>${escape(section.summary)}</p></header>
       <div class="production-items">${section.tasks.map(task => `
         <article class="production-item">
-          <div class="production-item-heading"><h3>${escape(task.title)}</h3><span>${escape(task.status)}</span></div>
-          <p>${escape(task.detail)}</p><p class="production-next"><strong>Next:</strong> ${escape(task.next)}</p>
+          <div class="production-item-heading">
+            <label class="production-checkbox"><input type="checkbox" disabled${task.done === true ? ' checked' : ''} aria-label="${task.done === true ? 'Completed' : 'Incomplete'} tracker item: ${escape(task.title)}"><span class="production-title">${escape(task.title)}</span></label>
+            <span class="production-status status-${statusFor(section, task).kind}">${statusFor(section, task).label}</span>
+          </div>
+          <details class="production-details"><summary>Details and next step</summary><div class="production-detail-body">
+            <p><strong>Current note:</strong> ${escape(task.status)}</p>
+            <p>${escape(task.detail)}</p><p class="production-next"><strong>Next:</strong> ${escape(task.next)}</p>
+          </div></details>
         </article>`).join('')}
       </div>
     </section>`).join('');
+  mount.insertAdjacentHTML('afterbegin', overview);
 }
 document.querySelectorAll('[data-check]').forEach(input => input.addEventListener('change', () => {
   overrides[input.dataset.check] = input.checked;

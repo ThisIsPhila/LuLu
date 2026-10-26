@@ -1,0 +1,64 @@
+TAP version 13
+# Subtest: worker generator accepts only the app index, generated assets and four local brand assets
+ok 1 - worker generator accepts only the app index, generated assets and four local brand assets
+  ---
+  duration_ms: 1.346417
+  type: 'test'
+  ...
+# Subtest: cache version is deterministic for one build and changes when any cached asset changes
+ok 2 - cache version is deterministic for one build and changes when any cached asset changes
+  ---
+  duration_ms: 0.463334
+  type: 'test'
+  ...
+# Subtest: install precaches only allowlisted build files and activate preserves unrelated caches
+ok 3 - install precaches only allowlisted build files and activate preserves unrelated caches
+  ---
+  duration_ms: 13.257583
+  type: 'test'
+  ...
+# Subtest: failed precache removes only its partial new cache and leaves the active version intact
+ok 4 - failed precache removes only its partial new cache and leaves the active version intact
+  ---
+  duration_ms: 1.408125
+  type: 'test'
+  ...
+# Subtest: failed reinstall with an existing identical build cache preserves the active cache
+ok 5 - failed reinstall with an existing identical build cache preserves the active cache
+  ---
+  duration_ms: 0.755833
+  type: 'test'
+  ...
+# Subtest: root/index navigation is network-first and falls back only to the cached app index
+ok 6 - root/index navigation is network-first and falls back only to the cached app index
+  ---
+  duration_ms: 1.370583
+  type: 'test'
+  ...
+# Subtest: other routes and runtime APIs are never given the app-index fallback or cached
+ok 7 - other routes and runtime APIs are never given the app-index fallback or cached
+  ---
+  duration_ms: 0.590458
+  type: 'test'
+  ...
+# Subtest: built assets are cache-first while unlisted assets, queries and non-GET requests bypass the cache
+ok 8 - built assets are cache-first while unlisted assets, queries and non-GET requests bypass the cache
+  ---
+  duration_ms: 0.645625
+  type: 'test'
+  ...
+# Subtest: worker update stays waiting for normal lifecycle and registration does not force a reload
+ok 9 - worker update stays waiting for normal lifecycle and registration does not force a reload
+  ---
+  duration_ms: 0.309167
+  type: 'test'
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 83.21

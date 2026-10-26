@@ -1,0 +1,17 @@
+Date: 2026-10-26
+Capacitor: 8.5.3
+App identifier: org.khora.lulu
+
+Build/runtime evidence:
+- npm run build:app: passed; package verifier reported 24 files, with demo/review/test fixtures absent.
+- npm run native:sync: passed; synced Android and iOS with App, Browser, Camera, Secure Storage plugins.
+- npm --prefix functions run build: passed.
+- npm --prefix functions test: 12 tests passed.
+- Focused private/media/autosave/offline tests: 65 passed.
+- Android debug build: passed with JDK 21 (Gradle BUILD SUCCESSFUL).
+- iOS generic device build: passed with signing disabled (Xcode BUILD SUCCEEDED).
+- iOS simulator build after the final sync: passed (Xcode BUILD SUCCEEDED).
+- iPhone 18 Pro simulator install and launch: app process starts, but screenshot is black. Functional startup is not yet verified; screenshot stored alongside this file.
+- Android emulator runtime unavailable: configured AVD system image is missing system.img; no physical device attached.
+
+Hosted bridge and native exchange function code are not deployed. Therefore authenticated journaling, restart persistence, native private-storage isolation, and media capture recovery have not been demonstrated on either platform.

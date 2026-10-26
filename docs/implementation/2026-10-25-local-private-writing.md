@@ -2,6 +2,8 @@
 
 25 October 2026. Implements the first delivery slice in the [product direction](../product/2026-10-25-product-direction.md). Local code only; no deployment, owner acceptance or native-device verification is claimed.
 
+Later delivery: [durable private capture](2026-10-25-durable-private-capture.md) adds encrypted autosave/recovery drafts in subsequent local source. Its current behaviour supersedes this first slice's explicit-save-only/unsaved-draft-loss description. The first slice's evidence and limits remain historical; the parent later integrated that first slice in Hosting, while the new durability work is not deployed.
+
 ## What works in code
 
 An ordinary new draft has a **Write privately** action that opens the existing real passkey step-up. Successful verification creates a `LocalVault` bound to the authenticated owner and current private-session generation. The current draft is retained during that transition. Ordinary existing-entry edits remain ordinary and update their existing Firestore record; they are not silently converted.

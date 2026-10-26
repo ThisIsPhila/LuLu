@@ -1,5 +1,11 @@
 # Active context
 
+## Durable private text delivery — 25 October 2026
+
+Bounded goal requested by owner, coordinated here with Luna High implementation/review. New LOCAL source autosaves encrypted mutable drafts separately from originals; recovery is private-session-only after restart/reload. Save atomically creates an original or appends a revision and removes the draft. Includes version conflict protection, quota/abort retry, invalid-snapshot guards and exact-record reconciliation after a lost finalization acknowledgement. Quick exit still locks immediately and drops controller callbacks/queued references. Completed autosaves survive the tested reload; uncommitted edits/eviction/key loss cannot be guaranteed.
+
+56 focused tests, app build/main-only packaging and local synthetic browser recovery/error checks pass; native-device/authenticated app acceptance remains open. No deployment/cloud resources/paid calls/push/commit by this goal. Parent-owned hackathon HTML/production progress JavaScript and unrelated reconstruction work were preserved. Delivery: `docs/implementation/2026-10-25-durable-private-capture.md`; evidence/assessment: `../../evidence/durable-private-capture/` and `../../reports/durable-private-capture/2026-10-25-delivery.md`. Offline startup/unlock, media, export/deletion/backup/key recovery, actual sharing, Trails and support remain on the product tracker; this is not whole-backlog completion.
+
 ## Product implementation session — 25 October 2026
 
 Owner requested Sol Medium coordination with Luna High delegation, full product-discussion reconciliation and immediate implementation under the existing formal-SDD pause. Consolidated goal/current-code gap map: `docs/product/2026-10-25-product-direction.md`; complete owner/assistant source remains alongside it. No new phase or fabricated approval. Official OpenAI Decisions API contract verified; no provider transport or paid expansion added.
@@ -127,3 +133,47 @@ Hosting-only correction succeeded, version cf2ca69e213e14dd. Live HTML asset has
 ## Internal production progress view — 25 October 2026
 
 Local review HTML now includes Tasks → Production progress (#tasks-production), 31 read-only entries covering verified foundations, implemented/acceptance work and remaining goals. Legacy #tasks-delivery opens the same current view. Logo/Print/other library sections preserved. Current data in docs/hackathon/production-tasks.js mirrors docs/product/2026-10-25-task-status.md. Browser rendering verified; local only, no Firebase publication or paid service change.
+
+## Project orientation — 25 October 2026 (Kimi)
+
+Owner requested a detailed project summary before choosing the next piece of work. Reviewed current product direction, implementation tracker, application/backend structure and local private-writing boundaries. No implementation, deployment, external mutation or phase approval is implied by this orientation session.
+
+## Local browse and visual correction — 26 October 2026
+
+Existing private components now use scoped warm tactile light styling; no new unapproved page design. Ordinary Home/Leaves exclude legacy protected records from results/counts, working Leaves query/type filters and Home tag results replace inert controls; fabricated statistics/metadata removed. 60 focused tests and main-only hosted build pass; synthetic browser search/open/filter/isolation observed. Local only, no deployment or phone/design acceptance. Reports: ../../reports/private-visual-alignment/2026-10-25-review.md and ../../reports/ordinary-browse/2026-10-26-review.md. Broader product goal remains active; ordinary Story creation, offline/media/export/backup remain open. Owner flagged usage-tool figures as inaccurate; stop using that source for pacing and prefer owner-visible figures (latest supplied85% session/58% weekly remaining, observation only).
+
+## Existing controls and offline shell — 26 October 2026
+
+Owner rejected further UI additions/layout changes; removed new composer collection controls and closed test tabs. Existing Home Stories filter → existing lower Write action now supplies Story kind; existing Story edits retain kind. Backend write/reclassification support is tested by nine local emulator cases including starter preservation; reclassification UI remains open. No new page/layout/side panel.
+
+Production-only service worker caches generated app shell/assets/local logos, excludes runtime data/auth/API/docs/demo/externalfonts, and updates through natural waiting lifecycle. Actual app root and fresh sign-in query rendered with local preview server stopped. Nine worker tests + sixty ordinary/private regressions (69) pass; final hosted build/main-only packaging and Firebase guard pass. Offline auth/private unlock/capture are still open; current online authority remains unchanged. Reports: ../../reports/offline-shell/2026-10-26-review.md and ../../reports/ordinary-collections/2026-10-26-review.md. No deployment/cloud mutation/commit/push. Production tracker source and local HTML data updated.
+
+OpenUsage CLI found at /usr/local/bin/openusage; read succeeded and matched owner-visible percentages at first comparison. State the fetch time because it shares a five-minute cache. Last read here fetched03:33UTC,69% session/56% weekly remaining; this is observation-time data, not a live guarantee. Do not use the conflicting app usage tool for pacing.
+
+## Local private media — 26 October 2026
+
+Private writing card now uses the existing composer image/mic tool pattern; existing private list/detail handles independent immutable media originals, explicit reveal/conceal and cleanup. No new page/sidebar/CSS. Same account/unlock/generation authority gates AES-GCM raw bytes and encrypted metadata. Split metadata/binary stores prevent loading all ciphertexts for lists; atomic inserts and quota rollback preserve originals. Recorder cancels delayed permission, releases tracks, retains final encoded chunks on Stop, limits bytes and schedules about60s stop; elapsed metadata is approximate. Ordinary media icons explain the working private route; ordinary attachments and text/media association remain open.
+
+93 focused tests, final hosted main-only build and Firebase guard pass. Actual-component synthetic image picker→save→reload→concealed reopen→reveal→conceal/exit observed; final cleanup recheck showed zero media elements after exit. No native camera/mic or owner-authenticated phone acceptance, cloud transport/deploy/push/commit. Browser-held key/passkey-binding, offline reauthentication, export/deletion/backup/recovery remain open. Report ../../reports/private-media/2026-10-26-review.md; raw evidence ../../evidence/private-media/. Owner's latest supplied usage was50% session/53% weekly; no Codex CLI used, only OpenUsage provider command.
+
+## Readable private export — 26 October 2026
+
+Existing private detail now exports local text originals/all saved revisions as readable JSON, or exact original media bytes. Explicit scope review/download; unencrypted/not-backup/no-unsaved-edits labels; cancel/exit revoke prepared URLs and authority rechecked before download. No new destination/sidebar/CSS, cloud transport/deploy/push/commit. LocalVault/LocalMediaVault gain assertions only, not new authorization. One runtime.ts import suffix in concurrently added native deviceKeyStore restored standard Node tests; native key semantics/work preserved.
+
+98 focused tests, hosted main-only build and Firebase guard pass. Actual-component synthetic JSON/image downloads inspected; image bytes/hash exact. Initial download observation interrupted by concurrent native packaging HMR; repeated successfully against stable no-HMR local server. Cancel/quick-exit cleanup observed; server/tab closed. Report ../../reports/private-export/2026-10-26-review.md. Readable export is not backup/recovery. Ordinary/legacy-cloud export, deletion/retention, encrypted backup/restore/cross-device keys, offline reauthentication and phone/native acceptance remain open. Goal remains active.
+
+## Local deletion —26October2026
+
+One LunaHigh lifecycle implementation + root review/combined pass. Existing private detail now prepares scoped irreversible deletion with acknowledgement; text original/history/linked drafts or media pair delete atomically only if unchanged and still authorized. Unsaved edits gate confirmation. Historical-parent recovery remains allowed; deleted-target autosaves reject.118 focused tests (including16 deletion and4 recovery-file crypto) and hosted build/packaging/Firebase guard pass. Browser confirmation/ack/cancel/exit verified; no browser permanent-deletion click/owner deletion. Report ../../reports/private-lifecycle/2026-10-26-review.md. No deployment/cloud/push/commit.
+
+Password-encrypted recovery-file primitive exists/tested; no backup/restore UI or recovery claim until restore integration verifies metadata/history/conflicts acrossfreshdevicekeys. Ordinary/cloud lifecycle, retention, backup/restore, offline authorization, phone/native acceptance and broader product backlog remain open; goalactive.
+
+Latest owner direction: STOP usage CLI checks (password prompts). Use supplied screenshots; prioritize five-hour allowance, reset time and burnrate, ignore weekly concern for today'sdelivery. Latest screenshot06:23SAST:90%session left, resets4h49, projected exhaustion1h47. Aim roughly18%/hour orless acrossremainingwindow toavoidresetwait, batchwork/reviews/tests, LunaHigh boundeddelegation. No automaticusagechecks.
+
+## Capacitor mobile implementation — 26 October 2026
+
+Capacitor 8 local iOS/Android shells, app-only bundle verification, platform boundaries, native passkey bridge/client and exchange backend, native key adapter, and camera/audio adapters are implemented locally. `npm run build:app`, `npm run native:sync`, Functions build + 12 tests, 65 focused private/media/offline tests, Android debug build, iOS generic build, and iOS simulator build pass. Simulator install/launch succeeds but the current WebView screen is black; startup rendering needs diagnosis before ordinary mobile authentication/journaling can be accepted. Android emulator has no complete system image; no physical Android device is attached. The hosted bridge and Functions changes are not deployed, so authenticated account-owned journal persistence, native private storage isolation, and capture recovery remain unverified. No external deployment or signing configuration was changed. Details and exact release requirements: ../../implementation/2026-10-26-capacitor-mobile.md; build/runtime artifact: ../../evidence/native-mobile/.
+
+## Per-record encrypted private backup and restore — 26 October 2026
+
+Existing private journal flow now backs up one saved text history or media original into a password-encrypted `.lulubackup`; same-account restore re-encrypts using the current device key. It excludes drafts, unsaved edits, whole-vault contents, passkeys and device keys. Conflict IDs are not overwritten; identical saved records are idempotent. Fresh-key IndexedDB restore and exact media bytes/metadata pass local tests. Nine backup-focused cases are part of 127 passing combined regressions; hosted build and Firebase guard pass. Browser download and synthetic two-version restore/reopen/quick-exit were observed; tab and server are closed. No real owner record, physical phone, cloud mutation, commit, push or deployment. See ../../implementation/2026-10-26-private-backup.md, ../../reports/private-backup/2026-10-26-review.md, and ../../evidence/private-backup/.

@@ -1,0 +1,500 @@
+/* Private writing surfaces: scoped to the local journal and its composer. */
+.private-journal-page {
+  flex: 1;
+  width: min(100%, 800px);
+  min-height: 0;
+  margin-inline: auto;
+  padding: 18px clamp(18px, 4vw, 34px) 124px;
+  overflow-y: auto;
+  color: #292822;
+  background:
+    radial-gradient(ellipse at 95% 0%, rgba(198, 190, 165, .16), transparent 34%),
+    linear-gradient(145deg, rgba(252, 249, 243, .88), rgba(246, 240, 230, .86));
+}
+
+/* App-level private actions are siblings of the viewport shell in App.tsx. */
+.lulu-app-root:has(.private-journal-page) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+.lulu-app-root:has(.private-journal-page) > .account-actions {
+  position: sticky;
+  top: 0;
+  z-index: 47;
+  width: min(100%, 440px);
+  min-height: 46px;
+  flex: 0 0 46px;
+  align-self: center;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  box-sizing: border-box;
+  padding: 6px 14px;
+  border-bottom: 1px solid rgba(163, 153, 136, .28);
+  background: rgba(250, 247, 240, .93);
+}
+.lulu-app-root:has(.private-journal-page) > .account-actions button,
+.lulu-app-root:has(.private-draft-composer) > .account-actions button {
+  min-height: 32px;
+  padding: 6px 11px;
+  border: 1px solid rgba(145, 137, 120, .34);
+  border-radius: 999px;
+  background: rgba(251, 248, 242, .9);
+  color: #514d44;
+  font: 600 11px/1.2 var(--font-heading, sans-serif);
+  text-decoration: none;
+  cursor: pointer;
+}
+.lulu-app-root:has(.private-journal-page) > .account-actions button:last-child,
+.lulu-app-root:has(.private-draft-composer) > .account-actions button:last-child {
+  border-color: #4b564a;
+  background: #4b564a;
+  color: #fbf8f2;
+}
+.lulu-app-root:has(.private-journal-page) > .lulu-viewport-shell {
+  min-height: calc(100dvh - 46px);
+}
+
+.lulu-app-root:has(.private-draft-composer) > .account-actions {
+  position: fixed;
+  z-index: 47;
+  top: max(0px, env(safe-area-inset-top));
+  left: 50%;
+  width: min(100%, 440px);
+  min-height: 38px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  box-sizing: border-box;
+  padding: 3px 14px;
+  border-bottom: 1px solid rgba(163, 153, 136, .3);
+  background: rgba(250, 247, 240, .96);
+  box-shadow: 0 3px 10px rgba(69, 57, 42, .06);
+  transform: translateX(-50%);
+}
+.lulu-app-root:has(.private-draft-composer) .private-draft-composer .transform-header {
+  margin-top: calc(40px + env(safe-area-inset-top, 0px));
+}
+
+.private-journal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.private-journal-toolbar {
+  display: flex;
+  min-height: 38px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid rgba(163, 153, 136, .28);
+}
+.private-journal-toolbar .private-journal-actions { justify-content: flex-end; }
+
+.private-journal-action,
+.private-journal-history-toggle,
+.private-draft-retry,
+.private-draft-preview-toggle {
+  min-height: 38px;
+  padding: 8px 13px;
+  border: 1px solid rgba(145, 137, 120, .34);
+  border-radius: 999px;
+  background: rgba(251, 248, 242, .86);
+  color: #514d44;
+  font: 600 12px/1.25 var(--font-heading, sans-serif);
+  cursor: pointer;
+  transition: background-color .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.private-journal-action:hover:not(:disabled),
+.private-journal-history-toggle:hover,
+.private-draft-retry:hover:not(:disabled),
+.private-draft-preview-toggle:hover {
+  border-color: rgba(75, 86, 74, .48);
+  background: #eef0e8;
+}
+
+.private-journal-action:focus-visible,
+.private-journal-record:focus-visible,
+.private-journal-history-toggle:focus-visible,
+.private-draft-retry:focus-visible,
+.private-draft-preview-toggle:focus-visible,
+.private-draft-save:focus-visible,
+.private-draft-title:focus-visible {
+  outline: 2px solid #4b564a;
+  outline-offset: 3px;
+}
+
+.private-journal-action:disabled,
+.private-draft-retry:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.private-journal-action-primary {
+  border-color: #4b564a;
+  background: #4b564a;
+  color: #fbf8f2;
+  box-shadow: 0 3px 10px rgba(53, 61, 48, .16);
+}
+
+.private-journal-action-primary:hover:not(:disabled) {
+  background: #3d483c;
+}
+
+.private-journal-heading {
+  max-width: 660px;
+  padding: 18px 2px 6px;
+}
+
+.private-writing-kicker {
+  color: #737365;
+  font: 600 10px/1.4 var(--font-mono, monospace);
+  letter-spacing: .13em;
+}
+
+.private-journal-heading h1 {
+  margin-top: 5px;
+  color: #292822;
+  font: 400 clamp(30px, 6vw, 42px)/1.12 var(--font-serif, Georgia, serif);
+  letter-spacing: -.045em;
+}
+
+.private-journal-heading > p,
+.private-journal-note,
+.private-journal-status,
+.private-journal-alert,
+.private-draft-explainer,
+.private-draft-security-note {
+  color: #6a655b;
+  font: 13px/1.55 var(--font-heading, sans-serif);
+}
+.private-journal-note { font-size: 11px; }
+
+.private-journal-heading > p { margin-top: 9px; max-width: 620px; }
+.private-journal-section-heading { margin: 4px 0 10px; }
+.private-journal-section-heading h2 {
+  margin-top: 3px;
+  color: #302e28;
+  font: 400 23px/1.2 var(--font-serif, Georgia, serif);
+  letter-spacing: -.025em;
+}
+
+.private-journal-refresh { align-self: flex-start; }
+.private-journal-note { margin: -4px 0 12px; max-width: 620px; }
+.private-journal-status,
+.private-journal-alert {
+  margin: 0;
+  padding: 11px 14px;
+  border: 1px solid rgba(177, 168, 150, .4);
+  border-radius: 14px;
+  background: rgba(251, 248, 242, .9);
+}
+.private-journal-alert { border-color: rgba(151, 95, 78, .3); color: #744b40; }
+.private-journal-alert .private-journal-action { margin: 8px 0 0; }
+.private-journal-empty {
+  padding: 20px;
+  border: 1px dashed rgba(145, 137, 120, .48);
+  border-radius: 16px;
+  color: #6a655b;
+  font: 15px/1.5 var(--font-serif, Georgia, serif);
+  text-align: center;
+}
+
+.private-journal-list {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.private-journal-list-item { min-width: 0; }
+.private-journal-record {
+  display: flex;
+  width: 100%;
+  min-height: 68px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(186, 177, 159, .48);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 253, 248, .98), rgba(248, 243, 233, .96));
+  box-shadow: 0 2px 5px rgba(66, 53, 37, .04), inset 0 1px 0 rgba(255,255,255,.95);
+  color: #302e28;
+  text-align: left;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.private-journal-record:hover {
+  transform: translateY(-1px);
+  border-color: rgba(75, 86, 74, .4);
+  box-shadow: 0 5px 13px rgba(66, 53, 37, .08), inset 0 1px 0 rgba(255,255,255,.95);
+}
+.private-journal-record-mark {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  place-items: center;
+  border: 1px solid rgba(93, 106, 88, .2);
+  border-radius: 12px;
+  background: #e8ece3;
+  color: #4b564a;
+  font: 500 15px/1 var(--font-serif, Georgia, serif);
+}
+.private-journal-record-copy { display: grid; min-width: 0; gap: 3px; }
+.private-journal-record-copy strong {
+  overflow: hidden;
+  color: #302e28;
+  font: 500 16px/1.3 var(--font-serif, Georgia, serif);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.private-journal-record-copy > span { color: #787266; font: 11px/1.4 var(--font-heading, sans-serif); }
+.private-journal-record-arrow { margin-left: auto; color: #737365; font: 16px/1 var(--font-heading, sans-serif); }
+.private-journal-record-section { margin-top: 4px; }
+
+.private-journal-record-detail { display: grid; gap: 12px; }
+.private-journal-page .private-draft-fields {
+  padding: 16px;
+  border: 1px solid rgba(180, 169, 149, .52);
+  border-radius: 19px;
+  background: linear-gradient(145deg, #fffdf8, #f8f3e9);
+  box-shadow: 0 7px 20px rgba(69, 57, 42, .08), inset 0 1px 0 rgba(255,255,255,.96);
+}
+.private-journal-page .private-draft-inputs { gap: 12px; }
+.private-journal-page .private-draft-title { font-size: 25px; }
+.private-journal-page .private-paragraph-editor { gap: 10px; }
+.private-journal-page .private-paragraph-list { gap: 9px; }
+.private-journal-page .private-paragraph-active,
+.private-journal-page .private-paragraph-concealed {
+  border-color: rgba(180, 169, 149, .5);
+  border-radius: 14px;
+  background: #fcf9f3;
+  box-shadow: inset 0 1px 2px rgba(61, 51, 38, .035), 0 1px 0 rgba(255,255,255,.8);
+}
+.private-journal-page .private-paragraph-add { border-radius: 999px; }
+.private-journal-page .private-draft-save { max-width: 280px; }
+.private-journal-history-toggle { justify-self: start; }
+.private-journal-history {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #292d29;
+  border-radius: 18px;
+  background: #171a18;
+  color: #f3f0e9;
+  box-shadow: 0 8px 22px rgba(32, 32, 28, .13);
+}
+.private-journal-history-note { color: #c0bfb6; font: 12px/1.5 var(--font-heading, sans-serif); }
+.private-journal-history-card {
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 13px;
+  background: #202421;
+}
+.private-journal-history-card strong { color: #f2eee5; font: 600 12px/1.4 var(--font-heading, sans-serif); }
+.private-journal-history-card p { margin-top: 4px; color: #a4a79f; font: 10px/1.4 var(--font-mono, monospace); }
+.private-journal-history-card pre {
+  margin-top: 11px;
+  color: #e8e3d9;
+  font: 14px/1.65 var(--font-serif, Georgia, serif);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.private-draft-composer {
+  background:
+    radial-gradient(ellipse at 90% 8%, rgba(204, 195, 172, .2), transparent 36%),
+    linear-gradient(160deg, #faf7f0, #f1ece2);
+  color: #292822;
+}
+.private-draft-composer .transform-header {
+  flex: 0 0 56px;
+  border-bottom-color: rgba(163, 153, 136, .3);
+  background: rgba(250, 247, 240, .76);
+}
+.private-draft-composer .icon-btn-round { border: 1px solid rgba(145, 137, 120, .28); background: rgba(255,253,248,.65); }
+.private-draft-composer .icon-btn-round:hover { background: #e9ece4; }
+.private-draft-composer .transform-flow-body { gap: 10px; }
+.private-draft-processing { padding: 2px 2px 0; }
+.private-draft-security-note {
+  width: fit-content;
+  max-width: 100%;
+  padding: 8px 11px;
+  border: 1px solid rgba(165, 157, 138, .26);
+  border-radius: 11px;
+  background: rgba(250, 247, 240, .76);
+  font-size: 11px;
+}
+.private-draft-preview-toggle { align-self: flex-start; min-height: 34px; padding: 7px 11px; }
+.private-draft-preview {
+  border-color: #313631;
+  background: linear-gradient(145deg, #1d211e, #141715 72%);
+  box-shadow: 0 8px 22px rgba(33, 34, 29, .17);
+}
+.private-draft-preview > p { color: #b6b8ae; font: 11px/1.45 var(--font-heading, sans-serif); }
+.private-draft-preview .protected-body-rendered { color: #f0eee7; }
+.private-draft-preview > button {
+  align-self: flex-start;
+  min-height: 34px;
+  padding: 7px 11px;
+  border: 1px solid rgba(233, 232, 220, .24);
+  border-radius: 999px;
+  background: #292e29;
+  color: #ece9df;
+  font: 600 11px/1.25 var(--font-heading, sans-serif);
+  cursor: pointer;
+}
+.private-draft-preview > button:hover { background: #353c35; }
+
+.private-draft-composer .composer-input-dock .original-entry-card {
+  gap: 8px;
+  border-color: rgba(180, 169, 149, .54);
+  border-radius: 19px;
+  background: linear-gradient(145deg, #fffdf8, #f8f3e9);
+  box-shadow: 0 10px 28px rgba(69, 57, 42, .11), inset 0 1px 0 rgba(255,255,255,.96);
+}
+.private-draft-composer .composer-processing-panel {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.private-draft-composer .composer-input-dock {
+  min-height: 0;
+  max-height: min(58dvh, 510px);
+  flex: 0 1 auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.private-draft-fields { display: grid; gap: 8px; min-width: 0; }
+.private-draft-explainer { color: #777165; font-size: 11px; line-height: 1.4; }
+.private-draft-inputs {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.private-draft-title-label {
+  display: grid;
+  gap: 3px;
+  color: #777165;
+  font: 600 9px/1.4 var(--font-mono, monospace);
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.private-draft-title {
+  width: 100%;
+  min-width: 0;
+  padding: 3px 0 7px;
+  border: 0;
+  border-bottom: 1px solid rgba(158, 150, 133, .4);
+  border-radius: 0;
+  background: transparent;
+  color: #302e28;
+  font: 400 21px/1.2 var(--font-serif, Georgia, serif);
+  letter-spacing: -.025em;
+}
+.private-draft-title::placeholder { color: #aaa395; }
+.private-draft-title:focus-visible { outline-offset: 1px; }
+.private-draft-save-status {
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px 10px;
+  border: 1px solid rgba(158, 150, 133, .3);
+  border-radius: 999px;
+  background: rgba(237, 234, 225, .7);
+  color: #6a655b;
+  font: 11px/1.4 var(--font-heading, sans-serif);
+}
+.private-draft-save-status.is-saving,
+.private-draft-save-status.is-finalizing { border-color: rgba(156, 130, 85, .35); color: #68583f; }
+.private-draft-save-status.is-saved,
+.private-draft-save-status.is-finalized { border-color: rgba(75, 86, 74, .28); background: #edf0e9; color: #4b564a; }
+.private-draft-save-status.is-error { border-color: rgba(151, 95, 78, .35); background: #f7eeea; color: #744b40; }
+.private-draft-retry { justify-self: start; min-height: 34px; }
+.private-draft-save { min-height: 42px; padding: 10px 15px; background: #282a26; box-shadow: 0 4px 12px rgba(32, 32, 28, .16); }
+.private-draft-save:hover:not(:disabled) { background: #3a3d37; transform: translateY(-1px); }
+.private-draft-save:disabled { opacity: .58; cursor: not-allowed; }
+
+/* Keep the reusable editor unchanged outside the private composer. */
+.private-draft-composer .private-paragraph-editor { gap: 7px; }
+.private-draft-composer .private-paragraph-list { gap: 7px; }
+.private-draft-composer .private-paragraph-list {
+  max-height: clamp(82px, 22dvh, 180px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.private-draft-composer .private-paragraph-active,
+.private-draft-composer .private-paragraph-concealed {
+  border-color: rgba(180, 169, 149, .48);
+  border-radius: 13px;
+  background: rgba(250, 247, 240, .86);
+  box-shadow: inset 0 1px 2px rgba(61, 51, 38, .035), 0 1px 0 rgba(255,255,255,.8);
+}
+.private-draft-composer .private-paragraph-active {
+  min-height: 76px;
+  padding: 10px 12px;
+  color: #302e28;
+  font-size: 16px;
+  line-height: 1.55;
+}
+.private-draft-composer .private-paragraph-concealed { min-height: 60px; }
+.private-draft-composer .private-paragraph-add {
+  min-height: 34px;
+  border-color: rgba(75, 86, 74, .3);
+  border-radius: 999px;
+  background: #e9ece4;
+  color: #465143;
+}
+
+@media (min-width: 800px) {
+  .private-journal-page { border-radius: 22px; }
+  .lulu-app-root:has(.private-journal-page) > .account-actions { width: min(100%, 1040px); }
+  .lulu-app-root:has(.private-journal-page) > .lulu-viewport-shell { width: 100%; }
+  .lulu-app-root:has(.private-draft-composer) > .account-actions { width: min(100%, 820px); }
+}
+
+@media (max-width: 520px) {
+  .private-journal-page { gap: 15px; padding-inline: 16px; }
+  .private-journal-toolbar { align-items: flex-start; gap: 8px; }
+  .private-journal-toolbar .private-journal-actions { justify-content: flex-start; }
+  .private-journal-actions { gap: 7px; }
+  .private-journal-action { min-height: 36px; padding: 7px 11px; font-size: 11px; }
+  .private-journal-heading { padding-top: 12px; }
+  .private-journal-record { min-height: 64px; padding: 10px 11px; }
+  .private-journal-record-copy strong { font-size: 15px; }
+  .private-draft-composer .transform-flow-body { padding-inline: 12px; }
+  .private-draft-composer .composer-input-dock .original-entry-card { padding: 10px; }
+  .private-draft-title { font-size: 19px; }
+  .private-draft-explainer { font-size: 11px; }
+  .private-draft-security-note { font-size: 11px; }
+  .private-draft-save-status { padding: 5px 8px; font-size: 11px; }
+  .private-draft-composer .composer-input-dock { max-height: min(58dvh, 510px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .private-journal-action,
+  .private-journal-record,
+  .private-journal-history-toggle,
+  .private-draft-retry,
+  .private-draft-preview-toggle { transition: none; }
+}
+
+/* The app shell already supplies Quick exit; retain the standalone component's
+   control only when that shell control is absent. */
+.lulu-app-root:has(> .account-actions):has(.private-journal-page) .private-journal-exit { display: none; }

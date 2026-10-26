@@ -15,9 +15,10 @@ import { decryptPrivate, encryptPrivate, type Envelope } from '../backend/device
  */
 
 const DATABASE = 'lulu.local-vault.v1';
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 3;
 const REVISION_STORE = 'revisions';
 const HEAD_STORE = 'heads';
+const DRAFT_STORE = 'drafts';
 const MAX_CONTENT_BYTES = 1_000_000;
 
 type RevisionKind = 'original' | 'derived';
@@ -60,6 +61,35 @@ export interface LocalVaultRevision {
   sha256: string;
 }
 
+export interface LocalVaultDraftTarget {
+  recordId: string;
+  parentRevisionId: string;
+}
+
+export interface LocalVaultDraft {
+  ownerId: string;
+  draftId: string;
+  version: number;
+  content: unknown;
+  target?: LocalVaultDraftTarget;
+  /** Device clock only; not a trusted timestamp. */
+  clientUpdatedAt: string;
+}
+
+export interface SaveDraftInput {
+  draftId: string;
+  expectedVersion: number | null;
+  content: unknown;
+  target?: LocalVaultDraftTarget;
+}
+
+export interface FinalizeDraftInput {
+  draftId: string;
+  expectedVersion: number;
+  recordId?: string;
+  revisionId?: string;
+}
+
 interface StoredRevision {
   key: string;
   ownerRecordKey: string;
@@ -78,6 +108,27 @@ interface StoredHead {
   recordId: string;
   latestRevisionId: string;
   revisionCount: number;
+}
+
+interface StoredDraft {
+  key: string;
+  ownerId: string;
+  draftId: string;
+  version: number;
+  target?: LocalVaultDraftTarget;
+  clientUpdatedAt: string;
+  envelope: Envelope;
+}
+
+interface EncryptedDraftPayload {
+  schemaVersion: 1;
+  ownerId: string;
+  draftId: string;
+  version: number;
+  target?: LocalVaultDraftTarget;
+  clientUpdatedAt: string;
+  content: unknown;
+  sha256: string;
 }
 
 interface EncryptedPayload {
@@ -119,6 +170,25 @@ function ownerRecordKey(ownerId: string, recordId: string): string {
 
 function revisionKey(ownerId: string, recordId: string, revisionId: string): string {
   return JSON.stringify([ownerId, recordId, revisionId]);
+}
+
+function requestError(request: IDBRequest, fallback: string): Error {
+  return request.error ?? new Error(fallback);
+}
+
+function conflictForConstraint(error: Error, message: string): Error {
+  return error instanceof DOMException && error.name === 'ConstraintError'
+    ? new LocalVaultConflictError(message)
+    : error;
+}
+
+function ownerDraftKey(ownerId: string, draftId: string): string {
+  return JSON.stringify([ownerId, draftId]);
+}
+
+function draftAadId(ownerId: string, draftId: string, version: number): string {
+  // Draft ciphertext has a separate namespace and identity tuple from evidence.
+  return JSON.stringify(['draft', ownerId, draftId, version]);
 }
 
 function aadId(ownerId: string, recordId: string, revisionId: string): string {
@@ -223,7 +293,7 @@ function serializeContent(content: unknown): unknown {
   }
   if (serialized === undefined) throw new TypeError('Vault content must be JSON-serializable.');
   if (new TextEncoder().encode(serialized).byteLength > MAX_CONTENT_BYTES) {
-    throw new RangeError('Vault content exceeds the 1 MB local revision limit.');
+    throw new RangeError('Vault content exceeds the 1 MB local content limit.');
   }
   const normalized = JSON.parse(serialized) as unknown;
   rejectMarkedSynthetic(normalized);
@@ -255,6 +325,7 @@ function rejectMarkedSynthetic(value: unknown, visited = new Set<object>()): voi
 function openDatabase(): Promise<IDBDatabase> {
   if (typeof indexedDB === 'undefined') return Promise.reject(new Error('IndexedDB is unavailable.'));
   return new Promise((resolve, reject) => {
+    let settled = false;
     const request = indexedDB.open(DATABASE, DATABASE_VERSION);
     request.onupgradeneeded = () => {
       const db = request.result;
@@ -268,10 +339,30 @@ function openDatabase(): Promise<IDBDatabase> {
         ? request.transaction!.objectStore(HEAD_STORE)
         : db.createObjectStore(HEAD_STORE, { keyPath: 'key' });
       if (!heads.indexNames.contains('ownerId')) heads.createIndex('ownerId', 'ownerId', { unique: false });
+      const drafts = db.objectStoreNames.contains(DRAFT_STORE)
+        ? request.transaction!.objectStore(DRAFT_STORE)
+        : db.createObjectStore(DRAFT_STORE, { keyPath: 'key' });
+      if (!drafts.indexNames.contains('ownerId')) drafts.createIndex('ownerId', 'ownerId', { unique: false });
     };
-    request.onerror = () => reject(request.error ?? new Error('Could not open local vault storage.'));
-    request.onblocked = () => reject(new Error('Local vault storage upgrade is blocked by another tab.'));
-    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => {
+      if (settled) return;
+      settled = true;
+      reject(request.error ?? new Error('Could not open local vault storage.'));
+    };
+    request.onblocked = () => {
+      if (settled) return;
+      settled = true;
+      reject(new Error('Local vault storage upgrade is blocked by another tab.'));
+    };
+    request.onsuccess = () => {
+      if (settled) {
+        request.result.close();
+        return;
+      }
+      settled = true;
+      request.result.onversionchange = () => request.result.close();
+      resolve(request.result);
+    };
   });
 }
 
@@ -287,6 +378,7 @@ async function transact(
   const db = await openDatabase();
   return new Promise<void>((resolve, reject) => {
     let abortReason: unknown;
+    let abortRequested = false;
     const tx = db.transaction(stores, mode);
     tx.oncomplete = () => {
       db.close();
@@ -308,6 +400,8 @@ async function transact(
     try {
       assertSession(session, ownerId, expectedGeneration);
       body(tx, (reason) => {
+        if (abortRequested) return;
+        abortRequested = true;
         abortReason = reason;
         tx.abort();
       });
@@ -318,7 +412,7 @@ async function transact(
   });
 }
 
-async function digest(payload: Omit<EncryptedPayload, 'sha256'>): Promise<string> {
+async function digest(payload: object): Promise<string> {
   const bytes = new TextEncoder().encode(JSON.stringify(payload));
   const hash = await crypto.subtle.digest('SHA-256', bytes);
   return Array.from(new Uint8Array(hash), (byte) => byte.toString(16).padStart(2, '0')).join('');
@@ -345,6 +439,155 @@ async function makeStoredRevision(
     key: revisionKey(ownerId, recordId, revisionId), ownerRecordKey: ownerRecordKey(ownerId, recordId),
     ownerId, recordId, revisionId, parentRevisionId, kind, clientCreatedAt, envelope,
   };
+}
+
+async function prepareRestoredRevision(
+  session: LocalVaultSession,
+  ownerId: string,
+  generation: number,
+  revision: LocalVaultRevision,
+): Promise<StoredRevision> {
+  assertSession(session, ownerId, generation);
+  if (!revision || typeof revision !== 'object' || revision.ownerId !== ownerId ||
+      typeof revision.recordId !== 'string' || typeof revision.revisionId !== 'string' ||
+      (revision.parentRevisionId !== null && typeof revision.parentRevisionId !== 'string') ||
+      (revision.kind !== 'original' && revision.kind !== 'derived') ||
+      (revision.provenance !== null && revision.provenance !== 'user-authored' && revision.provenance !== 'user-captured') ||
+      typeof revision.clientCreatedAt !== 'string' || !Number.isFinite(Date.parse(revision.clientCreatedAt)) ||
+      typeof revision.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(revision.sha256)) {
+    throw new TypeError('The recovery record history is invalid.');
+  }
+  assertId(revision.recordId, 'recordId');
+  assertId(revision.revisionId, 'revisionId');
+  if (revision.parentRevisionId !== null) assertId(revision.parentRevisionId, 'parentRevisionId');
+  if ((revision.kind === 'original' && revision.provenance === null) ||
+      (revision.kind === 'derived' && revision.provenance !== null)) {
+    throw new TypeError('The recovery record provenance is invalid.');
+  }
+  const content = serializeContent(revision.content);
+  if (JSON.stringify(content) !== JSON.stringify(revision.content)) throw new TypeError('The recovery record content is not in its saved form.');
+  const payloadBase = {
+    schemaVersion: 1 as const,
+    ownerId,
+    recordId: revision.recordId,
+    revisionId: revision.revisionId,
+    parentRevisionId: revision.parentRevisionId,
+    kind: revision.kind,
+    provenance: revision.provenance,
+    clientCreatedAt: revision.clientCreatedAt,
+    content,
+  };
+  assertSession(session, ownerId, generation);
+  if (await digest(payloadBase) !== revision.sha256) throw new Error('The recovery record content failed its integrity check.');
+  assertSession(session, ownerId, generation);
+  const envelope = await encryptPrivate(ownerId, aadId(ownerId, revision.recordId, revision.revisionId), {
+    ...payloadBase,
+    sha256: revision.sha256,
+  } satisfies EncryptedPayload);
+  assertSession(session, ownerId, generation);
+  return {
+    key: revisionKey(ownerId, revision.recordId, revision.revisionId),
+    ownerRecordKey: ownerRecordKey(ownerId, revision.recordId),
+    ownerId,
+    recordId: revision.recordId,
+    revisionId: revision.revisionId,
+    parentRevisionId: revision.parentRevisionId,
+    kind: revision.kind,
+    clientCreatedAt: revision.clientCreatedAt,
+    envelope,
+  };
+}
+
+function normalizeDraftTarget(target: LocalVaultDraftTarget | undefined): LocalVaultDraftTarget | undefined {
+  if (target === undefined) return undefined;
+  if (!target || typeof target !== 'object') throw new TypeError('Draft target must identify a record and parent revision.');
+  const recordId = target.recordId;
+  const parentRevisionId = target.parentRevisionId;
+  assertId(recordId, 'target.recordId');
+  assertId(parentRevisionId, 'target.parentRevisionId');
+  return { recordId, parentRevisionId };
+}
+
+function validateDraftRow(row: StoredDraft, ownerId: string, draftId: string): void {
+  if (row.key !== ownerDraftKey(ownerId, draftId) || row.ownerId !== ownerId || row.draftId !== draftId ||
+      !Number.isSafeInteger(row.version) || row.version < 1) {
+    throw new Error('Local vault draft lookup identity validation failed.');
+  }
+}
+
+function sameEnvelope(left: Envelope, right: Envelope): boolean {
+  return left?.version === right?.version && left?.iv === right?.iv && left?.ciphertext === right?.ciphertext;
+}
+
+function sameRevisionSnapshot(left: StoredRevision, right: StoredRevision): boolean {
+  return left.key === right.key && left.ownerRecordKey === right.ownerRecordKey && left.ownerId === right.ownerId &&
+    left.recordId === right.recordId && left.revisionId === right.revisionId &&
+    left.parentRevisionId === right.parentRevisionId && left.kind === right.kind &&
+    left.clientCreatedAt === right.clientCreatedAt && sameEnvelope(left.envelope, right.envelope);
+}
+
+function sameDraftSnapshot(left: StoredDraft, right: StoredDraft): boolean {
+  return left.key === right.key && left.ownerId === right.ownerId && left.draftId === right.draftId &&
+    left.version === right.version && left.clientUpdatedAt === right.clientUpdatedAt &&
+    JSON.stringify(left.target) === JSON.stringify(right.target) && sameEnvelope(left.envelope, right.envelope);
+}
+
+function sameSnapshotSet<T extends { key: string }>(
+  current: T[], expected: T[], compare: (left: T, right: T) => boolean,
+): boolean {
+  if (current.length !== expected.length) return false;
+  const byKey = new Map(current.map((row) => [row.key, row]));
+  return byKey.size === current.length && expected.every((row) => {
+    const currentRow = byKey.get(row.key);
+    return currentRow !== undefined && compare(currentRow, row);
+  });
+}
+
+function sameRevisionContent(left: LocalVaultRevision, right: LocalVaultRevision): boolean {
+  return left.ownerId === right.ownerId && left.recordId === right.recordId && left.revisionId === right.revisionId &&
+    left.parentRevisionId === right.parentRevisionId && left.kind === right.kind && left.provenance === right.provenance &&
+    left.clientCreatedAt === right.clientCreatedAt && left.sha256 === right.sha256 &&
+    JSON.stringify(left.content) === JSON.stringify(right.content);
+}
+
+async function makeStoredDraft(
+  session: LocalVaultSession,
+  ownerId: string,
+  generation: number,
+  draftId: string,
+  version: number,
+  content: unknown,
+  target: LocalVaultDraftTarget | undefined,
+): Promise<StoredDraft> {
+  const clientUpdatedAt = new Date().toISOString();
+  const payloadBase = { schemaVersion: 1 as const, ownerId, draftId, version, ...(target ? { target } : {}), clientUpdatedAt, content };
+  const payload: EncryptedDraftPayload = { ...payloadBase, sha256: await digest(payloadBase) };
+  assertSession(session, ownerId, generation);
+  const envelope = await encryptPrivate(ownerId, draftAadId(ownerId, draftId, version), payload);
+  assertSession(session, ownerId, generation);
+  return { key: ownerDraftKey(ownerId, draftId), ownerId, draftId, version, ...(target ? { target } : {}), clientUpdatedAt, envelope };
+}
+
+async function decryptDraft(
+  session: LocalVaultSession,
+  expectedOwnerId: string,
+  generation: number,
+  row: StoredDraft,
+): Promise<LocalVaultDraft> {
+  const ownerId = assertSession(session, expectedOwnerId, generation);
+  validateDraftRow(row, ownerId, row.draftId);
+  const payload = await decryptPrivate<EncryptedDraftPayload>(ownerId, draftAadId(ownerId, row.draftId, row.version), row.envelope);
+  assertSession(session, ownerId, generation);
+  if (payload.schemaVersion !== 1 || payload.ownerId !== row.ownerId || payload.draftId !== row.draftId ||
+      payload.version !== row.version || payload.clientUpdatedAt !== row.clientUpdatedAt ||
+      JSON.stringify(payload.target) !== JSON.stringify(row.target)) {
+    throw new Error('Local vault draft identity validation failed.');
+  }
+  const { sha256, ...hashable } = payload;
+  if (await digest(hashable) !== sha256) throw new Error('Local vault draft integrity check failed.');
+  assertSession(session, ownerId, generation);
+  return { ownerId, draftId: row.draftId, version: row.version, content: payload.content,
+    ...(payload.target ? { target: payload.target } : {}), clientUpdatedAt: row.clientUpdatedAt };
 }
 
 async function decryptRevision(session: LocalVaultSession, expectedOwnerId: string, generation: number, row: StoredRevision): Promise<LocalVaultRevision> {
@@ -376,6 +619,305 @@ export class LocalVault {
     this.ownerId = session.ownerId;
     this.generation = generation;
     assertSession(session, this.ownerId, this.generation);
+  }
+
+  /** Revalidate the bound owner and generation before releasing local data. */
+  assertUnlocked(): void {
+    assertSession(this.session, this.ownerId, this.generation);
+  }
+
+  getOwnerId(): string {
+    return assertSession(this.session, this.ownerId, this.generation);
+  }
+
+  /** Validate and prepare a complete same-owner record history without writes. */
+  async prepareRestoreRecord(revisions: LocalVaultRevision[]): Promise<{ existing: boolean; confirm: () => Promise<void> }> {
+    const ownerId = assertSession(this.session, this.ownerId, this.generation);
+    if (!Array.isArray(revisions) || revisions.length < 1) throw new TypeError('A backup must contain one complete record history.');
+    // Detach the caller-owned graph before the first await. Each revision keeps
+    // the normal 1 MiB content cap, while the complete history has no aggregate cap.
+    assertPlainJson(revisions);
+    const snapshots = JSON.parse(JSON.stringify(revisions)) as LocalVaultRevision[];
+    for (const revision of snapshots) revision.content = serializeContent(revision.content);
+    const recordId = snapshots[0]?.recordId;
+    assertId(recordId, 'recordId');
+    const imported: LocalVaultRevision[] = [];
+    const importedRows: StoredRevision[] = [];
+    const seen = new Set<string>();
+    for (let index = 0; index < snapshots.length; index += 1) {
+      const revision = snapshots[index];
+      assertSession(this.session, ownerId, this.generation);
+      if (revision?.recordId !== recordId || (index === 0
+        ? revision.parentRevisionId !== null || revision.kind !== 'original'
+        : revision.parentRevisionId !== snapshots[index - 1].revisionId || revision.kind !== 'derived') ||
+          seen.has(revision.revisionId)) {
+        throw new TypeError('The recovery file does not contain one complete, unbranched revision history.');
+      }
+      seen.add(revision.revisionId);
+      const row = await prepareRestoredRevision(this.session, ownerId, this.generation, revision);
+      assertSession(this.session, ownerId, this.generation);
+      imported.push({ ...revision });
+      importedRows.push(row);
+    }
+
+    const observed: { head?: StoredHead; rows: StoredRevision[] } = { rows: [] };
+    await transact([HEAD_STORE, REVISION_STORE], 'readonly', this.session, ownerId, this.generation, (tx) => {
+      const headRequest = tx.objectStore(HEAD_STORE).get(ownerRecordKey(ownerId, recordId));
+      const rowsRequest = tx.objectStore(REVISION_STORE).index('ownerRecordKey').getAll(ownerRecordKey(ownerId, recordId));
+      headRequest.onsuccess = () => { observed.head = headRequest.result as StoredHead | undefined; };
+      rowsRequest.onsuccess = () => { observed.rows = rowsRequest.result as StoredRevision[]; };
+      headRequest.onerror = () => tx.abort();
+      rowsRequest.onerror = () => tx.abort();
+    });
+    assertSession(this.session, ownerId, this.generation);
+    let existingRevisions: LocalVaultRevision[] = [];
+    if (observed.head || observed.rows.length) {
+      const chain = validateRevisionChain(ownerId, recordId, observed.head, observed.rows);
+      for (const row of chain) {
+        existingRevisions.push(await decryptRevision(this.session, ownerId, this.generation, row));
+        assertSession(this.session, ownerId, this.generation);
+      }
+      if (existingRevisions.length !== imported.length ||
+          !existingRevisions.every((revision, index) => sameRevisionContent(revision, imported[index]))) {
+        throw new LocalVaultConflictError('A different record already uses this ID. The recovery file was not imported.');
+      }
+    }
+    const existing = existingRevisions.length > 0;
+    const expectedHead = observed.head;
+    const expectedRows = [...observed.rows];
+    let attempted = false;
+    return {
+      existing,
+      confirm: async () => {
+        if (attempted) throw new LocalVaultConflictError('This restore plan has already been used. Prepare the recovery file again.');
+        attempted = true;
+        assertSession(this.session, ownerId, this.generation);
+        await transact([HEAD_STORE, REVISION_STORE], 'readwrite', this.session, ownerId, this.generation, (tx, abort) => {
+          const heads = tx.objectStore(HEAD_STORE);
+          const revisionsStore = tx.objectStore(REVISION_STORE);
+          const headRequest = heads.get(ownerRecordKey(ownerId, recordId));
+          const rowsRequest = revisionsStore.index('ownerRecordKey').getAll(ownerRecordKey(ownerId, recordId));
+          let reads = 0;
+          const verifyAndRestore = () => {
+            if (++reads !== 2) return;
+            try {
+              assertSession(this.session, ownerId, this.generation);
+              const currentHead = headRequest.result as StoredHead | undefined;
+              const currentRows = rowsRequest.result as StoredRevision[];
+              const matchesExpected = expectedHead
+                ? Boolean(currentHead && JSON.stringify(currentHead) === JSON.stringify(expectedHead) &&
+                  sameSnapshotSet(currentRows, expectedRows, sameRevisionSnapshot))
+                : !currentHead && currentRows.length === 0;
+              if (!matchesExpected) {
+                abort(new LocalVaultConflictError('A record changed while this recovery file was prepared. Prepare it again.'));
+                return;
+              }
+              if (existing) return;
+              for (const row of importedRows) {
+                const request = revisionsStore.add(row);
+                request.onerror = (event) => {
+                  event.preventDefault();
+                  abort(conflictForConstraint(requestError(request, 'Could not restore the record history.'), 'A record or revision ID already exists.'));
+                };
+                request.onsuccess = () => {
+                  try { assertSession(this.session, ownerId, this.generation); }
+                  catch (error) { abort(error); }
+                };
+              }
+              const headWrite = heads.add({
+                key: ownerRecordKey(ownerId, recordId), ownerId, recordId,
+                latestRevisionId: imported.at(-1)!.revisionId, revisionCount: imported.length,
+              } satisfies StoredHead);
+              headWrite.onerror = (event) => {
+                event.preventDefault();
+                abort(conflictForConstraint(requestError(headWrite, 'Could not restore the record head.'), 'A record with this ID already exists.'));
+              };
+              headWrite.onsuccess = () => {
+                try { assertSession(this.session, ownerId, this.generation); }
+                catch (error) { abort(error); }
+              };
+            } catch (error) { abort(error); }
+          };
+          headRequest.onsuccess = rowsRequest.onsuccess = verifyAndRestore;
+          headRequest.onerror = () => abort(requestError(headRequest, 'Could not verify the existing record.'));
+          rowsRequest.onerror = () => abort(requestError(rowsRequest, 'Could not verify the existing record history.'));
+        });
+      },
+    };
+  }
+
+  /** Save a mutable encrypted recovery snapshot using version compare-and-swap. */
+  async saveDraft(input: SaveDraftInput): Promise<LocalVaultDraft> {
+    const ownerId = assertSession(this.session, this.ownerId, this.generation);
+    const draftId = input.draftId;
+    const expectedVersion = input.expectedVersion;
+    assertId(draftId, 'draftId');
+    if (expectedVersion !== null && (!Number.isSafeInteger(expectedVersion) || expectedVersion < 1)) {
+      throw new TypeError('expectedVersion must be null or a positive safe integer.');
+    }
+    const content = serializeContent(input.content);
+    const target = normalizeDraftTarget(input.target);
+    const version = expectedVersion === null ? 1 : expectedVersion + 1;
+    if (!Number.isSafeInteger(version)) throw new TypeError('Draft version exceeded the safe integer limit.');
+    const row = await makeStoredDraft(this.session, ownerId, this.generation, draftId, version, content, target);
+    await transact(target ? [DRAFT_STORE, HEAD_STORE, REVISION_STORE] : [DRAFT_STORE], 'readwrite', this.session, ownerId, this.generation, (tx, abort) => {
+      const store = tx.objectStore(DRAFT_STORE);
+      const get = store.get(ownerDraftKey(ownerId, draftId));
+      get.onsuccess = () => {
+        try {
+          const current = get.result as StoredDraft | undefined;
+          if (expectedVersion === null ? Boolean(current) : !current || current.version !== expectedVersion) {
+            abort(new LocalVaultConflictError('The draft changed since this version was read.'));
+            return;
+          }
+          const save = () => {
+            try {
+              assertSession(this.session, ownerId, this.generation);
+              const write = expectedVersion === null ? store.add(row) : store.put(row);
+              write.onerror = (event) => {
+                event.preventDefault();
+                abort(conflictForConstraint(requestError(write, 'Draft storage write failed.'), 'The draft changed since this version was read.'));
+              };
+            } catch (error) { abort(error); }
+          };
+          if (!target) { save(); return; }
+
+          const headRequest = tx.objectStore(HEAD_STORE).get(ownerRecordKey(ownerId, target.recordId));
+          const revisionRequest = tx.objectStore(REVISION_STORE).get(revisionKey(ownerId, target.recordId, target.parentRevisionId));
+          let reads = 0;
+          const validateTarget = () => {
+            if (++reads !== 2) return;
+            const head = headRequest.result as StoredHead | undefined;
+            const parent = revisionRequest.result as StoredRevision | undefined;
+            if (!head || head.ownerId !== ownerId || head.recordId !== target.recordId ||
+                !parent || parent.ownerId !== ownerId ||
+                parent.recordId !== target.recordId || parent.revisionId !== target.parentRevisionId) {
+              abort(new LocalVaultConflictError('The record was deleted or changed; this recovery draft was not saved.'));
+              return;
+            }
+            save();
+          };
+          headRequest.onsuccess = validateTarget;
+          revisionRequest.onsuccess = validateTarget;
+          headRequest.onerror = () => abort(requestError(headRequest, 'Could not verify the draft target record.'));
+          revisionRequest.onerror = () => abort(requestError(revisionRequest, 'Could not verify the draft parent revision.'));
+        } catch (error) {
+          abort(error);
+        }
+      };
+      get.onerror = () => abort(requestError(get, 'Could not read the current draft version.'));
+    }).catch((error) => {
+      if (error instanceof DOMException && error.name === 'ConstraintError') throw new LocalVaultConflictError('The draft already exists.');
+      throw error;
+    });
+    return decryptDraft(this.session, ownerId, this.generation, row);
+  }
+
+  async getDraft(draftId: string): Promise<LocalVaultDraft | null> {
+    const ownerId = assertSession(this.session, this.ownerId, this.generation);
+    assertId(draftId, 'draftId');
+    let row: StoredDraft | undefined;
+    await transact([DRAFT_STORE], 'readonly', this.session, ownerId, this.generation, (tx) => {
+      const request = tx.objectStore(DRAFT_STORE).get(ownerDraftKey(ownerId, draftId));
+      request.onsuccess = () => { row = request.result as StoredDraft | undefined; };
+      request.onerror = () => tx.abort();
+    });
+    if (!row) return null;
+    validateDraftRow(row, ownerId, draftId);
+    return decryptDraft(this.session, ownerId, this.generation, row);
+  }
+
+  async listDrafts(): Promise<LocalVaultDraft[]> {
+    const ownerId = assertSession(this.session, this.ownerId, this.generation);
+    let rows: StoredDraft[] = [];
+    await transact([DRAFT_STORE], 'readonly', this.session, ownerId, this.generation, (tx) => {
+      const request = tx.objectStore(DRAFT_STORE).index('ownerId').getAll(ownerId);
+      request.onsuccess = () => { rows = request.result as StoredDraft[]; };
+      request.onerror = () => tx.abort();
+    });
+    const drafts: LocalVaultDraft[] = [];
+    for (const row of rows) {
+      validateDraftRow(row, ownerId, row.draftId);
+      drafts.push(await decryptDraft(this.session, ownerId, this.generation, row));
+    }
+    return drafts;
+  }
+
+  /** Promote a draft snapshot and remove it in the same transaction as the immutable revision. */
+  async finalizeDraft(input: FinalizeDraftInput): Promise<LocalVaultRevision> {
+    const ownerId = assertSession(this.session, this.ownerId, this.generation);
+    const draftId = input.draftId;
+    const expectedVersion = input.expectedVersion;
+    const requestedRecordId = input.recordId;
+    const requestedRevisionId = input.revisionId;
+    assertId(draftId, 'draftId');
+    if (!Number.isSafeInteger(expectedVersion) || expectedVersion < 1) throw new TypeError('expectedVersion must be a positive safe integer.');
+    if (requestedRecordId !== undefined) assertId(requestedRecordId, 'recordId');
+    if (requestedRevisionId !== undefined) assertId(requestedRevisionId, 'revisionId');
+    const draft = await this.getDraft(draftId);
+    if (!draft) throw new LocalVaultConflictError('The draft no longer exists.');
+    if (draft.version !== expectedVersion) throw new LocalVaultConflictError('The draft changed since this version was read.');
+    const target = draft.target;
+    const recordId = requestedRecordId ?? target?.recordId ?? draftId;
+    const revisionId = requestedRevisionId ?? (target ? `${draftId}:v${expectedVersion}` : draftId);
+    assertId(recordId, 'recordId');
+    assertId(revisionId, 'revisionId');
+    if (target && recordId !== target.recordId) throw new TypeError('A draft targeting an existing record must be finalized to that record.');
+    const content = serializeContent(draft.content);
+    const row = await makeStoredRevision(this.session, ownerId, this.generation, recordId, revisionId,
+      target?.parentRevisionId ?? null, target ? 'derived' : 'original', target ? null : 'user-authored', content);
+    await transact([DRAFT_STORE, HEAD_STORE, REVISION_STORE], 'readwrite', this.session, ownerId, this.generation, (tx, abort) => {
+      const drafts = tx.objectStore(DRAFT_STORE);
+      const currentDraftRequest = drafts.get(ownerDraftKey(ownerId, draftId));
+      currentDraftRequest.onsuccess = () => {
+        try {
+          const currentDraft = currentDraftRequest.result as StoredDraft | undefined;
+          if (!currentDraft || currentDraft.version !== expectedVersion) {
+            abort(new LocalVaultConflictError('The draft changed since this version was read.'));
+            return;
+          }
+          const heads = tx.objectStore(HEAD_STORE);
+          const headKey = ownerRecordKey(ownerId, recordId);
+          const headRequest = heads.get(headKey);
+          headRequest.onsuccess = () => {
+            try {
+              const head = headRequest.result as StoredHead | undefined;
+              if (target ? !head || head.latestRevisionId !== target.parentRevisionId : Boolean(head)) {
+                abort(new LocalVaultConflictError(target
+                  ? 'The draft target changed; the draft has been preserved.'
+                  : 'A record with this ID already exists; the draft has been preserved.'));
+                return;
+              }
+              const revisions = tx.objectStore(REVISION_STORE);
+              const revisionAdd = revisions.add(row);
+              revisionAdd.onerror = (event) => {
+                event.preventDefault();
+                abort(conflictForConstraint(requestError(revisionAdd, 'Revision storage write failed.'), 'This revision already exists; the draft has been preserved.'));
+              };
+              const nextHead: StoredHead = target
+                ? { ...head!, latestRevisionId: revisionId, revisionCount: head!.revisionCount + 1 }
+                : { key: headKey, ownerId, recordId, latestRevisionId: revisionId, revisionCount: 1 };
+              const headWrite = target ? heads.put(nextHead) : heads.add(nextHead);
+              headWrite.onerror = (event) => {
+                event.preventDefault();
+                abort(conflictForConstraint(requestError(headWrite, 'Record head storage write failed.'), 'The record changed; the draft has been preserved.'));
+              };
+              drafts.delete(ownerDraftKey(ownerId, draftId));
+            } catch (error) {
+              abort(error);
+            }
+          };
+          headRequest.onerror = () => abort(requestError(headRequest, 'Could not read the record head.'));
+        } catch (error) {
+          abort(error);
+        }
+      };
+      currentDraftRequest.onerror = () => abort(requestError(currentDraftRequest, 'Could not read the draft being finalized.'));
+    }).catch((error) => {
+      if (error instanceof DOMException && error.name === 'ConstraintError') throw new LocalVaultConflictError('The record or revision changed; the draft has been preserved.');
+      throw error;
+    });
+    return decryptRevision(this.session, ownerId, this.generation, row);
   }
 
   /** Create a single original. Duplicate record IDs and revisions fail atomically. */
@@ -438,6 +980,91 @@ export class LocalVault {
       throw error;
     });
     return decryptRevision(this.session, ownerId, this.generation, row);
+  }
+
+  /** Prepare a scoped, one-shot delete plan for one record and its linked drafts. */
+  async prepareDeletion(recordId: string): Promise<{ revisionCount: number; draftCount: number; confirm: () => Promise<void> }> {
+    const ownerId = assertSession(this.session, this.ownerId, this.generation);
+    assertId(recordId, 'recordId');
+    const snapshot: { head?: StoredHead; rows: StoredRevision[]; drafts: StoredDraft[] } = { rows: [], drafts: [] };
+    await transact([HEAD_STORE, REVISION_STORE, DRAFT_STORE], 'readonly', this.session, ownerId, this.generation, (tx) => {
+      const headRequest = tx.objectStore(HEAD_STORE).get(ownerRecordKey(ownerId, recordId));
+      const rowsRequest = tx.objectStore(REVISION_STORE).index('ownerRecordKey').getAll(ownerRecordKey(ownerId, recordId));
+      const draftsRequest = tx.objectStore(DRAFT_STORE).index('ownerId').getAll(ownerId);
+      headRequest.onsuccess = () => { snapshot.head = headRequest.result as StoredHead | undefined; };
+      rowsRequest.onsuccess = () => { snapshot.rows = rowsRequest.result as StoredRevision[]; };
+      draftsRequest.onsuccess = () => { snapshot.drafts = draftsRequest.result as StoredDraft[]; };
+      headRequest.onerror = () => tx.abort();
+      rowsRequest.onerror = () => tx.abort();
+      draftsRequest.onerror = () => tx.abort();
+    });
+    assertSession(this.session, ownerId, this.generation);
+    if (!snapshot.head) throw new Error('This private record is not available.');
+    const chain = validateRevisionChain(ownerId, recordId, snapshot.head, snapshot.rows);
+    if (chain.length === 0) throw new Error('This private record is not available.');
+    for (const revision of chain) {
+      await decryptRevision(this.session, ownerId, this.generation, revision);
+      assertSession(this.session, ownerId, this.generation);
+    }
+    const linkedDrafts = snapshot.drafts.filter((draft) => draft.target?.recordId === recordId);
+    for (const draft of linkedDrafts) {
+      validateDraftRow(draft, ownerId, draft.draftId);
+      await decryptDraft(this.session, ownerId, this.generation, draft);
+      assertSession(this.session, ownerId, this.generation);
+    }
+
+    const expectedHead = snapshot.head;
+    const expectedRows = [...chain];
+    const expectedDrafts = [...linkedDrafts];
+    let attempted = false;
+    return {
+      revisionCount: expectedRows.length,
+      draftCount: expectedDrafts.length,
+      confirm: async () => {
+        if (attempted) throw new LocalVaultConflictError('This deletion plan has already been used. Refresh the private list and prepare again.');
+        attempted = true;
+        assertSession(this.session, ownerId, this.generation);
+        await transact([HEAD_STORE, REVISION_STORE, DRAFT_STORE], 'readwrite', this.session, ownerId, this.generation, (tx, abort) => {
+          const headRequest = tx.objectStore(HEAD_STORE).get(ownerRecordKey(ownerId, recordId));
+          const rowsRequest = tx.objectStore(REVISION_STORE).index('ownerRecordKey').getAll(ownerRecordKey(ownerId, recordId));
+          const draftsRequest = tx.objectStore(DRAFT_STORE).index('ownerId').getAll(ownerId);
+          let reads = 0;
+          const verifyAndDelete = () => {
+            if (++reads !== 3) return;
+            try {
+              assertSession(this.session, ownerId, this.generation);
+              const currentHead = headRequest.result as StoredHead | undefined;
+              const currentRows = rowsRequest.result as StoredRevision[];
+              const currentDrafts = (draftsRequest.result as StoredDraft[])
+                .filter((draft) => draft.target?.recordId === recordId);
+              if (!currentHead || JSON.stringify(currentHead) !== JSON.stringify(expectedHead) ||
+                  !sameSnapshotSet(currentRows, expectedRows, sameRevisionSnapshot) ||
+                  !sameSnapshotSet(currentDrafts, expectedDrafts, sameDraftSnapshot)) {
+                abort(new LocalVaultConflictError('The record history or a linked recovery draft changed. Refresh and prepare deletion again.'));
+                return;
+              }
+              validateRevisionChain(ownerId, recordId, currentHead, currentRows);
+              const deleteRequests = [
+                tx.objectStore(HEAD_STORE).delete(ownerRecordKey(ownerId, recordId)),
+                ...currentRows.map((revision) => tx.objectStore(REVISION_STORE).delete(revision.key)),
+                ...currentDrafts.map((draft) => tx.objectStore(DRAFT_STORE).delete(draft.key)),
+              ];
+              for (const request of deleteRequests) {
+                request.onsuccess = () => {
+                  try { assertSession(this.session, ownerId, this.generation); }
+                  catch (error) { abort(error); }
+                };
+                request.onerror = () => abort(requestError(request, 'Could not delete the selected private record.'));
+              }
+            } catch (error) { abort(error); }
+          };
+          headRequest.onsuccess = rowsRequest.onsuccess = draftsRequest.onsuccess = verifyAndDelete;
+          headRequest.onerror = () => abort(requestError(headRequest, 'Could not verify the selected private record.'));
+          rowsRequest.onerror = () => abort(requestError(rowsRequest, 'Could not verify the private record history.'));
+          draftsRequest.onerror = () => abort(requestError(draftsRequest, 'Could not verify linked recovery drafts.'));
+        });
+      },
+    };
   }
 
   async getRevision(recordId: string, revisionId: string): Promise<LocalVaultRevision | null> {

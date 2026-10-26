@@ -1,0 +1,172 @@
+Go ahead and create the image for this
+
+Fantastic and now for the last set, let's get the planning
+The final batch covers screens 11–14, completing LuLu's onboarding journey.
+
+The first ten screens have introduced everyday writing, personalisation, private access, paragraph protection and quick exit. The final four should demonstrate what happens after an experience has been captured: preserving it, understanding it, finding support and securing the user's space.
+
+The progression is:
+
+Capture → Understand → Connect → Secure.
+
+Screen 11: Some moments need more than words.
+11/14 · Multimodal capture and evidence
+
+Purpose: Demonstrate LuLu's ability to capture experiences through different formats and preserve them as records.
+
+Headline: Some moments need more than words.
+
+Supporting copy: “Write it, record it, photograph it or keep the files that matter.”
+
+Visual composition
+
+A clean, functional capture interface featuring four distinct actions:
+
+Text
+
+Voice
+
+Photo
+
+Files
+
+Underneath, a compact example of a saved evidence entry: a recording, photograph and short written note grouped under one record with a timestamp.
+
+A subtle caption, “Originals preserved. Additions stay traceable.”, introduces the legal documentation capability without requiring a technical explanation.
+
+Interactive behaviour: Selecting Voice, Camera or Files introduces the relevant OS permission at the point of use, preceded by a short explanation. In a guided demonstration, those actions can use sample media so users can continue without granting access.
+
+Design: Light, minimal, interface-focused. Distinct capture controls and one evidence preview are sufficient. No cinematic photograph needed.
+
+Screen 12: Understand what you're experiencing.
+12/14 · Privacy-aware interpretation
+
+Purpose: Demonstrate LuLu's decision layer and how it can help someone understand possible patterns without making diagnoses.
+
+Headline: A little clarity can change everything.
+
+Supporting copy: “Explore possible patterns, understand your options and decide what happens next.”
+
+Visual composition
+
+The screen demonstrates a transformation from a selected private entry into a structured interpretation.
+
+EXAMPLE · PRIVATE ENTRY
+
+“I keep having to ask permission before I can use my own money.”
+
+Possible topic
+
+Financial control
+Some forms of controlling behaviour involve restricting access to money or financial decisions.
+
+Learn about this topic
+
+The example shows that LuLu identifies a potential topic, explains why it may be relevant and makes further information available.
+
+A small disclosure indicator can show that identifying details are checked before external processing.
+
+Design: A slightly more structured screen, but with one central interpretation card rather than a dashboard full of statistics. The result should feel explanatory, measured and respectful.
+
+Screen 13: You don't have to do this alone.
+13/14 · Companions and professional support
+
+Purpose: Introduce the user's options for seeking help while remaining in control of their information.
+
+Headline: You don't have to do this alone.
+
+Supporting copy: “Share with someone you trust, explore available help or take your time.”
+
+Visual composition
+
+One central support panel with three clearly differentiated pathways:
+
+Trusted companion
+
+Share selected records, receive contributions or start a safety Trail.
+
+Professional support
+
+Find counselling, legal assistance and verified support services.
+
+Keep it private
+
+Continue documenting without sharing anything.
+
+This screen demonstrates the decision to involve others, rather than asking the user to add a trusted companion immediately.
+
+Design: Warm, calm, approachable. The three pathways should feel equally legitimate, without visual pressure towards disclosure.
+
+Screen 14: Your space. Your control.
+14/14 · Security setup and completion
+
+Purpose: Convert the guided experience into a protected, usable personal workspace.
+
+Headline: Your space. Your control.
+
+Supporting copy: “Protect your private space with a passkey. What you choose to share stays your decision.”
+
+Visual composition
+
+A spacious final screen with a clear security-setup component.
+
+Protect private access
+
+Use your device's passkey authentication to unlock LuLu's private space.
+
+Private originals are stored on your device by default.
+
+External processing and sharing follow your privacy permissions.
+
+Interactive behaviour: This is the actual passkey-enrolment stage rather than a simulation. Successful setup transitions to the ordinary LuLu workspace.
+
+Design: Minimal and confident, with the security action as the clear focal point. A restrained transition and haptic acknowledgement can confirm completion.
+
+Final four-screen composition
+Screen
+
+Primary visual
+
+Density
+
+Treatment
+
+11 · Capture
+
+Multimodal capture controls and evidence record
+
+Moderate
+
+Light paper and sage
+
+12 · Understand
+
+Private entry and interpretation result
+
+Moderate
+
+Light with structured cards
+
+13 · Connect
+
+Companion, professional and private pathways
+
+Moderate
+
+Warm, approachable
+
+14 · Secure
+
+Passkey activation and privacy assurances
+
+Low
+
+Spacious, potentially darker for emphasis
+
+For the image generation, we should preserve the visual continuity of the previous batches: four proportional portrait screens on one 16:9 canvas, a quiet neutral surrounding background, consistent LuLu branding, strong typographic hierarchy, subtle elevation and appropriate negative space.
+
+All four remain onboarding screens, with only previous/continue controls and progress labelled 11/14 through 14/14. No application tab bars or device mockups.
+
+The final screen should feel like a natural culmination of what the user has just experienced, rather than a promotional closing page.
+
+By the end of this batch, LuLu's complete onboarding narrative will be visible: introduce yourself, write, protect, preserve, understand, connect and take control.

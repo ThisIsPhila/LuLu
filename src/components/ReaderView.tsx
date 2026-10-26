@@ -58,7 +58,7 @@ export const ReaderView: React.FC<Props> = ({
         </button>
         <div className="header-brand-title">
           <LuLuLogo size="sm" />
-          <span className="composer-label">Story View</span>
+          <span className="composer-label">{entry.kind === 'Story' ? 'Story' : 'Journal'}</span>
         </div>
         <div className="header-right-tools">
           <button className="icon-btn-round" onClick={onEdit} title={entry.protected ? 'Protected entry editing is not available yet' : 'Edit entry'} aria-label={entry.protected ? 'Protected entry editing is not available yet' : 'Edit entry'}>
@@ -78,7 +78,7 @@ export const ReaderView: React.FC<Props> = ({
       <main className="reading-content-container">
         {/* Date & Mode Meta */}
         <div className="reading-meta-bar">
-          <span className="reading-date-timestamp">• 12 May 2026 • 21:36</span>
+          <time className="reading-date-timestamp" dateTime={entry.date}>{new Date(entry.date).toLocaleString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</time>
 
           {entry.protected && (
             <button
@@ -92,14 +92,14 @@ export const ReaderView: React.FC<Props> = ({
               }}
             >
               <Eye size={12} />
-              <span>{showOriginal ? 'CONCEALED' : 'ORIGINAL'} • 3 min</span>
+              <span>{showOriginal ? 'CONCEALED' : 'ORIGINAL'}</span>
             </button>
           )}
         </div>
 
         {/* Category Pill */}
         <div className="reading-tag-capsule">
-          <span>EVENING REFLECTION • Quiet mood</span>
+          <span>{entry.kind}{entry.tags.length ? ` · ${entry.tags.join(' · ')}` : ''}</span>
         </div>
 
         {/* Title */}
@@ -127,20 +127,18 @@ export const ReaderView: React.FC<Props> = ({
         </div>
 
         {/* Identified Entities Card (Screen Reading Mode) */}
-        {entry.protected && (
+        {entry.protected && Boolean(entry.entitiesRecognized?.length) && (
           <div className="identified-entities-card">
             <div className="entities-card-header">
               <div className="entities-title-row">
                 <Shield size={14} className="shield-icon-stone" />
                 <span>IDENTIFIED ENTITIES</span>
               </div>
-              <span className="encrypted-tag">3 Encrypted</span>
+              <span className="encrypted-tag">{entry.entitiesRecognized?.length} references</span>
             </div>
 
             <div className="entities-chips-list">
-              <span className="entity-chip-pill">• John [Person]</span>
-              <span className="entity-chip-pill">• The Nest [Place]</span>
-              <span className="entity-chip-pill">• Blue Moon [Context]</span>
+              {entry.entitiesRecognized?.map(reference => <span key={reference} className="entity-chip-pill">{reference}</span>)}
             </div>
           </div>
         )}

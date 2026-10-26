@@ -1,16 +1,12 @@
 import React, { useState } from 'react';
 import {
   Search,
-  SlidersHorizontal,
-  Lock,
-  Unlock,
-  ChevronRight,
   Layers,
   ArrowRight,
-  Sparkles,
   BookOpen,
 } from 'lucide-react';
 import type { Entry } from '../domain/journal';
+import { filterOrdinaryEntries, findCuratedDeck, type OrdinaryEntryFilter } from '../domain/ordinaryBrowse';
 
 type Props = {
   entries: Entry[];
@@ -18,117 +14,100 @@ type Props = {
   onOpenProtectedGate: () => void;
 };
 
-export const StoryLeavesView: React.FC<Props> = ({
-  entries,
-  onSelectEntry,
-  onOpenProtectedGate,
-}) => {
+export const StoryLeavesView: React.FC<Props> = ({ entries, onSelectEntry }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState<'All' | 'Curated' | 'Masked'>('All');
-  const [isFlipped, setIsFlipped] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<OrdinaryEntryFilter>('All');
 
-  const curatedEntries = entries.filter((e) => e.curatedDeck);
-  const otherEntries = entries.filter((e) => !e.curatedDeck);
+  const visibleEntries = filterOrdinaryEntries(entries, searchQuery, activeFilter);
+  const curatedDeck = findCuratedDeck(visibleEntries);
+  const filters: OrdinaryEntryFilter[] = ['All', 'Journal', 'Stories'];
+
+  const selectWithKeyboard = (event: React.KeyboardEvent<HTMLElement>, entry: Entry) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onSelectEntry(entry);
+    }
+  };
 
   return (
     <div className="story-leaves-screen">
-      {/* Curated Deck Hero Card (Screen Leaves 1 & 2) */}
-      <section className="curated-deck-section">
-        <div className="curated-deck-card">
-          <div className="deck-card-head">
-            <span className="deck-tag">CURATED DECK • 4 archival sheets</span>
-            <button className="deck-flip-trigger" onClick={() => setIsFlipped(!isFlipped)}>
-              <Layers size={14} />
-            </button>
-          </div>
-
-          <div className="deck-card-content">
-            <div className="deck-text-col">
-              <h2 className="deck-title">Spring Monologue</h2>
-              <p className="deck-snippet">
-                Quiet daylight drifting through linen curtains. Notes on stillness, the cadence of
-                early tea, and the small rituals that keep life anchored.
-              </p>
+      {curatedDeck && (
+        <section className="curated-deck-section" aria-label="Curated collection">
+          <div className="curated-deck-card">
+            <div className="deck-card-head">
+              <span className="deck-tag">CURATED DECK • {curatedDeck.count} {curatedDeck.count === 1 ? 'entry' : 'entries'}</span>
+              <button
+                type="button"
+                className="deck-flip-trigger"
+                aria-label={`Open ${curatedDeck.name} collection`}
+                onClick={() => onSelectEntry(curatedDeck.entry)}
+              >
+                <Layers size={14} />
+              </button>
             </div>
-            <img
-              src="https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=300&q=80"
-              alt="Deck thumbnail"
-              className="deck-thumb"
-            />
-          </div>
 
-          <div className="deck-footer-row">
-            <span className="deck-touch-meta">Last touched today</span>
-            <button
-              className="deck-flip-btn"
-              onClick={() => {
-                const entry = entries.find((e) => e.title === 'Spring Monologue') || entries[0];
-                onSelectEntry(entry);
-              }}
-            >
-              <span>Flip deck</span>
-              <ArrowRight size={13} />
-            </button>
-          </div>
-        </div>
-      </section>
+            <div className="deck-card-content">
+              <div className="deck-text-col">
+                <h2 className="deck-title">{curatedDeck.name}</h2>
+                <p className="deck-snippet">{curatedDeck.entry.body}</p>
+              </div>
+            </div>
 
-      {/* Inset Search Bar */}
+            <div className="deck-footer-row">
+              <span className="deck-touch-meta">{curatedDeck.count} {curatedDeck.count === 1 ? 'entry' : 'entries'}</span>
+              <button type="button" className="deck-flip-btn" onClick={() => onSelectEntry(curatedDeck.entry)}>
+                <span>Open entry</span>
+                <ArrowRight size={13} />
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
       <div className="leaves-search-well">
-        <Search size={15} className="search-icon-well" />
+        <Search size={15} className="search-icon-well" aria-hidden="true" />
         <input
-          type="text"
-          placeholder="Search entries, masked entities..."
+          type="search"
+          aria-label="Search ordinary entries"
+          placeholder="Search titles, writing, and tags..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(event) => setSearchQuery(event.target.value)}
         />
-        <kbd className="cmd-k-tag">⌘K</kbd>
       </div>
 
-      {/* Filter Chips */}
-      <div className="leaves-filters-row">
-        <button
-          className={`filter-pill ${activeFilter === 'All' ? 'active' : ''}`}
-          onClick={() => setActiveFilter('All')}
-        >
-          <span>April 2025</span>
-        </button>
-        <button
-          className={`filter-pill ${activeFilter === 'Curated' ? 'active' : ''}`}
-          onClick={() => setActiveFilter('Curated')}
-        >
-          <span>Reflections</span>
-        </button>
-        <button
-          className={`filter-pill ${activeFilter === 'Masked' ? 'active' : ''}`}
-          onClick={() => setActiveFilter('Masked')}
-        >
-          <Lock size={11} />
-          <span>Protected (1)</span>
-        </button>
+      <div className="leaves-filters-row" role="group" aria-label="Filter entries by type">
+        {filters.map(filter => (
+          <button
+            key={filter}
+            type="button"
+            className={`filter-pill ${activeFilter === filter ? 'active' : ''}`}
+            aria-pressed={activeFilter === filter}
+            onClick={() => setActiveFilter(filter)}
+          >
+            <span>{filter}</span>
+          </button>
+        ))}
       </div>
 
-      {/* Entries Stacked List */}
-      <div className="leaves-list">
-        {entries.map((entry) => (
+      <div className="leaves-list" aria-live="polite">
+        {visibleEntries.length > 0 ? visibleEntries.map(entry => (
           <article
             key={entry.id}
-            className={`leaf-card ${entry.protected ? 'protected-leaf' : ''}`}
+            className="leaf-card"
+            role="button"
+            tabIndex={0}
+            aria-label={`Open ${entry.title}, ${entry.kind}, ${entry.groupDate}`}
             onClick={() => onSelectEntry(entry)}
+            onKeyDown={event => selectWithKeyboard(event, entry)}
           >
             <div className="leaf-top-row">
               <span className="leaf-meta-time">
-                {entry.timeStr} • {entry.kind}
+                {entry.groupDate}{entry.timeStr ? ` · ${entry.timeStr}` : ''} • {entry.kind}
               </span>
-              {entry.protected ? (
-                <span className="masked-badge-capsule">
-                  <Lock size={10} />
-                  <span>Protected · 3 entities masked</span>
-                </span>
-              ) : (
+              {entry.curatedDeck && (
                 <span className="leaf-sheets-tag">
                   <Layers size={11} />
-                  <span>2 sheets stacked</span>
+                  <span>{entry.curatedDeck}</span>
                 </span>
               )}
             </div>
@@ -136,42 +115,29 @@ export const StoryLeavesView: React.FC<Props> = ({
             <div className="leaf-body-row">
               <div className="leaf-text-col">
                 <h3 className="leaf-title">{entry.title}</h3>
-                <p className="leaf-excerpt">
-                  {entry.protected
-                    ? 'I met with ••••• today. It felt good to be open and honest...'
-                    : entry.body}
-                </p>
+                <p className="leaf-excerpt">{entry.body}</p>
               </div>
-              {entry.imageUrl && (
-                <img src={entry.imageUrl} alt={entry.title} className="leaf-image-preview" />
-              )}
+              {entry.imageUrl && <img src={entry.imageUrl} alt="" className="leaf-image-preview" />}
             </div>
 
             <div className="leaf-footer-row">
-              {entry.protected ? (
-                <button
-                  className="btn-unmask-leaf"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenProtectedGate();
-                  }}
-                >
-                  <Sparkles size={12} />
-                  <span>Tap to verify & unmask</span>
-                </button>
-              ) : (
-                <div className="leaf-tags-group">
-                  {entry.tags.map((t) => (
-                    <span key={t} className="leaf-tag-pill">
-                      #{t.toLowerCase()}
-                    </span>
-                  ))}
-                </div>
-              )}
-              <span className="read-time-sub">2 min read</span>
+              <div className="leaf-tags-group">
+                {entry.tags.map(tag => (
+                  <span key={tag} className="leaf-tag-pill">#{tag.toLowerCase()}</span>
+                ))}
+              </div>
+              <BookOpen size={14} aria-hidden="true" />
             </div>
           </article>
-        ))}
+        )) : (
+          <p className="leaves-empty-state" role="status">
+            {searchQuery.trim()
+              ? 'No ordinary entries match your search.'
+              : activeFilter === 'All'
+                ? 'Your ordinary entries will appear here.'
+                : `No ${activeFilter === 'Journal' ? 'journal entries' : 'stories'} yet.`}
+          </p>
+        )}
       </div>
     </div>
   );

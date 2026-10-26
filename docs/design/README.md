@@ -1,6 +1,14 @@
 # LuLu design references
 
+## Fourteen-screen onboarding direction — 26 October 2026
+
+The owner’s complete onboarding journey is documented in [onboarding-flow-2026-10-26.md](onboarding-flow-2026-10-26.md), with all four source boards and both conversation exports preserved in [its resource folder](resources/2026-10-26-onboarding/). The walkthrough covers personalisation (1–3), a first ordinary entry (4–6), sample-only private-layer demonstrations (7–10), then capture, understanding, connection and actual passkey setup (11–14). It records pictured copy and controls, data boundaries, open decisions and current implementation reuse points. These are design references, not proof that roadmap capabilities exist. The [internal review library](../hackathon/review.html#media-onboarding) has a navigable visual summary.
+
 Received 24 October 2026. Story/journal is the selected product direction; mobile-first web is the immediate delivery surface.
+
+## Component reference and screen plan — 26 October 2026
+
+The owner considers [Component board 01](resources/2026-10-25-component-review/01-light-warm-components.png) good enough to retain as a **visual reference**. It is not blanket page approval. The [screen and flow plan](screen-plan-2026-10-26.md) maps the whole product direction, access boundaries, responsive behavior and feature status; individual page layouts still need owner review. See the [component reference note](component-review-2026-10-25.md). Use actual logo assets with sufficient contrast, no header plus, and Write within lower reach. Earlier generated page studies are not approved implementation direction.
 
 ## Latest direction: warm, tactile character
 

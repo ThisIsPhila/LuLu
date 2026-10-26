@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Local encrypted draft fixture</title></head>
+<body><h1>Local encrypted draft fixture</h1><p>Synthetic test text only. This verifies local storage/components; it does not authenticate a LuLu account.</p><div id="root"></div>
+<script type="module">
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import {LocalVault} from '/src/services/vault/localVault.ts';
+import {LocalPrivateJournal} from '/src/components/LocalPrivateJournal.tsx';
+import {PrivateDraftFields} from '/src/components/PrivateDraftFields.tsx';
+function Fixture(){
+ const authority=React.useRef({generation:0,unlocked:false});
+ const failures=React.useRef({draft:false,record:false,ack:false});
+ const [,redraw]=React.useState(0);
+ const [vault,setVault]=React.useState(null),[view,setView]=React.useState('list');
+ function lock(){authority.current.generation++;authority.current.unlocked=false;setVault(null);setView('list');}
+ function unlock(){authority.current.generation++;authority.current.unlocked=true;
+  const real=new LocalVault({ownerId:'local-synthetic-draft-fixture',generation:()=>authority.current.generation,isUnlocked:()=>authority.current.unlocked});
+  const save=real.saveDraft.bind(real),finalize=real.finalizeDraft.bind(real);
+  real.saveDraft=input=>failures.current.draft?Promise.reject(new DOMException('Synthetic quota injection','QuotaExceededError')):save(input);
+  real.finalizeDraft=async input=>{if(failures.current.record)throw new DOMException('Synthetic promotion interruption','AbortError');const revision=await finalize(input);if(failures.current.ack)throw new DOMException('Synthetic lost acknowledgement','AbortError');return revision;};
+  setVault(real);}
+ React.useEffect(()=>{const hide=()=>{if(document.hidden)lock();};document.addEventListener('visibilitychange',hide);return()=>document.removeEventListener('visibilitychange',hide);},[]);
+ return React.createElement(React.Fragment,null,
+  React.createElement('button',{onClick:vault?lock:unlock},vault?'Lock fixture':'Unlock synthetic fixture'),
+  React.createElement('button',{onClick:()=>{failures.current.draft=!failures.current.draft;redraw(v=>v+1);}},failures.current.draft?'Restore draft storage':'Simulate draft quota error'),
+  React.createElement('button',{onClick:()=>{failures.current.record=!failures.current.record;redraw(v=>v+1);}},failures.current.record?'Restore record storage':'Simulate record interruption'),
+  React.createElement('button',{onClick:()=>{failures.current.ack=!failures.current.ack;redraw(v=>v+1);}},failures.current.ack?'Restore acknowledgements':'Simulate lost acknowledgement'),
+  vault?(view==='compose'?React.createElement(PrivateDraftFields,{vault,onSaved:()=>setView('list')}):React.createElement(LocalPrivateJournal,{vault,onExit:lock,onCompose:()=>setView('compose')})):React.createElement('p',null,'Locked. No private drafts or records are displayed.'));
+}
+createRoot(document.getElementById('root')).render(React.createElement(React.StrictMode,null,React.createElement(Fixture)));
+</script></body></html>

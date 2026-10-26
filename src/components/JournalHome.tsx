@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { LuLuLogo } from './Logo';
 import type { Entry } from '../domain/journal';
+import { filterOrdinaryEntries } from '../domain/ordinaryBrowse';
 
 type Props = {
   entries: Entry[];
@@ -49,7 +50,12 @@ export const JournalHome: React.FC<Props> = ({
   const now = new Date();
   const greeting = now.getHours() < 12 ? 'Good morning' : now.getHours() < 17 ? 'Good afternoon' : 'Good evening';
 
-  const filteredEntries = entries.filter((e) => {
+  const ordinaryEntries = filterOrdinaryEntries(entries);
+  const weeklyCount = ordinaryEntries.filter(entry => {
+    const age = now.getTime() - Date.parse(entry.date);
+    return age >= 0 && age < 7 * 86400000;
+  }).length;
+  const filteredEntries = ordinaryEntries.filter((e) => {
     if (activeTab === 'All') return true;
     if (activeTab === 'Journal') return e.kind === 'Journal';
     if (activeTab === 'Stories') return e.kind === 'Story';
@@ -57,7 +63,7 @@ export const JournalHome: React.FC<Props> = ({
     return true;
   });
 
-  const visibleEntries = filteredEntries.filter(e => `${e.title} ${e.body}`.toLowerCase().includes(query.toLowerCase()));
+  const visibleEntries = filterOrdinaryEntries(filteredEntries, query);
 
   return (
     <div className="stitch-journal-home">
@@ -77,7 +83,7 @@ export const JournalHome: React.FC<Props> = ({
 
             <button
               className="topbar-circle-btn"
-              onClick={() => setSearching(!searching)}
+              onClick={() => { if (searching) setQuery(''); setSearching(!searching); }}
               aria-label="Search entries" aria-expanded={searching}
             >
               <Search size={16} />
@@ -116,7 +122,7 @@ export const JournalHome: React.FC<Props> = ({
             onClick={() => onTabChange('All')}
           >
             <span>All</span>
-            <span className="count-pill-stitch">{entries.length}</span>
+            <span className="count-pill-stitch">{ordinaryEntries.length}</span>
           </button>
 
           <button
@@ -172,13 +178,15 @@ export const JournalHome: React.FC<Props> = ({
               key={title}
               title={title}
               entries={visibleEntries.filter(e => e.kind === (title === 'Journal' ? 'Journal' : 'Story'))}
-              expanded={openCollection === title}
+              expanded={openCollection === title || Boolean(query.trim())}
               onToggle={() => setOpenCollection(current => current === title ? null : title)}
               controls={spreadId}
             />
           ))}
         </div>
-        {openCollection && (
+        {query.trim() ? (
+          <EntrySpread id={spreadId} title="Search results" entries={visibleEntries} onSelectEntry={onSelectEntry} />
+        ) : openCollection && (
           <EntrySpread
             id={spreadId}
             title={openCollection}
@@ -194,7 +202,7 @@ export const JournalHome: React.FC<Props> = ({
             </div>
             <div className="clarity-text">
               <h4>Weekly Clarity Rhythm</h4>
-              <p>7 entries recorded • 100% on-device</p>
+              <p>{weeklyCount} {weeklyCount === 1 ? 'entry' : 'entries'} in the last 7 days</p>
             </div>
           </div>
 

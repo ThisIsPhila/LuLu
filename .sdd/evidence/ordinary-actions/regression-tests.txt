@@ -1,0 +1,822 @@
+TAP version 13
+# Subtest: ordinary browse searches title, body and tags case-insensitively and trims the query
+ok 1 - ordinary browse searches title, body and tags case-insensitively and trims the query
+  ---
+  duration_ms: 0.934834
+  type: 'test'
+  ...
+# Subtest: ordinary browse filters All, Journal and Stories categories
+ok 2 - ordinary browse filters All, Journal and Stories categories
+  ---
+  duration_ms: 0.156208
+  type: 'test'
+  ...
+# Subtest: protected titles, bodies and tags never appear in ordinary browse or search
+ok 3 - protected titles, bodies and tags never appear in ordinary browse or search
+  ---
+  duration_ms: 0.133708
+  type: 'test'
+  ...
+# Subtest: curated deck summary reflects actual matching entries and is absent without a deck
+ok 4 - curated deck summary reflects actual matching entries and is absent without a deck
+  ---
+  duration_ms: 0.114709
+  type: 'test'
+  ...
+# Subtest: remote decision gate allows exact purpose, recipient, policy, and text snapshot
+ok 5 - remote decision gate allows exact purpose, recipient, policy, and text snapshot
+  ---
+  duration_ms: 10.082583
+  type: 'test'
+  ...
+# Subtest: remote decision gate fails closed without policy, strict authorization, or purpose approval
+ok 6 - remote decision gate fails closed without policy, strict authorization, or purpose approval
+  ---
+  duration_ms: 3.533625
+  type: 'test'
+  ...
+# Subtest: disclosure preparation and review bind source revisions, purpose, recipient, policy, and exact text
+ok 7 - disclosure preparation and review bind source revisions, purpose, recipient, policy, and exact text
+  ---
+  duration_ms: 2.355167
+  type: 'test'
+  ...
+# Subtest: ordinary and starter content stay distinct from authentic evidence
+ok 8 - ordinary and starter content stay distinct from authentic evidence
+  ---
+  duration_ms: 0.187459
+  type: 'test'
+  ...
+# Subtest: paragraphs are concealed while locked and revealing another conceals the prior paragraph
+ok 9 - paragraphs are concealed while locked and revealing another conceals the prior paragraph
+  ---
+  duration_ms: 0.266084
+  type: 'test'
+  ...
+# Subtest: companion access requires matching owner and valid grant time, and is scoped, expiring, and revocable
+ok 10 - companion access requires matching owner and valid grant time, and is scoped, expiring, and revocable
+  ---
+  duration_ms: 0.4135
+  type: 'test'
+  ...
+# Subtest: companion statement remains a separate attributed contribution value
+ok 11 - companion statement remains a separate attributed contribution value
+  ---
+  duration_ms: 0.213875
+  type: 'test'
+  ...
+# Subtest: context and perspective remain coherent
+ok 12 - context and perspective remain coherent
+  ---
+  duration_ms: 9.306875
+  type: 'test'
+  ...
+# Subtest: alias updates retain references
+ok 13 - alias updates retain references
+  ---
+  duration_ms: 1.122375
+  type: 'test'
+  ...
+# Subtest: replacement is literal and original stays unchanged
+ok 14 - replacement is literal and original stays unchanged
+  ---
+  duration_ms: 1.11275
+  type: 'test'
+  ...
+# Subtest: perspective distancing can be toggled independently
+ok 15 - perspective distancing can be toggled independently
+  ---
+  duration_ms: 0.169792
+  type: 'test'
+  ...
+# Subtest: recognised mentions counts entities accurately
+ok 16 - recognised mentions counts entities accurately
+  ---
+  duration_ms: 0.127667
+  type: 'test'
+  ...
+# Subtest: detectEntitySpans identifies positions
+ok 17 - detectEntitySpans identifies positions
+  ---
+  duration_ms: 0.066208
+  type: 'test'
+  ...
+# Subtest: originals round-trip without plaintext in envelope and use fresh nonces
+ok 18 - originals round-trip without plaintext in envelope and use fresh nonces
+  ---
+  duration_ms: 17.73425
+  type: 'test'
+  ...
+# Subtest: concurrent saves retain one account key
+ok 19 - concurrent saves retain one account key
+  ---
+  duration_ms: 7.730458
+  type: 'test'
+  ...
+# Subtest: acknowledged autosave reopens only through a fresh unlocked session and promotes exact text
+ok 20 - acknowledged autosave reopens only through a fresh unlocked session and promotes exact text
+  ---
+  duration_ms: 36.224041
+  type: 'test'
+  ...
+# Subtest: exit drops queued changes and late callbacks, preserving the last completed encrypted snapshot
+ok 21 - exit drops queued changes and late callbacks, preserving the last completed encrypted snapshot
+  ---
+  duration_ms: 30.480333
+  type: 'test'
+  ...
+# Subtest: a lost finalization acknowledgement leaves exactly one record and no orphan draft
+ok 22 - a lost finalization acknowledgement leaves exactly one record and no orphan draft
+  ---
+  duration_ms: 56.062792
+  type: 'test'
+  ...
+# Subtest: recovered edit autosaves then appends while exact original remains unchanged
+ok 23 - recovered edit autosaves then appends while exact original remains unchanged
+  ---
+  duration_ms: 33.400958
+  type: 'test'
+  ...
+# Subtest: binary image bytes and metadata round-trip exactly while stored fields stay encrypted
+ok 24 - binary image bytes and metadata round-trip exactly while stored fields stay encrypted
+  ---
+  duration_ms: 32.443167
+  type: 'test'
+  ...
+# Subtest: audio MIME codec parameters normalize and duration/source/file metadata remain encrypted
+ok 25 - audio MIME codec parameters normalize and duration/source/file metadata remain encrypted
+  ---
+  duration_ms: 10.775792
+  type: 'test'
+  ...
+# Subtest: unsupported active content and mismatched capture sources are rejected
+ok 26 - unsupported active content and mismatched capture sources are rejected
+  ---
+  duration_ms: 3.729417
+  type: 'test'
+  ...
+# Subtest: 25 MiB limit is enforced before reading and zero-byte media is rejected
+ok 27 - 25 MiB limit is enforced before reading and zero-byte media is rejected
+  ---
+  duration_ms: 22.4915
+  type: 'test'
+  ...
+# Subtest: simultaneous duplicate IDs commit at most one immutable media row
+ok 28 - simultaneous duplicate IDs commit at most one immutable media row
+  ---
+  duration_ms: 43.462917
+  type: 'test'
+  ...
+# Subtest: owner, media ID and ciphertext swaps fail authentication
+ok 29 - owner, media ID and ciphertext swaps fail authentication
+  ---
+  duration_ms: 27.084958
+  type: 'test'
+  ...
+# Subtest: listing decrypts metadata without decrypting the binary envelope
+ok 30 - listing decrypts metadata without decrypting the binary envelope
+  ---
+  duration_ms: 17.267416
+  type: 'test'
+  ...
+# Subtest: upgrades the previous combined row layout into separate metadata and binary stores
+ok 31 - upgrades the previous combined row layout into separate metadata and binary stores
+  ---
+  duration_ms: 12.072875
+  type: 'test'
+  ...
+# Subtest: lock or generation change suppresses delayed writes and reads
+ok 32 - lock or generation change suppresses delayed writes and reads
+  ---
+  duration_ms: 11.779583
+  type: 'test'
+  ...
+# Subtest: lock after the row add starts aborts the pending transaction before it commits
+ok 33 - lock after the row add starts aborts the pending transaction before it commits
+  ---
+  duration_ms: 24.308666
+  type: 'test'
+  ...
+# Subtest: synchronous binary add failure aborts both stores, preserves prior data, and closes the database
+ok 34 - synchronous binary add failure aborts both stores, preserves prior data, and closes the database
+  ---
+  duration_ms: 20.012583
+  type: 'test'
+  ...
+# Subtest: missing identifiers and records fail without disclosing another owner record
+ok 35 - missing identifiers and records fail without disclosing another owner record
+  ---
+  duration_ms: 5.300625
+  type: 'test'
+  ...
+# Subtest: stores original and derived revisions encrypted, preserving the original
+ok 36 - stores original and derived revisions encrypted, preserving the original
+  ---
+  duration_ms: 63.609625
+  type: 'test'
+  ...
+# Subtest: locked or changed sessions fail closed for reads and writes
+ok 37 - locked or changed sessions fail closed for reads and writes
+  ---
+  duration_ms: 11.792292
+  type: 'test'
+  ...
+# Subtest: prevents synthetic records and invalid provenance from entering evidence
+ok 38 - prevents synthetic records and invalid provenance from entering evidence
+  ---
+  duration_ms: 9.639292
+  type: 'test'
+  ...
+# Subtest: atomically prevents duplicate originals and stale or duplicate revisions
+ok 39 - atomically prevents duplicate originals and stale or duplicate revisions
+  ---
+  duration_ms: 64.252042
+  type: 'test'
+  ...
+# Subtest: owner identity scopes records and authenticated encryption
+ok 40 - owner identity scopes records and authenticated encryption
+  ---
+  duration_ms: 15.035125
+  type: 'test'
+  ...
+# Subtest: pins owner identity for the lifetime of a vault instance
+ok 41 - pins owner identity for the lifetime of a vault instance
+  ---
+  duration_ms: 10.51325
+  type: 'test'
+  ...
+# Subtest: authenticated data is bound to owner, record and revision identity
+ok 42 - authenticated data is bound to owner, record and revision identity
+  ---
+  duration_ms: 13.867916
+  type: 'test'
+  ...
+# Subtest: rejects a row copied to another lookup key without changing its identity fields
+ok 43 - rejects a row copied to another lookup key without changing its identity fields
+  ---
+  duration_ms: 10.446958
+  type: 'test'
+  ...
+# Subtest: snapshots plain JSON once and rejects mutable or lossy values
+ok 44 - snapshots plain JSON once and rejects mutable or lossy values
+  ---
+  duration_ms: 9.032041
+  type: 'test'
+  ...
+# Subtest: snapshots record IDs and provenance before asynchronous encryption
+ok 45 - snapshots record IDs and provenance before asynchronous encryption
+  ---
+  duration_ms: 32.162083
+  type: 'test'
+  ...
+# Subtest: rejects late reads after exit and permits a fresh instance at a new generation
+ok 46 - rejects late reads after exit and permits a fresh instance at a new generation
+  ---
+  duration_ms: 14.557458
+  type: 'test'
+  ...
+# Subtest: detects missing revisions against the record head
+ok 47 - detects missing revisions against the record head
+  ---
+  duration_ms: 16.971708
+  type: 'test'
+  ...
+# Subtest: detects orphaned revision rows when a record head is missing
+ok 48 - detects orphaned revision rows when a record head is missing
+  ---
+  duration_ms: 7.346125
+  type: 'test'
+  ...
+# Subtest: explicit start captures exact encoded chunks and saves once on stop
+ok 49 - explicit start captures exact encoded chunks and saves once on stop
+  ---
+  duration_ms: 15.303125
+  type: 'test'
+  ...
+# Subtest: cancel during a delayed permission request closes its eventual stream and ignores late results
+ok 50 - cancel during a delayed permission request closes its eventual stream and ignores late results
+  ---
+  duration_ms: 0.449334
+  type: 'test'
+  ...
+# Subtest: cancel while recording stops tracks, clears timers and drops bytes even if recorder later emits stop
+ok 51 - cancel while recording stops tracks, clears timers and drops bytes even if recorder later emits stop
+  ---
+  duration_ms: 6.347792
+  type: 'test'
+  ...
+# Subtest: denied permission exposes actionable content-free status
+ok 52 - denied permission exposes actionable content-free status
+  ---
+  duration_ms: 1.7375
+  type: 'test'
+  ...
+# Subtest: recorder errors discard partial bytes and release microphone
+ok 53 - recorder errors discard partial bytes and release microphone
+  ---
+  duration_ms: 0.42425
+  type: 'test'
+  ...
+# Subtest: unsupported MIME negotiation falls back to the platform default constructor
+ok 54 - unsupported MIME negotiation falls back to the platform default constructor
+  ---
+  duration_ms: 0.276042
+  type: 'test'
+  ...
+# Subtest: size cap discards an over-limit recording without saving a partial file
+ok 55 - size cap discards an over-limit recording without saving a partial file
+  ---
+  duration_ms: 0.215834
+  type: 'test'
+  ...
+# Subtest: scheduled 60 second stop saves complete bytes and reports actual elapsed time if the timer is delayed
+ok 56 - scheduled 60 second stop saves complete bytes and reports actual elapsed time if the timer is delayed
+  ---
+  duration_ms: 0.332541
+  type: 'test'
+  ...
+# Subtest: double start is ignored while busy and a canceled controller can start again
+ok 57 - double start is ignored while busy and a canceled controller can start again
+  ---
+  duration_ms: 0.467208
+  type: 'test'
+  ...
+# Subtest: cancel before permission resolves prevents a stale earlier operation from winning a later start
+ok 58 - cancel before permission resolves prevents a stale earlier operation from winning a later start
+  ---
+  duration_ms: 0.614625
+  type: 'test'
+  ...
+# Subtest: worker generator accepts only the app index, generated assets and four local brand assets
+ok 59 - worker generator accepts only the app index, generated assets and four local brand assets
+  ---
+  duration_ms: 2.994791
+  type: 'test'
+  ...
+# Subtest: cache version is deterministic for one build and changes when any cached asset changes
+ok 60 - cache version is deterministic for one build and changes when any cached asset changes
+  ---
+  duration_ms: 0.673417
+  type: 'test'
+  ...
+# Subtest: install precaches only allowlisted build files and activate preserves unrelated caches
+ok 61 - install precaches only allowlisted build files and activate preserves unrelated caches
+  ---
+  duration_ms: 133.546375
+  type: 'test'
+  ...
+# Subtest: failed precache removes only its partial new cache and leaves the active version intact
+ok 62 - failed precache removes only its partial new cache and leaves the active version intact
+  ---
+  duration_ms: 1.263916
+  type: 'test'
+  ...
+# Subtest: failed reinstall with an existing identical build cache preserves the active cache
+ok 63 - failed reinstall with an existing identical build cache preserves the active cache
+  ---
+  duration_ms: 0.664042
+  type: 'test'
+  ...
+# Subtest: root/index navigation is network-first and falls back only to the cached app index
+ok 64 - root/index navigation is network-first and falls back only to the cached app index
+  ---
+  duration_ms: 6.017458
+  type: 'test'
+  ...
+# Subtest: other routes and runtime APIs are never given the app-index fallback or cached
+ok 65 - other routes and runtime APIs are never given the app-index fallback or cached
+  ---
+  duration_ms: 0.866041
+  type: 'test'
+  ...
+# Subtest: built assets are cache-first while unlisted assets, queries and non-GET requests bypass the cache
+ok 66 - built assets are cache-first while unlisted assets, queries and non-GET requests bypass the cache
+  ---
+  duration_ms: 0.686542
+  type: 'test'
+  ...
+# Subtest: worker update stays waiting for normal lifecycle and registration does not force a reload
+ok 67 - worker update stays waiting for normal lifecycle and registration does not force a reload
+  ---
+  duration_ms: 0.302875
+  type: 'test'
+  ...
+# Subtest: ordinary export emits only a saved-source whitelist with a generic filename
+ok 68 - ordinary export emits only a saved-source whitelist with a generic filename
+  ---
+  duration_ms: 8.589875
+  type: 'test'
+  ...
+# Subtest: ordinary export rejects protected records and invalid saved fields
+ok 69 - ordinary export rejects protected records and invalid saved fields
+  ---
+  duration_ms: 0.794
+  type: 'test'
+  ...
+# Subtest: serializes writes, coalesces rapid edits, and flush waits for the latest accepted snapshot
+ok 70 - serializes writes, coalesces rapid edits, and flush waits for the latest accepted snapshot
+  ---
+  duration_ms: 10.071667
+  type: 'test'
+  ...
+# Subtest: stop drops queued snapshots and ignores late vault acknowledgements and callbacks
+ok 71 - stop drops queued snapshots and ignores late vault acknowledgements and callbacks
+  ---
+  duration_ms: 2.23375
+  type: 'test'
+  ...
+# Subtest: quota error keeps the newest snapshot in memory for an explicit retry and exposes no text
+ok 72 - quota error keeps the newest snapshot in memory for an explicit retry and exposes no text
+  ---
+  duration_ms: 2.534791
+  type: 'test'
+  ...
+# Subtest: a compare-and-swap conflict is surfaced and never blindly retried
+ok 73 - a compare-and-swap conflict is surfaced and never blindly retried
+  ---
+  duration_ms: 2.423333
+  type: 'test'
+  ...
+# Subtest: finalization retains the draft after failure and clears it only after storage acknowledgement
+ok 74 - finalization retains the draft after failure and clears it only after storage acknowledgement
+  ---
+  duration_ms: 7.84625
+  type: 'test'
+  ...
+# Subtest: blank-body drafts autosave, but finalization refuses them without deleting their draft
+ok 75 - blank-body drafts autosave, but finalization refuses them without deleting their draft
+  ---
+  duration_ms: 0.494042
+  type: 'test'
+  ...
+# Subtest: resuming requires the persisted version that protects against blind replacement
+ok 76 - resuming requires the persisted version that protects against blind replacement
+  ---
+  duration_ms: 0.143458
+  type: 'test'
+  ...
+# Subtest: invalid latest snapshot blocks flush and finalize after an earlier snapshot was saved, then a valid edit recovers
+ok 77 - invalid latest snapshot blocks flush and finalize after an earlier snapshot was saved, then a valid edit recovers
+  ---
+  duration_ms: 0.411459
+  type: 'test'
+  ...
+# Subtest: invalid latest snapshot during an earlier in-flight save never reports that older write as saved
+ok 78 - invalid latest snapshot during an earlier in-flight save never reports that older write as saved
+  ---
+  duration_ms: 2.978958
+  type: 'test'
+  ...
+# Subtest: record-stage failures route through finalize again instead of retrying draft save
+ok 79 - record-stage failures route through finalize again instead of retrying draft save
+  ---
+  duration_ms: 0.926625
+  type: 'test'
+  ...
+# Subtest: snapshot copying rejects accessors without invoking them
+ok 80 - snapshot copying rejects accessors without invoking them
+  ---
+  duration_ms: 0.245
+  type: 'test'
+  ...
+# Subtest: valid edits after a record-stage quota failure clear the record error and autosave the mutable draft
+ok 81 - valid edits after a record-stage quota failure clear the record error and autosave the mutable draft
+  ---
+  duration_ms: 0.232334
+  type: 'test'
+  ...
+# Subtest: valid edits after stale-target promotion conflict still autosave the retained draft
+ok 82 - valid edits after stale-target promotion conflict still autosave the retained draft
+  ---
+  duration_ms: 0.641083
+  type: 'test'
+  ...
+# Subtest: lost finalize acknowledgement reconciles only an exact existing revision
+ok 83 - lost finalize acknowledgement reconciles only an exact existing revision
+  ---
+  duration_ms: 0.226084
+  type: 'test'
+  ...
+# Subtest: finalization IDs are captured before flush yields and content comparison ignores object key order
+ok 84 - finalization IDs are captured before flush yields and content comparison ignores object key order
+  ---
+  duration_ms: 0.174875
+  type: 'test'
+  ...
+# Subtest: resumed targeted draft uses its actual storage version in the default revision ID
+ok 85 - resumed targeted draft uses its actual storage version in the default revision ID
+  ---
+  duration_ms: 0.090834
+  type: 'test'
+  ...
+# Subtest: a later record-stage error replaces an earlier quota classification
+ok 86 - a later record-stage error replaces an earlier quota classification
+  ---
+  duration_ms: 0.222958
+  type: 'test'
+  ...
+# Subtest: lost finalize acknowledgement with mismatched stored content remains an error
+ok 87 - lost finalize acknowledgement with mismatched stored content remains an error
+  ---
+  duration_ms: 0.156416
+  type: 'test'
+  ...
+# Subtest: stopping during lost-ack lookup suppresses reconciliation success and later status callbacks
+ok 88 - stopping during lost-ack lookup suppresses reconciliation success and later status callbacks
+  ---
+  duration_ms: 0.171166
+  type: 'test'
+  ...
+# Subtest: text backup restores complete original history after local records and old key are lost
+ok 89 - text backup restores complete original history after local records and old key are lost
+  ---
+  duration_ms: 322.63225
+  type: 'test'
+  ...
+# Subtest: restore preparation snapshots caller-owned history before its first asynchronous step
+ok 90 - restore preparation snapshots caller-owned history before its first asynchronous step
+  ---
+  duration_ms: 8.691458
+  type: 'test'
+  ...
+# Subtest: wrong passphrase, tampered file, and wrong current owner fail before creating records
+ok 91 - wrong passphrase, tampered file, and wrong current owner fail before creating records
+  ---
+  duration_ms: 337.879083
+  type: 'test'
+  ...
+# Subtest: conflicting record IDs never overwrite and a prepared absence race aborts restore
+ok 92 - conflicting record IDs never overwrite and a prepared absence race aborts restore
+  ---
+  duration_ms: 252.527959
+  type: 'test'
+  ...
+# Subtest: locked or stale authority aborts a prepared restore without writing
+ok 93 - locked or stale authority aborts a prepared restore without writing
+  ---
+  duration_ms: 247.319958
+  type: 'test'
+  ...
+# Subtest: text restore rolls back all revision writes when a later revision add fails
+ok 94 - text restore rolls back all revision writes when a later revision add fails
+  ---
+  duration_ms: 155.09975
+  type: 'test'
+  ...
+# Subtest: media backup restores exact bytes and all saved metadata after the old key is removed
+ok 95 - media backup restores exact bytes and all saved metadata after the old key is removed
+  ---
+  duration_ms: 155.540875
+  type: 'test'
+  ...
+# Subtest: media restore rejects wrong owner, mismatched bytes, and conflicting existing IDs
+ok 96 - media restore rejects wrong owner, mismatched bytes, and conflicting existing IDs
+  ---
+  duration_ms: 157.728459
+  type: 'test'
+  ...
+# Subtest: media restore rolls back metadata if binary add setup fails
+ok 97 - media restore rolls back metadata if binary add setup fails
+  ---
+  duration_ms: 149.412458
+  type: 'test'
+  ...
+# Subtest: private text capture and revision survive a new vault instance without network
+ok 98 - private text capture and revision survive a new vault instance without network
+  ---
+  duration_ms: 64.556958
+  type: 'test'
+  ...
+# Subtest: invalid private capture does not create a record
+ok 99 - invalid private capture does not create a record
+  ---
+  duration_ms: 8.379
+  type: 'test'
+  ...
+# Subtest: text deletion removes only the chosen history and linked drafts; key and unrelated data remain
+ok 100 - text deletion removes only the chosen history and linked drafts; key and unrelated data remain
+  ---
+  duration_ms: 37.941625
+  type: 'test'
+  ...
+# Subtest: preparing or canceling text deletion has no storage effect
+ok 101 - preparing or canceling text deletion has no storage effect
+  ---
+  duration_ms: 7.476417
+  type: 'test'
+  ...
+# Subtest: text deletion plan rejects changed history, linked drafts, or encrypted envelopes without deleting
+    # Subtest: head and revision set changes
+    ok 1 - head and revision set changes
+      ---
+      duration_ms: 9.361209
+      type: 'test'
+      ...
+    # Subtest: linked draft version changes
+    ok 2 - linked draft version changes
+      ---
+      duration_ms: 13.958917
+      type: 'test'
+      ...
+    # Subtest: stored revision envelope changes
+    ok 3 - stored revision envelope changes
+      ---
+      duration_ms: 3.547958
+      type: 'test'
+      ...
+    1..3
+ok 102 - text deletion plan rejects changed history, linked drafts, or encrypted envelopes without deleting
+  ---
+  duration_ms: 30.674458
+  type: 'test'
+  ...
+# Subtest: linked autosave cannot recreate a draft after its target record was deleted
+ok 103 - linked autosave cannot recreate a draft after its target record was deleted
+  ---
+  duration_ms: 5.52375
+  type: 'test'
+  ...
+# Subtest: text deletion rolls back all stores when a later synchronous delete setup fails
+ok 104 - text deletion rolls back all stores when a later synchronous delete setup fails
+  ---
+  duration_ms: 7.104125
+  type: 'test'
+  ...
+# Subtest: locked or changed session cannot confirm deletion
+ok 105 - locked or changed session cannot confirm deletion
+  ---
+  duration_ms: 20.954709
+  type: 'test'
+  ...
+# Subtest: media deletion reads metadata only when preparing and removes only the selected owner record atomically
+ok 106 - media deletion reads metadata only when preparing and removes only the selected owner record atomically
+  ---
+  duration_ms: 30.061125
+  type: 'test'
+  ...
+# Subtest: prepared media deletion can be canceled without changing either store
+ok 107 - prepared media deletion can be canceled without changing either store
+  ---
+  duration_ms: 4.236166
+  type: 'test'
+  ...
+# Subtest: media deletion detects stale metadata and preserves both stores on synchronous binary delete failure
+    # Subtest: metadata changed after prepare
+    ok 1 - metadata changed after prepare
+      ---
+      duration_ms: 2.920916
+      type: 'test'
+      ...
+    # Subtest: binary delete setup fails after metadata delete is queued
+    ok 2 - binary delete setup fails after metadata delete is queued
+      ---
+      duration_ms: 1.945042
+      type: 'test'
+      ...
+    1..2
+ok 108 - media deletion detects stale metadata and preserves both stores on synchronous binary delete failure
+  ---
+  duration_ms: 5.521209
+  type: 'test'
+  ...
+# Subtest: locked media session does not prepare or commit deletion
+ok 109 - locked media session does not prepare or commit deletion
+  ---
+  duration_ms: 2.39875
+  type: 'test'
+  ...
+# Subtest: concurrent new revision does not prevent recovery of later edits to the original parent
+ok 110 - concurrent new revision does not prevent recovery of later edits to the original parent
+  ---
+  duration_ms: 5.527417
+  type: 'test'
+  ...
+# Subtest: drafts survive a new vault instance with the same browser key and remain encrypted at rest
+ok 111 - drafts survive a new vault instance with the same browser key and remain encrypted at rest
+  ---
+  duration_ms: 26.217625
+  type: 'test'
+  ...
+# Subtest: adds the draft store through a version-2 upgrade without replacing existing stores or rows
+ok 112 - adds the draft store through a version-2 upgrade without replacing existing stores or rows
+  ---
+  duration_ms: 5.007
+  type: 'test'
+  ...
+# Subtest: closes a database connection that succeeds after an already-rejected blocked upgrade
+ok 113 - closes a database connection that succeeds after an already-rejected blocked upgrade
+  ---
+  duration_ms: 13.974542
+  type: 'test'
+  ...
+# Subtest: draft saves use compare-and-swap and reject locked or stale generations
+ok 114 - draft saves use compare-and-swap and reject locked or stale generations
+  ---
+  duration_ms: 9.1145
+  type: 'test'
+  ...
+# Subtest: oversized snapshots fail without an acknowledgement or partial stored draft
+ok 115 - oversized snapshots fail without an acknowledgement or partial stored draft
+  ---
+  duration_ms: 7.400083
+  type: 'test'
+  ...
+# Subtest: preserves quota errors on a failed update and keeps the prior draft available for retry
+ok 116 - preserves quota errors on a failed update and keeps the prior draft available for retry
+  ---
+  duration_ms: 6.370625
+  type: 'test'
+  ...
+# Subtest: new draft promotion atomically creates an original and removes only the draft
+ok 117 - new draft promotion atomically creates an original and removes only the draft
+  ---
+  duration_ms: 10.823833
+  type: 'test'
+  ...
+# Subtest: finalization snapshots requested record and revision IDs before asynchronous reads
+ok 118 - finalization snapshots requested record and revision IDs before asynchronous reads
+  ---
+  duration_ms: 3.814583
+  type: 'test'
+  ...
+# Subtest: promotion abort preserves the draft and creates no partial original or head; retry commits once
+ok 119 - promotion abort preserves the draft and creates no partial original or head; retry commits once
+  ---
+  duration_ms: 11.958208
+  type: 'test'
+  ...
+# Subtest: targeted draft promotion appends without changing the exact original
+ok 120 - targeted draft promotion appends without changing the exact original
+  ---
+  duration_ms: 16.140167
+  type: 'test'
+  ...
+# Subtest: stale target or changed draft fails finalization and preserves the recovery snapshot
+ok 121 - stale target or changed draft fails finalization and preserves the recovery snapshot
+  ---
+  duration_ms: 19.73275
+  type: 'test'
+  ...
+# Subtest: text export is readable and contains the complete immutable original and revision history
+ok 122 - text export is readable and contains the complete immutable original and revision history
+  ---
+  duration_ms: 19.64525
+  type: 'test'
+  ...
+# Subtest: media export is one generic file containing exactly the saved original bytes
+ok 123 - media export is one generic file containing exactly the saved original bytes
+  ---
+  duration_ms: 5.512458
+  type: 'test'
+  ...
+# Subtest: locked, wrong-owner and stale sessions cannot prepare or later release text exports
+ok 124 - locked, wrong-owner and stale sessions cannot prepare or later release text exports
+  ---
+  duration_ms: 14.179208
+  type: 'test'
+  ...
+# Subtest: session invalidation during awaited text and media reads rejects before returning exports
+ok 125 - session invalidation during awaited text and media reads rejects before returning exports
+  ---
+  duration_ms: 24.537458
+  type: 'test'
+  ...
+# Subtest: text export rejects records that are not supported private text
+ok 126 - text export rejects records that are not supported private text
+  ---
+  duration_ms: 12.08575
+  type: 'test'
+  ...
+# Subtest: recovery file preserves arbitrary bytes and Unicode without depending on a browser device key
+ok 127 - recovery file preserves arbitrary bytes and Unicode without depending on a browser device key
+  ---
+  duration_ms: 251.513792
+  type: 'test'
+  ...
+# Subtest: each encrypted file has fresh salt/IV, and wrong passphrases or altered bytes fail authentication
+ok 128 - each encrypted file has fresh salt/IV, and wrong passphrases or altered bytes fail authentication
+  ---
+  duration_ms: 560.598875
+  type: 'test'
+  ...
+# Subtest: hostile KDF headers and invalid sizes/passphrases are rejected
+ok 129 - hostile KDF headers and invalid sizes/passphrases are rejected
+  ---
+  duration_ms: 77.752333
+  type: 'test'
+  ...
+# Subtest: lock after asynchronous work prevents encrypted or decrypted results from escaping
+ok 130 - lock after asynchronous work prevents encrypted or decrypted results from escaping
+  ---
+  duration_ms: 161.79925
+  type: 'test'
+  ...
+1..130
+# tests 135
+# suites 0
+# pass 135
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2283.917
