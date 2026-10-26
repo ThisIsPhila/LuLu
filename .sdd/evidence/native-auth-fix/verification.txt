@@ -1,0 +1,30 @@
+Date: 2026-10-26 (Africa/Johannesburg)
+Scope: local native authentication repair; no live Firebase changes.
+
+Build and configuration checks:
+- npm run native:sync — an earlier run passed before separate onboarding files appeared in the shared worktree.
+- Final `npm run native:sync` attempt — BLOCKED at the TypeScript step by two errors in untracked onboarding files: `src/components/OnboardingJourney.tsx:165` (numbered screen union compared with `1`) and `src/services/onboardingDraft.ts:144` (`Uint8Array<ArrayBufferLike>` passed as WebCrypto `BufferSource`). These files are outside this auth change and were left untouched.
+- Final app bundle — `npm exec -- vite build --mode app` PASS; `node scripts/verify-mobile-package.mjs` PASS (24 application files, no demo/review/fixtures); `npx cap sync` PASS for iOS and Android.
+- npm --prefix functions run build — PASS.
+- npm run guard:firebase — PASS; the existing owner-reviewed provider configuration exception matched.
+- No automated tests or live authentication attempt was run for this change.
+
+Code defects addressed:
+- The onboarding UI previously disabled native passkeys when the WebView lacked WebAuthn, although native passkeys run in the hosted system-browser bridge.
+- Firebase's authDomain now matches the app and bridge origin (khora-lulu-2026.web.app), avoiding cross-site redirect helper storage during Safari Google sign-in.
+
+Reference alignment:
+- Compared LuLu with Confessions' `src/lib/passkeys.ts`, `src/lib/native-app.ts`, `src/lib/native-browser.ts`, `src/app/auth-bridge/page.tsx`, and callable exchange functions.
+- Kept the Capacitor system-browser → HTTPS passkey relay → registered app URL callback → Firebase custom-token sign-in pattern. Confessions invokes WebAuthn automatically after the hosted bridge loads; LuLu retains that behavior.
+- LuLu retains request/state/proof/operation binding and its existing account/session model rather than adopting Confessions' different account model.
+
+Live state / acceptance boundary:
+- The repository's latest recorded cloud check says the provider config, hosted bridge, and native exchange Functions were not deployed. This verification does not re-check cloud state.
+- Email and Google account creation/sign-in, passkey registration/sign-in, and Firestore persistence require release and device acceptance after release.
+- Google OAuth redirect handler URI: https://khora-lulu-2026.web.app/__/auth/handler. Firebase's provider documentation says default Firebase Hosting domains are authorized automatically.
+- Required release targets in the existing project: Auth provider configuration, the existing `lulu` Functions codebase, and the main-app Firebase Hosting site. Run `npm run guard:firebase` immediately before any authorized deployment.
+
+Security boundaries retained:
+- WebAuthn remains on the trusted HTTPS Hosting origin; Capacitor origins were not added to its RP/origin allowlist.
+- Firebase/custom tokens remain out of callback URLs; native exchange state, proof, operation and request binding remain in place.
+- No Firebase resource, user account, journal record, or hosted environment was changed.

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ArrowRight, ChevronLeft, CircleAlert, Info, LoaderCircle, ScanFace, ShieldCheck } from 'lucide-react';
+import { isNativePlatform } from '../platform/runtime';
 import './OnboardingAuth.css';
 
 export type OnboardingAuthScreen = 'welcome' | 'signin' | 'create';
@@ -48,7 +49,9 @@ const reasonCopy: Record<AuthFailureReason, string> = {
 };
 
 function detectPasskeySupport() {
-  return typeof window !== 'undefined' && 'PublicKeyCredential' in window && Boolean(window.isSecureContext);
+  // Native WebViews hand passkey work to LuLu's HTTPS bridge in the system
+  // browser. WebAuthn support in the WebView itself is not required there.
+  return isNativePlatform() || (typeof window !== 'undefined' && 'PublicKeyCredential' in window && Boolean(window.isSecureContext));
 }
 
 export function OnboardingAuth({
