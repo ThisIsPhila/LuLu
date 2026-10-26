@@ -11,7 +11,7 @@ import { assertExchangeProof, assertExchangeRedeemable, assertExchangeState, isN
 initializeApp();
 const db = getFirestore();
 const identity = getAuth();
-const origins = new Set(['https://khora-lulu-2026.web.app', 'https://khora-lulu-2026.firebaseapp.com', 'http://localhost:5173', 'http://127.0.0.1:5173']);
+const origins = new Set(['https://khora-lulu-2026.web.app', 'https://khora-lulu-2026.firebaseapp.com', 'https://lulu.thisisphila.co.za', 'http://localhost:5173', 'http://127.0.0.1:5173']);
 const nativeOrigins = new Set(['capacitor://localhost', 'https://localhost']);
 const knownRoutes = new Set(['/auth/register/options', '/auth/register/verify', '/auth/login/options', '/auth/login/verify', '/auth/stepup/options', '/auth/stepup/verify', '/auth/provider/session', '/auth/lock', '/auth/logout', '/session', '/native/exchange/create', '/native/exchange/options', '/native/exchange/complete', '/native/exchange/provider-complete', '/native/exchange/redeem', '/native/exchange/cancel']);
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
