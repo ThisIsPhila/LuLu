@@ -1,12 +1,41 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { OnboardingAuth, type AuthActionResult } from '../OnboardingAuth';
-import { authenticate, authError, BackendRequestError, restoreNativeAppSession, restorePendingNativeAuth, type AppSession } from '../../services/backend/passkeys';
+import { OnboardingJourney, type OnboardingJourneyScreen, type OnboardingJourneyState, type JourneyActionResult } from '../OnboardingJourney';
+import { authenticate, authenticateWithEmail, authenticateWithGoogle, authError, BackendRequestError, restoreNativeAppSession, restorePendingNativeAuth, type AppSession } from '../../services/backend/passkeys';
+import { bindOnboardingDraft, discardUnreadableOnboardingDraft, loadOnboardingDraft, saveFirstOnboardingEntry, saveOnboardingProgress } from '../../services/onboardingDraft';
 import { isNativePlatform } from '../../platform/runtime';
+import { localDevelopmentAvailable, localDevelopmentSession } from '../../services/localDevelopment';
 import './auth.css';
 export function AuthBoundary({children}: {children:(session:AppSession,onSignedOut:()=>void)=>ReactNode}) {
   const [session,setSession]=useState<AppSession|null>(null);
   const [restoring,setRestoring]=useState(isNativePlatform());
+  const [journeyReady,setJourneyReady]=useState(false);
+  const [journeyError,setJourneyError]=useState('');
+  const [draftReadFailed,setDraftReadFailed]=useState(false);
+  const [journeyScreen,setJourneyScreen]=useState<OnboardingJourneyScreen>(1);
+  const [journeyInitialState,setJourneyInitialState]=useState<Partial<OnboardingJourneyState>>({});
+  const [route,setRoute]=useState<'journey'|'signin'>('signin');
+  const journeyScreenRef=useRef<OnboardingJourneyScreen>(1);
+  const journeyStateRef=useRef<OnboardingJourneyState>({name:'',intentions:[],prompt:null,firstEntryText:'',supportChoice:null});
   const verified=useRef<AppSession|null>(null);
+  useEffect(()=>{
+    if(route!=='journey')return;
+    let active=true;
+    void loadOnboardingDraft().then(draft=>{
+      if(!active)return;
+      if(draft && !draft.ownerUid){
+        const restoredScreen = draft.version===3 ? draft.screen : draft.version===2
+          ? ({1:1,2:2,3:6,4:8,5:9,6:11,7:13,8:14} as Record<number,number>)[draft.screen]
+          : draft.screen;
+        journeyScreenRef.current=restoredScreen as OnboardingJourneyScreen;
+        journeyStateRef.current={...journeyStateRef.current,...draft.state} as OnboardingJourneyState;
+        setJourneyScreen(journeyScreenRef.current);
+        setJourneyInitialState(journeyStateRef.current);
+      }
+    }).catch(error=>{if(active){setDraftReadFailed(true);setJourneyError(error instanceof Error?error.message:'The local onboarding draft could not be opened.');}})
+      .finally(()=>{if(active)setJourneyReady(true);});
+    return()=>{active=false;};
+  },[route]);
   useEffect(()=>{
     if(!isNativePlatform())return;
     let active=true;
@@ -22,22 +51,81 @@ export function AuthBoundary({children}: {children:(session:AppSession,onSignedO
     })();
     return()=>{active=false;};
   },[]);
-  async function begin(create:boolean):Promise<AuthActionResult> {
-    if(window.location.hostname==='127.0.0.1')return {status:'error',reason:'local-origin'};
-    try {verified.current=await authenticate(create);return {status:'authenticated'};}
+  async function runAuthentication(action:()=>Promise<AppSession>):Promise<AuthActionResult> {
+    try {verified.current=await action();return {status:'authenticated'};}
     catch(error){
       verified.current=null;
       if(error instanceof Error && error.name==='NotAllowedError')return {status:'cancelled'};
-      if(error instanceof BackendRequestError && create && error.recoveryAction==='sign-in')return {status:'error',reason:'unknown',message:'Your passkey may already be ready. Sign in with it to continue.',recoveryAction:'sign-in'};
+      if(error instanceof BackendRequestError && error.recoveryAction==='sign-in')return {status:'error',reason:'unknown',message:'Your passkey may already be ready. Sign in with it to continue.',recoveryAction:'sign-in'};
       return {status:'error',reason:error instanceof TypeError?'network':'unknown',message:authError(error)};
     }
   }
+  function beginPasskey(create:boolean):Promise<AuthActionResult> {
+    if(window.location.hostname==='127.0.0.1')return Promise.resolve({status:'error',reason:'local-origin'});
+    return runAuthentication(()=>authenticate(create));
+  }
+  function persistJourney(screen:OnboardingJourneyScreen,state:OnboardingJourneyState){
+    if(typeof screen!=='number')return;
+    void saveOnboardingProgress(screen,state).then(()=>setJourneyError('')).catch(error=>{
+      setJourneyError(error instanceof Error?error.message:'Your onboarding progress could not be saved on this device.');
+    });
+  }
+  async function saveFirstEntry(entry:{text:string;prompt:string|null}):Promise<JourneyActionResult>{
+    try {
+      journeyStateRef.current={...journeyStateRef.current,firstEntryText:entry.text,prompt:entry.prompt};
+      await saveFirstOnboardingEntry(entry.text,entry.prompt,journeyStateRef.current);
+      setJourneyError('');
+      return {status:'success'};
+    }catch(error){return {status:'error',message:error instanceof Error?error.message:'The entry could not be saved on this device.'};}
+  }
+  async function enroll(state:OnboardingJourneyState):Promise<JourneyActionResult>{
+    journeyStateRef.current=state;
+    if(window.location.hostname==='127.0.0.1')return {
+      status:'error',
+      message:'This local address cannot create a passkey. Open LuLu on localhost to test enrollment. Any draft on this address remains here because browsers keep the two local addresses separate.',
+      actionUrl:`http://localhost:${window.location.port || '5173'}${window.location.pathname}`,
+      actionLabel:'Open LuLu on localhost',
+    };
+    if(!verified.current){
+      const result=await beginPasskey(true);
+      if(result.status==='cancelled')return {status:'cancelled'};
+      if(result.status==='error')return {status:'error',message:result.message??authError(new Error(result.reason))};
+    }
+    try {
+      await bindOnboardingDraft(verified.current!.uid);
+      setSession(verified.current);
+      return {status:'success'};
+    }catch(error){
+      return {status:'error',message:`Your account is ready, but LuLu couldn't retain the local onboarding draft yet. Try again here. ${error instanceof Error?error.message:''}`};
+    }
+  }
   if(session) return children(session,()=>{verified.current=null;setSession(null);});
-  if(restoring)return <div className="auth-restore" role="status">Opening your LuLu journal…</div>;
+  if(restoring || (route==='journey' && !journeyReady))return <div className="auth-restore" role="status">Opening your LuLu journal…</div>;
+  if(draftReadFailed && route==='journey')return <div className="auth-draft-recovery" role="alert">
+    <h1>Your local draft could not be opened.</h1><p>{journeyError} The text stays on this device until you choose what to do.</p>
+    <button type="button" onClick={()=>setRoute('signin')}>Sign in to an existing account</button>
+    <button type="button" onClick={()=>void discardUnreadableOnboardingDraft().then(()=>{setDraftReadFailed(false);setJourneyError('');setJourneyScreen(1);journeyScreenRef.current=1;setJourneyInitialState({});}).catch(error=>setJourneyError(error instanceof Error?error.message:'The local draft could not be discarded.'))}>Discard unreadable draft and start again</button>
+  </div>;
+  if(route==='journey')return <>
+    {journeyError && <div className="auth-journey-error" role="alert">{journeyError}</div>}
+    <OnboardingJourney initialScreen={journeyScreen} initialState={journeyInitialState}
+      onboardingStateChange={state=>{journeyStateRef.current=state;persistJourney(journeyScreenRef.current,state);}}
+      onNavigate={screen=>{
+        if(screen==='sign-in'){setRoute('signin');return;}
+        journeyScreenRef.current=screen;
+        setJourneyScreen(screen);
+        persistJourney(screen,journeyStateRef.current);
+      }}
+      onSaveFirstEntry={saveFirstEntry} onCreatePrivateSpace={enroll} onSignIn={()=>setRoute('signin')} />
+  </>;
   return <OnboardingAuth
-    initialScreen={new URLSearchParams(window.location.search).get('screen') === 'signin' ? 'signin' : new URLSearchParams(window.location.search).get('screen') === 'create' ? 'create' : 'welcome'}
-    onRegister={()=>begin(true)}
-    onSignIn={()=>begin(false)}
+    initialScreen="signin"
+    onRegister={()=>beginPasskey(true)}
+    onSignIn={()=>beginPasskey(false)}
+    onEmailAuth={(email,password,create)=>runAuthentication(()=>authenticateWithEmail(email,password,create))}
+    onGoogleSignIn={()=>runAuthentication(authenticateWithGoogle)}
+    onStartOnboarding={()=>setRoute('journey')}
+    onDevelopmentEnter={import.meta.env?.DEV === true && localDevelopmentAvailable() ? ()=>setSession(localDevelopmentSession()) : undefined}
     onAuthenticated={()=>{if(verified.current)setSession(verified.current);}}
   />;
 }

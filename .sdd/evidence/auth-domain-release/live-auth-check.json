@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-10-26T12:33:50.563Z",
+  "origin": "https://lulu.thisisphila.co.za",
+  "project": "khora-lulu-2026",
+  "email": {
+    "registration": true,
+    "returningSignIn": true,
+    "applicationSession": true
+  },
+  "passkey": {
+    "registrationAndSession": true,
+    "returningSignIn": true,
+    "privateStepUp": true
+  },
+  "cleanup": {
+    "testAccounts": 2,
+    "testDocuments": 7,
+    "verifiedAbsent": true,
+    "failures": []
+  },
+  "hosting": {
+    "status": 200,
+    "script": "/assets/index-I51RQHS_.js"
+  },
+  "providers": {
+    "emailPasswordEnabled": true,
+    "googleEnabled": true,
+    "customDomainAuthorized": true
+  }
+}

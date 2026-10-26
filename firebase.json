@@ -54,7 +54,11 @@
     ],
     "providers": {
       "anonymous": false,
-      "emailPassword": false
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "LuLu",
+        "supportEmail": "lulu@thisisphila.co.za"
+      }
     }
   }
 }

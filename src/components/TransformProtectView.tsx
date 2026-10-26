@@ -30,7 +30,7 @@ type Props = {
   }) => Promise<void>;
   onDeleteOrdinary: (entryId: string) => Promise<void>;
   isOrdinarySessionActive: () => boolean;
-  onOpenEntityInspector: () => void;
+  onOpenEntityInspector: (currentText?: string) => void;
   onEnterPrivate: () => void;
   privateVault?: LocalVault;
   privateMediaVault?: LocalMediaVault;

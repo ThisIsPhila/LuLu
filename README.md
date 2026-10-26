@@ -8,7 +8,7 @@
 <h1 align="center">Your story. Your safety. Your choice.</h1>
 <p align="center"><strong>An ordinary journal with an extraordinary purpose.</strong></p>
 <p align="center">
-  <a href="https://khora-lulu-2026.web.app/"><strong>Open LuLu</strong></a>
+  <a href="https://lulu.thisisphila.co.za/"><strong>Open LuLu</strong></a>
   &nbsp;·&nbsp;
   <a href="#experience-lulu">Explore the experience</a>
   &nbsp;·&nbsp;
@@ -37,18 +37,18 @@ Created by **Team KHÔRA** for the **FNB App of the Year Hackathon 2026**, addre
 
 ### Start with the live application
 
-**[Launch LuLu in your browser](https://khora-lulu-2026.web.app/)**
+**[Launch LuLu in your browser](https://lulu.thisisphila.co.za/)**
 
 The web release is the quickest way to explore the *currently deployed* experience. The application uses real device/browser passkey authentication; there is no shared demo password.
 
 | Step | What to do | What you'll see |
 | --- | --- | --- |
-| **1. Create your space** | Register or sign in with a passkey. | A device/browser authentication prompt, followed by your account-owned space. |
+| **1. Create your space** | Register or sign in with a passkey or email/password; Google is configured with its corrected OAuth callback. | A device/browser authentication prompt, followed by your account-owned space. |
 | **2. Explore the journal** | Open ordinary journal entries, edit one and save. | Three fictional starter entries are initially added to new accounts; they can be edited. |
 | **3. Explore Stories** | Navigate to **Stories** in the ordinary experience. | A familiar, everyday writing surface. |
 | **4. Explore protected writing** | In a version exposing **Private** or **Write privately**, select that entry point. | Protected access is separate from signing in. Availability varies by release; see below. |
 
-**Important:** The live Firebase Hosting release and newer repository source are not identical. The currently documented hosted release is confirmed for passkey access and the account-owned ordinary journal; the newer encrypted local private-writing implementation has been exercised in local testing but has **not** been verified as part of that hosted release. This README distinguishes them rather than presenting planned functionality as live.
+**Release update — 26 October:** The main-app source is now published at the custom domain. Login opens directly and **Onboarding** is optional. Live synthetic email/password and passkey registration, returning sign-in and application-session tests passed, including private passkey step-up; both temporary accounts and seven test documents were removed. Product Implementation corrected the missing Google OAuth callback; interactive Google/native acceptance remains open. Broader private/mobile features have local evidence and still need owner-device acceptance. See the [release verification](docs/implementation/2026-10-26-auth-domain-release.md).
 
 ### The experience we're building
 
@@ -67,14 +67,17 @@ Rather than treating a design concept, a local implementation and a deployed rel
 
 | Capability | Live hosted web app | Current repository source |
 | --- | --- | --- |
-| Passkey registration and sign-in | **Available** | Available |
+| Passkey registration and sign-in | **Available · live synthetic check passed** | Available |
+| Email/password registration and sign-in | **Available · live synthetic check passed** | Available |
+| Google sign-in | Callback corrected; interactive acceptance pending | Implemented |
+| Optional onboarding | **Available from login** | Fourteen-screen flow |
 | Account-owned ordinary journal (Firestore) | **Available** | Available |
 | Three editable fictional starter entries | **Available** | Available |
-| Encrypted browser-local private text and media | Not verified in hosted release | Implemented; locally tested |
-| Private drafts, revisions and autosave | Not verified in hosted release | Implemented; locally tested |
-| Image/audio private attachments; export and deletion | Not verified in hosted release | Implemented; locally tested |
-| Password-encrypted per-record backup/restore | Not verified in hosted release | Implemented; locally tested |
-| Configured substitutions and narrative distancing | Hosted availability unverified | Implemented |
+| Encrypted browser-local private text and media | Source deployed; device acceptance pending | Implemented; locally tested |
+| Private drafts, revisions and autosave | Source deployed; device acceptance pending | Implemented; locally tested |
+| Image/audio private attachments; export and deletion | Source deployed; device acceptance pending | Implemented; locally tested |
+| Password-encrypted per-record backup/restore | Source deployed; device acceptance pending | Implemented; locally tested |
+| Configured substitutions and narrative distancing | Source deployed; broader detection remains planned | Implemented |
 | General contextual PII screening / OpenAI Decisions API integration | Not available | Planned |
 | Companion permissions and evidence sharing | Not available | Planned |
 | Safety Trails / live location sharing | Not available | Planned |
@@ -88,10 +91,10 @@ For detailed and dated engineering evidence, see the [implementation tracker](do
 
 | Platform | How to access | Status |
 | --- | --- | --- |
-| **Web** | **[Open the live app](https://khora-lulu-2026.web.app/)** | Hosted release available. |
+| **Web** | **[Open the live app](https://lulu.thisisphila.co.za/)** | Hosted release available. |
 | **PWA** | Install from a supported browser when offered. | Installability and offline behaviour must still be validated before publishing installation instructions. |
 | **Android** | Capacitor 8 Android project in source. | Builds have succeeded; no device-accepted APK download is currently published. |
-| **iOS** | Capacitor 8 iOS project in source. | Simulator black-screen issue and device acceptance remain outstanding; no IPA/TestFlight link published. |
+| **iOS** | Capacitor 8 iOS project in source. | Physical iPhone startup repaired; full device journey acceptance remains outstanding; no IPA/TestFlight link published. |
 
 APK and iOS installation links will appear here **after** testable, signed builds exist. A successful project build alone is not evidence of a working mobile release.
 
@@ -113,7 +116,7 @@ The application deliberately distinguishes ordinary account data, original prote
 
 ## Run from source
 
-Requirements: Node.js and npm, plus configured development environment credentials for the relevant Firebase functionality.
+Requirements: Node.js and npm. Local Vite development provides an **Open development app** button with a separate fictional journal saved in browser storage. Production and native builds retain real authentication; the local bypass is removed from production output.
 
 ```bash
 npm install
@@ -127,7 +130,7 @@ npm run dev
 | `http://127.0.0.1:5173/demo/legacy.html` | Independent historical prototype, not the current app |
 | `http://127.0.0.1:5173/docs/hackathon/review.html#canvas` | Interactive project documentation library |
 
-To review newer private-record functionality in the current source, sign in, select **Private** or **Write privately**, create and reopen a protected record, and test **Quick exit**. Local behaviour should not be assumed to match the hosted version.
+To review private-record functionality in local development, click **Open development app**, select **Private** or **Write privately**, create and reopen a protected record, and test **Quick exit**. The local workspace has its own identity and records and grants no access to a Firebase account. Use **Onboarding** from login to develop that flow separately.
 
 ### Builds and checks
 

@@ -1,0 +1,23 @@
+Date: 2026-10-26
+Base revision: 9dd69fee75b744f68d0df6537f7bb91978476149 plus ios-startup source changes.
+Physical environment: connected iPhone 13 Pro Max, iOS 27.0.1.
+Simulator environment: iPhone 18 Pro, iOS 27.0.
+
+Before change:
+- devicectl launch --terminate-existing org.khora.lulu: launched successfully; physical screenshot was blank white (iphone-before.png).
+- devicectl launch --console: Loading app at capacitor://localhost; WebView loaded; SecureStorage internalGetItem; TO JS {"data":null}; no onboarding appeared.
+- Fresh simulator build/install reproduced blank startup, eliminating an old installed bundle as the sole cause.
+
+After change:
+- npm run native:sync: PASS. TypeScript + Vite app build; 24 application files accepted by verifier; iOS and Android sync completed.
+- npm run guard:firebase: PASS with owner-reviewed auth provider exception.
+- xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -destination 'platform=iOS Simulator,id=E1ADABCA-A0DD-4D7C-B798-F80F16BA482C' -derivedDataPath /tmp/lulu-ios-derived CODE_SIGNING_ALLOWED=NO build: BUILD SUCCEEDED.
+- simctl install + launch: PASS. Initial 8-second capture black; later screenshot showed complete welcome screen. No startup-duration claim.
+- xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -destination 'platform=iOS,id=00008110-000204493CBA401E' -derivedDataPath /tmp/lulu-ios-derived DEVELOPMENT_TEAM=98VDV7Q934 build: BUILD SUCCEEDED.
+- devicectl install app: PASS, org.khora.lulu, existing installation updated in place.
+- devicectl launch --terminate-existing --console: local WebView loaded; SecureStorage returned null; complete welcome screen observed.
+- Second devicectl launch --terminate-existing: PASS; complete welcome screen observed again (iphone-after-relaunch.png).
+- Temporary Vite preview http://127.0.0.1:4173: welcome heading, copy, Begin with LuLu and I already have an account observed. Tab/server closed.
+- git diff --check for changed source files: PASS. An unrelated concurrent docs/product/2026-10-25-task-status.md edit contained trailing whitespace; it was not modified by this repair.
+
+Scope: startup through welcome only. No owner sign-in, account record access/write, cloud deployment, push, provider enablement, or private-vault persistence claim.

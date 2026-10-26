@@ -1,7 +1,7 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { ApiError } from './policy.js';
 
-export type NativeOperation = 'register' | 'login' | 'stepup';
+export type NativeOperation = 'register' | 'login' | 'stepup' | 'google-login';
 export type NativeExchangeState = 'pending' | 'challenge' | 'complete' | 'redeemed' | 'cancelled';
 export type NativeExchangeBinding = {
   requestId: string;
@@ -13,7 +13,7 @@ export type NativeExchangeBinding = {
 };
 
 const digest = (value: string) => createHash('sha256').update(value).digest('hex');
-export const isNativeOperation = (value: unknown): value is NativeOperation => value === 'register' || value === 'login' || value === 'stepup';
+export const isNativeOperation = (value: unknown): value is NativeOperation => value === 'register' || value === 'login' || value === 'stepup' || value === 'google-login';
 export const isNativeOpaqueValue = (value: unknown): value is string => typeof value === 'string' && /^[A-Za-z0-9_-]{32,128}$/.test(value);
 
 function equalsHash(expected: unknown, value: string): boolean {

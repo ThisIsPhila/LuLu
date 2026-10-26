@@ -16,6 +16,7 @@ test('native request tokens and operations are tightly validated', () => {
   assert.equal(isNativeOpaqueValue(state), true);
   assert.equal(isNativeOpaqueValue('short'), false);
   assert.equal(isNativeOperation('stepup'), true);
+  assert.equal(isNativeOperation('google-login'), true);
   assert.equal(isNativeOperation('delete'), false);
 });
 
@@ -30,6 +31,9 @@ test('proof is bound to the initiating request and expected operation', () => {
   assert.throws(() => assertExchangeProof(exchange, proof, 'another-request', 'login'), ApiError);
   assert.throws(() => assertExchangeProof(exchange, proof, exchange.requestId, 'stepup'), ApiError);
   assert.throws(() => assertExchangeProof(exchange, 'x'.repeat(43), exchange.requestId, 'login'), ApiError);
+  const googleExchange = { ...exchange, operation: 'google-login' as const };
+  assert.doesNotThrow(() => assertExchangeProof(googleExchange, proof, exchange.requestId, 'google-login'));
+  assert.throws(() => assertExchangeProof(googleExchange, proof, exchange.requestId, 'login'), ApiError);
 });
 
 test('only completed or same-proof redeemed exchanges may be returned before expiry', () => {
