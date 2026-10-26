@@ -10,7 +10,7 @@ import './PrivateWriting.css';
 import type { LocalMediaVault } from '../services/vault/localMediaVault';
 import { PrivateMediaCapture } from './PrivateMediaCapture';
 
-type Props={vault:LocalVault;mediaVault?:LocalMediaVault;initialTitle:string;initialBody:string;entities:Entity[];onBack:()=>void;onSaved:(revision:LocalVaultRevision)=>void;onOpenEntityInspector:()=>void};
+type Props={vault:LocalVault;mediaVault?:LocalMediaVault;initialTitle:string;initialBody:string;entities:Entity[];onBack:()=>void;onSaved:(revision:LocalVaultRevision)=>void;onOpenEntityInspector:(currentText:string)=>void};
 
 export function PrivateDraftComposer({vault,mediaVault,initialTitle,initialBody,entities,onBack,onSaved,onOpenEntityInspector}:Props) {
   const viewport=useWritingViewport();
@@ -27,7 +27,7 @@ export function PrivateDraftComposer({vault,mediaVault,initialTitle,initialBody,
         <button className="private-draft-preview-toggle" type="button" aria-expanded={showPreview} onClick={()=>setShowPreview(value=>!value)}>{showPreview?'Conceal preview':'Inspect representation preview'}</button>
         {showPreview && <div className="protected-vault-card private-draft-preview"><p>Configured representations are a preview, not a complete privacy review.</p>
           <div className="protected-body-rendered">{transform(body,entities,{perspectiveDistancing:true})}</div>
-          <button type="button" onClick={onOpenEntityInspector}>Edit representations</button>
+          <button type="button" onClick={()=>onOpenEntityInspector(body)}>Edit representations</button>
         </div>}
       </div>
       <div className="composer-input-dock"><div className="original-entry-card">

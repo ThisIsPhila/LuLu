@@ -3,8 +3,10 @@ import { database } from './firebase.ts';
 import { encryptPrivate, decryptPrivate, type Envelope } from './deviceVault.ts';
 import type { Entry } from '../../domain/journal';
 import type { Entity } from '../../domain/transform';
+import { isLocalDevelopment, developmentJournal } from '../localDevelopment';
 
 export function watchEntries(uid: string, receive: (entries: Entry[]) => void, fail: (error: Error) => void) {
+  if (import.meta.env?.DEV === true && isLocalDevelopment(uid)) return developmentJournal.watch(receive, fail);
   return onSnapshot(query(collection(database,'users',uid,'entries'),orderBy('createdAt','desc'),limit(100)), snapshot => {
     receive(snapshot.docs.map(record => {
       const d=record.data(), date=d.createdAt?.toDate?.() ?? new Date();
@@ -24,6 +26,7 @@ export async function saveEntry(
   data: {title:string;body:string;originalBody:string;protected:boolean;entities:Entity[];kind?:EntryKind},
   firestore: Firestore = database,
 ) {
+  if (import.meta.env?.DEV === true && isLocalDevelopment(uid)) { developmentJournal.save(data); return; }
   if (data.kind !== undefined && !validEntryKind(data.kind)) throw new Error('Choose Journal or Story for this entry.');
   if(!data.body.trim() || data.body.length>50000 || data.originalBody.length>50000) throw new Error('Write between 1 and 50,000 characters.');
   const ref=doc(collection(firestore,'users',uid,'entries'));
@@ -40,6 +43,7 @@ export async function saveEntry(
 
 /** Update an ordinary display entry without touching any protected payload. */
 export async function updateEntry(uid: string, id: string, data: {title:string;body:string;kind?:EntryKind}, firestore: Firestore = database) {
+  if (import.meta.env?.DEV === true && isLocalDevelopment(uid)) { developmentJournal.update(id, data); return; }
   if (typeof uid !== 'string' || !uid || typeof id !== 'string' || !id || id.includes('/') ||
       typeof data?.title !== 'string' || data.title.length > 200 ||
       typeof data?.body !== 'string' || !data.body.trim() || data.body.length > 50000 ||
@@ -60,6 +64,7 @@ export async function updateEntry(uid: string, id: string, data: {title:string;b
 
 /** Permanently delete only one owner-scoped ordinary entry. */
 export async function deleteEntry(uid: string, id: string, firestore: Firestore = database): Promise<void> {
+  if (import.meta.env?.DEV === true && isLocalDevelopment(uid)) { developmentJournal.remove(id); return; }
   if (typeof uid !== 'string' || !uid.trim() || uid.length > 128 || uid.includes('/') ||
       typeof id !== 'string' || !id.trim() || id.length > 200 || id.includes('/')) {
     throw new TypeError('A valid account and ordinary entry ID are required.');
@@ -74,6 +79,7 @@ export async function deleteEntry(uid: string, id: string, firestore: Firestore 
 }
 
 export async function readOriginal(uid: string, id: string) {
+  if (import.meta.env?.DEV === true && isLocalDevelopment(uid)) throw new Error('Cloud originals are unavailable in the local workspace.');
   const record=await getDoc(doc(database,'users',uid,'private',id));
   if(!record.exists()) throw new Error('The original record is unavailable.');
   return decryptPrivate<{originalBody:string;title:string;entities:Entity[]}>(uid,id,record.data() as Envelope);
@@ -81,6 +87,7 @@ export async function readOriginal(uid: string, id: string) {
 
 export type TrustedContact={id:string;name:string;phone:string};
 export async function loadContacts(uid:string):Promise<TrustedContact[]> {
+  if (import.meta.env?.DEV === true && isLocalDevelopment(uid)) return developmentJournal.contacts();
   const record=await getDoc(doc(database,'users',uid,'private','trusted-contacts'));
   if(!record.exists())return [];
   const payload=await decryptPrivate<{contacts:TrustedContact[]}>(uid,'trusted-contacts',record.data() as Envelope);
@@ -88,6 +95,7 @@ export async function loadContacts(uid:string):Promise<TrustedContact[]> {
 }
 export async function saveContacts(uid:string,contacts:TrustedContact[]) {
   if(contacts.length>20 || contacts.some(c=>!c.name.trim() || c.name.length>100 || !/^[+\d ()-]{3,30}$/.test(c.phone)))throw new Error('Add a name and a valid phone number, up to 20 contacts.');
+  if (import.meta.env?.DEV === true && isLocalDevelopment(uid)) { developmentJournal.saveContacts(contacts); return; }
   const envelope=await encryptPrivate(uid,'trusted-contacts',{contacts});
   const batch=writeBatch(database);
   batch.set(doc(database,'users',uid,'private','trusted-contacts'),{...envelope,updatedAt:serverTimestamp()});

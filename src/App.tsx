@@ -4,10 +4,11 @@ import type { Entry } from './domain/journal';
 import { filterOrdinaryEntries } from './domain/ordinaryBrowse';
 import { AuthBoundary } from './components/auth/AuthBoundary';
 import { watchEntries, saveEntry, readOriginal, updateEntry, deleteEntry } from './services/backend/journal';
+import { retainFirstOnboardingEntry } from './services/backend/onboardingEntry';
 import { ensureStarterEntries } from './services/backend/demoCatalogue';
 import { unlockPrivate, lockPrivate, logout, type AppSession } from './services/backend/passkeys';
 import type { Entity } from './domain/transform';
-import { initialEntities } from './domain/transform';
+import { LocalRepresentationVault } from './services/vault/localRepresentationVault';
 import { JournalHome } from './components/JournalHome';
 import { TransformProtectView } from './components/TransformProtectView';
 import { ProtectedWritingView } from './components/ProtectedWritingView';
@@ -21,20 +22,24 @@ import { LocalPrivateJournal } from './components/LocalPrivateJournal';
 import { LocalVault } from './services/vault/localVault';
 import { LocalMediaVault } from './services/vault/localMediaVault';
 import { onAndroidBack, onAppActiveChange, exitNativeApp } from './platform/appLifecycle';
+import { isLocalDevelopment } from './services/localDevelopment';
 
 export default function App() {
   return <AuthBoundary>{(session,onSignedOut)=><JournalApp key={session.uid} session={session} onSignedOut={onSignedOut}/>}</AuthBoundary>;
 }
 function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>void}) {
+  const development = import.meta.env?.DEV === true && isLocalDevelopment(session.uid);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [personalState, setPersonalState] = useState<{ status: 'loading' | 'ready' | 'error'; message?: string }>({ status: 'loading' });
   const [starterState, setStarterState] = useState<{ status: 'loading' | 'ready' | 'error'; message?: string }>({ status: 'loading' });
   const [starterAttempt, setStarterAttempt] = useState(0);
+  const [onboardingImportState, setOnboardingImportState] = useState<{ status: 'loading' | 'ready' | 'error'; message?: string }>({ status: 'loading' });
+  const [onboardingImportAttempt, setOnboardingImportAttempt] = useState(0);
   const [watchAttempt, setWatchAttempt] = useState(0);
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
   const [composingKind, setComposingKind] = useState<Entry['kind']>('Journal');
   const signingOut = useRef(false);
-  const [entities, setEntities] = useState<Entity[]>(initialEntities);
+  const [entities, setEntities] = useState<Entity[]>([]);
   const ordinaryEntries = filterOrdinaryEntries(entries);
 
   // Active view: 'home' | 'leaves' | 'compose' | 'enclave-writing' | 'vault' | 'inspector' | 'reader'
@@ -49,6 +54,13 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
 
   // Protected Mode & Modals
   const [protectedMode, setProtectedMode] = useState<boolean>(false);
+  const [representationsLoading, setRepresentationsLoading] = useState(false);
+  const [representationsError, setRepresentationsError] = useState('');
+  const [inspectorText, setInspectorText] = useState('');
+  const inspectorReturnView = useRef<'home'|'leaves'|'compose'|'enclave-writing'|'vault'|'local-private'|'reader'>('home');
+  const localRepresentations = useRef<LocalRepresentationVault | null>(null);
+  const representationVersion = useRef(0);
+  const representationLoadRequest = useRef(0);
   const composeRouteSignature = useMemo(
     () => JSON.stringify([currentView, editingEntry?.id ?? null, composingKind, protectedMode]),
     [currentView, editingEntry?.id, composingKind, protectedMode],
@@ -72,16 +84,42 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   const privateUnlockAttempt=useRef(0);
   const originalReadRequest=useRef(0);
   const [pendingView,setPendingView]=useState<'vault'|'inspector'|null>(null);
+
+  async function loadRepresentations(vault: LocalRepresentationVault) {
+    const request = ++representationLoadRequest.current;
+    const generation = privateAuthority.current.generation;
+    setRepresentationsLoading(true);setRepresentationsError('');
+    try {
+      const snapshot = await vault.load();
+      if (request !== representationLoadRequest.current || vault !== localRepresentations.current ||
+          generation !== privateAuthority.current.generation || Date.now() >= privateAuthority.current.until) return;
+      representationVersion.current = snapshot.version;
+      setEntities(snapshot.entities);
+    } catch {
+      if (request === representationLoadRequest.current && vault === localRepresentations.current &&
+          generation === privateAuthority.current.generation && Date.now() < privateAuthority.current.until) {
+        setRepresentationsError('Could not read encrypted representations from this device. They were not changed.');
+      }
+    } finally {
+      if (request === representationLoadRequest.current && vault === localRepresentations.current &&
+          generation === privateAuthority.current.generation && Date.now() < privateAuthority.current.until) setRepresentationsLoading(false);
+    }
+  }
+
   useEffect(()=>{
     if(!session.resumePrivate || session.privateUntil<=Date.now())return;
     privateAuthority.current={until:session.privateUntil,generation:privateAuthority.current.generation+1};
-    const privateSession={ownerId:session.uid,generation:()=>privateAuthority.current.generation,isUnlocked:()=>!signingOut.current && Date.now()<privateAuthority.current.until};
+    const privateSession={ownerId:session.uid,generation:()=>privateAuthority.current.generation,isUnlocked:()=>!signingOut.current && Date.now()<session.expiresAt && Date.now()<privateAuthority.current.until};
     localVault.current=new LocalVault(privateSession);localMediaVault.current=new LocalMediaVault(privateSession);
+    const representationsVault=new LocalRepresentationVault(privateSession);
+    localRepresentations.current=representationsVault;
     setPrivateUntil(session.privateUntil);setProtectedMode(true);
+    void loadRepresentations(representationsVault);
   },[]);
   useEffect(()=>watchEntries(session.uid,loaded=>{if(signingOut.current)return;setEntries(loaded);setPersonalState({status:'ready'});},e=>{if(signingOut.current)return;setPersonalState({status:'error',message:e.message});}),[session.uid,watchAttempt]);
   useEffect(()=>{
     let current=true;
+    if(development){setStarterState({status:'ready'});return;}
     setStarterState({status:'loading'});
     ensureStarterEntries(session.uid).then(()=>{if(current)setStarterState({status:'ready'});}).catch(e=>{
       if(current)setStarterState({status:'error',message:e instanceof Error?e.message:'Could not prepare your starter entries.'});
@@ -89,7 +127,15 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     return()=>{current=false;};
   },[session.uid,starterAttempt]);
   useEffect(()=>{
-    const expire=setTimeout(()=>{signingOut.current=true;handleExitProtected();setEntries([]);void logout().catch(()=>{}).finally(onSignedOut);},Math.max(0,session.expiresAt-Date.now()));
+    let current=true;
+    if(development){setOnboardingImportState({status:'ready'});return;}
+    setOnboardingImportState({status:'loading'});
+    void retainFirstOnboardingEntry(session.uid).then(()=>{if(current)setOnboardingImportState({status:'ready'});})
+      .catch(error=>{if(current)setOnboardingImportState({status:'error',message:error instanceof Error?error.message:'Your first entry could not be added to this journal.'});});
+    return()=>{current=false;};
+  },[session.uid,onboardingImportAttempt]);
+  useEffect(()=>{
+    const expire=setTimeout(()=>{signingOut.current=true;handleExitProtected();setEntries([]);if(development)onSignedOut();else void logout().catch(()=>{}).finally(onSignedOut);},Math.max(0,session.expiresAt-Date.now()));
     return ()=>clearTimeout(expire);
   },[session.expiresAt]);
   useEffect(()=>{
@@ -110,7 +156,11 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     document.addEventListener('keydown',shortcut,true);
     return()=>{stopLifecycle();stopBack();document.removeEventListener('keydown',shortcut,true);};
   },[]);
-  function navigatePrivate(view:'vault'|'inspector') {
+  function navigatePrivate(view:'vault'|'inspector', currentText = '') {
+    if(view==='inspector') {
+      inspectorReturnView.current=currentView==='inspector'?'home':currentView;
+      setInspectorText(currentText);
+    }
     if(protectedMode && Date.now()<privateUntil)setCurrentView(view);
     else {setPendingView(view);setIsProtectedGateOpen(true);}
   }
@@ -153,6 +203,23 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     setNotice('Entry saved.');setCurrentView('home');
   };
 
+  async function handleConfirmRepresentations(next: Entity[]) {
+    const vault = localRepresentations.current;
+    const generation = privateAuthority.current.generation;
+    if (!vault || !protectedMode || Date.now() >= privateAuthority.current.until) throw new Error('Unlock the private session before saving representations.');
+    const saved = await vault.save(next, representationVersion.current);
+    if (vault !== localRepresentations.current || generation !== privateAuthority.current.generation ||
+        !protectedMode || Date.now() >= privateAuthority.current.until) throw new Error('The private session ended before the save was confirmed.');
+    representationVersion.current = saved.version;
+    setEntities(saved.entities);
+    setRepresentationsError('');
+    if (currentViewRef.current === 'inspector') {
+      setInspectorText('');
+      setNotice('Private representations saved encrypted on this device.');
+      setCurrentView(inspectorReturnView.current);
+    }
+  }
+
   const handleDeleteOrdinaryEntry = async (id: string) => {
     const routeToken = currentComposeRouteToken();
     if (!accountSessionActive()) throw new Error('Account session expired. Sign in again before deleting an entry.');
@@ -161,27 +228,22 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     setSelectedEntry(null);setEditingEntry(null);setCurrentView('home');setNotice('Entry permanently deleted.');
   };
 
-  const handleUpdateAlias = (id: string, newAlias: string) => {
-    if(Date.now()>=privateAuthority.current.until)return;
-    setEntities((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, alias: newAlias } : e))
-    );
-    setNotice(`Updated representation to "${newAlias}".`);
-  };
-
   const handleProtectedSuccess = async () => {
     const attempt=++privateUnlockAttempt.current;
     const generation=privateAuthority.current.generation;
-    const until=await unlockPrivate();
-    if(attempt!==privateUnlockAttempt.current || generation!==privateAuthority.current.generation){await lockPrivate();return;}
+    const until=development ? Date.now()+15*60_000 : await unlockPrivate();
+    if(attempt!==privateUnlockAttempt.current || generation!==privateAuthority.current.generation){if(!development)await lockPrivate();return;}
     privateAuthority.current.until=until;
     const privateSession={
       ownerId:session.uid,
       generation:()=>privateAuthority.current.generation,
-      isUnlocked:()=>!signingOut.current && Date.now()<privateAuthority.current.until,
+      isUnlocked:()=>!signingOut.current && Date.now()<session.expiresAt && Date.now()<privateAuthority.current.until,
     };
     localVault.current=new LocalVault(privateSession);
     localMediaVault.current=new LocalMediaVault(privateSession);
+    const representationsVault=new LocalRepresentationVault(privateSession);
+    localRepresentations.current=representationsVault;
+    void loadRepresentations(representationsVault);
     setPrivateUntil(until);setProtectedMode(true);setIsProtectedGateOpen(false);
     if(pendingView){setCurrentView(pendingView);setPendingView(null);}
     if(selectedEntry?.protected){
@@ -197,20 +259,23 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   function handleExitProtected() {
     privateUnlockAttempt.current++;
     originalReadRequest.current++;
+    representationLoadRequest.current++;
     privateAuthority.current={until:0,generation:privateAuthority.current.generation+1};
     localVault.current=null;
     localMediaVault.current=null;
-    setPrivateUntil(0);setProtectedMode(false);setEntities(initialEntities);
+    localRepresentations.current=null;representationVersion.current=0;
+    setRepresentationsLoading(false);setRepresentationsError('');setInspectorText('');
+    setPrivateUntil(0);setProtectedMode(false);setEntities([]);
     setSelectedEntry(null);setEditingEntry(null);setNotice('');setBackendError('');
     setCurrentView('home');setIsProtectedGateOpen(false);setPendingView(null);
-    void lockPrivate().catch(()=>{});
+    if(!development)void lockPrivate().catch(()=>{});
   }
   async function signOutAccount(){
     signingOut.current=true;
     handleExitProtected();
     setEntries([]);
     setPersonalState({status:'ready'});setStarterState({status:'ready'});
-    try{await logout();}finally{onSignedOut();}
+    try{if(!development)await logout();}finally{onSignedOut();}
   }
 
   return (
@@ -231,9 +296,10 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
       <div className="lulu-viewport-shell">
         {(currentView === 'home' || currentView === 'leaves' || currentView === 'reader') && (
           <section className="journal-source-panel" aria-label="Journal status">
-            {(personalState.status === 'loading' || starterState.status === 'loading') && <p className="journal-source-status" role="status">Preparing your journal…</p>}
+            {(personalState.status === 'loading' || starterState.status === 'loading' || onboardingImportState.status === 'loading') && <p className="journal-source-status" role="status">Preparing your journal…</p>}
             {personalState.status === 'error' && <p className="journal-source-status is-error" role="alert">Could not load your journal. {personalState.message || 'Check your connection and try again.'} <button type="button" onClick={()=>{setPersonalState({status:'loading'});setWatchAttempt(value=>value+1);}}>Try again</button></p>}
             {starterState.status === 'error' && <p className="journal-source-status is-error" role="alert">Could not prepare your starter entries. {starterState.message || 'Check your connection and try again.'} <button type="button" onClick={()=>setStarterAttempt(value=>value+1)}>Try again</button></p>}
+            {onboardingImportState.status === 'error' && <p className="journal-source-status is-error" role="alert">Your locally saved first entry is still on this device. {onboardingImportState.message || 'It could not be added to your journal yet.'} <button type="button" onClick={()=>setOnboardingImportAttempt(value=>value+1)}>Try again</button></p>}
             {personalState.status === 'ready' && starterState.status === 'ready' && ordinaryEntries.length === 0 && <p className="journal-source-status" role="status">Your journal is ready for your first entry.</p>}
           </section>
         )}
@@ -259,7 +325,8 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
             />
         )}
 
-        {currentView === 'compose' && (
+        {(currentView === 'compose' || (currentView === 'inspector' && protectedMode && inspectorReturnView.current === 'compose')) && (
+          <div style={currentView === 'inspector' ? {display:'none'} : undefined}>
           <TransformProtectView
             key={`compose-${privateAuthority.current.generation}-${editingEntry?.id ?? `new-${composingKind}`}`}
             entities={entities}
@@ -270,7 +337,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
             onSaveProtected={handleSaveProtectedEntry}
             onDeleteOrdinary={handleDeleteOrdinaryEntry}
             isOrdinarySessionActive={()=>!signingOut.current && Date.now()<session.expiresAt}
-            onOpenEntityInspector={() => navigatePrivate('inspector')}
+            onOpenEntityInspector={(text) => navigatePrivate('inspector', text ?? '')}
             onEnterPrivate={() => setIsProtectedGateOpen(true)}
             privateVault={localVault.current ?? undefined}
             privateMediaVault={localMediaVault.current ?? undefined}
@@ -279,6 +346,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
               setNotice('Private record saved in this browser.');setCurrentView('local-private');
             }}
           />
+          </div>
         )}
 
         {currentView === 'local-private' && protectedMode && localVault.current && (
@@ -305,12 +373,14 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
         {currentView === 'inspector' && (
           <EntityInspectorView
             entities={entities}
-            onBack={() => setCurrentView('home')}
-            onUpdateAlias={handleUpdateAlias}
-            onConfirm={() => {
-              setNotice('Representations updated for this session.');
-              setCurrentView('home');
+            referenceText={inspectorText}
+            loading={representationsLoading}
+            loadError={representationsError}
+            onBack={() => {
+              if(Date.now()<privateAuthority.current.until) {setInspectorText('');setCurrentView(inspectorReturnView.current);}
+              else handleExitProtected();
             }}
+            onConfirm={handleConfirmRepresentations}
           />
         )}
 
@@ -338,6 +408,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
           <BottomNav
             currentView={currentView as any}
             onNavigate={(view) => {
+              if(currentViewRef.current==='inspector' && view!=='inspector')setInspectorText('');
               if (view === 'compose') {
                 setComposingKind(currentView === 'home' && activeCategoryTab === 'Stories' ? 'Story' : 'Journal');
                 setEditingEntry(null);setSelectedEntry(null);
@@ -358,7 +429,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
         isOpen={isProtectedGateOpen}
         onClose={() => {
           if(privateAuthority.current.until>0){handleExitProtected();return;}
-          privateUnlockAttempt.current++;setIsProtectedGateOpen(false);setPendingView(null);
+          privateUnlockAttempt.current++;setIsProtectedGateOpen(false);setPendingView(null);setInspectorText('');
         }}
         onVerify={handleProtectedSuccess}
       />

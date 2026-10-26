@@ -29,6 +29,8 @@ export type OnboardingAuthProps = {
   onEmailAuth: (email: string, password: string, create: boolean) => Promise<AuthActionResult>;
   onGoogleSignIn: () => Promise<AuthActionResult>;
   onHelpSigningIn?: () => void;
+  onStartOnboarding?: () => void;
+  onDevelopmentEnter?: () => void;
   /** Called immediately after the host reports a verified server session. */
   onAuthenticated: () => void;
 };
@@ -62,6 +64,8 @@ export function OnboardingAuth({
   onEmailAuth,
   onGoogleSignIn,
   onHelpSigningIn,
+  onStartOnboarding,
+  onDevelopmentEnter,
   onAuthenticated,
 }: OnboardingAuthProps) {
   const [screen, setScreen] = useState<Screen>(initialScreen);
@@ -133,8 +137,7 @@ export function OnboardingAuth({
     setFailureReason(null);
     setWasCancelled(false);
     setRecoveryAction(null);
-    if (screen === 'signin') setScreen('welcome');
-    else if (screen === 'create') setScreen('orientation-two');
+    if (screen === 'signin' || screen === 'create') setScreen('signin');
     else if (screen === 'orientation-two') setScreen('orientation-one');
     else setScreen('welcome');
   };
@@ -145,7 +148,7 @@ export function OnboardingAuth({
         <section className="oa-cover" aria-label="LuLu journal">
           <div className="oa-cover-image" aria-hidden="true" />
           <header className="oa-header">
-            {screen !== 'welcome' ? (
+            {screen !== 'welcome' && screen !== 'signin' ? (
               <button className="oa-back" type="button" onClick={headerBack} aria-label="Go back">
                 <ChevronLeft size={18} aria-hidden="true" />
               </button>
@@ -191,20 +194,28 @@ export function OnboardingAuth({
               onEmailChange={setEmail} onPasswordChange={setPassword} onEmailSubmit={() => void runEmailAuth(true)} onGoogle={() => void runGoogleSignIn()} />
           </>}
 
-          {screen === 'signin' && <>
+          {import.meta.env?.DEV === true && screen === 'signin' && onDevelopmentEnter && <>
+            <span className="oa-kicker">Local development</span>
+            <h1>Open your<br />workspace.</h1>
+            <p className="oa-intro">Explore the app with a separate journal saved on this browser.</p>
+            <button className="oa-primary" type="button" onClick={onDevelopmentEnter}>Open development app <ArrowRight size={17} aria-hidden="true" /></button>
+          </>}
+
+          {screen === 'signin' && !onDevelopmentEnter && <>
             <span className="oa-kicker">Welcome back</span>
             <h1>Pick up where<br />you left off.</h1>
             <p className="oa-intro">Continue with a passkey, email and password, or Google.</p>
             <PasskeyAction
               action="signin" busy={busy} message={message} failureReason={failureReason} wasCancelled={wasCancelled}
               canUsePasskeys={canUsePasskeys} onTry={() => void runAuth('signin')}
-              onHelp={onHelpSigningIn} secondaryLabel="I’m new to LuLu" onSecondary={goCreate}
+              onHelp={onHelpSigningIn} secondaryLabel="Create an account" onSecondary={goCreate}
             />
             <ProviderActions email={email} password={password} busy={busy} message={providerMessage}
               onEmailChange={setEmail} onPasswordChange={setPassword} onEmailSubmit={() => void runEmailAuth(false)} onGoogle={() => void runGoogleSignIn()} />
           </>}
 
-          {(screen === 'create' || screen === 'signin') && <div className="oa-footnote"><ShieldCheck size={15} aria-hidden="true" /><span>Your device handles passkey verification. LuLu does not receive your face or fingerprint.</span></div>}
+          {screen === 'signin' && onStartOnboarding && <button className="oa-secondary" type="button" disabled={busy!==null} onClick={onStartOnboarding}>Onboarding</button>}
+          {!onDevelopmentEnter && (screen === 'create' || screen === 'signin') && <div className="oa-footnote"><ShieldCheck size={15} aria-hidden="true" /><span>Your device handles passkey verification. LuLu does not receive your face or fingerprint.</span></div>}
         </section>
       </div>
     </main>

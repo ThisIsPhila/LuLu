@@ -1,286 +1,239 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
-  MoreHorizontal,
-  ShieldCheck,
-  User,
-  MapPin,
-  Clock,
-  Plus,
-  Lock,
   ArrowRight,
-  Edit2,
-  RotateCcw,
+  Lock,
+  Plus,
 } from 'lucide-react';
 import { LuLuLogo } from './Logo';
-import type { Entity } from '../domain/transform';
+import { recognised, type Entity, type EntityType } from '../domain/transform';
 
 type Props = {
   entities: Entity[];
+  referenceText?: string;
+  loading?: boolean;
+  loadError?: string;
   onBack: () => void;
-  onUpdateAlias: (id: string, newAlias: string) => void;
-  onConfirm: () => void;
+  onConfirm: (entities: Entity[]) => Promise<void>;
 };
+
+const entityTypes: EntityType[] = ['Person', 'Place', 'Time', 'Topic', 'Pronoun'];
+
+function newReferenceId(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  return `reference-${Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')}`;
+}
 
 export const EntityInspectorView: React.FC<Props> = ({
   entities,
+  referenceText = '',
+  loading = false,
+  loadError = '',
   onBack,
-  onUpdateAlias,
   onConfirm,
 }) => {
-  const [activeTab, setActiveTab] = useState<'Active' | 'Audit'>('Active');
+  const [draftEntities, setDraftEntities] = useState<Entity[]>(entities);
+  const [dirty, setDirty] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [tempAlias, setTempAlias] = useState('');
+  const [adding, setAdding] = useState(false);
+  const [newOriginal, setNewOriginal] = useState('');
+  const [newAlias, setNewAlias] = useState('');
+  const [newType, setNewType] = useState<EntityType>('Person');
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const startEdit = (e: Entity) => {
-    setEditingId(e.id);
-    setTempAlias(e.alias);
+  useEffect(() => {
+    if (!dirty) setDraftEntities(entities);
+  }, [entities, dirty]);
+
+  const currentMatches = useMemo(
+    () => new Map(recognised(referenceText, draftEntities).map((entity) => [entity.id, entity.mentions ?? 0])),
+    [referenceText, draftEntities],
+  );
+  const controlsDisabled = loading || saving || Boolean(loadError);
+
+  const startEdit = (entity: Entity) => {
+    setError('');
+    setEditingId(entity.id);
+    setTempAlias(entity.alias);
   };
 
   const saveEdit = (id: string) => {
-    if (tempAlias.trim()) {
-      onUpdateAlias(id, tempAlias.trim());
+    const alias = tempAlias.trim();
+    if (!alias || alias.length > 200) {
+      setError('Enter a representation between 1 and 200 characters.');
+      return;
     }
+    setDraftEntities((current) => current.map((entity) => entity.id === id ? { ...entity, alias } : entity));
+    setDirty(true);
     setEditingId(null);
+    setError('');
   };
+
+  const keepOriginal = (id: string) => {
+    setDraftEntities((current) => current.map((entity) => entity.id === id ? { ...entity, alias: entity.original } : entity));
+    setDirty(true);
+    setEditingId(null);
+    setError('');
+  };
+
+  const addReference = (event: React.FormEvent) => {
+    event.preventDefault();
+    const original = newOriginal.trim();
+    const alias = newAlias.trim();
+    if (!original || original.length > 200 || !alias || alias.length > 200) {
+      setError('Enter an original reference and a representation, each up to 200 characters.');
+      return;
+    }
+    if (draftEntities.length >= 100) {
+      setError('You can save up to 100 private references.');
+      return;
+    }
+    if (draftEntities.some((entity) => entity.original.toLocaleLowerCase() === original.toLocaleLowerCase())) {
+      setError('That original reference is already listed.');
+      return;
+    }
+    setDraftEntities((current) => [...current, { id: newReferenceId(), original, alias, type: newType }]);
+    setDirty(true);
+    setNewOriginal('');
+    setNewAlias('');
+    setNewType('Person');
+    setAdding(false);
+    setError('');
+  };
+
+  async function confirm() {
+    if (saving || loading) return;
+    setSaving(true);
+    setError('');
+    try {
+      await onConfirm(draftEntities);
+    } catch {
+      setError('Could not confirm whether these private representations were saved. Reopen the inspector to check before retrying.');
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div className="inspector-screen">
-      {/* Top Header */}
       <header className="inspector-header">
-        <button className="icon-btn-round" onClick={onBack} aria-label="Go back">
+        <button className="icon-btn-round" onClick={onBack} aria-label="Back to private writing">
           <ArrowLeft size={18} />
         </button>
         <div className="inspector-header-title">
-          <h2>Recognised in this entry</h2>
-          <span className="entry-meta-sub">14 MAY 2026 • 21:36 • ENTRY #142</span>
+          <h2>Private representations</h2>
+          <span className="entry-meta-sub">Configured for this account on this device</span>
         </div>
-        <button className="icon-btn-ghost">
-          <MoreHorizontal size={18} />
-        </button>
+        <div className="header-brand-title"><LuLuLogo size="sm" /></div>
       </header>
 
-      {/* Main Content */}
       <main className="inspector-body">
-        {/* High Privacy Status Card */}
         <div className="privacy-level-card">
-          <div className="privacy-badge-row">
-            <div className="shield-circle">
-              <ShieldCheck size={16} />
-            </div>
-            <div className="level-titles">
-              <strong>3 entities mapped • HIGH PRIVACY LEVEL</strong>
-              <p>
-                LuLu mapped original references to coherent representations. Your device enclave
-                keeps original data completely offline.
-              </p>
-            </div>
+          <div className="level-titles">
+            <strong>Your configured references</strong>
+            <p>These replacements are saved encrypted on this device when you confirm. They are not a complete privacy review.</p>
           </div>
           <div className="enclave-status-footer">
-            <div className="status-tag">
-              <span className="green-dot" />
-              <span>Neural Enclave Active</span>
-            </div>
-            <span className="zero-knowledge-tag">Zero-Knowledge Mask</span>
+            <div className="status-tag"><Lock size={13} /><span>Private session required</span></div>
+            <span className="zero-knowledge-tag">This device</span>
           </div>
         </div>
 
-        {/* Transformations Section Header */}
         <div className="transformations-meta-row">
           <div className="left-count">
-            <span className="section-label">TRANSFORMATIONS</span>
-            <span className="count-pill">3 Active</span>
-          </div>
-          <div className="toggle-subtabs">
-            <button
-              className={`subtab-btn ${activeTab === 'Active' ? 'active' : ''}`}
-              onClick={() => setActiveTab('Active')}
-            >
-              All
-            </button>
-            <button
-              className={`subtab-btn ${activeTab === 'Audit' ? 'active' : ''}`}
-              onClick={() => setActiveTab('Audit')}
-            >
-              Audit Log
-            </button>
+            <span className="section-label">REFERENCES</span>
+            <span className="count-pill">{draftEntities.length} configured</span>
           </div>
         </div>
 
-        {/* Entity Card 1: Person */}
-        <div className="inspector-entity-card">
-          <div className="card-type-row">
-            <div className="type-badge person">
-              <span>Person</span>
-            </div>
-            <span className="mention-label">4 mentions in this entry</span>
-          </div>
+        {loading && <p className="private-journal-status" role="status">Loading encrypted references…</p>}
+        {loadError && <p className="private-journal-alert" role="alert">{loadError}</p>}
+        {error && <p className="private-journal-alert" role="alert">{error}</p>}
 
-          <div className="mapping-headline">
-            <div className="col-orig">
-              <span className="meta-caps">ORIGINAL</span>
-              <h4>David</h4>
-            </div>
-            <ArrowRight size={16} className="arrow-sep" />
-            <div className="col-rep">
-              <span className="meta-caps">REPRESENTATION</span>
-              <h4>
-                {editingId === 'person-david' ? (
-                  <input
-                    value={tempAlias}
-                    onChange={(e) => setTempAlias(e.target.value)}
-                    className="inline-input"
-                    autoFocus
-                  />
+        {!loading && draftEntities.length === 0 && (
+          <p className="private-journal-empty">No private references are configured. Add only replacements you choose to use.</p>
+        )}
+
+        {draftEntities.map((entity) => {
+          const matches = currentMatches.get(entity.id);
+          const typeClass = entity.type === 'Place' ? 'location' : entity.type === 'Time' ? 'time' : entity.type === 'Person' ? 'person' : '';
+          return (
+            <article className="inspector-entity-card" key={entity.id}>
+              <div className="card-type-row">
+                <div className={`type-badge ${typeClass}`}><span>{entity.type}</span></div>
+                <span className="mention-label">
+                  {referenceText ? `${matches ?? 0} matches in current writing` : 'Configured reference'}
+                </span>
+              </div>
+              <div className="mapping-headline">
+                <div className="col-orig"><span className="meta-caps">ORIGINAL</span><h4>{entity.original}</h4></div>
+                <ArrowRight size={16} className="arrow-sep" aria-hidden="true" />
+                <div className="col-rep">
+                  <span className="meta-caps">REPRESENTATION</span>
+                  {editingId === entity.id ? (
+                    <input
+                      value={tempAlias}
+                      onChange={(event) => setTempAlias(event.target.value)}
+                      className="inline-input"
+                      aria-label={`Representation for ${entity.original}`}
+                      maxLength={200}
+                      autoFocus
+                    />
+                  ) : <h4>{entity.alias}</h4>}
+                </div>
+              </div>
+              <div className="card-actions-row">
+                {editingId === entity.id ? (
+                  <>
+                    <button className="btn-pill-action primary" type="button" onClick={() => saveEdit(entity.id)}>Keep change</button>
+                    <button className="btn-pill-action secondary" type="button" onClick={() => setEditingId(null)}>Cancel</button>
+                  </>
                 ) : (
-                  entities.find((e) => e.id === 'person-david')?.alias || 'John'
+                  <>
+                    <button className="btn-pill-action" type="button" disabled={controlsDisabled} onClick={() => startEdit(entity)}>Change</button>
+                    <button className="btn-pill-action secondary" type="button" disabled={controlsDisabled} onClick={() => keepOriginal(entity.id)}>Keep original</button>
+                  </>
                 )}
-              </h4>
+              </div>
+            </article>
+          );
+        })}
+
+        {adding ? (
+          <form className="inspector-entity-card" onSubmit={addReference}>
+            <span className="section-label">ADD PRIVATE REFERENCE</span>
+            <label className="meta-caps">ORIGINAL REFERENCE
+              <input className="inline-input" aria-label="Original reference" value={newOriginal} onChange={(event) => setNewOriginal(event.target.value)} maxLength={200} autoComplete="off" />
+            </label>
+            <label className="meta-caps">REPRESENTATION
+              <input className="inline-input" aria-label="New representation" value={newAlias} onChange={(event) => setNewAlias(event.target.value)} maxLength={200} autoComplete="off" />
+            </label>
+            <label className="meta-caps">TYPE
+              <select aria-label="Reference type" value={newType} onChange={(event) => setNewType(event.target.value as EntityType)}>
+                {entityTypes.map((type) => <option key={type} value={type}>{type}</option>)}
+              </select>
+            </label>
+            <div className="card-actions-row">
+              <button className="btn-pill-action primary" type="submit" disabled={controlsDisabled}>Add reference</button>
+              <button className="btn-pill-action secondary" type="button" disabled={saving} onClick={() => { setAdding(false); setError(''); }}>Cancel</button>
             </div>
-          </div>
+          </form>
+        ) : (
+          <button className="btn-add-reference-manually" type="button" disabled={controlsDisabled} onClick={() => { setAdding(true); setError(''); }}>
+            <Plus size={16} /><span>Add a new reference manually</span>
+          </button>
+        )}
 
-          <p className="context-snippet-quote">
-            "...met up with <span className="highlight-tag">John [David]</span> later to discuss plans
-            for the next residency..."
-          </p>
-
-          <div className="card-actions-row">
-            {editingId === 'person-david' ? (
-              <button
-                className="btn-pill-action primary"
-                onClick={() => saveEdit('person-david')}
-              >
-                Save
-              </button>
-            ) : (
-              <button
-                className="btn-pill-action"
-                onClick={() => startEdit(entities.find((e) => e.id === 'person-david')!)}
-              >
-                Change
-              </button>
-            )}
-            <button
-              className="btn-pill-action secondary"
-              onClick={() => onUpdateAlias('person-david', 'David')}
-            >
-              Keep Original
-            </button>
-          </div>
-        </div>
-
-        {/* Entity Card 2: Location */}
-        <div className="inspector-entity-card">
-          <div className="card-type-row">
-            <div className="type-badge location">
-              <span>Location</span>
-            </div>
-            <span className="mention-label">2 mentions</span>
-          </div>
-
-          <div className="mapping-headline">
-            <div className="col-orig">
-              <span className="meta-caps">ORIGINAL</span>
-              <h4>House in Tamboersk...</h4>
-            </div>
-            <ArrowRight size={16} className="arrow-sep" />
-            <div className="col-rep">
-              <span className="meta-caps">REPRESENTATION</span>
-              <h4>The Nest</h4>
-            </div>
-          </div>
-
-          <p className="context-snippet-quote">
-            "...morning breeze at <span className="highlight-tag">The Nest</span> was crisp and kept
-            thoughts untangled..."
-          </p>
-
-          <div className="card-actions-row">
-            <button
-              className="btn-pill-action"
-              onClick={() => {
-                const next = prompt('Edit representation for location:', 'The Nest');
-                if (next) onUpdateAlias('place-tamboerskloof', next);
-              }}
-            >
-              Edit Name
-            </button>
-            <button
-              className="btn-pill-action secondary"
-              onClick={() => onUpdateAlias('place-tamboerskloof', 'The Nest')}
-            >
-              Reset
-            </button>
-          </div>
-        </div>
-
-        {/* Entity Card 3: Time / Context */}
-        <div className="inspector-entity-card">
-          <div className="card-type-row">
-            <div className="type-badge time">
-              <span>Time / Context</span>
-            </div>
-            <span className="mention-label">1 mention</span>
-          </div>
-
-          <div className="mapping-headline">
-            <div className="col-orig">
-              <span className="meta-caps">ORIGINAL</span>
-              <h4>May 2026 / 9pm</h4>
-            </div>
-            <ArrowRight size={16} className="arrow-sep" />
-            <div className="col-rep">
-              <span className="meta-caps">REPRESENTATION</span>
-              <h4>Blue Moon</h4>
-            </div>
-          </div>
-
-          <div className="card-actions-row">
-            <button
-              className="btn-pill-action"
-              onClick={() => {
-                const next = prompt('Change time alias:', 'Blue Moon');
-                if (next) onUpdateAlias('time-evening', next);
-              }}
-            >
-              Change Period
-            </button>
-            <button
-              className="btn-pill-action secondary"
-              onClick={() => onUpdateAlias('time-evening', '9pm')}
-            >
-              Keep Literal
-            </button>
-          </div>
-        </div>
-
-        {/* Add Reference Button */}
-        <button
-          className="btn-add-reference-manually"
-          onClick={() => {
-            const orig = prompt('Enter real private word:');
-            const rep = prompt('Enter concealed alias:');
-            if (orig && rep) {
-              onUpdateAlias('new-' + Date.now(), rep);
-              alert(`Added private mapping: ${orig} → ${rep}`);
-            }
-          }}
-        >
-          <Plus size={16} />
-          <span>Add a new reference manually</span>
-        </button>
-
-        {/* Enclave Lock Footnote */}
         <div className="enclave-lock-footnote">
           <Lock size={13} />
-          <span>Protected with Biometric Passkey / Device Enclave</span>
+          <span>Confirm to save these changes encrypted on this device.</span>
         </div>
-
-        {/* Primary Confirm Button */}
         <div className="confirm-action-footer">
-          <button className="confirm-apply-btn" onClick={onConfirm}>
-            <span>Confirm representations</span>
-            <span className="apply-tag">APPLY →</span>
+          <button className="confirm-apply-btn" type="button" disabled={loading || saving || Boolean(loadError)} onClick={() => void confirm()}>
+            <span>{saving ? 'Saving…' : 'Confirm representations'}</span>
+            <span className="apply-tag">{saving ? 'SAVE…' : 'SAVE →'}</span>
           </button>
         </div>
       </main>
