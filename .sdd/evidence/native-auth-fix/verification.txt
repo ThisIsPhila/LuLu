@@ -2,11 +2,12 @@ Date: 2026-10-26 (Africa/Johannesburg)
 Scope: local native authentication repair; no live Firebase changes.
 
 Build and configuration checks:
-- npm run native:sync — an earlier run passed before separate onboarding files appeared in the shared worktree.
-- Final `npm run native:sync` attempt — BLOCKED at the TypeScript step by two errors in untracked onboarding files: `src/components/OnboardingJourney.tsx:165` (numbered screen union compared with `1`) and `src/services/onboardingDraft.ts:144` (`Uint8Array<ArrayBufferLike>` passed as WebCrypto `BufferSource`). These files are outside this auth change and were left untouched.
-- Final app bundle — `npm exec -- vite build --mode app` PASS; `node scripts/verify-mobile-package.mjs` PASS (24 application files, no demo/review/fixtures); `npx cap sync` PASS for iOS and Android.
+- npm run native:sync — PASS; TypeScript app build passed, 24 app files verified, Capacitor synced iOS and Android.
 - npm --prefix functions run build — PASS.
 - npm run guard:firebase — PASS; the existing owner-reviewed provider configuration exception matched.
+- Android `assembleDebug` — PASS; debug APK installed on the connected Vivo V2020 (`10HC2D0LD8003FP`) and LuLu launch command succeeded.
+- Xcode Debug device build — PASS, signed with the existing Apple team; app installed on iPhone 13 Pro Max (`00008110-000204493CBA401E`) and LuLu launch succeeded.
+- iPhone screenshot shows the existing onboarding journey at screen 5/14. Android WebView inspection shows the LuLu welcome screen at 1/14; the Android display was asleep at screenshot time, so its screenshot is black. Android logs also showed no internet connection during launch.
 - No automated tests or live authentication attempt was run for this change.
 
 Code defects addressed:
