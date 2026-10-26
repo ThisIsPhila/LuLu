@@ -4,27 +4,22 @@ import {
   MoreHorizontal,
   Image,
   Mic,
-  Lock,
-  Sparkles,
-  ArrowRight,
-  Shield,
   User,
-  MapPin,
-  Clock,
-  Shuffle,
   ShieldCheck,
 } from 'lucide-react';
 import { LuLuLogo } from './Logo';
 import type { Entity } from '../domain/transform';
 import type { Entry } from '../domain/journal';
 import { useWritingViewport } from '../hooks/useWritingViewport';
-import { transform, recognised } from '../domain/transform';
-import { PrivateParagraphEditor } from './PrivateParagraphEditor';
+import type { LocalVault, LocalVaultRevision } from '../services/vault/localVault';
+import { PrivateDraftComposer } from './PrivateDraftComposer';
+import type { LocalMediaVault } from '../services/vault/localMediaVault';
 
 type Props = {
   entities: Entity[];
   protectedMode: boolean;
   editingEntry?: Entry;
+  initialKind?: Entry['kind'];
   onBack: () => void;
   onSaveProtected: (data: {
     title: string;
@@ -34,37 +29,49 @@ type Props = {
   }) => Promise<void>;
   onOpenEntityInspector: () => void;
   onEnterPrivate: () => void;
+  privateVault?: LocalVault;
+  privateMediaVault?: LocalMediaVault;
+  onPrivateSaved: (revision: LocalVaultRevision) => void;
 };
 
 export const TransformProtectView: React.FC<Props> = ({
   entities,
   protectedMode,
   editingEntry,
+  initialKind = 'Journal',
   onBack,
   onSaveProtected,
   onOpenEntityInspector,
   onEnterPrivate,
+  privateVault,
+  privateMediaVault,
+  onPrivateSaved,
 }) => {
   const viewport = useWritingViewport();
   const [naturalText, setNaturalText] = useState(editingEntry?.body ?? '');
   const [title, setTitle] = useState(editingEntry?.title ?? '');
+  const kind = editingEntry?.kind ?? initialKind;
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState('');
-  const [showPreview,setShowPreview]=useState(false);
 
-  // Derive transformed text
-  const transformedText = protectedMode && !editingEntry ? transform(naturalText, entities, {
-    perspectiveDistancing: true,
-  }) : naturalText;
+  const transformedText = naturalText;
 
   const wordsCount = naturalText.trim().split(/\s+/).filter(Boolean).length;
 
   const handleSave = async () => {
+    if (busy) return;
     setBusy(true);setError('');
-    try {await onSaveProtected({title:title || 'Journal entry',body:transformedText,originalBody:naturalText,kind:'Journal'});}
+    try {await onSaveProtected({title:title || (kind === 'Story' ? 'Story' : 'Journal entry'),body:transformedText,originalBody:naturalText,kind});}
     catch(e){setError(e instanceof Error?e.message:'Could not save. Your draft is still here.');}
     finally{setBusy(false);}
   };
+
+  if (protectedMode) {
+    if (!privateVault) return <p role="alert">Unlock private writing again before continuing.</p>;
+    return <PrivateDraftComposer vault={privateVault} initialTitle={title} initialBody={naturalText}
+      mediaVault={privateMediaVault}
+      entities={entities} onBack={onBack} onSaved={onPrivateSaved} onOpenEntityInspector={onOpenEntityInspector} />;
+  }
 
   return (
     <div className="transform-protect-screen keyboard-writing-screen" style={viewport}>
@@ -93,79 +100,34 @@ export const TransformProtectView: React.FC<Props> = ({
           </button>
         </div>
 
-{protectedMode && <div className="composer-processing-panel">
-        <p>Private writing saves encrypted in this browser. No backup is configured.</p>
-        <p>Save to keep this draft. Quick exit or Escape closes unsaved writing.</p>
-        <button type="button" onClick={()=>setShowPreview(value=>!value)}>{showPreview?'Conceal preview':'Inspect representation preview'}</button>
-        {showPreview && <>
-        <div className="protected-vault-card">
-          <div className="vault-glow-ambient" />
-          <div className="vault-card-header">
-            <div className="vault-lock-badge">
-              <Lock size={14} />
-            </div>
-            <div className="vault-titles">
-              <h3>Protected Version</h3>
-              <p>Preview with your configured representations.</p>
-            </div>
-          </div>
-
-          <div className="protected-body-rendered">
-            {transformedText || "Your transformed writing will appear here."}
-          </div>
-
-          <div className="vault-card-footer">
-            <div className="shelf-tools-dark">
-              <Image size={15} />
-              <Mic size={15} />
-              <MoreHorizontal size={15} />
-            </div>
-            <div className="sync-badge">
-              <span className="green-dot" />
-              <span>Live preview</span>
-            </div>
-          </div>
-        </div>
-
-        <details className="cloaking-ledger-section compact-processing-ledger">
-          <summary>Representations · {recognised(naturalText, entities).length} recognised</summary>
-          {recognised(naturalText, entities).map(entity => (
-            <button key={entity.id} className="cloaking-item" onClick={onOpenEntityInspector}>
-              <span className="item-labels"><span className="item-type">{entity.type}</span><span>{entity.original}</span></span>
-              <ArrowRight size={12} /><span className="item-alias-capsule">{entity.alias}</span>
-            </button>
-          ))}
-        </details>
-
-</>}
-</div>}<div className="composer-input-dock">        {/* 1. Original Entry Card (Warm Paper) */}
+<div className="composer-input-dock">        {/* 1. Original Entry Card (Warm Paper) */}
         <div className="original-entry-card">
           <div className="card-top-meta">
             <div className="source-badge">
               <span className="dot-orange" />
-              <span>{editingEntry ? 'Edit your entry' : protectedMode?'Original Entry · Your Natural Words':'Your writing'}</span>
+              <span>{editingEntry ? 'Edit your entry' : 'Your writing'}</span>
             </div>
             <span className="timestamp">{wordsCount} words</span>
           </div>
 
+
           <input aria-label="Entry title" placeholder="Title (optional)" value={title} onChange={e=>setTitle(e.target.value)} maxLength={200} style={{width:'100%',border:0,background:'transparent',padding:'12px 0',font:'inherit'}}/>
           {error && <p role="alert">{error}</p>}
-          {protectedMode ? <PrivateParagraphEditor value={naturalText} sessionUnlocked
-            onChange={value=>{setNaturalText(value);setShowPreview(false);}} /> : <textarea
+          <textarea
             className="original-natural-textarea"
             aria-label="Write your entry"
             value={naturalText}
             onChange={(e) => setNaturalText(e.target.value)}
             rows={4}
             placeholder="Write naturally in your own words..."
-          />}
+          />
 
           <div className="card-bottom-shelf">
             <div className="shelf-tools">
-              <button className="shelf-tool-btn" title="Image">
+              <button className="shelf-tool-btn" title="Image" onClick={()=>setError('Image capture is available in private writing. Start a new entry and choose Write privately.')}>
                 <Image size={15} />
               </button>
-              <button className="shelf-tool-btn" title="Mic">
+              <button className="shelf-tool-btn" title="Mic" onClick={()=>setError('Audio capture is available in private writing. Start a new entry and choose Write privately.')}>
                 <Mic size={15} />
               </button>
               <button className="shelf-tool-btn" title="Options">

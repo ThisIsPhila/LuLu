@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { CircleAlert, X } from 'lucide-react';
 import type { Entry } from './domain/journal';
+import { filterOrdinaryEntries } from './domain/ordinaryBrowse';
 import { AuthBoundary } from './components/auth/AuthBoundary';
 import { watchEntries, saveEntry, readOriginal, updateEntry } from './services/backend/journal';
 import { ensureStarterEntries } from './services/backend/demoCatalogue';
@@ -18,7 +19,8 @@ import { BottomNav } from './components/BottomNav';
 import { ProtectedGateModal } from './components/ProtectedGateModal';
 import { LocalPrivateJournal } from './components/LocalPrivateJournal';
 import { LocalVault } from './services/vault/localVault';
-import { capturePrivateText } from './services/privateCapture';
+import { LocalMediaVault } from './services/vault/localMediaVault';
+import { onAndroidBack, onAppActiveChange, exitNativeApp } from './platform/appLifecycle';
 
 export default function App() {
   return <AuthBoundary>{(session,onSignedOut)=><JournalApp key={session.uid} session={session} onSignedOut={onSignedOut}/>}</AuthBoundary>;
@@ -30,13 +32,17 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   const [starterAttempt, setStarterAttempt] = useState(0);
   const [watchAttempt, setWatchAttempt] = useState(0);
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
+  const [composingKind, setComposingKind] = useState<Entry['kind']>('Journal');
   const signingOut = useRef(false);
   const [entities, setEntities] = useState<Entity[]>(initialEntities);
+  const ordinaryEntries = filterOrdinaryEntries(entries);
 
   // Active view: 'home' | 'leaves' | 'compose' | 'enclave-writing' | 'vault' | 'inspector' | 'reader'
   const [currentView, setCurrentView] = useState<
     'home' | 'leaves' | 'compose' | 'enclave-writing' | 'vault' | 'inspector' | 'reader' | 'local-private'
   >('home');
+  const currentViewRef = useRef(currentView);
+  currentViewRef.current = currentView;
 
   const [activeCategoryTab, setActiveCategoryTab] = useState<string>('All');
   const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
@@ -50,9 +56,17 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   const [privateUntil,setPrivateUntil]=useState(0);
   const privateAuthority=useRef({until:0,generation:0});
   const localVault=useRef<LocalVault | null>(null);
+  const localMediaVault=useRef<LocalMediaVault | null>(null);
   const privateUnlockAttempt=useRef(0);
   const originalReadRequest=useRef(0);
   const [pendingView,setPendingView]=useState<'vault'|'inspector'|null>(null);
+  useEffect(()=>{
+    if(!session.resumePrivate || session.privateUntil<=Date.now())return;
+    privateAuthority.current={until:session.privateUntil,generation:privateAuthority.current.generation+1};
+    const privateSession={ownerId:session.uid,generation:()=>privateAuthority.current.generation,isUnlocked:()=>!signingOut.current && Date.now()<privateAuthority.current.until};
+    localVault.current=new LocalVault(privateSession);localMediaVault.current=new LocalMediaVault(privateSession);
+    setPrivateUntil(session.privateUntil);setProtectedMode(true);
+  },[]);
   useEffect(()=>watchEntries(session.uid,loaded=>{if(signingOut.current)return;setEntries(loaded);setPersonalState({status:'ready'});},e=>{if(signingOut.current)return;setPersonalState({status:'error',message:e.message});}),[session.uid,watchAttempt]);
   useEffect(()=>{
     let current=true;
@@ -72,13 +86,17 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     return ()=>clearTimeout(timer);
   },[privateUntil]);
   useEffect(()=>{
-    const hide=()=>{if(document.hidden)handleExitProtected();};
+    const stopLifecycle=onAppActiveChange(isActive=>{if(!isActive)handleExitProtected();});
+    const stopBack=onAndroidBack(()=>{
+      if(privateAuthority.current.until>0)handleExitProtected();
+      else if(currentViewRef.current!=='home')setCurrentView('home');
+      else exitNativeApp();
+    });
     const shortcut=(event:KeyboardEvent)=>{
       if(event.key==='Escape' && privateAuthority.current.until>0){event.preventDefault();handleExitProtected();}
     };
-    document.addEventListener('visibilitychange',hide);
     document.addEventListener('keydown',shortcut,true);
-    return()=>{document.removeEventListener('visibilitychange',hide);document.removeEventListener('keydown',shortcut,true);};
+    return()=>{stopLifecycle();stopBack();document.removeEventListener('keydown',shortcut,true);};
   },[]);
   function navigatePrivate(view:'vault'|'inspector') {
     if(protectedMode && Date.now()<privateUntil)setCurrentView(view);
@@ -107,18 +125,13 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     }
   };
   const handleSaveProtectedEntry = async (data:{title:string;body:string;originalBody:string;kind:'Journal'|'Story'}) => {
-    const generation=privateAuthority.current.generation;
     if(protectedMode && Date.now()>=privateUntil)throw new Error('Private session expired. Unlock again before saving.');
     if(editingEntry) {
       if(editingEntry.protected)throw new Error('Protected entries cannot be edited in this view. Open protected access to work with protected content.');
-      await updateEntry(session.uid,editingEntry.id,{title:data.title,body:data.body});
+      await updateEntry(session.uid,editingEntry.id,{title:data.title,body:data.body,kind:data.kind});
       setSelectedEntry(null);setEditingEntry(null);
     } else if(protectedMode) {
-      const vault=localVault.current;
-      if(!vault)throw new Error('Unlock private writing again before saving.');
-      await capturePrivateText(vault,data.title,data.originalBody);
-      if(generation!==privateAuthority.current.generation || Date.now()>=privateAuthority.current.until)return;
-      setNotice('Saved privately in this browser.');setCurrentView('local-private');return;
+      throw new Error('Save through the encrypted private draft editor.');
     } else {
       await saveEntry(session.uid,{...data,protected:protectedMode,entities});
     }
@@ -139,11 +152,13 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     const until=await unlockPrivate();
     if(attempt!==privateUnlockAttempt.current || generation!==privateAuthority.current.generation){await lockPrivate();return;}
     privateAuthority.current.until=until;
-    localVault.current=new LocalVault({
+    const privateSession={
       ownerId:session.uid,
       generation:()=>privateAuthority.current.generation,
       isUnlocked:()=>!signingOut.current && Date.now()<privateAuthority.current.until,
-    });
+    };
+    localVault.current=new LocalVault(privateSession);
+    localMediaVault.current=new LocalMediaVault(privateSession);
     setPrivateUntil(until);setProtectedMode(true);setIsProtectedGateOpen(false);
     if(pendingView){setCurrentView(pendingView);setPendingView(null);}
     if(selectedEntry?.protected){
@@ -161,6 +176,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     originalReadRequest.current++;
     privateAuthority.current={until:0,generation:privateAuthority.current.generation+1};
     localVault.current=null;
+    localMediaVault.current=null;
     setPrivateUntil(0);setProtectedMode(false);setEntities(initialEntities);
     setSelectedEntry(null);setEditingEntry(null);setNotice('');setBackendError('');
     setCurrentView('home');setIsProtectedGateOpen(false);setPendingView(null);
@@ -195,15 +211,15 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
             {(personalState.status === 'loading' || starterState.status === 'loading') && <p className="journal-source-status" role="status">Preparing your journal…</p>}
             {personalState.status === 'error' && <p className="journal-source-status is-error" role="alert">Could not load your journal. {personalState.message || 'Check your connection and try again.'} <button type="button" onClick={()=>{setPersonalState({status:'loading'});setWatchAttempt(value=>value+1);}}>Try again</button></p>}
             {starterState.status === 'error' && <p className="journal-source-status is-error" role="alert">Could not prepare your starter entries. {starterState.message || 'Check your connection and try again.'} <button type="button" onClick={()=>setStarterAttempt(value=>value+1)}>Try again</button></p>}
-            {personalState.status === 'ready' && starterState.status === 'ready' && entries.length === 0 && <p className="journal-source-status" role="status">Your journal is ready for your first entry.</p>}
+            {personalState.status === 'ready' && starterState.status === 'ready' && ordinaryEntries.length === 0 && <p className="journal-source-status" role="status">Your journal is ready for your first entry.</p>}
           </section>
         )}
         {currentView === 'home' && (
           <JournalHome
-            entries={entries}
+            entries={ordinaryEntries}
             activeTab={activeCategoryTab}
             onTabChange={setActiveCategoryTab}
-            onNewEntry={() => { setEditingEntry(null);setSelectedEntry(null);setCurrentView('compose'); }}
+            onNewEntry={() => { setComposingKind(activeCategoryTab === 'Stories' ? 'Story' : 'Journal');setEditingEntry(null);setSelectedEntry(null);setCurrentView('compose'); }}
             onSelectEntry={handleSelectEntry}
             onOpenProtectedGate={() => setIsProtectedGateOpen(true)}
             protectedMode={protectedMode}
@@ -214,7 +230,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
 
         {currentView === 'leaves' && (
             <StoryLeavesView
-              entries={entries}
+              entries={ordinaryEntries}
               onSelectEntry={handleSelectEntry}
               onOpenProtectedGate={() => setIsProtectedGateOpen(true)}
             />
@@ -226,15 +242,22 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
             entities={entities}
             protectedMode={protectedMode && !editingEntry}
             editingEntry={editingEntry ?? undefined}
+            initialKind={composingKind}
             onBack={() => setCurrentView('home')}
             onSaveProtected={handleSaveProtectedEntry}
             onOpenEntityInspector={() => navigatePrivate('inspector')}
             onEnterPrivate={() => setIsProtectedGateOpen(true)}
+            privateVault={localVault.current ?? undefined}
+            privateMediaVault={localMediaVault.current ?? undefined}
+            onPrivateSaved={() => {
+              if(Date.now()>=privateAuthority.current.until)return;
+              setNotice('Private record saved in this browser.');setCurrentView('local-private');
+            }}
           />
         )}
 
         {currentView === 'local-private' && protectedMode && localVault.current && (
-          <LocalPrivateJournal key={privateAuthority.current.generation} vault={localVault.current}
+          <LocalPrivateJournal key={privateAuthority.current.generation} vault={localVault.current} mediaVault={localMediaVault.current ?? undefined}
             onExit={handleExitProtected} onCompose={()=>{setEditingEntry(null);setSelectedEntry(null);setCurrentView('compose');}} />
         )}
 
@@ -291,6 +314,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
             currentView={currentView as any}
             onNavigate={(view) => {
               if (view === 'compose') {
+                setComposingKind(currentView === 'home' && activeCategoryTab === 'Stories' ? 'Story' : 'Journal');
                 setEditingEntry(null);setSelectedEntry(null);
                 setCurrentView('compose');
               } else if(view === 'vault' || view === 'inspector') {
