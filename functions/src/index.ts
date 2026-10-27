@@ -8,18 +8,23 @@ import type { RegistrationResponseJSON, AuthenticationResponseJSON, Authenticato
 import { ApiError, assertChallenge, assertSession, canOfferRegistrationSignInRecovery, documentId, failureDiagnostic, mintBeforePersist, withCompensation, CHALLENGE_TTL, SESSION_TTL, PRIVATE_TTL, type Challenge, type FailureStage } from './policy.js';
 import { assertExchangeProof, assertExchangeRedeemable, assertExchangeState, isNativeOpaqueValue, isNativeOperation, storedWebAuthnOptions, type NativeOperation } from './native-exchange-policy.js';
 import { browserOrigins as origins, nativeOrigins, isAllowedApiOrigin } from './origin-policy.js';
-import { assertPrivacyRateLimit, configuredProvider, nextPrivacyDailyQuota, PrivacyDailyQuotaError, privacyCapability, validateReviewedPrivacyRequest } from './privacy-processing.js';
+import { configuredProvider, privacyCapability, validateReviewedPrivacyRequest } from './privacy-processing.js';
+import { judgeInviteDigest, isJudgeInviteActive } from './judge-invite.js';
+import { mayReadAccountActivity } from './owner-notifications.js';
+import { scrubForLu, respondAsLu, LU_LANGUAGES } from './lu-chat.js';
+import { refillJudgeAllowance, type JudgeAllowance } from './judge-allowance.js';
+
+const judgeVoicePolicy = {refillCredits: 300, maxCredits: 300, refillCooldownMs: 24 * 60 * 60_000, accessDurationMs: 24 * 60 * 60_000};
 
 initializeApp();
 const db = getFirestore();
 const identity = getAuth();
-const knownRoutes = new Set(['/auth/register/options', '/auth/register/verify', '/auth/login/options', '/auth/login/verify', '/auth/stepup/options', '/auth/stepup/verify', '/auth/provider/session', '/auth/lock', '/auth/logout', '/session', '/privacy/capability', '/privacy/understand', '/native/exchange/create', '/native/exchange/options', '/native/exchange/complete', '/native/exchange/provider-complete', '/native/exchange/redeem', '/native/exchange/cancel']);
+const knownRoutes = new Set(['/auth/register/options', '/auth/register/verify', '/auth/login/options', '/auth/login/verify', '/auth/stepup/options', '/auth/stepup/verify', '/auth/provider/session', '/auth/lock', '/auth/logout', '/session', '/judge/redeem', '/judge/access', '/owner/account-activity', '/lu/scrub', '/lu/chat', '/privacy/capability', '/privacy/understand', '/native/exchange/create', '/native/exchange/options', '/native/exchange/complete', '/native/exchange/provider-complete', '/native/exchange/redeem', '/native/exchange/cancel']);
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
 const sessions = db.collection('_sessions');
 const challenges = db.collection('_challenges');
 const credentials = db.collection('_credentials');
 const nativeExchanges = db.collection('_nativeExchanges');
-const privacyDailyQuota = db.collection('_rateLimits').doc('privacy-demo-daily');
 type Session = {uid: string; expiresAt: number; privateUntil: number; authMethod?: 'passkey'|'email'|'google'};
 type NativeExchange = {requestId:string; stateHash:string; proofHash:string; operation:NativeOperation; uid:string|null; sid:string|null; status:'pending'|'challenge'|'complete'|'redeemed'|'cancelled'; expiresAt:number; challengeId?:string; challengeOrigin?:string; challengeOptions?:unknown; customToken?:string; privateUntil?:number; purgeAfter:Timestamp};
 const nativeTtl = 5 * 60_000;
@@ -38,6 +43,14 @@ async function sessionFor(header: string | undefined, requirePrivate = false, re
   assertSession(session, token.uid, Date.now(), requirePrivate);
   return {...session!, authMethod:session!.authMethod ?? (passkeySession ? 'passkey' : undefined), uid: token.uid, sid};
 }
+async function requireLuAiAccess(uid: string) {
+  const user = await identity.getUser(uid);
+  if (mayReadAccountActivity(user)) return;
+  const access = (await db.collection('_judgeAccess').doc(uid).get()).data();
+  if (!access || access.enabled !== true || typeof access.inviteDigest !== 'string') throw new ApiError(403, 'Full Lu AI access requires a judge invitation.');
+  const invitation = (await db.collection('_judgeInvites').doc(access.inviteDigest).get()).data();
+  if (!isJudgeInviteActive(invitation)) throw new ApiError(403, 'This judge invitation is no longer active.');
+}
 async function limitRequest(ip: string) {
   const bucket = Math.floor(Date.now() / 900_000);
   const ref = db.collection('_rateLimits').doc(hash(`${ip}:${bucket}`));
@@ -46,20 +59,6 @@ async function limitRequest(ip: string) {
     const count = record.data()?.count ?? 0;
     if (count >= 60) throw new ApiError(429, 'Please wait before trying again.');
     tx.set(ref, {count: count + 1, expiresAt: Timestamp.fromMillis((bucket + 2) * 900_000)});
-  });
-}
-async function reservePrivacyDailyQuota(now = Date.now()) {
-  const day = new Date(now).toISOString().slice(0, 10);
-  await db.runTransaction(async transaction => {
-    const snapshot = await transaction.get(privacyDailyQuota);
-    let next;
-    try { next = nextPrivacyDailyQuota(snapshot.exists ? snapshot.data() : null, day); }
-    catch (error) {
-      if (error instanceof PrivacyDailyQuotaError && error.kind === 'limit') throw new ApiError(429, 'The daily privacy review limit has been reached.');
-      if (error instanceof PrivacyDailyQuotaError) throw new ApiError(503, 'Privacy review is temporarily unavailable.');
-      throw error;
-    }
-    transaction.set(privacyDailyQuota, {...next, updatedAt: Timestamp.fromMillis(now)});
   });
 }
 async function takeChallenge(id: unknown, kind: Challenge['kind'], origin: string): Promise<Challenge> {
@@ -92,7 +91,7 @@ async function loadNativeExchange(id: unknown, state: unknown) {
   return {ref, exchange};
 }
 
-/** No original journal text, private mappings or biometrics are accepted by this API. */
+/** Lu demo privacy processing accepts user-submitted text; private mappings and biometrics are never accepted. */
 export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInstances: 2, minInstances: 0, concurrency: 10, timeoutSeconds: 30, invoker: 'public', secrets: ['OPENAI_API_KEY']}, async (request, response) => {
   response.set('Cache-Control', 'no-store');
   response.set('X-Content-Type-Options', 'nosniff');
@@ -353,6 +352,79 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
     }
     stage = 'session-lookup';
     const current = await sessionFor(request.get('authorization'));
+    if (route === '/lu/scrub') {
+      await requireLuAiAccess(current.uid);
+      if (Object.keys(body).length !== 1 || typeof body.text !== 'string' || !body.text.trim() || body.text.length > 4000) throw new ApiError(400, 'Enter text of up to 4,000 characters.');
+      if (!process.env.OPENAI_API_KEY) throw new ApiError(503, 'Cloud privacy processing is not configured.');
+      const scrubbed = await scrubForLu(process.env.OPENAI_API_KEY, body.text);
+      if (scrubbed === '[unable to safely scrub]') throw new ApiError(422, 'The text could not be prepared safely. Please edit it and try again.');
+      const ticket = randomUUID();
+      await db.collection('_luReviews').doc(hash(ticket)).create({uid:current.uid, textHash:hash(scrubbed), expiresAt:Date.now()+10*60_000});
+      response.json({scrubbed, ticket}); return;
+    }
+    if (route === '/lu/chat') {
+      await requireLuAiAccess(current.uid);
+      if (Object.keys(body).sort().join(',') !== 'language,text,ticket' || typeof body.text !== 'string' || body.text.length > 12000 || typeof body.ticket !== 'string' || !/^[0-9a-f-]{36}$/.test(body.ticket) || !LU_LANGUAGES.includes(body.language)) throw new ApiError(400, 'Invalid reviewed chat request.');
+      const ref=db.collection('_luReviews').doc(hash(body.ticket));
+      await db.runTransaction(async transaction => {
+        const review=await transaction.get(ref); const data=review.data();
+        if (!data || data.uid!==current.uid || data.expiresAt<=Date.now() || data.textHash!==hash(body.text)) throw new ApiError(403, 'Review the prepared text again before sending.');
+        transaction.delete(ref);
+      });
+      if (!process.env.OPENAI_API_KEY) throw new ApiError(503, 'Lu chat is not configured.');
+      const reply=await respondAsLu(process.env.OPENAI_API_KEY,body.text,body.language);
+      response.json({reply}); return;
+    }
+    if (route === '/owner/account-activity') {
+      if (Object.keys(body).length !== 0) throw new ApiError(400, 'Invalid request.');
+      const owner = await identity.getUser(current.uid);
+      if (!mayReadAccountActivity(owner)) {
+        response.json({owner:false}); return;
+      }
+      const accounts: {createdAt:string; email:string|null; signInMethods:string[]}[] = [];
+      let pageToken: string | undefined;
+      let pages = 0;
+      do {
+        const page = await identity.listUsers(1000, pageToken);
+        for (const user of page.users) {
+          if (user.uid === current.uid) continue;
+          accounts.push({createdAt:user.metadata.creationTime, email:user.email ?? null, signInMethods:user.providerData.map(provider => provider.providerId)});
+        }
+        pageToken = page.pageToken;
+      } while (pageToken && ++pages < 10);
+      accounts.sort((a,b) => Date.parse(b.createdAt)-Date.parse(a.createdAt));
+      response.json({owner:true, accounts:accounts.slice(0,50), truncated: Boolean(pageToken)}); return;
+    }
+    if (route === '/judge/redeem') {
+      if (Object.keys(body).length !== 1 || !Object.hasOwn(body, 'invitation')) throw new ApiError(400, 'Invalid invitation.');
+      let digest: string;
+      try { digest = judgeInviteDigest(body.invitation); }
+      catch { throw new ApiError(400, 'Invalid invitation.'); }
+      const inviteRef = db.collection('_judgeInvites').doc(digest);
+      const accessRef = db.collection('_judgeAccess').doc(current.uid);
+      const result = await db.runTransaction(async transaction => {
+        const [invite, access] = await Promise.all([transaction.get(inviteRef), transaction.get(accessRef)]);
+        if (!invite.exists || !isJudgeInviteActive(invite.data())) throw new ApiError(403, 'This invitation is not active.');
+        const data = access.data();
+        if (data?.enabled === false) throw new ApiError(403, 'This account no longer has judge access.');
+        const previous = data?.voiceAllowance as JudgeAllowance | undefined;
+        const refill = refillJudgeAllowance(previous ?? null, judgeVoicePolicy, Date.now());
+        if (!refill.ok) {
+          if (refill.reason === 'revoked') throw new ApiError(403, 'This account no longer has judge access.');
+          return {judgeAccess: true, voiceAllowance: previous ?? null, refillAvailableAt: refill.retryAt};
+        }
+        transaction.set(accessRef, {enabled:true, role:'judge', inviteDigest:digest, voiceAllowance:refill.allowance, ...(access.exists ? {} : {createdAt:Timestamp.now()})}, {merge:true});
+        return {judgeAccess:true, voiceAllowance:refill.allowance, refillAvailableAt:refill.allowance.lastRefillAt! + judgeVoicePolicy.refillCooldownMs};
+      });
+      response.json(result); return;
+    }
+    if (route === '/judge/access') {
+      if (Object.keys(body).length !== 0) throw new ApiError(400, 'Invalid request.');
+      const access = await db.collection('_judgeAccess').doc(current.uid).get();
+      const data = access.data();
+      const allowance = data?.voiceAllowance as JudgeAllowance | undefined;
+      response.json({judgeAccess:access.exists && data?.enabled === true, voiceAllowance:allowance ?? null, refillAvailableAt:allowance?.lastRefillAt == null ? null : allowance.lastRefillAt + judgeVoicePolicy.refillCooldownMs}); return;
+    }
     if (route === '/privacy/capability') {
       if (Object.keys(body).length !== 0) throw new ApiError(400, 'Invalid request.');
       const provider = configuredProvider(process.env, process.env.OPENAI_API_KEY);
@@ -366,9 +438,6 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
       catch (error) { throw new ApiError(400, error instanceof Error ? error.message : 'Invalid privacy request.'); }
       const provider = configuredProvider(process.env, process.env.OPENAI_API_KEY);
       if (!provider.enabled) throw new ApiError(503, 'Privacy understanding is not configured.');
-      try { assertPrivacyRateLimit(privateSession.sid); }
-      catch { throw new ApiError(429, 'Please wait before trying again.'); }
-      await reservePrivacyDailyQuota();
       try {
         const result = await provider.understand(reviewed, AbortSignal.timeout(8_000));
         const stillPrivate = await sessionFor(request.get('authorization'), true, true);

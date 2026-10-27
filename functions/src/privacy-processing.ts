@@ -266,57 +266,6 @@ function extractResponsesOutputText(value: unknown): string {
   return chunks[0];
 }
 
-const rateWindows = new Map<string, {start: number; count: number}>();
-const PRIVACY_WINDOW_MS = 15 * 60_000;
-const PRIVACY_WINDOW_MAX = 5;
-export const PRIVACY_DAILY_MAX = 20;
-
-export class PrivacyDailyQuotaError extends Error {
-  constructor(public readonly kind: 'limit' | 'invalid') {
-    super(kind === 'limit' ? 'Daily privacy request limit reached.' : 'Privacy request budget is unavailable.');
-  }
-}
-
-export type PrivacyDailyQuota = {day: string; count: number};
-
-function isUtcDay(value: unknown): value is string {
-  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const date = new Date(`${value}T00:00:00.000Z`);
-  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
-}
-
-/** Calculate the next durable, UTC-day reservation; malformed state fails closed. */
-export function nextPrivacyDailyQuota(previous: unknown, today: string): PrivacyDailyQuota {
-  if (!isUtcDay(today)) throw new PrivacyDailyQuotaError('invalid');
-  if (previous === undefined || previous === null) return {day: today, count: 1};
-  if (typeof previous !== 'object' || Array.isArray(previous)) throw new PrivacyDailyQuotaError('invalid');
-  const record = previous as {day?: unknown; count?: unknown};
-  if (!isUtcDay(record.day) || !Number.isSafeInteger(record.count) || (record.count as number) < 1 || (record.count as number) > PRIVACY_DAILY_MAX) {
-    throw new PrivacyDailyQuotaError('invalid');
-  }
-  if (record.day > today) throw new PrivacyDailyQuotaError('invalid');
-  if (record.day < today) return {day: today, count: 1};
-  if ((record.count as number) >= PRIVACY_DAILY_MAX) throw new PrivacyDailyQuotaError('limit');
-  return {day: today, count: (record.count as number) + 1};
-}
-
-/** Process-local burst ceiling. Deployment must not treat it as a billing cap. */
-export function assertPrivacyRateLimit(sessionId: string, now = Date.now()): void {
-  if (rateWindows.size >= 400) {
-    for (const [key, value] of rateWindows) if (now - value.start >= PRIVACY_WINDOW_MS) rateWindows.delete(key);
-  }
-  const current = rateWindows.get(sessionId);
-  if (current && now - current.start < PRIVACY_WINDOW_MS) {
-    if (current.count >= PRIVACY_WINDOW_MAX) throw new Error('Please wait before trying again.');
-    current.count++;
-  } else {
-    if (!current && rateWindows.size >= 500) throw new Error('Please wait before trying again.');
-    rateWindows.set(sessionId, {start: now, count: 1});
-  }
-}
-
-export function clearPrivacyRateLimitsForTests(): void { rateWindows.clear(); }
-
 export function privacyCapability(provider: PrivacyDecisionProvider) {
   return {
     provider: provider.id,

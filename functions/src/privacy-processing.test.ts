@@ -2,9 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import {
-  assertPrivacyRateLimit, clearPrivacyRateLimitsForTests, configuredProvider,
-  createOpenAIDecisionsProvider, createOpenAIResponsesProvider, disabledProvider, nextPrivacyDailyQuota,
-  PrivacyDailyQuotaError, privacyCapability,
+ configuredProvider,
+  createOpenAIDecisionsProvider, createOpenAIResponsesProvider, disabledProvider, privacyCapability,
   validateReviewedPrivacyRequest,
 } from './privacy-processing.js';
 
@@ -137,40 +136,4 @@ test('Responses adapter rejects provider errors and invalid or oversized decisio
   await assert.rejects(withBody({output: []}).understand(validateReviewedPrivacyRequest(reviewed())), /invalid result/);
   await assert.rejects(withBody({output: [{type: 'message', content: [{type: 'output_text', text: '{"decision":"nope","rationale":"x"}'}]}]}).understand(validateReviewedPrivacyRequest(reviewed())), /invalid result/);
   await assert.rejects(withBody({output: [{type: 'message', content: [{type: 'output_text', text: JSON.stringify({decision: 'high', rationale: 'x'.repeat(401)})}]}]}).understand(validateReviewedPrivacyRequest(reviewed())), /invalid result/);
-});
-
-test('per-session process-local rate window allows five calls then rejects', () => {
-  clearPrivacyRateLimitsForTests();
-  for (let index = 0; index < 5; index++) assertPrivacyRateLimit('sid-a', 10_000);
-  assert.throws(() => assertPrivacyRateLimit('sid-a', 10_001), /wait/);
-  assert.doesNotThrow(() => assertPrivacyRateLimit('sid-b', 10_001));
-  assert.doesNotThrow(() => assertPrivacyRateLimit('sid-a', 10_000 + 15 * 60_000));
-  clearPrivacyRateLimitsForTests();
-});
-
-test('daily quota reserves first request and increments on the same UTC day', () => {
-  assert.deepEqual(nextPrivacyDailyQuota(null, '2026-10-26'), {day: '2026-10-26', count: 1});
-  assert.deepEqual(nextPrivacyDailyQuota({day: '2026-10-26', count: 19}, '2026-10-26'), {day: '2026-10-26', count: 20});
-});
-
-test('daily quota resets at UTC day rollover', () => {
-  assert.deepEqual(nextPrivacyDailyQuota({day: '2026-10-26', count: 20}, '2026-10-27'), {day: '2026-10-27', count: 1});
-  assert.deepEqual(nextPrivacyDailyQuota({day: '2024-02-28', count: 4}, '2024-02-29'), {day: '2024-02-29', count: 1});
-});
-
-test('daily quota rejects exhausted and malformed records closed', () => {
-  assert.throws(() => nextPrivacyDailyQuota({day: '2026-10-26', count: 20}, '2026-10-26'),
-    (error: unknown) => error instanceof PrivacyDailyQuotaError && error.kind === 'limit');
-  for (const record of [
-    {day: '2026-13-01', count: 1},
-    {day: '2026-10-26', count: 0},
-    {day: '2026-10-26', count: 21},
-    {day: '2026-10-27', count: 1},
-    {day: 'not-a-day', count: 1},
-    {day: '2026-10-26', count: '1'},
-    [],
-  ]) {
-    assert.throws(() => nextPrivacyDailyQuota(record, '2026-10-26'),
-      (error: unknown) => error instanceof PrivacyDailyQuotaError && error.kind === 'invalid');
-  }
 });

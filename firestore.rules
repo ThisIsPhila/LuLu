@@ -8,7 +8,7 @@ service cloud.firestore {
     // updatedAt server timestamp. Device key is never uploaded.
     // All underscore collections are server-only, including session authority.
     function isAuthenticated() {
-      return request.auth != null && request.auth.token.passkey == true
+      return request.auth != null && (request.auth.token.get('passkey', false) == true || request.auth.token.get('luluSession', false) == true)
         && request.auth.token.sid is string;
     }
     function isOwner(uid) { return isAuthenticated() && request.auth.uid == uid; }
@@ -18,7 +18,7 @@ service cloud.firestore {
     }
     function privateSession(uid) {
       let s = get(/databases/$(database)/documents/_sessions/$(request.auth.token.sid)).data;
-      return activeSession(uid) && s.privateUntil > request.time.toMillis();
+      return activeSession(uid) && request.auth.token.get('passkey', false) == true && s.privateUntil > request.time.toMillis();
     }
     function activeCurrentSession() {
       return isAuthenticated() && activeSession(request.auth.uid);

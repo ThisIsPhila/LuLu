@@ -1,0 +1,16 @@
+{
+  "firestore": {
+    "rules": ".sdd/reports/starter-permissions/firestore.rules",
+    "predeploy": [
+      "node scripts/firebase-guard.mjs"
+    ]
+  },
+  "emulators": {
+    "firestore": {
+      "port": 8085
+    },
+    "ui": {
+      "enabled": false
+    }
+  }
+}
