@@ -10,6 +10,8 @@
 <p align="center">
   <a href="https://lulu.thisisphila.co.za/"><strong>Try the live web demo</strong></a>
   &nbsp;·&nbsp;
+  <a href="https://github.com/ThisIsPhila/LuLu/releases/tag/android-ios-preview-2026-10-27">Download mobile previews</a>
+  &nbsp;·&nbsp;
   <a href="#experience-lulu">Explore the experience</a>
   &nbsp;·&nbsp;
   <a href="#availability-and-platforms">Platforms</a>
@@ -93,8 +95,26 @@ For detailed and dated engineering evidence, see the [implementation tracker](do
 | --- | --- | --- |
 | **Web** | **[Open the live demo](https://lulu.thisisphila.co.za/)** | Recommended for demos and reviews; hosted release available. |
 | **PWA install** | Not available yet; use the regular web link above. | LuLu does not currently provide a web manifest/install prompt. Offline account access and private-vault recovery are not guaranteed. |
-| **Android** | Build the Capacitor 8 project from source (instructions below). | No signed APK or Play Store download has been published. A source build is not a released app. |
-| **iOS** | Build the Capacitor 8 project from source (instructions below). | iPhone startup and passkey return to the app were confirmed; full journal create/edit/restart persistence has not been verified. No TestFlight or App Store download has been published. |
+| **Android** | [Download the development APK](https://github.com/ThisIsPhila/LuLu/releases/download/android-ios-preview-2026-10-27/LuLu-Android-preview.apk). | Debug-signed preview for Android 7.0 or later; not a Play Store release. |
+| **iOS** | [Download the registered-device iPhone build](https://github.com/ThisIsPhila/LuLu/releases/download/android-ios-preview-2026-10-27/LuLu-iOS-registered-device.zip). | Development build for the already registered iPhone, installed from a Mac with Xcode. No TestFlight or App Store download is available. |
+
+### Download and install a mobile preview
+
+The [mobile preview release](https://github.com/ThisIsPhila/LuLu/releases/tag/android-ios-preview-2026-10-27) contains both packages and [SHA-256 checksums](https://github.com/ThisIsPhila/LuLu/releases/download/android-ios-preview-2026-10-27/SHA256SUMS.txt). This repository is private, so you must sign in to a GitHub account with access to download them. The previews were built from the local development working tree on 27 October 2026, including changes not yet committed to GitHub main; the release tag identifies the main-branch baseline, not an exact source snapshot of these packages.
+
+**Android:** Download the APK on the phone, open it from Downloads, allow your browser or file manager to install apps when Android asks, and tap **Install**. The APK is version 1.0, build 1, signed with the development debug certificate. If Android reports an incompatible signature with an existing LuLu installation, preserve any local records before changing or removing that installation. This is a development preview; the full journal edit and restart journey has not yet been accepted on a device.
+
+**iPhone:** The ZIP contains `App.app` signed for the existing registered development iPhone; it is not an IPA or a TestFlight link and cannot be installed on an arbitrary iPhone. On a Mac with Xcode, connect and trust that registered phone, enable Developer Mode, then run:
+
+```bash
+unzip LuLu-iOS-registered-device.zip -d lulu-ios
+xcrun devicectl list devices
+xcrun devicectl device install app --device "<device-identifier>" lulu-ios/App.app
+```
+
+Replace `<device-identifier>` with the identifier shown for the registered iPhone. The included development provisioning profile expires **2 November 2026 at 05:22 UTC**; installation and launch after that require a renewed profile and rebuilt package. For a wider iPhone beta, [Apple TestFlight](https://developer.apple.com/testflight/) requires an App Store Connect build and tester setup. iPhone passkey sign-in was confirmed on the owner's device; full journal edit and restart persistence remains to be verified.
+
+The optional privacy model can be downloaded separately in the app under **Settings → On-device privacy model**. It requires roughly 192 MB and is stored in the app's WebView storage. It is an experimental English entity detector, and its download and inference have not yet been verified on these mobile builds.
 
 ### Build a mobile version from source
 
@@ -105,10 +125,10 @@ npm install
 npm run native:sync
 ```
 
-- **Android:** install Android Studio and the Android SDK, connect a physical Android device with developer debugging enabled, then run `npm run native:open:android`. Select the device in Android Studio and run the `app` configuration. Android signing is required before distributing a release APK/AAB.
+- **Android:** install Android Studio, the Android SDK and JDK 21, connect a physical Android device with developer debugging enabled, then run `npm run native:open:android`. Select the device in Android Studio and run the `app` configuration. A separate release signing key is required for a production APK/AAB.
 - **iOS:** on macOS, install Xcode, connect an iPhone, then run `npm run native:open:ios`. Select a signing team and the connected device in Xcode, then run the app. Apple signing is required before distributing an IPA or TestFlight build.
 
-There are currently no public APK, IPA, Play Store or TestFlight download links. We will add them here once signed release builds and their real-device journeys are ready.
+The downloadable builds above are development previews. No Play Store, TestFlight or App Store release has been published.
 
 ## Behind the project
 
