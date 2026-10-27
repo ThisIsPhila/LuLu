@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { ArrowLeft, BookOpen, ChevronRight, Compass, FileText, LibraryBig, PenLine, X } from 'lucide-react';
 import { LuOrb, type LuQuickAction } from './LuOrb';
+import { LuTextChat } from './LuTextChat';
+import { labelLuAction, matchLuTextAction, validateScrubbedLuCommand, type LuTextAction } from '../services/privacy/luTextActions';
 import './LooLuGuide.css';
 
 export type LooLuDestination = 'home' | 'journal' | 'stories' | 'library' | 'reader' | 'write' | 'settings' | 'privacy-settings' | 'private-writing' | 'support';
@@ -35,12 +37,42 @@ export function LooLuGuide({ currentView, privateAvailable, canLeaveCurrentView,
   const [text, setText] = useState('');
   const [review, setReview] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [askText, setAskText] = useState('');
+  const [askStatus, setAskStatus] = useState<'idle' | 'ready' | 'error'>('idle');
+  const [askMessage, setAskMessage] = useState('');
+  const [scrubbedAsk, setScrubbedAsk] = useState('');
+  const [suggestedAction, setSuggestedAction] = useState<LuTextAction | null>(null);
 
-  function choosePage(page: GuidePage) {
-    setSelectedPage(page);
-    setCaptureOpen(false);
-    setReview(false);
-    setConfirmed(false);
+  function closeGuide() {
+    setAskText(''); setAskStatus('idle'); setAskMessage(''); setScrubbedAsk(''); setSuggestedAction(null);
+    setOpen(false);
+  }
+
+  function resetAskResult(nextText: string) {
+    setAskText(nextText);
+    setAskStatus('idle'); setAskMessage(''); setScrubbedAsk(''); setSuggestedAction(null);
+  }
+
+  function reviewAskText() {
+    if (!canLeaveCurrentView || !askText.trim()) return;
+    setScrubbedAsk(''); setSuggestedAction(null);
+    const safeCommand = validateScrubbedLuCommand(askText);
+    if (!safeCommand) {
+      setAskStatus('error');
+      setAskMessage('Lu accepts only a short app command using screen/action names and optional generic placeholders such as Person A. Remove names and writing details first.');
+      return;
+    }
+    setScrubbedAsk(safeCommand);
+    setSuggestedAction(matchLuTextAction(safeCommand));
+    setAskStatus('ready');
+    setAskMessage('This restricted command stays on this device. Lu does not receive journal writing or send text to a service.');
+  }
+
+  function useSuggestedAction() {
+    if (!canLeaveCurrentView || !suggestedAction || askStatus !== 'ready') return;
+    if (suggestedAction.kind === 'navigate') onNavigate(suggestedAction.destination);
+    else onQuickAction(suggestedAction.action);
+    closeGuide();
   }
 
   function goToSelectedPage() {
@@ -62,7 +94,7 @@ export function LooLuGuide({ currentView, privateAvailable, canLeaveCurrentView,
   function startDraft() {
     if (!canStartDraft || !confirmed || !text.trim()) return;
     onStartDraft(text);
-    setOpen(false);
+    closeGuide();
     setCaptureOpen(false);
     setReview(false);
     setConfirmed(false);
@@ -70,7 +102,7 @@ export function LooLuGuide({ currentView, privateAvailable, canLeaveCurrentView,
   }
 
   function quickAction(action: LuQuickAction) {
-    setOpen(false);
+    closeGuide();
     setSelectedPage(null);
     onQuickAction(action);
   }
@@ -90,11 +122,11 @@ export function LooLuGuide({ currentView, privateAvailable, canLeaveCurrentView,
             : selected?.description ?? '';
 
   return <div className="lulu-guide-root">
-    <LuOrb open={open} disabled={false} onOpen={() => setOpen(value => !value)} onAction={quickAction} />
+    <LuOrb open={open} disabled={false} onOpen={() => { if (open) closeGuide(); else setOpen(true); }} onAction={quickAction} />
     {open && <section className="lulu-guide-panel" role="dialog" aria-modal="false" aria-labelledby="lulu-guide-title">
       <header className="lulu-guide-header">
         <div><span className="lulu-guide-kicker">YOUR LU GUIDE</span><h2 id="lulu-guide-title">Where would you like to go?</h2></div>
-        <button type="button" className="lulu-guide-close" aria-label="Close Lu" onClick={() => setOpen(false)}><X size={18} /></button>
+        <button type="button" className="lulu-guide-close" aria-label="Close Lu" onClick={closeGuide}><X size={18} /></button>
       </header>
       {selectedPage ? <section className="lulu-guide-page-detail" aria-labelledby="lulu-guide-page-title">
         <span className="lulu-guide-kicker">SCREEN GUIDE</span>
@@ -108,16 +140,29 @@ export function LooLuGuide({ currentView, privateAvailable, canLeaveCurrentView,
         </div>
       </section> : <>
       {!canLeaveCurrentView && <p className="lulu-guide-notice" role="status">Finish or leave this screen before navigating with Lu, so your work is not interrupted.</p>}
-      <nav className="lulu-guide-destinations" aria-label="LuLu screens">
-        {destinations.map(({ id, title, description, icon: Icon }) => {
-          return <button key={id} type="button" className="lulu-guide-destination" aria-current={currentView === id ? 'page' : undefined} onClick={() => choosePage(id)}>
+      <section className="lulu-guide-quick-section" aria-labelledby="lulu-guide-navigation"><h3 id="lulu-guide-navigation">Navigation</h3><nav className="lulu-guide-destinations" aria-label="LuLu screens">
+        {destinations.map(({ id, title, icon: Icon }) => {
+          return <button key={id} type="button" className="lulu-guide-destination" aria-current={currentView === id ? 'page' : undefined} disabled={pageIsUnavailable(id)} onClick={() => { onNavigate(id as LooLuDestination); closeGuide(); }}>
             <span className="lulu-guide-icon"><Icon size={17} aria-hidden="true" /></span>
-            <span className="lulu-guide-destination-copy"><strong>{title}</strong><small>{description}</small></span>
+            <span className="lulu-guide-destination-copy"><strong>{title}</strong></span>
             <ChevronRight size={16} aria-hidden="true" />
           </button>;
         })}
-      </nav>
-      <section className="lulu-guide-capture" aria-labelledby="lulu-guide-capture-title">
+      </nav></section>
+      <section className="lulu-guide-quick-section" aria-labelledby="lulu-guide-actions"><h3 id="lulu-guide-actions">Actions</h3><div className="lulu-guide-action-grid"><details className="lulu-guide-subgroup"><summary>Chat with Lu</summary><LuTextChat /></details><details className="lulu-guide-subgroup"><summary>Ask Lu</summary><section className="lulu-guide-capture lulu-guide-ask" aria-labelledby="lulu-guide-ask-title">
+        <div className="lulu-guide-capture-heading"><div><span className="lulu-guide-kicker">LOCAL TEXT ACTION</span><h3 id="lulu-guide-ask-title">Ask Lu to find an app action</h3></div></div>
+        <p>Text-based actions are limited to short commands. Do not paste journal writing: first remove names and details yourself, using generic labels such as Person A. Lu rejects anything outside its small command vocabulary. The command stays on this device and is not sent or saved. Automatic text scrubbing is unavailable while local model processing is on hold.</p>
+        <label className="lulu-guide-text-label" htmlFor="lulu-guide-ask-text">Text for Lu</label>
+        <textarea id="lulu-guide-ask-text" value={askText} maxLength={240} rows={2} onChange={event => resetAskResult(event.target.value)} placeholder="Open Settings for Person A" />
+        <div className="lulu-guide-actions"><button type="button" className="lulu-guide-capture-button" disabled={!canLeaveCurrentView || !askText.trim()} onClick={reviewAskText}>Review safe command</button></div>
+        {askMessage && <p className={`lulu-guide-ask-status ${askStatus === 'error' ? 'is-error' : ''}`} role={askStatus === 'error' ? 'alert' : 'status'}>{askMessage}</p>}
+        {askStatus === 'ready' && <>
+          <span className="lulu-guide-text-label">Scrubbed text Lu used</span>
+          <div className="lulu-guide-review" aria-label="Scrubbed text used by Lu">{scrubbedAsk}</div>
+          {suggestedAction ? <div className="lulu-guide-actions lulu-guide-suggested-action"><span>{labelLuAction(suggestedAction)}</span><button type="button" className="lulu-guide-capture-button" onClick={useSuggestedAction}>Use this action</button></div> : <p className="lulu-guide-ask-status">No matching app action found. You can choose a screen above.</p>}
+        </>}
+      </section></details>
+      <details className="lulu-guide-subgroup"><summary>Start a text draft</summary><section className="lulu-guide-capture" aria-labelledby="lulu-guide-capture-title">
         <div className="lulu-guide-capture-heading"><div><span className="lulu-guide-kicker">A THOUGHT TO START WITH</span><h3 id="lulu-guide-capture-title">Bring text into a new draft</h3></div></div>
         {!captureOpen ? <>
           <p>Type or paste a thought here. Lu will only place it in a new, unsaved ordinary writing draft after you review and confirm.</p>
@@ -136,9 +181,9 @@ export function LooLuGuide({ currentView, privateAvailable, canLeaveCurrentView,
             <div className="lulu-guide-actions"><button type="button" className="lulu-guide-secondary" onClick={() => setReview(false)}>Edit text</button><button type="button" className="lulu-guide-capture-button" disabled={!canStartDraft || !confirmed} onClick={startDraft}>Continue to Write</button></div>
           </>}
         </>}
-      </section>
+      </section></details></div></section>
       </>}
-      <p className="lulu-guide-footer">Press and hold Lu for private capture and your private space.</p>
+      <details className="lulu-guide-group"><summary>Info <span>About Lu</span></summary><p className="lulu-guide-footer">Press and hold Lu for quick actions.</p><p className="lulu-guide-footer">Voice AI is not connected.</p></details>
     </section>}
   </div>;
 }

@@ -36,7 +36,39 @@
 .lulu-guide-confirm { display: flex; align-items: flex-start; gap: 8px; margin-top: 11px; color: #4c493e; font-size: 12px; line-height: 1.4; }
 .lulu-guide-confirm input { margin-top: 2px; accent-color: #59624e; }
 .lulu-guide-unsaved-note { padding: 8px 9px; border-left: 2px solid #8c9877; background: #eeeadf; }
+.lulu-guide-ask { border-color: #d5cbb8; background: #f3eee3; }
+.lulu-guide-ask > p { margin: 8px 0 10px; }
+.lulu-guide-ask-status { margin: 8px 0 0 !important; color: #605a4d; font-size: 11px !important; }
+.lulu-guide-ask-status.is-error { color: #8a3c34 !important; }
+.lulu-guide-suggested-action { align-items: center; justify-content: space-between; color: #49463e; font-size: 12px; font-weight: 600; }
 .lulu-guide-notice { padding: 8px 10px; border-radius: 9px; background: #f2e7d9; color: #6e4c34 !important; }
 .lulu-guide-footer { margin: 13px 2px 0; font-size: 10px; }
 @media (min-width: 700px) { .lulu-guide-root { right: 24px; bottom: 24px; } }
 @media (max-width: 420px) { .lulu-guide-panel { right: -8px; width: calc(100vw - 28px); padding: 16px; } }
+
+.lulu-guide-group { margin-top: 8px; border: 1px solid #e1dacd; border-radius: 14px; background: #f6f2e9; }
+.lulu-guide-group > summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 48px; padding: 0 14px; cursor: pointer; list-style: none; color: #34362d; font-weight: 600; font-size: 13px; }
+.lulu-guide-group > summary::-webkit-details-marker { display: none; }
+.lulu-guide-group > summary span { color: #777061; font-size: 11px; font-weight: 400; }
+.lulu-guide-group > summary::after { content: '+'; font-size: 20px; font-weight: 400; }
+.lulu-guide-group[open] > summary::after { content: '−'; }
+.lulu-guide-group > .lulu-guide-destinations { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 0 8px 8px; }
+.lulu-guide-group .lulu-guide-destination { grid-template-columns: 30px 1fr; gap: 7px; padding: 6px; }
+.lulu-guide-group .lulu-guide-destination > svg { display: none; }
+.lulu-guide-group > .lulu-guide-capture { margin: 0 8px 8px; }
+.lulu-guide-group > .lulu-guide-footer { margin: 0; padding: 0 14px 10px; }
+
+.lulu-guide-subgroup { margin: 0 8px 8px; border: 1px solid #e1dacd; border-radius: 10px; }
+.lulu-guide-subgroup > summary { padding: 11px 12px; color: #4d5548; font-size: 12px; font-weight: 600; cursor: pointer; }
+.lulu-guide-subgroup > .lulu-guide-capture { margin: 0; border: 0; }
+
+/* Common destinations stay visible and open directly; only action forms expand. */
+.lulu-guide-quick-section { margin-top: 10px; }
+.lulu-guide-quick-section > h3 { margin: 0 0 6px; color: #777061; font: 600 10px/1.4 var(--font-mono, monospace); letter-spacing: .1em; text-transform: uppercase; }
+.lulu-guide-quick-section > .lulu-guide-destinations { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:5px; }
+.lulu-guide-quick-section .lulu-guide-destination { min-height:44px; grid-template-columns:30px minmax(0, 1fr); gap:8px; padding:5px 8px; border:1px solid #e5ded1; background:#f7f3ea; }
+.lulu-guide-quick-section .lulu-guide-destination > svg { display:none; }
+.lulu-guide-action-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:6px; align-items:start; }
+.lulu-guide-action-grid > .lulu-guide-subgroup { margin:0; background:#f6f2e9; }
+.lulu-guide-action-grid > .lulu-guide-subgroup[open] { grid-column:1 / -1; }
+.lulu-guide-action-grid > .lulu-guide-subgroup > summary { min-height:44px; display:flex; align-items:center; }
