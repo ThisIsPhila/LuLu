@@ -136,9 +136,9 @@ window.productionTasks = {
         },
         {
           "title": "Search and library",
-          "status": "Existing surface · boundaries need validation",
-          "detail": "Local Home/Leaves search and type filters work across titles, writing and tags. Protected records are excluded from ordinary lists, counts and matches; synthetic browser and 60 focused regression tests pass.",
-          "next": "Verify authenticated phone journeys and complete useful notes, tasks and settings flows within the established UI.",
+          "status": "Implemented locally · acceptance pending",
+          "detail": "Library searches ordinary entries, notes and tasks. Entries filter by collection, favorite and saved topics; Notes/Tasks support account-owned create/edit/delete and task completion. Firebase service uses the signed-in UID, Firestore rules bound the records, and the local-development store is isolated.",
+          "next": "Validate ordinary/private boundaries on the working app; deploy rules only through the authorized release process and complete target-device acceptance.",
           "done": false,
           "state": "verification"
         },
@@ -303,9 +303,9 @@ window.productionTasks = {
         },
         {
           "title": "Contextual representation editor",
-          "status": "Next Product Implementation batch",
-          "detail": "The current inspector still contains fictional names/counts and an Add reference action that does not create a usable mapping. The product session identified the gap; its latest turn was interrupted before correction.",
-          "next": "Finish the ordinary action browser review, then use real current-record/session data and working reference mappings in the existing contextual controls.",
+          "status": "Implemented locally · acceptance pending",
+          "detail": "The inspector lists only owner-configured references, stages Add/Change/Keep original, derives match counts from current draft text, and confirms encrypted owner/session-bound local storage. Private composer draft state remains mounted while the inspector is open.",
+          "next": "Accept Add/Change/Keep/persist and draft continuity in the working app; broader PII/context detection and language-quality work remain separate.",
           "done": false,
           "state": "next"
         }

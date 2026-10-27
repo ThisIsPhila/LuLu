@@ -1,6 +1,6 @@
 # Capacitor mobile implementation (2026-10-26)
 
-> Later evidence on 26 October supersedes the installation limitations below: Android debug install/launch commands passed, and a signed build installed and launched on the physical iPhone after a free-profile slot was released. These are install/process results; usable UI and authenticated journeys remain unverified. The earlier simulator black screen is a separate observation. New email/password and Google/provider code is local and not deployed. See the current progress assessment and the native-auth-provider implementation report.
+> Later evidence on 26 October supersedes the installation limitations below: an Android debug build completed, and a signed build installed and launched on the physical iPhone. The owner also confirmed the iPhone passkey prompt returned to the journal after the hosted passkey repair. These checks do not establish account-owned journal create/edit/restart persistence or a releasable mobile package. New email/password and Google/provider changes remain separate; see the current progress assessment and native-auth reports.
 
 ## Scope delivered in source
 
@@ -21,13 +21,13 @@ The native key adapter uses protected platform storage for newly created key mat
 
 ## Runtime and release gates
 
-The ordinary authenticated mobile journey (sign in, account-owned Firestore journal load, create/edit, restart, and persistence check) has not been demonstrated. The app build contains the client bridge, but its backend exchange routes and hosted bridge page are local changes and are not live. No deployment was performed.
+The complete authenticated mobile journey (sign in, account-owned Firestore journal load, create/edit, restart, and persistence check) has not been demonstrated. The iPhone passkey prompt and return to the app were confirmed after the hosted bridge repair; ordinary journal persistence still needs device acceptance. No public mobile release package is available.
 
-To enable hosted authentication, build the app with `npm run build:app`, publish `dist/app` to the existing Firebase Hosting site `khora-lulu-2026` (its canonical bridge URL is `https://khora-lulu-2026.web.app/native-auth-bridge`), and deploy the updated `functions` codebase `lulu` to the same Firebase project. Keep WebAuthn on the existing trusted hosted origin; do not add Capacitor origins to the WebAuthn allowlist. Validate the bridge and deployed exchange routes with a test account before treating the mobile sign-in journey as complete.
+Hosted authentication uses the existing LuLu web origin and native passkey bridge. Keep WebAuthn on the trusted hosted origin; do not add Capacitor origins to the WebAuthn allowlist. Treat passkey return, journal data access, and record persistence as separate acceptance checks.
 
 Native identifiers are `org.khora.lulu` for both shells and `org.khora.lulu.auth` for the iOS callback URL scheme; Android handles `lulu://auth-callback`. iOS distribution needs the owner's Apple Developer team, bundle-ID registration/capabilities, and signing profile. Android release distribution needs the owner's signing keystore, alias, and passwords configured outside the repository. No signing credentials or hosted changes were made.
 
-Android native compilation is verified, but the available `Medium_Phone_API_36.0` AVD is not runnable because its Android system image is incomplete (no `system.img`), and no physical Android device was attached. Native WebView journal and private-storage isolation therefore still need device/emulator verification. Camera/audio are source-integrated but also need device-level capture/recovery verification.
+Android native compilation is verified, but no physical Android journal/authentication journey is recorded. Native WebView journal, private-storage isolation and camera/audio capture/recovery still need real-device verification.
 
 ## Security review note
 
