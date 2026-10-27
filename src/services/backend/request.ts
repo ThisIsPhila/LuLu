@@ -10,9 +10,9 @@ export class BackendRequestError extends Error {
   }
 }
 
-export async function request<T>(path: string, data: unknown = {}): Promise<T> {
+export async function request<T>(path: string, data: unknown = {}, tokenOverride?: string): Promise<T> {
   await authReady;
-  const token = await auth.currentUser?.getIdToken();
+  const token = tokenOverride ?? await auth.currentUser?.getIdToken();
   const response = await fetch(backendEndpoint + path, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },

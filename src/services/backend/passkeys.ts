@@ -100,7 +100,9 @@ export async function linkGoogleAccount(expectedUid: string, authority: AccountL
   assertLinkAuthority(expectedUid,authority);
   const user = auth.currentUser;
   if (!user || user.uid !== expectedUid) throw new Error('The active account changed. Sign in again before linking a provider.');
-  await linkWithPopup(user, new GoogleAuthProvider());
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({prompt: 'select_account'});
+  await linkWithPopup(user, provider);
   if (auth.currentUser?.uid !== expectedUid || !auth.currentUser.providerData.some(provider => provider.providerId === 'google.com')) {
     throw new Error('Google did not finish linking to this account. Please check the sign-in methods and try again.');
   }
@@ -150,7 +152,7 @@ export async function logout() {
   try { await request('/auth/logout'); }
   finally { await signOut(auth); }
 }
-export async function lockPrivate() { await request('/auth/lock'); }
+export async function lockPrivate(tokenOverride?: string) { await request('/auth/lock', {}, tokenOverride); }
 export function authError(error: unknown) {
   if (error instanceof Error && error.name === 'NotAllowedError') return 'Passkey verification was cancelled or timed out. You can try again.';
   const code = error && typeof error === 'object' && 'code' in error ? String((error as {code?:unknown}).code) : '';

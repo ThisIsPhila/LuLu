@@ -5,8 +5,11 @@ import { authenticate, authenticateWithEmail, authenticateWithGoogle, authError,
 import { bindOnboardingDraft, discardUnreadableOnboardingDraft, loadOnboardingDraft, saveFirstOnboardingEntry, saveOnboardingProgress } from '../../services/onboardingDraft';
 import { isNativePlatform } from '../../platform/runtime';
 import { localDevelopmentAvailable, localDevelopmentSession } from '../../services/localDevelopment';
+import { pendingJudgeInvitation } from '../../services/judgeInvite';
 import './auth.css';
 const localPreviewSessionKey = 'lulu.local-preview.active';
+// Temporarily disabled at the owner's request; keep the journey and its drafts.
+const ONBOARDING_ENABLED = false;
 export function AuthBoundary({children}: {children:(session:AppSession,onSignedOut:()=>void)=>ReactNode}) {
   const [session,setSession]=useState<AppSession|null>(null);
   const [restoring,setRestoring]=useState(true);
@@ -149,7 +152,7 @@ export function AuthBoundary({children}: {children:(session:AppSession,onSignedO
       onSaveFirstEntry={saveFirstEntry} onCreatePrivateSpace={enroll} onSignIn={()=>setRoute('signin')} />
   </>;
   return <OnboardingAuth
-    initialScreen="signin"
+    initialScreen={pendingJudgeInvitation() ? 'create' : 'signin'}
     onRegister={()=>beginPasskey(true)}
     onSignIn={()=>beginPasskey(false)}
     onEmailAuth={(email,password,create)=>runAuthentication(()=>authenticateWithEmail(email,password,create))}
@@ -162,7 +165,7 @@ export function AuthBoundary({children}: {children:(session:AppSession,onSignedO
       }
     }}
     onGoogleSignIn={()=>runAuthentication(authenticateWithGoogle)}
-    onStartOnboarding={()=>setRoute('journey')}
+    onStartOnboarding={ONBOARDING_ENABLED ? ()=>setRoute('journey') : undefined}
     onDevelopmentEnter={localDevelopmentAvailable() ? ()=>{sessionStorage.setItem(localPreviewSessionKey,'yes');setSession(localDevelopmentSession());} : undefined}
     onAuthenticated={()=>{if(verified.current)setSession(verified.current);}}
   />;

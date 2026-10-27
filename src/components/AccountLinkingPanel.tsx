@@ -29,6 +29,7 @@ export function AccountLinkingPanel({uid,authMethod,emailVerificationStatus,isPr
   const [email,setEmail]=useState('');
   const [password,setPassword]=useState('');
   const [googleLinked,setGoogleLinked]=useState(()=>linkedProvider('google.com'));
+  const [googleEmail,setGoogleEmail]=useState(()=>auth.currentUser?.providerData.find(provider => provider.providerId === 'google.com')?.email ?? '');
   const [emailLinked,setEmailLinked]=useState(()=>linkedProvider(EmailAuthProvider.PROVIDER_ID));
   const [emailVerified,setEmailVerified]=useState(()=>auth.currentUser?.emailVerified ?? false);
   const [busy,setBusy]=useState(false);
@@ -37,6 +38,7 @@ export function AccountLinkingPanel({uid,authMethod,emailVerificationStatus,isPr
   const [googleReady,setGoogleReady]=useState(false);
   const temporaryPrivateStepUp=useRef(false);
   const googleAuthority=useRef<AccountLinkAuthority|null>(null);
+  const googleLockToken=useRef<string | undefined>(undefined);
 
   useEffect(()=>()=>{
     if(temporaryPrivateStepUp.current && !isPrivateSessionActive?.()) void lockPrivate().catch(()=>{});
@@ -57,6 +59,7 @@ export function AccountLinkingPanel({uid,authMethod,emailVerificationStatus,isPr
     void auth.currentUser?.reload().then(()=>{
       if(!active || auth.currentUser?.uid!==uid)return;
       setGoogleLinked(linkedProvider('google.com'));
+      setGoogleEmail(auth.currentUser.providerData.find(provider => provider.providerId === 'google.com')?.email ?? '');
       setEmailLinked(linkedProvider(EmailAuthProvider.PROVIDER_ID));
       setEmailVerified(auth.currentUser.emailVerified);
     }).catch(()=>{/* Keep the last confirmed account-link and verification states. */});
@@ -70,9 +73,10 @@ export function AccountLinkingPanel({uid,authMethod,emailVerificationStatus,isPr
     try {
       await unlockPrivate();
       googleAuthority.current=await assertAccountLinkAuthority(uid);
+      googleLockToken.current=await auth.currentUser?.getIdToken();
       temporaryPrivateStepUp.current=!preservePrivate;
       setGoogleReady(true);
-      setStatus('Passkey verified. Continue with Google in the next step.');
+      setStatus('Passkey verified. Tap Continue with Google and choose the Google account you want to link.');
     } catch(caught) {
       setError(providerError(caught));
       if(!isPrivateSessionActive?.())try{await lockPrivate();}catch{setError('Passkey verification failed, and LuLu could not confirm that private access was locked. Reconnect before continuing.');}
@@ -88,20 +92,21 @@ export function AccountLinkingPanel({uid,authMethod,emailVerificationStatus,isPr
     try {
       await linking;
       setGoogleLinked(true);
-      setStatus('Google is linked to this LuLu account.');
-    } catch(caught) { setGoogleLinked(linkedProvider('google.com'));setError(providerError(caught)); }
+      setGoogleEmail(auth.currentUser?.providerData.find(provider => provider.providerId === 'google.com')?.email ?? '');
+      setStatus('Google is linked to this LuLu account. You can use it to sign in next time.');
+    } catch(caught) { setGoogleLinked(linkedProvider('google.com'));setGoogleEmail(auth.currentUser?.providerData.find(provider => provider.providerId === 'google.com')?.email ?? '');setError(providerError(caught)); }
     finally {
-      try { if(!isPrivateSessionActive?.()) await lockPrivate(); }
+      try { if(!isPrivateSessionActive?.()) await lockPrivate(googleLockToken.current); }
       catch { setError('Google linking finished, but LuLu could not confirm that private access was locked. Reconnect and lock the private session before continuing.');setStatus(''); }
-      temporaryPrivateStepUp.current=false;googleAuthority.current=null;setGoogleReady(false);setBusy(false);
+      temporaryPrivateStepUp.current=false;googleAuthority.current=null;googleLockToken.current=undefined;setGoogleReady(false);setBusy(false);
     }
   }
 
   async function cancelGoogleLink() {
     setBusy(true);setError('');setStatus('');
-    try { if(!isPrivateSessionActive?.()) await lockPrivate(); }
+    try { if(!isPrivateSessionActive?.()) await lockPrivate(googleLockToken.current); }
     catch { setError('LuLu could not confirm that private access was locked. Reconnect and lock the private session before continuing.'); }
-    finally { temporaryPrivateStepUp.current=false;googleAuthority.current=null;setGoogleReady(false);setBusy(false); }
+    finally { temporaryPrivateStepUp.current=false;googleAuthority.current=null;googleLockToken.current=undefined;setGoogleReady(false);setBusy(false); }
   }
 
   async function linkEmail() {
@@ -153,13 +158,13 @@ export function AccountLinkingPanel({uid,authMethod,emailVerificationStatus,isPr
 
   const canLink=canLinkAdditionalProvider(authMethod) && !busy;
   return <section className="account-linking" aria-labelledby="account-linking-title">
-    <div className="account-linking-heading"><span>ACCOUNT ACCESS</span><h2 id="account-linking-title">Sign-in methods</h2><p>Link methods to this account after passkey verification. LuLu does not merge separate accounts.</p></div>
-    <div className="account-linking-method"><div><strong>Google</strong><span>{googleLinked?'Linked to this account':'Not linked'}</span></div>
+    <div className="account-linking-heading"><span>ACCOUNT ACCESS</span><h2 id="account-linking-title">Sign-in methods</h2><p>Add a way to sign in to this same account. First verify your passkey, then choose the Google account or enter your email and password.</p></div>
+    <div className="account-linking-method"><div><strong>Google</strong><span>{googleLinked ? (googleEmail ? `Linked: ${googleEmail}` : 'Linked to this account (email unavailable)') : 'Not linked'}</span></div>
       {!googleLinked && !isNativePlatform() && <div className="account-linking-actions">{!googleReady
         ? <button type="button" disabled={!canLink} onClick={()=>void prepareGoogleLink()}>{busy?'Verifying…':'Verify to link Google'}</button>
         : <><button type="button" disabled={busy} onClick={()=>void finishGoogleLink()}>{busy?'Opening Google…':'Continue with Google'}</button><button type="button" disabled={busy} onClick={()=>void cancelGoogleLink()}>Cancel</button></>}</div>}
     </div>
-    {!googleLinked && isNativePlatform() && <div className="account-linking-native-guide"><p className="account-linking-note">To link Google, open LuLu in your phone browser, sign in with this same passkey, then link Google in Settings. The browser session uses the same LuLu account.</p><button type="button" onClick={()=>void openWebAccountSettings()}>Open LuLu in phone browser</button></div>}
+    {!googleLinked && isNativePlatform() && <div className="account-linking-native-guide"><p className="account-linking-note">To link Google: open LuLu in your phone browser, sign in with this same passkey, open Settings, then choose Verify to link Google. After verification, choose Continue with Google and select your Google account.</p><button type="button" onClick={()=>void openWebAccountSettings()}>Open LuLu in phone browser</button></div>}
     <div className="account-linking-method"><div><strong>Email and password</strong><span>{emailLinked?(emailVerified?'Linked · email verified':'Linked · email unverified'):'Not linked'}</span></div>
       {emailLinked && !emailVerified && <div className="account-linking-actions"><button type="button" disabled={busy} onClick={()=>void resendVerification()}>Resend verification</button><button type="button" disabled={busy} onClick={()=>void refreshVerification()}>Check status</button></div>}
     </div>
