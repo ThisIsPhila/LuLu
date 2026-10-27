@@ -72,3 +72,11 @@
 .lulu-guide-action-grid > .lulu-guide-subgroup { margin:0; background:#f6f2e9; }
 .lulu-guide-action-grid > .lulu-guide-subgroup[open] { grid-column:1 / -1; }
 .lulu-guide-action-grid > .lulu-guide-subgroup > summary { min-height:44px; display:flex; align-items:center; }
+
+.lulu-guide-chat-heading { display:flex; align-items:center; gap:10px; }
+.lulu-guide-chat-modes { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 10px; }
+.lulu-guide-chat-modes span { display:inline-flex; align-items:center; gap:5px; min-height:32px; padding:0 10px; border:1px solid #e0d9cc; border-radius:999px; background:#f6f2e9; color:#8b877c; font-size:11px; }
+.lulu-guide-chat-modes .is-active { border-color:#b6c1a8; background:#e8ede2; color:#4b5b45; }
+.lulu-guide-chat-modes small { font-size:9px; }
+.lulu-guide-action-tiles { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.lulu-guide-panel.is-chat .lu-text-chat { background:transparent; border:0; padding:0; }
