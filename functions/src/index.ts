@@ -8,16 +8,18 @@ import type { RegistrationResponseJSON, AuthenticationResponseJSON, Authenticato
 import { ApiError, assertChallenge, assertSession, canOfferRegistrationSignInRecovery, documentId, failureDiagnostic, mintBeforePersist, withCompensation, CHALLENGE_TTL, SESSION_TTL, PRIVATE_TTL, type Challenge, type FailureStage } from './policy.js';
 import { assertExchangeProof, assertExchangeRedeemable, assertExchangeState, isNativeOpaqueValue, isNativeOperation, storedWebAuthnOptions, type NativeOperation } from './native-exchange-policy.js';
 import { browserOrigins as origins, nativeOrigins, isAllowedApiOrigin } from './origin-policy.js';
+import { assertPrivacyRateLimit, configuredProvider, nextPrivacyDailyQuota, PrivacyDailyQuotaError, privacyCapability, validateReviewedPrivacyRequest } from './privacy-processing.js';
 
 initializeApp();
 const db = getFirestore();
 const identity = getAuth();
-const knownRoutes = new Set(['/auth/register/options', '/auth/register/verify', '/auth/login/options', '/auth/login/verify', '/auth/stepup/options', '/auth/stepup/verify', '/auth/provider/session', '/auth/lock', '/auth/logout', '/session', '/native/exchange/create', '/native/exchange/options', '/native/exchange/complete', '/native/exchange/provider-complete', '/native/exchange/redeem', '/native/exchange/cancel']);
+const knownRoutes = new Set(['/auth/register/options', '/auth/register/verify', '/auth/login/options', '/auth/login/verify', '/auth/stepup/options', '/auth/stepup/verify', '/auth/provider/session', '/auth/lock', '/auth/logout', '/session', '/privacy/capability', '/privacy/understand', '/native/exchange/create', '/native/exchange/options', '/native/exchange/complete', '/native/exchange/provider-complete', '/native/exchange/redeem', '/native/exchange/cancel']);
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
 const sessions = db.collection('_sessions');
 const challenges = db.collection('_challenges');
 const credentials = db.collection('_credentials');
 const nativeExchanges = db.collection('_nativeExchanges');
+const privacyDailyQuota = db.collection('_rateLimits').doc('privacy-demo-daily');
 type Session = {uid: string; expiresAt: number; privateUntil: number; authMethod?: 'passkey'|'email'|'google'};
 type NativeExchange = {requestId:string; stateHash:string; proofHash:string; operation:NativeOperation; uid:string|null; sid:string|null; status:'pending'|'challenge'|'complete'|'redeemed'|'cancelled'; expiresAt:number; challengeId?:string; challengeOrigin?:string; challengeOptions?:unknown; customToken?:string; privateUntil?:number; purgeAfter:Timestamp};
 const nativeTtl = 5 * 60_000;
@@ -34,7 +36,7 @@ async function sessionFor(header: string | undefined, requirePrivate = false, re
   const snap = await sessions.doc(sid).get();
   const session = snap.data() as Session | undefined;
   assertSession(session, token.uid, Date.now(), requirePrivate);
-  return {...session!, uid: token.uid, sid};
+  return {...session!, authMethod:session!.authMethod ?? (passkeySession ? 'passkey' : undefined), uid: token.uid, sid};
 }
 async function limitRequest(ip: string) {
   const bucket = Math.floor(Date.now() / 900_000);
@@ -44,6 +46,20 @@ async function limitRequest(ip: string) {
     const count = record.data()?.count ?? 0;
     if (count >= 60) throw new ApiError(429, 'Please wait before trying again.');
     tx.set(ref, {count: count + 1, expiresAt: Timestamp.fromMillis((bucket + 2) * 900_000)});
+  });
+}
+async function reservePrivacyDailyQuota(now = Date.now()) {
+  const day = new Date(now).toISOString().slice(0, 10);
+  await db.runTransaction(async transaction => {
+    const snapshot = await transaction.get(privacyDailyQuota);
+    let next;
+    try { next = nextPrivacyDailyQuota(snapshot.exists ? snapshot.data() : null, day); }
+    catch (error) {
+      if (error instanceof PrivacyDailyQuotaError && error.kind === 'limit') throw new ApiError(429, 'The daily privacy review limit has been reached.');
+      if (error instanceof PrivacyDailyQuotaError) throw new ApiError(503, 'Privacy review is temporarily unavailable.');
+      throw error;
+    }
+    transaction.set(privacyDailyQuota, {...next, updatedAt: Timestamp.fromMillis(now)});
   });
 }
 async function takeChallenge(id: unknown, kind: Challenge['kind'], origin: string): Promise<Challenge> {
@@ -77,7 +93,7 @@ async function loadNativeExchange(id: unknown, state: unknown) {
 }
 
 /** No original journal text, private mappings or biometrics are accepted by this API. */
-export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInstances: 2, minInstances: 0, concurrency: 10, timeoutSeconds: 30, invoker: 'public'}, async (request, response) => {
+export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInstances: 2, minInstances: 0, concurrency: 10, timeoutSeconds: 30, invoker: 'public', secrets: ['OPENAI_API_KEY']}, async (request, response) => {
   response.set('Cache-Control', 'no-store');
   response.set('X-Content-Type-Options', 'nosniff');
   const origin = request.get('origin') || '';
@@ -337,7 +353,35 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
     }
     stage = 'session-lookup';
     const current = await sessionFor(request.get('authorization'));
-    if (route === '/session') { response.json({uid:current.uid,expiresAt:current.expiresAt,privateUntil:current.privateUntil}); return; }
+    if (route === '/privacy/capability') {
+      if (Object.keys(body).length !== 0) throw new ApiError(400, 'Invalid request.');
+      const provider = configuredProvider(process.env, process.env.OPENAI_API_KEY);
+      response.json(privacyCapability(provider)); return;
+    }
+    if (route === '/privacy/understand') {
+      stage = 'privacy-processing';
+      const privateSession = await sessionFor(request.get('authorization'), true, true);
+      let reviewed;
+      try { reviewed = validateReviewedPrivacyRequest(body); }
+      catch (error) { throw new ApiError(400, error instanceof Error ? error.message : 'Invalid privacy request.'); }
+      const provider = configuredProvider(process.env, process.env.OPENAI_API_KEY);
+      if (!provider.enabled) throw new ApiError(503, 'Privacy understanding is not configured.');
+      try { assertPrivacyRateLimit(privateSession.sid); }
+      catch { throw new ApiError(429, 'Please wait before trying again.'); }
+      await reservePrivacyDailyQuota();
+      try {
+        const result = await provider.understand(reviewed, AbortSignal.timeout(8_000));
+        const stillPrivate = await sessionFor(request.get('authorization'), true, true);
+        if (stillPrivate.sid !== privateSession.sid || stillPrivate.uid !== privateSession.uid) throw new ApiError(403, 'Please verify your passkey again.');
+        response.json(result); return;
+      } catch {
+        // Do not convert an authority change into a provider failure.
+        try { await sessionFor(request.get('authorization'), true, true); }
+        catch { throw new ApiError(403, 'Please verify your passkey again.'); }
+        throw new ApiError(502, 'Privacy understanding could not be completed.');
+      }
+    }
+    if (route === '/session') { response.json({uid:current.uid,expiresAt:current.expiresAt,privateUntil:current.privateUntil,authMethod:current.authMethod}); return; }
     if (route === '/auth/lock') { await sessions.doc(current.sid).update({privateUntil:0}); response.json({success:true}); return; }
     if (route === '/auth/logout') { await sessions.doc(current.sid).delete(); response.json({success:true}); return; }
     response.status(404).json({error:'Unknown operation.'});

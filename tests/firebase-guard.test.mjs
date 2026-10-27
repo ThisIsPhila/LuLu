@@ -6,10 +6,11 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { readInputFile, validateFirebase } from '../scripts/firebase-guard.mjs';
 
-const [firebaseBase, firebasercBase, policy, functionSourceBase] = await Promise.all([
+const [firebaseBase, firebasercBase, policy, exceptionDocument, functionSourceBase] = await Promise.all([
   readFile(new URL('../firebase.json', import.meta.url), 'utf8').then(JSON.parse),
   readFile(new URL('../.firebaserc', import.meta.url), 'utf8').then(JSON.parse),
   readFile(new URL('../.sdd/memory/governance/firebase-guard-policy.json', import.meta.url), 'utf8').then(JSON.parse),
+  readFile(new URL('../.sdd/memory/governance/firebase-guard-exceptions.json', import.meta.url), 'utf8').then(JSON.parse),
   readFile(new URL('../functions/src/index.ts', import.meta.url), 'utf8')
 ]);
 
@@ -18,14 +19,14 @@ const input = (changes = {}) => ({
   firebaserc: structuredClone(firebasercBase),
   policy,
   functionSource: functionSourceBase,
-  exceptions: [],
+  exceptions: exceptionDocument.exceptions,
   now: new Date('2026-10-25T12:00:00Z'),
   ...changes
 });
-const codes = (result) => result.map(({ code }) => code);
+const codes = (result) => result.filter(({ exception }) => !exception).map(({ code }) => code);
 
 test('allows the existing project and bounded Johannesburg function configuration', () => {
-  assert.deepEqual(validateFirebase(input()), []);
+  assert.deepEqual(codes(validateFirebase(input())), []);
 });
 
 test('rejects project and region drift', () => {
@@ -74,6 +75,16 @@ test('rejects unknown function options and non-literal option expressions', () =
   assert.ok(codes(validateFirebase(extraCpu)).includes('FUNCTION_OPTION_UNKNOWN'));
   assert.ok(codes(validateFirebase(extraVpcConnector)).includes('FUNCTION_OPTION_UNKNOWN'));
   assert.ok(codes(validateFirebase(dynamicOption)).includes('FUNCTION_OPTIONS_UNSUPPORTED'));
+});
+
+test('allows only the owner-reviewed literal OpenAI secret binding', () => {
+  assert.deepEqual(codes(validateFirebase(input())), []);
+  const extra = input({ functionSource: functionSourceBase.replace("secrets: ['OPENAI_API_KEY']", "secrets: ['OPENAI_API_KEY', 'OTHER_SECRET']") });
+  const dynamic = input({ functionSource: functionSourceBase.replace("secrets: ['OPENAI_API_KEY']", 'secrets: [process.env.SECRET_NAME]') });
+  const computed = input({ functionSource: functionSourceBase.replace("secrets: ['OPENAI_API_KEY']", 'secrets: approvedSecrets') });
+  assert.ok(codes(validateFirebase(extra)).includes('FUNCTION_SECRET_BINDING'));
+  assert.ok(codes(validateFirebase(dynamic)).includes('FUNCTION_OPTIONS_UNSUPPORTED'));
+  assert.ok(codes(validateFirebase(computed)).includes('FUNCTION_OPTIONS_UNSUPPORTED'));
 });
 
 test('rejects re-exports and export-list forms that could add functions indirectly', () => {

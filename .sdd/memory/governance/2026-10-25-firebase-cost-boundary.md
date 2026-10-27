@@ -24,6 +24,14 @@ Repository hooks and predeploy checks guard the reviewed local path. They cannot
 
 This decision corrects the earlier proposed Spark downgrade; that downgrade was not confirmed or applied. Formal SDD progression remains paused; relevant security, verification and preservation duties still apply.
 
+## Owner-approved bounded privacy demo activation
+
+Date: 26 October 2026. The owner approved the main web app and existing Johannesburg API deployment to the configured LuLu domain, binding the project Secret Manager value `OPENAI_API_KEY` to the existing API only, selecting `PRIVACY_PROVIDER=openai_decisions` (`gpt-6-luna`), and enabling reviewed-text Decisions requests with a maximum of 20 requests per UTC day. Up to three synthetic verification calls are included within that 20-request allowance. The owner explicitly allowed Firebase/Google Cloud CLI use because the connected Firebase integration was unavailable.
+
+The owner created the Secret Manager entry `OPENAI_API_KEY` in project `khora-lulu-2026`. The agent must verify secret metadata/version state without reading its payload. The value is injected only by the function's narrow Secret Manager binding; never copy it from a local environment variable or print it. Only deploy Hosting and the existing `api` function. Do not deploy the currently changed Firestore rules or Auth configuration under this approval. The 20-request/day quota is an operational request limit, not a hard monetary cap. OpenAI Decisions is billed according to its current token pricing; Google Cloud/Blaze remains subject to included allowances and overage billing. Record actual charges only after checking billing evidence.
+
+The approved function-secret guard exception is limited to the literal binding `secrets: ['OPENAI_API_KEY']`; no other names or dynamic secret lists are permitted.
+
 ## Hosting boundary clarified by owner
 
 Only the main application is deployed to Firebase Hosting. The interactive frame/demo, independent historical prototype and internal document/media review pages remain local development tools. Do not publish them or add hosted preview/demo routes without a new owner instruction. Database mock content is fictional starter content copied once into each signed-in account as ordinary private/unprotected editable entries; it is not a shared read-only journal or a replacement for protected mode. Preserve user changes and deletions across sign-in/device changes.

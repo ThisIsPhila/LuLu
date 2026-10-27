@@ -2,11 +2,11 @@ export const CHALLENGE_TTL = 5 * 60_000;
 export const SESSION_TTL = 12 * 60 * 60_000;
 export const PRIVATE_TTL = 10 * 60_000;
 export type Challenge = { challenge: string; kind: 'register' | 'login' | 'stepup'; uid: string | null; sid: string | null; origin: string; rpID: string; expiresAt: number; used: boolean; exchangeId?: string };
-export type FailureStage = 'request-validation' | 'rate-limit' | 'register-options' | 'login-options' | 'verify-registration' | 'persist-credential' | 'create-auth-user' | 'mint-token' | 'persist-session' | 'verify-authentication' | 'persist-counter' | 'update-session' | 'session-lookup' | 'unknown';
-export type FailureRoute = '/auth/register/options' | '/auth/register/verify' | '/auth/login/options' | '/auth/login/verify' | '/auth/stepup/options' | '/auth/stepup/verify' | '/auth/lock' | '/auth/logout' | '/session' | 'unknown';
+export type FailureStage = 'request-validation' | 'rate-limit' | 'register-options' | 'login-options' | 'verify-registration' | 'persist-credential' | 'create-auth-user' | 'mint-token' | 'persist-session' | 'verify-authentication' | 'persist-counter' | 'update-session' | 'session-lookup' | 'privacy-processing' | 'unknown';
+export type FailureRoute = '/auth/register/options' | '/auth/register/verify' | '/auth/login/options' | '/auth/login/verify' | '/auth/stepup/options' | '/auth/stepup/verify' | '/auth/lock' | '/auth/logout' | '/session' | '/privacy/capability' | '/privacy/understand' | 'unknown';
 
-const failureRoutes = new Set<FailureRoute>(['/auth/register/options', '/auth/register/verify', '/auth/login/options', '/auth/login/verify', '/auth/stepup/options', '/auth/stepup/verify', '/auth/lock', '/auth/logout', '/session', 'unknown']);
-const failureStages = new Set<FailureStage>(['request-validation', 'rate-limit', 'register-options', 'login-options', 'verify-registration', 'persist-credential', 'create-auth-user', 'mint-token', 'persist-session', 'verify-authentication', 'persist-counter', 'update-session', 'session-lookup', 'unknown']);
+const failureRoutes = new Set<FailureRoute>(['/auth/register/options', '/auth/register/verify', '/auth/login/options', '/auth/login/verify', '/auth/stepup/options', '/auth/stepup/verify', '/auth/lock', '/auth/logout', '/session', '/privacy/capability', '/privacy/understand', 'unknown']);
+const failureStages = new Set<FailureStage>(['request-validation', 'rate-limit', 'register-options', 'login-options', 'verify-registration', 'persist-credential', 'create-auth-user', 'mint-token', 'persist-session', 'verify-authentication', 'persist-counter', 'update-session', 'session-lookup', 'privacy-processing', 'unknown']);
 const safeErrorCodes = new Set(['auth/insufficient-permission', 'auth/invalid-credential', 'auth/internal-error', 'auth/uid-already-exists', 'auth/user-not-found', 'auth/network-request-failed', 'auth/invalid-uid', '7', 'permission-denied', 'PERMISSION_DENIED', 'unavailable', 'deadline-exceeded', 'unknown']);
 const safeErrorNames = new Set(['Error', 'FirebaseError', 'FirebaseAuthError', 'GoogleError', 'ApiError', 'TypeError']);
 

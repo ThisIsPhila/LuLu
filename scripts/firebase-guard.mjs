@@ -8,7 +8,7 @@ import ts from 'typescript';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const POLICY_PATH = '.sdd/memory/governance/firebase-guard-policy.json';
 const EXCEPTIONS_PATH = '.sdd/memory/governance/firebase-guard-exceptions.json';
-const ALLOWED_FUNCTION_OPTIONS = new Set(['region', 'memory', 'maxInstances', 'minInstances', 'concurrency', 'timeoutSeconds', 'invoker']);
+const ALLOWED_FUNCTION_OPTIONS = new Set(['region', 'memory', 'maxInstances', 'minInstances', 'concurrency', 'timeoutSeconds', 'invoker', 'secrets']);
 const ALLOWED_SERVICE_KEYS = {
   hosting: new Set(['public', 'ignore', 'rewrites', 'site', 'predeploy', 'cleanUrls', 'trailingSlash', 'headers']),
   firestore: new Set(['rules', 'indexes', 'predeploy']),
@@ -149,7 +149,21 @@ function validateFirebase({ firebase, firebaserc, functionSource, policy, except
           add(findings, 'FUNCTION_OPTION_UNKNOWN', key, `Function option ${key} is not allowlisted; review resource expansion before changing policy.`);
           continue;
         }
-        const value = readLiteral(property.initializer, parsed.sourceFile);
+        let value;
+        if (key === 'secrets') {
+          const secretArray = property.initializer;
+          if (!ts.isArrayLiteralExpression(secretArray) || secretArray.elements.some(element => !ts.isStringLiteral(element))) {
+            add(findings, 'FUNCTION_OPTIONS_UNSUPPORTED', { key, expression: secretArray.getText(parsed.sourceFile) }, 'Function secrets must be a literal array of approved secret names.');
+            continue;
+          }
+          value = secretArray.elements.map(element => element.text);
+          if (stable(value) !== stable(policy.functionSecretNames ?? [])) {
+            add(findings, 'FUNCTION_SECRET_BINDING', value, `Function secrets must match the reviewed list ${JSON.stringify(policy.functionSecretNames ?? [])}.`);
+            continue;
+          }
+        } else {
+          value = readLiteral(property.initializer, parsed.sourceFile);
+        }
         if (value && typeof value === 'object' && Object.hasOwn(value, 'unsupported')) {
           add(findings, 'FUNCTION_OPTIONS_UNSUPPORTED', { key, expression: value.unsupported }, 'Function options must use literal values; dynamic expressions fail closed.');
         } else {
@@ -169,7 +183,7 @@ function validateFirebase({ firebase, firebaserc, functionSource, policy, except
       ['invoker', options.invoker === 'public', options.invoker ?? null, 'Function invoker must remain public for the existing API.']
     ];
     for (const [key, valid, observed, message] of checks) if (!valid) add(findings, `FUNCTION_${key.replace(/[A-Z]/g, (letter) => `_${letter}`).toUpperCase()}`, observed, message);
-    if (!Object.hasOwn(options, 'region') || !Object.hasOwn(options, 'memory') || !Object.hasOwn(options, 'minInstances') || !Object.hasOwn(options, 'maxInstances')) {
+    if (!Object.hasOwn(options, 'region') || !Object.hasOwn(options, 'memory') || !Object.hasOwn(options, 'minInstances') || !Object.hasOwn(options, 'maxInstances') || !Object.hasOwn(options, 'secrets')) {
       add(findings, 'FUNCTION_OPTIONS_INCOMPLETE', options, 'Set each required function resource option explicitly so drift can be reviewed.');
     }
   }

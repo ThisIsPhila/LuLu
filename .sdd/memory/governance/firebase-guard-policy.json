@@ -6,6 +6,7 @@
   "functionCodebase": "lulu",
   "functionRuntime": "nodejs22",
   "functionName": "api",
+  "functionSecretNames": ["OPENAI_API_KEY"],
   "functionRegion": "africa-south1",
   "functionMemoryMiBMax": 256,
   "functionTimeoutSecondsMax": 30,
