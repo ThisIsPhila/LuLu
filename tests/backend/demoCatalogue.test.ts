@@ -23,6 +23,21 @@ test('catalogue mapping returns display-only synthetic fields and ignores source
   assert.equal('ownerId' in entry, false);
 });
 
+test('catalogue mapping retains an ordinary Story collection label', () => {
+  const entry = mapDemoRecord('demo-story', {
+    title: 'The next chapter',
+    body: 'Nia and Rowan return to the garden.',
+    kind: 'Story',
+    protected: false,
+    perspective: 'third',
+    curatedDeck: 'Juniper Street Garden',
+    tags: ['Fiction', 'Part 2'],
+    createdAt: { toDate: () => new Date('2026-10-24T12:30:00.000Z') },
+  });
+  assert.equal(entry.curatedDeck, 'Juniper Street Garden');
+  assert.deepEqual(entry.tags, ['Fiction', 'Part 2']);
+});
+
 test('catalogue mapping refuses protected or malformed records', () => {
   const base = {
     title: 'A fictional sample',
@@ -33,4 +48,5 @@ test('catalogue mapping refuses protected or malformed records', () => {
   };
   assert.throws(() => mapDemoRecord('demo-one', { ...base, protected: true }));
   assert.throws(() => mapDemoRecord('demo-one', { ...base, body: 10 }));
+  assert.throws(() => mapDemoRecord('demo-one', { ...base, kind: 'Journal', curatedDeck: 'Not a Story collection' }));
 });

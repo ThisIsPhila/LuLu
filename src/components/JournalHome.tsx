@@ -1,47 +1,46 @@
 import React, { useState } from 'react';
 import { EntryStack, EntrySpread } from './EntryStack';
 import {
-  Shield,
-  Search,
-  Lock,
   Sparkles,
   ArrowRight,
-  MoreHorizontal,
-  ChevronRight,
-  Footprints,
   Compass,
-  Target,
-  KeyRound,
-  Fingerprint,
-  LogOut,
-  UserRound,
+  StickyNote,
+  CheckSquare,
 } from 'lucide-react';
-import { LuLuLogo } from './Logo';
+import { OrdinaryNavigationHeader } from './OrdinaryNavigationHeader';
 import type { Entry } from '../domain/journal';
+import type { LibraryItemKind } from '../domain/libraryItems';
 import { filterOrdinaryEntries } from '../domain/ordinaryBrowse';
+import { OrdinaryEntryCard } from './OrdinaryEntryCard';
 
 type Props = {
   entries: Entry[];
+  displayName: string;
   activeTab: string;
   onTabChange: (tab: string) => void;
   onNewEntry: () => void;
+  onQuickCreateLibraryItem: (kind: LibraryItemKind) => void;
   onSelectEntry: (entry: Entry) => void;
   onOpenProtectedGate: () => void;
   protectedMode: boolean;
   onOpenVault: () => void;
   onSignOut: () => void;
+  onOpenSettings: () => void;
 };
 
 export const JournalHome: React.FC<Props> = ({
   entries,
+  displayName,
   activeTab,
   onTabChange,
   onNewEntry,
+  onQuickCreateLibraryItem,
   onSelectEntry,
   onOpenProtectedGate,
   protectedMode,
   onOpenVault,
   onSignOut,
+  onOpenSettings,
 }) => {
   const [searching, setSearching] = useState(false);
   const [query, setQuery] = useState('');
@@ -51,10 +50,17 @@ export const JournalHome: React.FC<Props> = ({
   const greeting = now.getHours() < 12 ? 'Good morning' : now.getHours() < 17 ? 'Good afternoon' : 'Good evening';
 
   const ordinaryEntries = filterOrdinaryEntries(entries);
-  const weeklyCount = ordinaryEntries.filter(entry => {
-    const age = now.getTime() - Date.parse(entry.date);
-    return age >= 0 && age < 7 * 86400000;
-  }).length;
+  const dayMs = 86400000;
+  const nowMs = now.getTime();
+  const dailyCounts = Array.from({ length: 7 }, () => 0);
+  for (const entry of ordinaryEntries) {
+    const timestamp = Date.parse(entry.date);
+    const age = nowMs - timestamp;
+    if (!Number.isFinite(timestamp) || age < 0 || age >= 7 * dayMs) continue;
+    dailyCounts[6 - Math.floor(age / dayMs)] += 1;
+  }
+  const weeklyCount = dailyCounts.reduce((total, count) => total + count, 0);
+  const maxDailyCount = Math.max(1, ...dailyCounts);
   const filteredEntries = ordinaryEntries.filter((e) => {
     if (activeTab === 'All') return true;
     if (activeTab === 'Journal') return e.kind === 'Journal';
@@ -67,41 +73,17 @@ export const JournalHome: React.FC<Props> = ({
 
   return (
     <div className="stitch-journal-home">
-      {/* Fixed Sticky Header */}
-      <header className="stitch-topbar">
-        <div className="topbar-container">
-          <LuLuLogo size="sm" />
-
-          <div className="topbar-actions">
-            <button
-              className={`topbar-circle-btn ${protectedMode ? 'active-vault' : ''}`}
-              onClick={onOpenVault}
-              title="Open Private Vault & Safety Sanctuary"
-            >
-              <Shield size={16} />
-            </button>
-
-            <button
-              className="topbar-circle-btn"
-              onClick={() => { if (searching) setQuery(''); setSearching(!searching); }}
-              aria-label="Search entries" aria-expanded={searching}
-            >
-              <Search size={16} />
-            </button>
-
-            <details className="account-menu">
-              <summary className="user-avatar-circle" aria-label="Account menu" title="Account menu"><UserRound size={18} aria-hidden="true" /></summary>
-              <div className="account-menu-panel">
-                <span className="account-menu-label">Your account</span>
-                <button type="button" onClick={onSignOut}><LogOut size={16} aria-hidden="true" />Sign out</button>
-              </div>
-            </details>
-          </div>
-        </div>
-      </header>
+      <OrdinaryNavigationHeader
+        protectedMode={protectedMode}
+        searchExpanded={searching}
+        onOpenVault={onOpenVault}
+        onOpenSettings={onOpenSettings}
+        onSignOut={onSignOut}
+        onSearch={() => { if (searching) setQuery(''); setSearching(!searching); }}
+      />
 
       {/* Main Stream */}
-      <main className="stitch-main-stream">
+      <main className="stitch-main-stream" data-ordinary-page-scroll="home" data-testid="ordinary-page-scroll-home">
         {/* Temporal Greeting */}
         <section className="temporal-greeting-section">
           <div className="temporal-date-row">
@@ -109,7 +91,7 @@ export const JournalHome: React.FC<Props> = ({
 
           </div>
 
-          <h1 className="greeting-headline">{greeting}</h1>
+          <h1 className="greeting-headline">{greeting}{displayName.trim() ? `, ${displayName.trim()}` : ''}</h1>
           <p className="greeting-sub">
             A quiet sanctuary for your personal thoughts & discoveries.
           </p>
@@ -142,15 +124,14 @@ export const JournalHome: React.FC<Props> = ({
 
         </nav>
 
-        {/* Daily Reflection Quote Card */}
+        {/* Reflection question */}
         {activeTab === 'All' && (
           <section className="daily-reflection-card">
             <div className="reflection-card-header">
               <span className="reflection-tag">
                 <Sparkles size={11} />
-                <span>Daily Reflection</span>
+                <span>Reflection question</span>
               </span>
-              <span className="reflection-prompt-time">06:00 AM Prompt</span>
             </div>
 
             <blockquote className="reflection-quote">
@@ -168,10 +149,20 @@ export const JournalHome: React.FC<Props> = ({
                 <ArrowRight size={13} className="arrow-well" />
               </div>
             </button>
+            <div className="home-quick-actions" role="group" aria-label="Quick actions">
+              <button type="button" className="home-quick-action" onClick={() => onQuickCreateLibraryItem('note')}>
+                <StickyNote size={14} aria-hidden="true" />
+                <span>Quick note</span>
+              </button>
+              <button type="button" className="home-quick-action" onClick={() => onQuickCreateLibraryItem('task')}>
+                <CheckSquare size={14} aria-hidden="true" />
+                <span>Task</span>
+              </button>
+            </div>
           </section>
         )}
 
-        {searching && <input className="home-search-input" type="search" aria-label="Search entries" placeholder="Search your entries…" value={query} onChange={e => setQuery(e.target.value)} autoFocus />}
+        {searching && <input className="home-search-input" type="search" aria-label="Search entries" data-ordinary-page-search="true" placeholder="Search your entries…" value={query} onChange={e => setQuery(e.target.value)} autoFocus />}
         <div className="home-collection-stacks" aria-label="Your collections">
           {(['Journal', 'Stories'] as const).map(title => (
             <EntryStack
@@ -194,24 +185,29 @@ export const JournalHome: React.FC<Props> = ({
             onSelectEntry={onSelectEntry}
           />
         )}
-        {/* Weekly Clarity Rhythm Card */}
+        {!query.trim() && <section className="home-latest-writing" aria-labelledby="home-latest-writing-title">
+          <div className="home-latest-writing-heading">
+            <h2 id="home-latest-writing-title">Your latest writing</h2>
+            <span>{visibleEntries.length} {visibleEntries.length === 1 ? 'entry' : 'entries'}</span>
+          </div>
+          {visibleEntries.length ? <div className="home-latest-writing-list">
+            {visibleEntries.slice(0, 3).map(entry => <OrdinaryEntryCard key={`latest-${entry.id}`} entry={entry} onSelect={onSelectEntry} />)}
+          </div> : <p className="home-latest-writing-empty">Your saved entries will appear here.</p>}
+        </section>}
+        {/* Recent writing count and seven rolling 24-hour buckets */}
         <section className="clarity-rhythm-card">
           <div className="clarity-left">
             <div className="clarity-icon-circle">
               <Compass size={17} />
             </div>
             <div className="clarity-text">
-              <h4>Weekly Clarity Rhythm</h4>
-              <p>{weeklyCount} {weeklyCount === 1 ? 'entry' : 'entries'} in the last 7 days</p>
+              <h4>Recent writing</h4>
+              <p>{weeklyCount} {weeklyCount === 1 ? 'entry' : 'entries'} in the past 7 days</p>
             </div>
           </div>
 
-          <div className="clarity-bars-visualizer" aria-hidden="true">
-            <span style={{ height: '14px' }} />
-            <span style={{ height: '22px' }} />
-            <span style={{ height: '8px' }} />
-            <span style={{ height: '26px' }} />
-            <span style={{ height: '18px' }} />
+          <div className="clarity-bars-visualizer" role="img" aria-label={`Entry counts by rolling 24-hour period, oldest to newest: ${dailyCounts.map((count, index) => `${count} ${count === 1 ? 'entry' : 'entries'}`).join(', ')}`}>
+            {dailyCounts.map((count, index) => <span key={index} style={{ height: count === 0 ? '0px' : `${Math.max(4, Math.round((count / maxDailyCount) * 28))}px` }} />)}
           </div>
         </section>
       </main>

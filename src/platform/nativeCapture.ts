@@ -3,11 +3,11 @@ import { isNativePlatform } from './runtime';
 
 export type CapturedImage = { blob: Blob; mimeType: string; format: string };
 
-/** Capture an image through the native camera and return its original camera output bytes. */
-export async function captureNativeImage(): Promise<CapturedImage | null> {
+/** Choose an image from the user's photo library and return its original image bytes. */
+export async function captureNativeImage(source: 'camera' | 'photos' = 'photos'): Promise<CapturedImage | null> {
   if (!isNativePlatform()) return null;
   const photo = await Camera.getPhoto({
-    source: CameraSource.Camera,
+    source: source === 'camera' ? CameraSource.Camera : CameraSource.Photos,
     resultType: CameraResultType.Uri,
     quality: 100,
     allowEditing: false,

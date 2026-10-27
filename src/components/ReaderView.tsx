@@ -1,47 +1,51 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ArrowLeft,
-  Lock,
+  ArrowRight,
   Unlock,
   Eye,
-  EyeOff,
-  Headphones,
   Palette,
   Type,
-  Shield,
-  Volume2,
-  VolumeX,
   Pencil,
+  Shield,
 } from 'lucide-react';
 import { LuLuLogo } from './Logo';
 import type { Entry } from '../domain/journal';
-import type { Entity } from '../domain/transform';
-import { transform } from '../domain/transform';
+import { OrdinaryMediaAttachments } from './OrdinaryMediaAttachments';
 
 type Props = {
   entry: Entry;
+  mediaOwnerId: string;
   protectedMode: boolean;
-  entities: Entity[];
   onBack: () => void;
   onEdit: () => void;
   onEnterProtected: () => void;
-  onExitProtected: () => void;
+  storySequence?: readonly Entry[];
+  onSelectStorySequenceEntry?: (entry: Entry) => void;
 };
 
 export const ReaderView: React.FC<Props> = ({
   entry,
+  mediaOwnerId,
   protectedMode,
-  entities,
   onBack,
   onEdit,
   onEnterProtected,
-  onExitProtected,
+  storySequence = [],
+  onSelectStorySequenceEntry,
 }) => {
   const [showOriginal, setShowOriginal] = useState(false);
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [fontSize, setFontSize] = useState<'regular' | 'large'>('regular');
   const [colorTheme, setColorTheme] = useState<'paper' | 'stone' | 'dark'>('paper');
+  const storySequenceIndex = storySequence.findIndex(item => item.id === entry.id);
+  const hasStorySequence = entry.kind === 'Story' && storySequence.length > 1 && storySequenceIndex >= 0 && Boolean(onSelectStorySequenceEntry);
 
+  useEffect(() => {
+    setShowOriginal(false);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [entry.id]);
+
+  const hasReadAccess = !entry.protected || protectedMode;
   const hasOriginal = Boolean(entry.originalBody && protectedMode);
 
   let displayText = entry.body;
@@ -53,53 +57,52 @@ export const ReaderView: React.FC<Props> = ({
     <div className={`story-reading-screen theme-${colorTheme}`}>
       {/* Top Header */}
       <header className="reading-header">
-        <button className="icon-btn-round" onClick={onBack} aria-label="Go back">
+        <button className="icon-btn-round" type="button" onClick={onBack} aria-label="Go back">
           <ArrowLeft size={18} />
         </button>
         <div className="header-brand-title">
           <LuLuLogo size="sm" />
-          <span className="composer-label">{entry.kind === 'Story' ? 'Story' : 'Journal'}</span>
+          {hasReadAccess && <span className="composer-label">{entry.kind === 'Story' ? 'Story' : 'Journal'}</span>}
         </div>
         <div className="header-right-tools">
-          <button className="icon-btn-round" onClick={onEdit} title={entry.protected ? 'Protected entry editing is not available yet' : 'Edit entry'} aria-label={entry.protected ? 'Protected entry editing is not available yet' : 'Edit entry'}>
+          {!entry.protected && <button className="icon-btn-round" type="button" onClick={onEdit} title="Edit entry" aria-label="Edit entry">
             <Pencil size={16} />
-          </button>
-          <button
-            className={`icon-btn-round ${protectedMode ? 'active-green' : ''}`}
-            onClick={protectedMode ? onExitProtected : onEnterProtected}
-            title={protectedMode ? 'Exit Protected Vault' : 'Authenticate Passkey'}
-          >
-            <Shield size={16} />
-          </button>
+          </button>}
         </div>
       </header>
 
       {/* Reader Body */}
       <main className="reading-content-container">
+        {!hasReadAccess ? (
+          <section aria-label="Open saved entry">
+            <p className="reading-tag-capsule">Verify to open this saved entry.</p>
+            <button className="btn-pill-action primary" type="button" onClick={onEnterProtected}>Verify with passkey</button>
+          </section>
+        ) : <>
         {/* Date & Mode Meta */}
         <div className="reading-meta-bar">
           <time className="reading-date-timestamp" dateTime={entry.date}>{new Date(entry.date).toLocaleString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</time>
 
-          {entry.protected && (
+          {entry.protected && protectedMode && (
             <button
               className={`original-pill-toggle ${showOriginal ? 'active' : ''}`}
+              type="button"
+              disabled={!hasOriginal}
+              aria-label={!hasOriginal ? 'Original text unavailable' : showOriginal ? 'Conceal original text' : 'Reveal original text'}
+              aria-pressed={showOriginal}
               onClick={() => {
-                if (!protectedMode) {
-                  onEnterProtected();
-                } else {
-                  setShowOriginal(!showOriginal);
-                }
+                if (hasOriginal) setShowOriginal(!showOriginal);
               }}
             >
               <Eye size={12} />
-              <span>{showOriginal ? 'CONCEALED' : 'ORIGINAL'}</span>
+              <span>{!hasOriginal ? 'ORIGINAL UNAVAILABLE' : showOriginal ? 'CONCEAL ORIGINAL' : 'REVEAL ORIGINAL'}</span>
             </button>
           )}
         </div>
 
         {/* Category Pill */}
         <div className="reading-tag-capsule">
-          <span>{entry.kind}{entry.tags.length ? ` · ${entry.tags.join(' · ')}` : ''}</span>
+          <span>{entry.kind}{entry.kind === 'Story' && entry.curatedDeck?.trim() ? ` · ${entry.curatedDeck.trim()}` : ''}{entry.tags.length ? ` · ${entry.tags.join(' · ')}` : ''}</span>
         </div>
 
         {/* Title */}
@@ -108,7 +111,7 @@ export const ReaderView: React.FC<Props> = ({
         {showOriginal && (
           <div className="author-unmasked-banner">
             <Unlock size={14} />
-            <span>Author original intent unmasked (Private Enclave Active)</span>
+            <span>Original text is visible while private access is active.</span>
           </div>
         )}
 
@@ -119,15 +122,27 @@ export const ReaderView: React.FC<Props> = ({
           ))}
         </article>
 
+        {!entry.protected && <OrdinaryMediaAttachments ownerId={mediaOwnerId} entryId={entry.id} />}
+
         {/* Separator Dots */}
-        <div className="reading-separator-dots" aria-hidden="true">
+        {hasStorySequence ? <nav className="reading-story-sequence" aria-label={`${entry.curatedDeck || 'Story'} reading sequence`}>
+          <button type="button" className="reading-sequence-step" disabled={storySequenceIndex === 0}
+            aria-label="Read previous entry in this story" onClick={() => onSelectStorySequenceEntry?.(storySequence[storySequenceIndex - 1]!)}>
+            <ArrowLeft size={15} aria-hidden="true" /><span>Previous</span>
+          </button>
+          <span className="reading-sequence-position" aria-live="polite">Part {storySequenceIndex + 1} of {storySequence.length}</span>
+          <button type="button" className="reading-sequence-step" disabled={storySequenceIndex === storySequence.length - 1}
+            aria-label="Read next entry in this story" onClick={() => onSelectStorySequenceEntry?.(storySequence[storySequenceIndex + 1]!)}>
+            <span>Next</span><ArrowRight size={15} aria-hidden="true" />
+          </button>
+        </nav> : <div className="reading-separator-dots" aria-hidden="true">
           <span>•</span>
           <span>•</span>
           <span>•</span>
-        </div>
+        </div>}
 
         {/* Identified Entities Card (Screen Reading Mode) */}
-        {entry.protected && Boolean(entry.entitiesRecognized?.length) && (
+        {entry.protected && protectedMode && Boolean(entry.entitiesRecognized?.length) && (
           <div className="identified-entities-card">
             <div className="entities-card-header">
               <div className="entities-title-row">
@@ -142,51 +157,33 @@ export const ReaderView: React.FC<Props> = ({
             </div>
           </div>
         )}
+        </>}
       </main>
-
-      {/* Audio Simulation Indicator */}
-      {isPlayingAudio && (
-        <div className="audio-playing-indicator">
-          <Volume2 size={15} />
-          <span>Reading aloud in natural calm cadence...</span>
-        </div>
-      )}
 
       {/* Floating Circular Reader Dock (Screen Reading Mode) */}
       <footer className="circular-reader-dock" aria-label="Reader tools">
         <button
-          className={`circle-tool-btn ${isPlayingAudio ? 'active' : ''}`}
-          onClick={() => setIsPlayingAudio(!isPlayingAudio)}
-          title="Listen"
-        >
-          {isPlayingAudio ? <VolumeX size={17} /> : <Headphones size={17} />}
-        </button>
-
-        <button
           className="circle-tool-btn"
+          type="button"
           onClick={() =>
             setColorTheme(colorTheme === 'paper' ? 'stone' : colorTheme === 'stone' ? 'dark' : 'paper')
           }
           title="Theme"
+          aria-label="Change reading theme"
         >
           <Palette size={17} />
         </button>
 
         <button
           className="circle-tool-btn"
+          type="button"
           onClick={() => setFontSize(fontSize === 'regular' ? 'large' : 'regular')}
           title="Typography"
+          aria-label="Change reading text size"
         >
           <Type size={17} />
         </button>
 
-        <button
-          className={`circle-tool-btn lock-btn ${protectedMode ? 'active-vault' : ''}`}
-          onClick={protectedMode ? onExitProtected : onEnterProtected}
-          title={protectedMode ? 'Exit Protected Vault' : 'Authenticate Passkey'}
-        >
-          <Lock size={17} />
-        </button>
       </footer>
     </div>
   );

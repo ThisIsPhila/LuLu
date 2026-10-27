@@ -1,0 +1,40 @@
+.profile-settings-page {
+  min-height: 100dvh;
+  padding: max(18px, env(safe-area-inset-top)) 20px max(40px, env(safe-area-inset-bottom));
+  color: #292824;
+  background: radial-gradient(ellipse at 84% 0%, rgba(217, 202, 188, .32), transparent 34%), #f7f2e9;
+}
+.profile-settings-header, .profile-settings-sections { width: min(100%, 720px); margin-inline: auto; }
+.profile-settings-back { display: inline-flex; min-height: 40px; align-items: center; gap: 8px; padding: 0 13px; border: 1px solid rgba(182, 174, 161, .55); border-radius: 999px; color: #45443e; background: rgba(251, 248, 242, .84); font: 600 13px var(--font-heading); cursor: pointer; }
+.profile-settings-back:focus-visible, .profile-settings-toggle:focus-visible, .profile-settings-link:focus-visible, .profile-settings-signout:focus-visible { outline: 3px solid #68745f; outline-offset: 3px; }
+.profile-settings-kicker { display: block; margin-top: 30px; color: #737362; font: 600 10px var(--font-mono); letter-spacing: .13em; }
+.profile-settings-header h1 { margin-top: 6px; color: #292824; font: 400 clamp(29px, 7vw, 39px)/1.14 var(--font-serif); letter-spacing: -.035em; }
+.profile-settings-header > p { max-width: 530px; margin-top: 8px; color: #6c665d; font: 15px/1.6 var(--font-serif); }
+.profile-settings-sections { display: grid; gap: 25px; margin-top: 30px; }
+.profile-settings-section h2 { margin: 0 0 9px 3px; color: #655f56; font: 600 12px var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.profile-settings-card { overflow: hidden; border: 1px solid rgba(217, 202, 188, .7); border-radius: 19px; background: rgba(251, 248, 242, .91); box-shadow: 0 3px 12px rgba(98, 79, 55, .045), inset 0 1px 0 rgba(255,255,255,.95); }
+.profile-settings-row, .profile-settings-link { display: flex; min-height: 70px; align-items: center; gap: 12px; padding: 13px 16px; }
+.profile-settings-row + .profile-settings-row, .profile-settings-link, .profile-settings-signout { border-top: 1px solid rgba(182, 174, 161, .28); }
+.profile-settings-icon { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; border-radius: 12px; color: #55624f; background: #e9ece3; }
+.profile-settings-copy { display: grid; min-width: 0; gap: 3px; }
+.profile-settings-copy strong { color: #302f2a; font: 600 14px/1.35 var(--font-heading); }
+.profile-settings-copy small { color: #777166; font: 12px/1.45 var(--font-heading); }
+.profile-settings-toggle { flex: 0 0 42px; width: 42px; height: 24px; margin-left: auto; accent-color: #59694f; cursor: pointer; }
+.profile-settings-row.static-row { justify-content: space-between; }
+.profile-settings-row.static-row .profile-settings-copy { flex: 1; }
+.profile-settings-value, .profile-settings-status { flex: 0 0 auto; color: #67685b; font: 11px var(--font-mono); }
+.profile-settings-link { width: 100%; justify-content: space-between; border-right: 0; border-bottom: 0; border-left: 0; color: inherit; background: transparent; text-align: left; cursor: pointer; }
+.profile-settings-link:hover { background: #f4efe6; }
+.profile-settings-link > svg { flex: 0 0 auto; color: #777468; }
+.profile-settings-note { padding: 0 16px 16px 62px; color: #777166; font: 11px/1.5 var(--font-heading); }
+.profile-settings-signout { display: flex; width: 100%; min-height: 48px; align-items: center; gap: 9px; padding: 10px 16px; border-right: 0; border-bottom: 0; border-left: 0; color: #6d4c44; background: transparent; font: 600 13px var(--font-heading); text-align: left; cursor: pointer; }
+.profile-settings-signout:hover { background: #f5ede8; }
+@media (max-width: 420px) {
+  .profile-settings-page { padding-inline: 16px; }
+  .profile-settings-row, .profile-settings-link { padding-inline: 13px; }
+  .profile-settings-copy small { max-width: 250px; }
+  .profile-settings-status { font-size: 9px; }
+  .profile-settings-note { padding-left: 13px; }
+}
+.profile-settings-name { display: grid; gap: 8px; padding: 14px 16px; }
+.profile-settings-name input { width: 100%; padding: 10px 12px; border: 1px solid #d8d0c2; border-radius: 10px; color: #302f2a; background: #fffdf8; font: 14px var(--font-heading); }

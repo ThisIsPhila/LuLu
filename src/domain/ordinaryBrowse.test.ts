@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { Entry } from './journal.ts';
-import { filterOrdinaryEntries, findCuratedDeck } from './ordinaryBrowse.ts';
+import { filterOrdinaryEntries, findCuratedDeck, findCuratedDeckEntries } from './ordinaryBrowse.ts';
 
 const entries: Entry[] = [
   {
@@ -49,4 +49,11 @@ test('curated deck summary reflects actual matching entries and is absent withou
     name: 'Moonlight', count: 2, entry: entries[1],
   });
   assert.equal(findCuratedDeck(filterOrdinaryEntries(entries, 'garden')), null);
+});
+
+test('curated Story entries form a chronological reading sequence without protected or Journal records', () => {
+  const protectedStory: Entry = { ...entries[2]!, id: 'protected-story', title: 'Hidden', protected: true, date: '2026-10-20T18:00:00.000Z' };
+  const journalWithLegacyDeck: Entry = { ...entries[0]!, id: 'journal-deck', kind: 'Journal', curatedDeck: 'Moonlight' };
+  assert.deepEqual(findCuratedDeckEntries([...entries, protectedStory, journalWithLegacyDeck], ' Moonlight ').map(entry => entry.id), ['story-2', 'story-1']);
+  assert.deepEqual(findCuratedDeckEntries(entries, '  '), []);
 });

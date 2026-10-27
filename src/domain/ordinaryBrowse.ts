@@ -21,11 +21,36 @@ export function filterOrdinaryEntries(
 
 export type CuratedDeckSummary = { name: string; count: number; entry: Entry };
 
-/** Return a deck summary only when a matching ordinary curated entry exists. */
+/** Return one summary per curated collection, based only on ordinary entries. */
+export function findCuratedDecks(entries: readonly Entry[]): CuratedDeckSummary[] {
+  const decks = new Map<string, CuratedDeckSummary>();
+  for (const entry of entries) {
+    if (entry.protected || entry.kind !== 'Story' || typeof entry.curatedDeck !== 'string') continue;
+    const name = entry.curatedDeck.trim();
+    if (!name) continue;
+    const deck = decks.get(name);
+    if (deck) deck.count += 1;
+    else decks.set(name, { name, count: 1, entry });
+  }
+  return [...decks.values()];
+}
+
+/** Return the first deck summary when callers need a single featured collection. */
 export function findCuratedDeck(entries: readonly Entry[]): CuratedDeckSummary | null {
-  const entry = entries.find(item => typeof item.curatedDeck === 'string' && item.curatedDeck.trim());
-  if (!entry || !entry.curatedDeck) return null;
-  const name = entry.curatedDeck.trim();
-  const count = entries.filter(item => item.curatedDeck?.trim() === name).length;
-  return { name, count, entry };
+  return findCuratedDecks(entries)[0] ?? null;
+}
+
+/** Keep a saved Story collection together in source-time order for continuous reading. */
+export function findCuratedDeckEntries(entries: readonly Entry[], deckName: string): Entry[] {
+  const target = deckName.trim();
+  if (!target) return [];
+  return entries
+    .filter(entry => !entry.protected && entry.kind === 'Story' && entry.curatedDeck?.trim() === target)
+    .slice()
+    .sort((left, right) => {
+      const leftDate = Date.parse(left.date);
+      const rightDate = Date.parse(right.date);
+      const orderedDate = (Number.isFinite(leftDate) ? leftDate : 0) - (Number.isFinite(rightDate) ? rightDate : 0);
+      return orderedDate || left.id.localeCompare(right.id);
+    });
 }

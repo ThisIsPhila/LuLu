@@ -1,0 +1,19 @@
+.lu-orb-launcher { position: relative; display: grid; place-items: center; width: 60px; height: 60px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; touch-action: none; -webkit-touch-callout: none; user-select: none; }
+.lu-orb-sphere { display: block; border-radius: 50%; background: radial-gradient(circle at 71% 20%, rgba(255,255,249,.98) 0 5%, rgba(255,250,229,.62) 14%, transparent 32%), radial-gradient(ellipse at 46% 64%, rgba(106,122,82,.75), rgba(177,180,135,.47) 32%, transparent 62%), radial-gradient(circle at 30% 29%, #f4ebd7, #d8c9a9 55%, #faf0d7 79%, #b6a783); border: 1px solid rgba(255,255,249,.9); box-shadow: inset 3px 4px 9px rgba(255,255,255,.78), inset -5px -7px 15px rgba(108,95,60,.24), 0 6px 18px rgba(91,78,54,.2), 0 0 16px rgba(233,221,182,.55); }
+.lu-orb-launcher .lu-orb-sphere { width: 54px; height: 54px; transition: transform .25s ease, box-shadow .25s ease; }
+.lu-orb-launcher:hover .lu-orb-sphere { transform: scale(1.06); }
+.lu-orb-mark { position: absolute; width: 25px; height: 25px; object-fit: contain; filter: drop-shadow(0 1px 3px rgba(55,55,38,.45)); pointer-events: none; }
+.lu-orb-launcher:focus-visible, .lu-wheel-action:focus-visible, .lu-wheel-close:focus-visible, .lu-orb-keyboard-actions:focus-visible { outline: 3px solid #748569; outline-offset: 4px; }
+.lu-orb-keyboard-actions { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.lu-orb-keyboard-actions:focus-visible { width: auto; height: auto; clip-path: none; right: 0; bottom: 64px; padding: 10px; border: 0; border-radius: 12px; background: #f9f3e8; }
+.lu-wheel-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(43, 39, 30, .22); backdrop-filter: blur(4px); }
+.lu-wheel { position: absolute; width: 0; height: 0; color: #292a24; }
+.lu-wheel-rings { position: absolute; width: 226px; height: 226px; left: -113px; top: -113px; border: 1px solid rgba(255,255,248,.65); border-radius: 50%; box-shadow: 0 0 0 20px rgba(246,238,216,.08), 0 0 60px rgba(226,218,166,.5), inset 0 0 36px rgba(247,240,211,.35); }
+.lu-wheel-orb { position: absolute; width: 112px; height: 112px; left: -56px; top: -56px; }
+.lu-wheel-mark { position: absolute; width: 49px; height: 49px; left: -24.5px; top: -24.5px; object-fit: contain; filter: drop-shadow(0 1px 4px rgba(55,55,38,.45)); pointer-events: none; }
+.lu-wheel-action { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; width: 72px; height: 72px; padding: 0; transform: translate(-50%,-50%); border: 1px solid rgba(255,255,250,.95); border-radius: 50%; color: #302f29; background: rgba(250,245,235,.96); box-shadow: 0 7px 22px rgba(67,58,43,.16); cursor: pointer; font: 500 11px/1 var(--font-sans, sans-serif); transition: background .15s, box-shadow .15s; }
+.lu-wheel-action.is-active, .lu-wheel-action:hover { background: #e5ebdb; box-shadow: 0 0 0 4px rgba(221,229,198,.6), 0 8px 24px rgba(67,58,43,.2); }
+.lu-wheel-action:disabled { opacity: .55; }
+.lu-wheel-hint { position: absolute; left: -100px; top: 139px; width: 200px; color: #fffdf7; text-align: center; font: 12px/1.4 var(--font-sans, sans-serif); text-shadow: 0 1px 5px #4a463c; }
+.lu-wheel-close { position: absolute; left: -28px; top: 163px; width: 56px; min-height: 36px; border: 0; border-radius: 999px; background: #faf5eb; color: #514f43; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .lu-orb-launcher .lu-orb-sphere, .lu-wheel-action { transition: none; } }

@@ -3,27 +3,24 @@ import {
   BookOpen,
   Layers,
   Edit3,
-  Shield,
-  ShieldCheck,
-  Settings2,
-  Lock,
+  LibraryBig,
 } from 'lucide-react';
 
 type Props = {
-  currentView: 'home' | 'leaves' | 'compose' | 'vault' | 'inspector';
-  onNavigate: (view: 'home' | 'leaves' | 'compose' | 'vault' | 'inspector') => void;
-  protectedMode: boolean;
+  currentView: 'home' | 'leaves' | 'stories' | 'library' | 'compose' | 'vault' | 'inspector';
+  onNavigate: (view: 'home' | 'leaves' | 'stories' | 'library' | 'compose') => void;
 };
 
-export const BottomNav: React.FC<Props> = ({ currentView, onNavigate, protectedMode }) => {
+export const BottomNav: React.FC<Props> = ({ currentView, onNavigate }) => {
   return (
-    <nav className="stitch-bottom-dock" aria-label="Main Navigation">
+    <nav className="stitch-bottom-dock" aria-label="Main Navigation" data-ordinary-navigation-dock="true" data-testid="ordinary-navigation-dock">
       <div className="dock-inner-container">
-        {/* 1. Home / Journal */}
+        {/* Home */}
         <button
           className={`dock-item-btn ${currentView === 'home' ? 'active' : ''}`}
+          aria-current={currentView === 'home' ? 'page' : undefined}
           onClick={() => onNavigate('home')}
-          aria-label="Journal Home"
+          aria-label="Home"
         >
           <div className="dock-icon-wrapper">
             <BookOpen size={18} />
@@ -31,51 +28,52 @@ export const BottomNav: React.FC<Props> = ({ currentView, onNavigate, protectedM
           <span className="dock-label">Home</span>
         </button>
 
-        {/* 2. Leaves / Decks */}
+        {/* Journal */}
         <button
           className={`dock-item-btn ${currentView === 'leaves' ? 'active' : ''}`}
+          aria-current={currentView === 'leaves' ? 'page' : undefined}
           onClick={() => onNavigate('leaves')}
-          aria-label="Story Leaves"
+          aria-label="Journal"
         >
           <div className="dock-icon-wrapper">
             <Layers size={18} />
           </div>
-          <span className="dock-label">Leaves</span>
+          <span className="dock-label">Journal</span>
         </button>
 
-        {/* 3. Center Compose Button */}
+        {/* Write */}
         <button
           className="dock-compose-btn"
           onClick={() => onNavigate('compose')}
-          aria-label="Compose Entry"
+          aria-label="Write"
         >
           <Edit3 size={20} />
         </button>
 
-        {/* 4. Vault / Sanctuary */}
+        {/* Stories */}
         <button
-          className={`dock-item-btn ${currentView === 'vault' ? 'active' : ''} ${
-            protectedMode ? 'enclave-unlocked' : ''
-          }`}
-          onClick={() => onNavigate('vault')}
-          aria-label="Private Sanctuary Vault"
+          className={`dock-item-btn ${currentView === 'stories' ? 'active' : ''}`}
+          aria-current={currentView === 'stories' ? 'page' : undefined}
+          onClick={() => onNavigate('stories')}
+          aria-label="Stories"
         >
           <div className="dock-icon-wrapper">
-            {protectedMode ? <ShieldCheck size={18} className="text-sage" /> : <Shield size={18} />}
+            <Layers size={18} />
           </div>
-          <span className="dock-label">Vault</span>
+          <span className="dock-label">Stories</span>
         </button>
 
-        {/* 5. Entity Inspector */}
+        {/* Library */}
         <button
-          className={`dock-item-btn ${currentView === 'inspector' ? 'active' : ''}`}
-          onClick={() => onNavigate('inspector')}
-          aria-label="Entity Inspector"
+          className={`dock-item-btn ${currentView === 'library' ? 'active' : ''}`}
+          aria-current={currentView === 'library' ? 'page' : undefined}
+          onClick={() => onNavigate('library')}
+          aria-label="Library"
         >
           <div className="dock-icon-wrapper">
-            <Settings2 size={18} />
+            <LibraryBig size={18} />
           </div>
-          <span className="dock-label">Inspector</span>
+          <span className="dock-label">Library</span>
         </button>
       </div>
     </nav>

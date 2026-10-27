@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // users/{uid}/entries/{id}: ownerId string immutable, title <=200, body <=50000,
-    // kind Journal|Story, protected bool, perspective first|third,
+    // kind Journal|Story, optional curatedDeck (ordinary Story only, <=80), optional favorite bool and tags (<=12 strings of <=40), protected bool, perspective first|third,
     // createdAt immutable timestamp, updatedAt server timestamp. No source fields.
     // users/{uid}/private/{id}: AES-GCM v1 ciphertext <=150000, iv base64 <=24,
     // updatedAt server timestamp. Device key is never uploaded.
@@ -25,13 +25,27 @@ service cloud.firestore {
     }
     function uidUnchanged(uid) { return request.resource.data.ownerId == uid; }
     function uidNotModified() { return request.resource.data.ownerId == resource.data.ownerId; }
+    function validTag(tags, i) {
+      return i >= tags.size() || (tags[i] is string && tags[i].size() > 0 && tags[i].size() <= 40);
+    }
+    function validTags(d) {
+      return !d.keys().hasAny(['tags']) || (d.tags is list && d.tags.size() <= 12
+        && validTag(d.tags,0) && validTag(d.tags,1) && validTag(d.tags,2) && validTag(d.tags,3)
+        && validTag(d.tags,4) && validTag(d.tags,5) && validTag(d.tags,6) && validTag(d.tags,7)
+        && validTag(d.tags,8) && validTag(d.tags,9) && validTag(d.tags,10) && validTag(d.tags,11));
+    }
     function isValidEntry(d) {
       return d.keys().hasAll(['ownerId','title','body','kind','protected','perspective','createdAt','updatedAt'])
-        && d.keys().hasOnly(['ownerId','title','body','kind','protected','perspective','createdAt','updatedAt'])
+        && d.keys().hasOnly(['ownerId','title','body','kind','protected','perspective','createdAt','updatedAt','curatedDeck','favorite','tags'])
         && d.ownerId is string && d.ownerId.size() <=128
         && d.title is string && d.title.size() <=200
         && (!d.protected || d.title == 'Journal entry')
         && d.body is string && d.body.size() >0 && d.body.size() <=50000
+        && (!d.keys().hasAny(['curatedDeck']) || (d.kind == 'Story' && !d.protected
+          && d.curatedDeck is string && d.curatedDeck.size() >0 && d.curatedDeck.size() <=80))
+        && (!d.keys().hasAny(['favorite']) || d.favorite is bool)
+        && validTags(d)
+        && (!d.keys().hasAny(['favorite','tags']) || !d.protected)
         && d.kind in ['Journal','Story'] && d.protected is bool
         && d.perspective in ['first','third']
         && d.createdAt is timestamp && d.updatedAt == request.time;
@@ -45,11 +59,16 @@ service cloud.firestore {
     }
     function isValidDemoEntry(d) {
       return d.keys().hasAll(['title','body','kind','protected','perspective','tags','createdAt'])
-        && d.keys().hasOnly(['title','body','kind','protected','perspective','tags','createdAt'])
+        && d.keys().hasOnly(['title','body','kind','protected','perspective','tags','createdAt','curatedDeck'])
         && d.title is string && d.title.size() > 0 && d.title.size() <= 200
         && d.body is string && d.body.size() > 0 && d.body.size() <= 50000
         && d.kind in ['Journal','Story'] && d.protected == false
         && d.perspective in ['first','third'] && d.tags is list && d.tags.size() <= 12
+        && validTag(d.tags,0) && validTag(d.tags,1) && validTag(d.tags,2) && validTag(d.tags,3)
+        && validTag(d.tags,4) && validTag(d.tags,5) && validTag(d.tags,6) && validTag(d.tags,7)
+        && validTag(d.tags,8) && validTag(d.tags,9) && validTag(d.tags,10) && validTag(d.tags,11)
+        && (!d.keys().hasAny(['curatedDeck']) || (d.kind == 'Story'
+          && d.curatedDeck is string && d.curatedDeck.size() > 0 && d.curatedDeck.size() <= 80))
         && d.createdAt is timestamp;
     }
     function isValidDemoManifest(d) {
@@ -70,6 +89,44 @@ service cloud.firestore {
         && request.resource.data.protected == resource.data.protected
         && (!resource.data.protected || privateSession(uid));
       allow delete: if activeSession(uid) && (!resource.data.protected || privateSession(uid));
+    }
+    function isValidLibraryItem(d) {
+      return d.keys().hasAll(['ownerId','kind','title','body','completed','createdAt','updatedAt'])
+        && d.keys().hasOnly(['ownerId','kind','title','body','completed','createdAt','updatedAt'])
+        && d.ownerId is string && d.ownerId.size() <= 128
+        && d.kind in ['note','task']
+        && d.title is string && d.title.size() > 0 && d.title.size() <= 200
+        && d.body is string && d.body.size() <= 10000
+        && d.completed is bool && d.createdAt is timestamp && d.updatedAt == request.time;
+    }
+    match /users/{uid}/notesTasks/{id} {
+      allow get: if activeSession(uid);
+      allow list: if activeSession(uid) && request.query.limit <= 100;
+      allow create: if activeSession(uid) && uidUnchanged(uid) && isValidLibraryItem(request.resource.data)
+        && request.resource.data.createdAt == request.time;
+      allow update: if activeSession(uid) && uidNotModified() && isValidLibraryItem(request.resource.data)
+        && request.resource.data.kind == resource.data.kind
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if activeSession(uid);
+    }
+    function isValidLibraryItem(d) {
+      return d.keys().hasAll(['ownerId','kind','title','body','completed','createdAt','updatedAt'])
+        && d.keys().hasOnly(['ownerId','kind','title','body','completed','createdAt','updatedAt'])
+        && d.ownerId is string && d.ownerId.size() <= 128
+        && d.kind in ['note','task']
+        && d.title is string && d.title.size() > 0 && d.title.size() <= 200
+        && d.body is string && d.body.size() <= 10000
+        && d.completed is bool && d.createdAt is timestamp && d.updatedAt == request.time;
+    }
+    match /users/{uid}/notesTasks/{id} {
+      allow get: if activeSession(uid);
+      allow list: if activeSession(uid) && request.query.limit <= 100;
+      allow create: if activeSession(uid) && uidUnchanged(uid) && isValidLibraryItem(request.resource.data)
+        && request.resource.data.createdAt == request.time;
+      allow update: if activeSession(uid) && uidNotModified() && isValidLibraryItem(request.resource.data)
+        && request.resource.data.kind == resource.data.kind
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if activeSession(uid);
     }
     // One-time initialization marker. Removing/editing a starter entry must never
     // cause it to be restored by a later sign-in or another device.

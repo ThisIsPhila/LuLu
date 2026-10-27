@@ -62,7 +62,7 @@ test('signed-in active passkey sessions can read the catalogue manifest and vali
  const manifestPath='demoCatalogues/johannesburg-v1';
  const path=`${manifestPath}/entries/demo-one`;
  const manifest={version:1,label:'Fictional demo catalogue',entryIds:['demo-one']};
- const sample={title:'A fictional sample',body:'A short invented scene.',kind:'Story',protected:false,perspective:'first',tags:['Demo'],createdAt:Timestamp.fromMillis(1)};
+ const sample={title:'A fictional sample',body:'A short invented scene.',kind:'Story',protected:false,perspective:'first',curatedDeck:'Demo collection',tags:['Demo'],createdAt:Timestamp.fromMillis(1)};
  await env.withSecurityRulesDisabled(async ctx=>{
   await setDoc(doc(ctx.firestore(),manifestPath),manifest);
   await setDoc(doc(ctx.firestore(),path),sample);
@@ -71,6 +71,10 @@ test('signed-in active passkey sessions can read the catalogue manifest and vali
  await assertSucceeds(getDoc(doc(db(),path)));
  await env.withSecurityRulesDisabled(ctx=>setDoc(doc(ctx.firestore(),'demoCatalogues/johannesburg-v1/entries/leaked'),{...sample,originalBody:'source text'}));
  await assertFails(getDoc(doc(db(),'demoCatalogues/johannesburg-v1/entries/leaked')));
+ await env.withSecurityRulesDisabled(ctx=>setDoc(doc(ctx.firestore(),'demoCatalogues/johannesburg-v1/entries/invalid-collection'),{...sample,curatedDeck:'x'.repeat(81)}));
+ await assertFails(getDoc(doc(db(),'demoCatalogues/johannesburg-v1/entries/invalid-collection')));
+ await env.withSecurityRulesDisabled(ctx=>setDoc(doc(ctx.firestore(),'demoCatalogues/johannesburg-v1/entries/journal-collection'),{...sample,kind:'Journal'}));
+ await assertFails(getDoc(doc(db(),'demoCatalogues/johannesburg-v1/entries/journal-collection')));
  await env.withSecurityRulesDisabled(ctx=>setDoc(doc(ctx.firestore(),'demoCatalogues/unsafe'),{...manifest,source:'leaked'}));
  await assertFails(getDoc(doc(db(),'demoCatalogues/unsafe')));
  const bob=db('bob','bob-session');

@@ -4,39 +4,125 @@
   "createdAtEncoding": "Convert each ISO 8601 createdAt value to a Firestore Timestamp when seeding.",
   "manifest": {
     "version": 1,
-    "label": "Fictional demo catalogue",
-    "entryIds": ["demo-quiet-morning", "demo-lantern-walk", "demo-small-rituals"]
+    "label": "Fictional starter journal",
+    "entryIds": [
+      "demo-journal-quiet-start",
+      "demo-journal-small-win",
+      "demo-journal-saturday-market",
+      "demo-journal-room-to-think",
+      "demo-journal-end-of-week",
+      "demo-story-juniper-01",
+      "demo-story-juniper-02",
+      "demo-story-juniper-03",
+      "demo-story-lantern-01",
+      "demo-story-lantern-02"
+    ]
   },
   "entries": [
     {
-      "id": "demo-quiet-morning",
-      "title": "A quiet morning",
-      "body": "The courtyard was still cool after the night rain. I watered the small herb pots, made tea, and wrote down one thing I wanted to finish before lunch.",
+      "id": "demo-journal-quiet-start",
+      "title": "A little room in the morning",
+      "body": "I left my phone on the table while the kettle warmed and opened the window to the cool air. The basil had leaned toward the light again, so I turned the pot and pinched off one dry leaf. Nothing dramatic happened; that was the good part. I ate toast slowly, wrote down the three things I wanted to carry into the day, and let the rest wait. By the time I picked up my messages, I felt more like I had arrived in the morning instead of being pulled into it.",
       "kind": "Journal",
       "protected": false,
       "perspective": "first",
-      "tags": ["Morning", "Reflection"],
-      "createdAt": "2026-10-25T07:40:00.000Z"
+      "tags": ["Morning", "Routine", "Reflection"],
+      "createdAt": "2026-10-23T06:35:00.000Z"
     },
     {
-      "id": "demo-lantern-walk",
-      "title": "The lantern walk",
-      "body": "Nia and Rowan met beneath the paper lanterns at Juniper Arcade, a made-up place in this sample story. They traded ideas for a tiny community garden and agreed to sketch a plan over the weekend.",
+      "id": "demo-journal-small-win",
+      "title": "One thing finished",
+      "body": "I kept avoiding the first page of the community garden notes because I wanted the whole plan to sound clever straight away. Today I made a rough list instead: shade, water, somewhere to sit, and a way for neighbours to borrow tools. It took twenty minutes. The list is ordinary and incomplete, but now there is something to improve. I sent Rowan a photo of it and asked which question we should answer first. Starting badly turned out to be much easier than waiting to start perfectly.",
+      "kind": "Journal",
+      "protected": false,
+      "perspective": "first",
+      "tags": ["Writing", "Small wins", "Garden"],
+      "createdAt": "2026-10-24T14:10:00.000Z"
+    },
+    {
+      "id": "demo-journal-saturday-market",
+      "title": "The Saturday market",
+      "body": "The market was busy, but the stallholders still had time to talk. I bought oranges from a woman who remembered that I like the small, tart ones, then walked the long way around the square with the paper bag tucked under my arm. A child was trying to teach a patient dog to sit beside the flower buckets. I wrote the scene down before it faded: orange peel on my fingers, the dog looking solemn, somebody laughing behind me. It is a small day, which feels like enough of a reason to remember it.",
+      "kind": "Journal",
+      "protected": false,
+      "perspective": "first",
+      "tags": ["Weekend", "People", "Places"],
+      "createdAt": "2026-10-25T09:25:00.000Z"
+    },
+    {
+      "id": "demo-journal-room-to-think",
+      "title": "A quieter afternoon",
+      "body": "I had more on my list than the afternoon could hold. Instead of moving everything to tomorrow, I circled the one call that needed an answer and the laundry that was already waiting. I took both in turn, then sat by the window with tea and no screen for ten minutes. The other tasks are still there, but they feel like separate things now rather than one large cloud. I want to remember that a shorter list can be an honest plan, not a sign that I have given up.",
+      "kind": "Journal",
+      "protected": false,
+      "perspective": "first",
+      "tags": ["Balance", "Reflection", "Routine"],
+      "createdAt": "2026-10-25T15:40:00.000Z"
+    },
+    {
+      "id": "demo-journal-end-of-week",
+      "title": "What I want to keep",
+      "body": "This week went better when I asked for help early, ate lunch away from my desk, and stopped trying to solve every small problem before bed. I did not manage those things every day. I did notice the difference on the days I remembered. For next week, I am keeping the sketchbook by the door and leaving one evening open. I am not making a grand promise to become more organised; I am making the next useful step easier to find.",
+      "kind": "Journal",
+      "protected": false,
+      "perspective": "first",
+      "tags": ["Weekly reflection", "Habits", "Planning"],
+      "createdAt": "2026-10-26T17:05:00.000Z"
+    },
+    {
+      "id": "demo-story-juniper-01",
+      "title": "The empty lot",
+      "body": "When Nia first stopped beside the empty lot on Juniper Street, she was only looking for a place to sit while the rain passed. Rowan was already there, balancing a paper cup on the low brick wall and watching water run toward the storm drain. Between them, the lot held a tangle of grass, two stubborn marigolds, and a broken sign for a shop that had closed years ago.\n\nNia said the space looked like it was waiting for someone to make a decision. Rowan laughed and said it looked like it was waiting for the rain to stop. They both stayed under the awning until the clouds thinned. Before they left, Rowan drew a rectangle in the damp dust with one finger and asked what might fit inside it. Nia said: a table, perhaps. Then they went home separately, carrying the same small question.\n\nFor the next few days, Nia found herself looking at the lot from the bus window. She noticed the light reached its back wall in the afternoon, and that the bakery next door threw away clean wooden crates every Thursday. On Friday she came back with a notebook, though she told herself she was only passing through. Rowan arrived with two coffees and a pencil. Neither had a plan yet. They wrote down what they knew: the landlord lived nearby, the tap behind the building still worked, and the marigolds had survived without anyone tending them.\n\nThey decided not to promise a garden or invite a crowd. First, they would ask the neighbours what the space needed. Rowan drew a small square for a table on the page. Nia added a question mark beside it. It was a beginning modest enough to carry home.",
       "kind": "Story",
       "protected": false,
       "perspective": "third",
-      "tags": ["People", "Places", "Story"],
-      "createdAt": "2026-10-24T17:20:00.000Z"
+      "curatedDeck": "Juniper Street Garden",
+      "tags": ["Fiction", "Neighbourhood", "Part 1"],
+      "createdAt": "2026-10-22T16:30:00.000Z"
     },
     {
-      "id": "demo-small-rituals",
-      "title": "Small rituals",
-      "body": "A warm mug, a clear desk, and a few minutes without notifications made the afternoon feel spacious. I want to keep this simple routine for the next writing session.",
-      "kind": "Journal",
+      "id": "demo-story-juniper-02",
+      "title": "A table and four pots",
+      "body": "A week later, Nia returned with a folded page of measurements. Rowan brought four pots rescued from a storeroom and a jar of screws that had belonged to his grandfather. They began with the table: two borrowed trestles, a wide plank, and a coat of paint that dried darker than the label promised. It wobbled, but only when someone leaned hard on one corner.\n\nPeople passing along Juniper Street slowed to ask what they were making. One neighbour offered mint cuttings; another knew where to find clean compost. A little girl named Amari chose the first marigold pot and insisted it needed a blue stone beside it for luck. By late afternoon, the lot looked almost the same from the road. Up close, it had a place to sit, four green beginnings, and a list of names on the back of Nia's plan.\n\nThe work did not happen in a tidy sequence. Rain softened the soil before they could finish the first bed. The hardware shop had run out of the screws Rowan wanted, so he used the mixed jar from his grandfather and sorted the useful ones on the table. Nia worried the neighbours would lose interest once the novelty wore off. Then Mrs. Dlamini came back with a thermos and a handwritten note about which plants could manage the afternoon shade.\n\nThey made a small rota, but left space beside every name for people to change their minds. Amari drew a sun in the corner and added three blue stones, just in case the first one got lonely. Before packing up, Nia stood at the gate and looked at the table from the street. It was still crooked. It was also the first thing on Juniper Street that had been built by people who had not known one another the week before.",
+      "kind": "Story",
       "protected": false,
-      "perspective": "first",
-      "tags": ["Writing", "Routine"],
-      "createdAt": "2026-10-23T14:05:00.000Z"
+      "perspective": "third",
+      "curatedDeck": "Juniper Street Garden",
+      "tags": ["Fiction", "Neighbourhood", "Part 2"],
+      "createdAt": "2026-10-23T16:30:00.000Z"
+    },
+    {
+      "id": "demo-story-juniper-03",
+      "title": "The first harvest",
+      "body": "By the time the first tomatoes ripened, the table had acquired a repaired leg and a collection of mismatched mugs. Nia kept a notebook in the top drawer, where anyone could write down what needed watering or what they had taken home. Rowan added a page for ideas that did not fit anywhere else. Amari's blue stone had moved from the marigold pot to the middle of the table, where it served as a paperweight.\n\nOn the first warm evening of spring, the neighbours cut the tomatoes into a bowl and passed it around with bread. They did not make speeches. Someone asked whether they should try beans next, and three people answered at once. Nia looked at the lot, still uneven and still full of weeds, and saw that it had become a place where a next time could be imagined. She wrote that down before going home.\n\nThe notebook filled slowly. There were lists of seedlings, reminders to tighten the table leg, and small observations that had nothing to do with gardening. Someone had written that the afternoon light made the back wall look gold. Another person left a recipe for tomato chutney and a note saying the jar was in the bakery fridge. Rowan began repairing the broken shop sign and asked everyone to vote on whether it should point toward the garden or toward the street.\n\nWhen the colder evenings returned, the group covered the beds with leaves and carried the pots under the awning. The lot looked quiet again, but the table stayed in place. Nia took the notebook home to copy the pages before the damp could reach them. She found her first square sketch among the notes and smiled at how little it had promised. Next to it, she wrote a new question: what might grow here next year? The answer could wait until spring. For now, the garden had become a place people knew how to return to.",
+      "kind": "Story",
+      "protected": false,
+      "perspective": "third",
+      "curatedDeck": "Juniper Street Garden",
+      "tags": ["Fiction", "Neighbourhood", "Part 3"],
+      "createdAt": "2026-10-24T16:30:00.000Z"
+    },
+    {
+      "id": "demo-story-lantern-01",
+      "title": "The last paper lantern",
+      "body": "At the end of the winter festival, Leila found one paper lantern still glowing beneath the arcade roof. Most of the others had gone dark, their painted moons and cranes folded softly against the night. She was supposed to help pack the stalls away, but the lantern's little pool of gold made the tiled passage feel like a room someone had left just for her.\n\nA bookseller named Tomas came by carrying a box of unsold postcards. He asked whether she thought the light would last until morning. Leila said she did not know, so they sat on the step and watched. While they waited, Tomas told her about a postcard he had kept for years without sending. Leila told him about the train trip she kept planning and postponing. When the wick finally dimmed, neither of them had solved the other person's problem. They had, however, made a plan to meet for tea and look at a map.\n\nThe arcade was different after the festival. Without the music and strings of colour overhead, Leila could hear the old clock behind the tailor's shop ticking unevenly. Tomas said the postcards had been printed for a town he had never visited, all blue coastlines and names he could not pronounce. He had bought them because his sister once told him she wanted to see the sea. Every year he meant to send one, and every year he found a reason to wait until he had something more important to say.\n\nLeila understood the habit. Her train trip had become a folder of saved routes and a promise she moved from one month to the next. She had imagined she needed a perfect weekend, enough money for every stop, and a companion who could take time off. Tomas asked which part mattered most. She said the sea. He suggested they start with the station timetable. The lantern went out while they were talking, but neither of them hurried to stand. They set a day to meet, then carried the empty boxes back through the quiet arcade.",
+      "kind": "Story",
+      "protected": false,
+      "perspective": "third",
+      "curatedDeck": "Lanternlight Notes",
+      "tags": ["Fiction", "Chance meetings", "Part 1"],
+      "createdAt": "2026-10-25T18:45:00.000Z"
+    },
+    {
+      "id": "demo-story-lantern-02",
+      "title": "A map with room to wander",
+      "body": "The next afternoon, Tomas brought the map to the tea shop, folded along a route that crossed three towns and ended by the sea. Leila had expected to talk herself out of the trip. Instead, she noticed the small pencil marks Tomas had added beside places with good bookshops and quiet benches. He said he had drawn them from memory, not advice. That made the route feel less like an itinerary and more like an invitation.\n\nThey chose one weekend, circled the station where Leila would change trains, and left the rest blank. Tomas finally wrote his postcard while they waited for the bill. He addressed it to his sister and kept the message short: he had found a story he wanted to tell her in person. Outside, the arcade was busy again. Leila tucked the map into her bag, no longer needing the lantern to know where to begin.\n\nFor the next two weeks, Leila kept the map on her kitchen table. She looked up the train times, then bought a ticket before she could redesign the entire weekend. Tomas posted the card and sent her a photograph of the empty desk where it had been sitting for years. His sister replied with the name of a small café near the coast and a reminder to bring a jumper because the wind always turned cold after sunset.\n\nOn the morning of the trip, Leila nearly missed the connection because she followed the wrong platform sign. A station attendant pointed her toward the footbridge, and she arrived just as the doors began to close. She found a window seat and watched the city give way to low hills, then fields, then a strip of bright water. There was no grand moment when the journey became certain. There was only the next station, the next page of the map, and the fact that she had gone.\n\nTomas met her at the bookshop by the shore. His sister was already inside, holding the postcard and laughing at how short the message had been. They spent the afternoon walking without checking the route. On the train home, Leila folded the map along a new line and left room for another one.",
+      "kind": "Story",
+      "protected": false,
+      "perspective": "third",
+      "curatedDeck": "Lanternlight Notes",
+      "tags": ["Fiction", "Chance meetings", "Part 2"],
+      "createdAt": "2026-10-26T18:15:00.000Z"
     }
   ]
 }

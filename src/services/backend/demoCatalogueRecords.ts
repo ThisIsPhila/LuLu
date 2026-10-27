@@ -1,4 +1,5 @@
 import type { Entry } from '../../domain/journal.ts';
+import { normalizeStoryCollection } from '../../domain/storyCollections.ts';
 
 export type DemoRecord = {
   title?: unknown;
@@ -7,6 +8,7 @@ export type DemoRecord = {
   protected?: unknown;
   perspective?: unknown;
   tags?: unknown;
+  curatedDeck?: unknown;
   createdAt?: { toDate?: () => Date };
 };
 
@@ -23,6 +25,10 @@ export function mapDemoRecord(id: string, record: DemoRecord): Entry {
   const yesterday = new Date(Date.now() - 86400000).toDateString();
   const groupDate = date.toDateString() === today ? 'Today' : date.toDateString() === yesterday ? 'Yesterday' : 'Earlier';
   const tags = Array.isArray(record.tags) && record.tags.every(tag => typeof tag === 'string') ? record.tags : [];
+  const curatedDeck = normalizeStoryCollection(record.curatedDeck);
+  if (curatedDeck && (record.kind !== 'Story' || record.protected !== false)) {
+    throw new Error('A sample Story collection is unavailable because its catalogue record is invalid.');
+  }
   return {
     id,
     title: record.title,
@@ -36,5 +42,6 @@ export function mapDemoRecord(id: string, record: DemoRecord): Entry {
     favorite: false,
     protected: false,
     perspective: record.perspective === 'third' ? 'third' : 'first',
+    ...(curatedDeck ? { curatedDeck } : {}),
   };
 }

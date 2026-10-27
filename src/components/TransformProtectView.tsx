@@ -4,6 +4,8 @@ import {
   MoreHorizontal,
   Image,
   Mic,
+  Square,
+  X,
   User,
   ShieldCheck,
 } from 'lucide-react';
@@ -15,18 +17,31 @@ import type { LocalVault, LocalVaultRevision } from '../services/vault/localVaul
 import { PrivateDraftComposer } from './PrivateDraftComposer';
 import type { LocalMediaVault } from '../services/vault/localMediaVault';
 import { prepareOrdinaryEntryExport } from '../services/ordinaryEntryExport';
+import { normalizeOrdinaryTags } from '../domain/ordinaryMetadata';
+import { createPlatformAudioCapture } from '../platform/nativeAudio';
+import type { AudioCaptureController, AudioCaptureState } from '../services/mediaCapture';
+import { captureNativeImage } from '../platform/nativeCapture';
+import { isNativePlatform } from '../platform/runtime';
+import { deleteOrdinaryMedia, listOrdinaryMedia, saveOrdinaryMedia } from '../services/ordinaryMedia';
+import type { OrdinaryMediaRef } from '../domain/journal';
 
 type Props = {
   entities: Entity[];
+  ownerId: string;
   protectedMode: boolean;
   editingEntry?: Entry;
   initialKind?: Entry['kind'];
+  initialDraft?: string;
   onBack: () => void;
   onSaveProtected: (data: {
+    entryId: string;
     title: string;
     body: string;
     originalBody: string;
     kind: 'Journal' | 'Story';
+    curatedDeck: string;
+    favorite: boolean;
+    tags: string[];
   }) => Promise<void>;
   onDeleteOrdinary: (entryId: string) => Promise<void>;
   isOrdinarySessionActive: () => boolean;
@@ -39,9 +54,11 @@ type Props = {
 
 export const TransformProtectView: React.FC<Props> = ({
   entities,
+  ownerId,
   protectedMode,
   editingEntry,
   initialKind = 'Journal',
+  initialDraft,
   onBack,
   onSaveProtected,
   onDeleteOrdinary,
@@ -53,15 +70,34 @@ export const TransformProtectView: React.FC<Props> = ({
   onPrivateSaved,
 }) => {
   const viewport = useWritingViewport();
-  const [naturalText, setNaturalText] = useState(editingEntry?.body ?? '');
+  const [entryId] = useState(() => editingEntry?.id ?? crypto.randomUUID());
+  const [naturalText, setNaturalText] = useState(editingEntry?.body ?? initialDraft ?? '');
   const [title, setTitle] = useState(editingEntry?.title ?? '');
   const [kind, setKind] = useState<Entry['kind']>(editingEntry?.kind ?? initialKind);
+  const [curatedDeck, setCuratedDeck] = useState(editingEntry?.curatedDeck ?? '');
+  const [favorite, setFavorite] = useState(editingEntry?.favorite ?? false);
+  const [tagsDraft, setTagsDraft] = useState((editingEntry?.tags ?? []).join(', '));
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState('');
+  const [confirmDiscard,setConfirmDiscard]=useState(false);
   const [menuAction,setMenuAction]=useState<'menu'|'export'|'delete'>('menu');
   const [deleteAcknowledged,setDeleteAcknowledged]=useState(false);
   const [deleteBusy,setDeleteBusy]=useState(false);
+  const [attachments,setAttachments]=useState<Array<{ref:OrdinaryMediaRef;url:string}>>([]);
+  const [initialAttachmentIds,setInitialAttachmentIds]=useState<string[]>([]);
+  const [mediaMessage,setMediaMessage]=useState('');
+  const [audioState,setAudioState]=useState<AudioCaptureState>('idle');
+  const [captureBusy,setCaptureBusy]=useState(false);
+  const [textareaHeight,setTextareaHeight]=useState<number>();
   const optionsMenu=useRef<HTMLDetailsElement|null>(null);
+  const mediaInput=useRef<HTMLInputElement|null>(null);
+  const textarea=useRef<HTMLTextAreaElement|null>(null);
+  const recorder=useRef<AudioCaptureController|null>(null);
+  const newMediaIds=useRef(new Set<string>());
+  const removedMediaIds=useRef(new Set<string>());
+  const saveCompleted=useRef(false);
+  const attachmentUrls=useRef(new Set<string>());
+  const discardDialog=useRef<HTMLDialogElement|null>(null);
   const mounted=useRef(false);
   const exportUrls=useRef(new Set<string>());
   const exportTimers=useRef(new Set<ReturnType<typeof setTimeout>>());
@@ -77,14 +113,75 @@ export const TransformProtectView: React.FC<Props> = ({
     };
   },[]);
 
+  useEffect(()=>{
+    let active=true;
+    const releaseUrls=()=>{for(const url of attachmentUrls.current)URL.revokeObjectURL(url);attachmentUrls.current.clear();};
+    const refresh=async()=>{
+      try{
+        const stored=await listOrdinaryMedia(ownerId,entryId);
+        if(!active)return;
+        releaseUrls();
+        setInitialAttachmentIds(stored.map(item=>item.ref.id).sort());
+        setAttachments(stored.map(item=>{const url=URL.createObjectURL(item.blob);attachmentUrls.current.add(url);return {ref:item.ref,url};}));
+      }catch{if(active)setMediaMessage('Attachments could not be loaded from this device.');}
+    };
+    void refresh();
+    const capture=createPlatformAudioCapture({
+      onState:status=>{if(active){setAudioState(status.state);if(status.message)setMediaMessage(status.message);}},
+      onCaptured:(blob,metadata)=>{if(active)void addAttachment(blob,{kind:'audio',durationMs:metadata.durationMs});},
+    });
+    recorder.current=capture;
+    return()=>{
+      active=false;capture.cancel();if(recorder.current===capture)recorder.current=null;
+      releaseUrls();
+      if(!saveCompleted.current && newMediaIds.current.size)void deleteOrdinaryMedia(ownerId,entryId,[...newMediaIds.current]);
+    };
+  },[ownerId,entryId]);
+
+  useEffect(()=>{
+    const input=textarea.current;
+    if(!input)return;
+    input.style.height='auto';
+    const maxHeight=Math.max(120,Math.floor((viewport.height||window.innerHeight)*0.52));
+    const height=Math.min(input.scrollHeight,maxHeight);
+    input.style.height=`${height}px`;
+    input.style.overflowY=input.scrollHeight>maxHeight?'auto':'hidden';
+    setTextareaHeight(height);
+  },[naturalText,viewport.height]);
+
   const transformedText = naturalText;
 
   const wordsCount = naturalText.trim().split(/\s+/).filter(Boolean).length;
+  const initialTitle = editingEntry?.title ?? '';
+  const initialBody = editingEntry?.body ?? '';
+  const initialKindValue = editingEntry?.kind ?? initialKind;
+  const initialDeck = editingEntry?.curatedDeck ?? '';
+  const initialFavorite = editingEntry?.favorite ?? false;
+  const initialTags = (editingEntry?.tags ?? []).join(', ');
+  const attachmentIds=attachments.map(item=>item.ref.id).sort();
+  const isDirty = title !== initialTitle || naturalText !== initialBody || kind !== initialKindValue || curatedDeck !== initialDeck || favorite !== initialFavorite || tagsDraft !== initialTags || attachmentIds.join('|') !== initialAttachmentIds.join('|');
+
+  useEffect(()=>{
+    const dialog=discardDialog.current;
+    if(!dialog)return;
+    if(confirmDiscard && !dialog.open)dialog.showModal();
+    else if(!confirmDiscard && dialog.open)dialog.close();
+  },[confirmDiscard]);
+
+  function requestBack(){
+    if(busy || deleteBusy)return;
+    if(isDirty)setConfirmDiscard(true);
+    else onBack();
+  }
 
   const handleSave = async () => {
     if (busy || deleteBusy) return;
     setBusy(true);setError('');
-    try {await onSaveProtected({title:title || (kind === 'Story' ? 'Story' : 'Journal entry'),body:transformedText,originalBody:naturalText,kind});}
+    try {
+      await onSaveProtected({entryId,title:title || (kind === 'Story' ? 'Story' : 'Journal entry'),body:transformedText,originalBody:naturalText,kind,curatedDeck:kind==='Story'?curatedDeck.trim().replace(/\s+/g,' '):'',favorite,tags:normalizeOrdinaryTags(tagsDraft.split(','))});
+      saveCompleted.current=true;
+      if(removedMediaIds.current.size)await deleteOrdinaryMedia(ownerId,entryId,[...removedMediaIds.current]);
+    }
     catch(e){setError(e instanceof Error?e.message:'Could not save. Your draft is still here.');}
     finally{setBusy(false);}
   };
@@ -92,6 +189,37 @@ export const TransformProtectView: React.FC<Props> = ({
   function closeOptions() {
     if(optionsMenu.current)optionsMenu.current.open=false;
     setMenuAction('menu');
+  }
+
+  async function addAttachment(blob:Blob,details:{kind:OrdinaryMediaRef['kind'];name?:string;durationMs?:number}) {
+    if(!blob.size)return;
+    setCaptureBusy(true);setMediaMessage('Saving attachment on this device…');
+    try{
+      const ref=await saveOrdinaryMedia(ownerId,entryId,blob,details);
+      newMediaIds.current.add(ref.id);
+      const url=URL.createObjectURL(blob);attachmentUrls.current.add(url);
+      setAttachments(current=>[...current,{ref,url}]);setMediaMessage('Attachment saved on this device.');
+    }catch(error){setMediaMessage(error instanceof Error?error.message:'The attachment could not be saved on this device.');}
+    finally{setCaptureBusy(false);}
+  }
+
+  async function captureImage() {
+    setMediaMessage('');
+    if(isNativePlatform()){
+      try{const captured=await captureNativeImage();if(captured)await addAttachment(captured.blob,{kind:'image',name:`Photo.${captured.format}`});}
+      catch{setMediaMessage('The camera could not capture an image. Check camera permission and try again.');}
+    }else mediaInput.current?.click();
+  }
+
+  function removeAttachment(id:string){
+    setAttachments(current=>{
+      const item=current.find(candidate=>candidate.ref.id===id);
+      if(item){URL.revokeObjectURL(item.url);attachmentUrls.current.delete(item.url);}
+      return current.filter(candidate=>candidate.ref.id!==id);
+    });
+    if(newMediaIds.current.has(id)){newMediaIds.current.delete(id);void deleteOrdinaryMedia(ownerId,entryId,[id]);}
+    else removedMediaIds.current.add(id);
+    setMediaMessage('Attachment removed from this entry.');
   }
 
   function downloadSavedCopy() {
@@ -142,14 +270,14 @@ export const TransformProtectView: React.FC<Props> = ({
     <div className="transform-protect-screen keyboard-writing-screen" style={viewport}>
       {/* Header */}
       <header className="transform-header">
-        <button className="icon-btn-round" onClick={onBack} aria-label="Go back">
+        <button className="icon-btn-round" onClick={requestBack} aria-label="Go back" disabled={busy || deleteBusy}>
           <ArrowLeft size={18} />
         </button>
         <div className="header-brand-title"><LuLuLogo size="sm" /></div>
         <div className="header-avatar-circle">
           <User size={15} />
         </div>
-        {!protectedMode && !editingEntry && <button type="button" onClick={onEnterPrivate}>Write privately</button>}
+        {!protectedMode && !editingEntry && <button type="button" className="composer-private-link" onClick={onEnterPrivate}>Write privately</button>}
       </header>
 
       {/* Main Flow */}
@@ -165,8 +293,17 @@ export const TransformProtectView: React.FC<Props> = ({
             <div className="account-menu-panel">
               {menuAction==='menu' ? <>
                 <span className="account-menu-label">Entry options</span>
-                <button type="button" aria-pressed={kind==='Journal'} onClick={()=>{setKind('Journal');closeOptions();}}>Journal{kind==='Journal'?' · current':''}</button>
+                <button type="button" aria-pressed={kind==='Journal'} onClick={()=>{setKind('Journal');setCuratedDeck('');closeOptions();}}>Journal{kind==='Journal'?' · current':''}</button>
                 <button type="button" aria-pressed={kind==='Story'} onClick={()=>{setKind('Story');closeOptions();}}>Story{kind==='Story'?' · current':''}</button>
+                {kind==='Story' && <label className="story-collection-field">Story collection <span>(optional)</span>
+                  <input value={curatedDeck} onChange={event=>setCuratedDeck(event.target.value)} maxLength={80} placeholder="For example, Summer memories" />
+                  <small>Use the same name to group saved stories together.</small>
+                </label>}
+                <label className="ordinary-entry-metadata-field"><input type="checkbox" checked={favorite} onChange={event=>setFavorite(event.target.checked)} /> Save to Favorites</label>
+                <label className="story-collection-field">Topics <span>(optional, up to 12)</span>
+                  <input value={tagsDraft} onChange={event=>setTagsDraft(event.target.value)} placeholder="For example, family, work" aria-label="Entry topics, separated by commas" />
+                  <small>Separate topics with commas. Topics appear in Library filters.</small>
+                </label>
                 {editingEntry && !editingEntry.protected && <>
                   <span className="account-menu-label">Saved entry</span>
                   <button type="button" onClick={()=>setMenuAction('export')}>Export saved copy</button>
@@ -202,22 +339,33 @@ export const TransformProtectView: React.FC<Props> = ({
           <input aria-label="Entry title" placeholder="Title (optional)" value={title} onChange={e=>setTitle(e.target.value)} maxLength={200} disabled={deleteBusy} style={{width:'100%',border:0,background:'transparent',padding:'12px 0',font:'inherit'}}/>
           {error && <p role="alert">{error}</p>}
           <textarea
+            ref={textarea}
             className="original-natural-textarea"
             aria-label="Write your entry"
             value={naturalText}
             onChange={(e) => setNaturalText(e.target.value)}
             disabled={deleteBusy}
-            rows={4}
+            rows={1}
+            style={textareaHeight?{height:textareaHeight}:undefined}
             placeholder="Write naturally in your own words..."
           />
 
+          {attachments.length>0 && <div className="ordinary-composer-attachments" aria-label="Entry attachments">
+            {attachments.map(({ref,url})=><div className="ordinary-composer-attachment" key={ref.id}>
+              {ref.kind==='image'?<img src={url} alt={ref.name||'Attached image'}/>:<div className="ordinary-audio-attachment"><span>Voice note</span><audio controls preload="metadata" src={url}/></div>}
+              <button type="button" aria-label="Remove attachment" title="Remove attachment" onClick={()=>removeAttachment(ref.id)}><X size={14}/></button>
+            </div>)}
+            <p className="ordinary-media-local-note">Attachments stay on this device; journal text syncs with your account.</p>
+          </div>}
+
           <div className="card-bottom-shelf">
             <div className="shelf-tools">
-              <button className="shelf-tool-btn" title="Image" onClick={()=>setError('Image capture is available in private writing. Start a new entry and choose Write privately.')}>
+              <button type="button" className="shelf-tool-btn" aria-label="Add image" title="Add image" disabled={captureBusy||audioState==='recording'} onClick={()=>void captureImage()}>
                 <Image size={15} />
               </button>
-              <button className="shelf-tool-btn" title="Mic" onClick={()=>setError('Audio capture is available in private writing. Start a new entry and choose Write privately.')}>
-                <Mic size={15} />
+              <input ref={mediaInput} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif" hidden onChange={event=>{const file=event.currentTarget.files?.[0];event.currentTarget.value='';if(file)void addAttachment(file,{kind:'image',name:file.name});}} />
+              <button type="button" className="shelf-tool-btn" title={audioState==='recording'?'Stop recording':'Record voice note'} aria-label={audioState==='recording'?'Stop recording':'Record voice note'} disabled={captureBusy||audioState==='requesting'||audioState==='stopping'} onClick={()=>{setMediaMessage('');if(audioState==='recording')recorder.current?.stop();else void recorder.current?.start();}}>
+                {audioState==='recording'?<Square size={15}/>:<Mic size={15} />}
               </button>
               <button className="shelf-tool-btn" type="button" title="Options" aria-label="Entry options" disabled={deleteBusy} onClick={()=>{if(optionsMenu.current)optionsMenu.current.open=!optionsMenu.current.open;}}>
                 <MoreHorizontal size={15} />
@@ -225,11 +373,22 @@ export const TransformProtectView: React.FC<Props> = ({
             </div>
             <button className="save-protected-btn composer-save" onClick={handleSave} disabled={busy || deleteBusy || !naturalText.trim()}><ShieldCheck size={15} /><span>{busy?'Saving…':editingEntry?'Save changes':'Save entry'}</span></button>
           </div>
+          {mediaMessage && <p className="ordinary-media-status" role={mediaMessage.includes('denied')||mediaMessage.includes('could not')?'alert':'status'}>{audioState==='recording'?'Recording voice note… ':''}{mediaMessage}</p>}
         </div>
         {downloadNotice && <p className="journal-source-status" role="status">{downloadNotice}</p>}
 
 </div>
       </main>
+      <dialog ref={discardDialog} className="composer-discard-dialog" aria-labelledby="discard-title" aria-describedby="discard-copy"
+        onCancel={event=>{event.preventDefault();setConfirmDiscard(false);}}
+        onClose={()=>setConfirmDiscard(false)}>
+        <h2 id="discard-title">Leave without saving?</h2>
+        <p id="discard-copy">Your writing has not been saved.</p>
+        <div className="composer-discard-actions">
+          <button type="button" className="composer-discard-keep" onClick={()=>setConfirmDiscard(false)}>Keep editing</button>
+          <button type="button" className="composer-discard-leave" onClick={()=>{setConfirmDiscard(false);onBack();}}>Discard and leave</button>
+        </div>
+      </dialog>
     </div>
   );
 };

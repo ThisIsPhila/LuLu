@@ -109,6 +109,8 @@ export async function ensureStarterEntries(uid: string, firestore: Firestore = d
         kind: source.mapped.kind,
         protected: false,
         perspective: source.mapped.perspective ?? 'first',
+        ...(source.mapped.curatedDeck ? { curatedDeck: source.mapped.curatedDeck } : {}),
+        tags: source.mapped.tags,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });

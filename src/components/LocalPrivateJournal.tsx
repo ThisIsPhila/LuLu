@@ -9,11 +9,12 @@ import './PrivateWriting.css';
 import { PrivateRecordExport } from './PrivateRecordExport';
 import { PrivateRecordDeletion } from './PrivateRecordDeletion';
 import { PrivateRecordBackup, PrivateBackupRestore } from './PrivateBackupControls';
+import { PrivateDisclosureReview } from './PrivateDisclosureReview';
 
-type Props = { vault: LocalVault; mediaVault?: LocalMediaVault; onExit: () => void; onCompose: () => void };
+type Props = { vault: LocalVault; mediaVault?: LocalMediaVault; onExit: () => void; onCompose: () => void; onInspectText?: (text:string,revision:string)=>void };
 
 /** Mounted only within a live private session; no ordinary preview receives these values. */
-export function LocalPrivateJournal({vault, mediaVault, onExit, onCompose}: Props) {
+export function LocalPrivateJournal({vault, mediaVault, onExit, onCompose, onInspectText}: Props) {
   const [records, setRecords] = useState<LocalVaultRevision[]>([]);
   const [media, setMedia] = useState<MediaMetadata[]>([]);
   const [drafts, setDrafts] = useState<LocalVaultDraft[]>([]);
@@ -22,6 +23,7 @@ export function LocalPrivateJournal({vault, mediaVault, onExit, onCompose}: Prop
   const [selectedDraft, setSelectedDraft] = useState<LocalVaultDraft | null>(null);
   const [history, setHistory] = useState<LocalVaultRevision[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [showDisclosureReview, setShowDisclosureReview] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(true);
   const [refresh, setRefresh] = useState(0);
@@ -57,7 +59,7 @@ export function LocalPrivateJournal({vault, mediaVault, onExit, onCompose}: Prop
 
   function open(record: LocalVaultRevision) {
     concealMedia(true);
-    try {readPrivateText(record);setSelected(record);setSelectedDraft(null);setTextEdited(false);setError('');}
+    try {readPrivateText(record);setSelected(record);setSelectedDraft(null);setTextEdited(false);setShowDisclosureReview(false);setError('');}
     catch {setError('This record format cannot be opened here.');}
   }
 
@@ -107,12 +109,12 @@ export function LocalPrivateJournal({vault, mediaVault, onExit, onCompose}: Prop
 
   function backToRecords() {
     concealMedia(true);
-    setSelected(null);setSelectedDraft(null);setTextEdited(false);setShowHistory(false);setRefresh(value=>value+1);
+    setSelected(null);setSelectedDraft(null);setTextEdited(false);setShowHistory(false);setShowDisclosureReview(false);setRefresh(value=>value+1);
   }
 
   function saved(revision: LocalVaultRevision) {
     concealMedia(true);
-    setSelectedDraft(null);setSelected(revision);setTextEdited(false);setShowHistory(false);setRefresh(value=>value+1);
+    setSelectedDraft(null);setSelected(revision);setTextEdited(false);setShowHistory(false);setShowDisclosureReview(false);setRefresh(value=>value+1);
   }
 
   const editing=Boolean(selected || selectedDraft || selectedMedia);
@@ -187,7 +189,7 @@ export function LocalPrivateJournal({vault, mediaVault, onExit, onCompose}: Prop
     {selected && text && <div className="private-journal-record-detail">
       <PrivateDraftFields key={`revision-${selected.revisionId}`} vault={vault}
         target={{recordId:selected.recordId,parentRevisionId:selected.revisionId}}
-        initialTitle={text.title} initialBody={text.body} onSaved={saved} onContentChange={()=>{setShowHistory(false);setTextEdited(true);}} />
+        initialTitle={text.title} initialBody={text.body} onSaved={saved} onContentChange={()=>{setShowHistory(false);setShowDisclosureReview(false);setTextEdited(true);}} />
       <button className="private-journal-history-toggle" type="button" aria-expanded={showHistory} onClick={()=>setShowHistory(value=>!value)}>{showHistory?'Conceal history':'Reveal original and revision history'} ({history.length})</button>
       {showHistory && <section className="private-journal-history" aria-label="Original and revision history">
         <p className="private-journal-history-note">Times come from this device. History preserves saved versions; it does not prove when an event occurred.</p>
@@ -196,6 +198,14 @@ export function LocalPrivateJournal({vault, mediaVault, onExit, onCompose}: Prop
           <p>{record.clientCreatedAt}</p><pre>{safeHistoryText(record)}</pre>
         </article>)}
       </section>}
+      {!textEdited ? <>
+        {onInspectText && <button className="private-journal-history-toggle" type="button" onClick={()=>{
+          try {vault.assertUnlocked();onInspectText(text.body,selected.revisionId);}
+          catch {setError('Unlock the private session before inspecting this saved revision.');}
+        }}>Find private details with the local model</button>}
+        <button className="private-journal-history-toggle" type="button" aria-expanded={showDisclosureReview} onClick={()=>setShowDisclosureReview(value=>!value)}>{showDisclosureReview?'Close disclosure review':'Prepare a disclosure copy'}</button>
+        {showDisclosureReview && <PrivateDisclosureReview key={`${selected.recordId}-${selected.revisionId}`} vault={vault} source={{recordId:selected.recordId,revisionId:selected.revisionId,title:text.title,text:text.body}} />}
+      </> : <p className="private-journal-note">Save the current edits as a revision before preparing a disclosure copy. Disclosure review uses saved text only.</p>}
       <PrivateRecordExport key={`export-text-${selected.recordId}`} kind="text" vault={vault} recordId={selected.recordId} />
       {!textEdited && <PrivateRecordBackup key={`backup-text-${selected.recordId}`} kind="text" vault={vault} recordId={selected.recordId} />}
       {textEdited

@@ -1,12 +1,14 @@
 import { doc, getDoc, runTransaction, serverTimestamp, type Firestore } from 'firebase/firestore';
 import { database } from './firebase.ts';
 import { clearOnboardingDraft, loadOnboardingDraft } from '../onboardingDraft.ts';
+import { readDisplayName, writeDisplayName } from '../displayName.ts';
 
 /** A stable target ID makes interrupted and repeated imports idempotent. */
 export async function retainFirstOnboardingEntry(uid: string, firestore: Firestore = database): Promise<'saved' | 'none'> {
   if (!uid || uid.length > 128 || uid.includes('/')) throw new Error('A verified account is required.');
   const draft = await loadOnboardingDraft();
   if (!draft || draft.ownerUid !== uid) return 'none';
+  if (!(await readDisplayName(uid)) && typeof draft.state.name === 'string' && draft.state.name.trim()) await writeDisplayName(uid, draft.state.name);
   const body = draft.state.firstEntryText;
   if (!draft.entrySaved || typeof body !== 'string' || !body.trim()) {
     await clearOnboardingDraft(draft.id);

@@ -17,6 +17,16 @@ export type Entry = {
   curatedDeck?: string;
 };
 
+/** Metadata for ordinary attachments stored in this browser. */
+export type OrdinaryMediaRef = {
+  id: string;
+  kind: 'image' | 'audio';
+  mimeType: string;
+  byteLength: number;
+  name?: string;
+  durationMs?: number;
+};
+
 const STORAGE_KEY = 'lulu.stitch.entries.v3';
 
 function isStoredEntry(value: unknown): value is Entry {

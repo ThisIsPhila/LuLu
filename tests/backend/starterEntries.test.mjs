@@ -10,7 +10,8 @@ let env;
 const session={uid:'alice',expiresAt:Date.now()+3600000,privateUntil:Date.now()+600000};
 const catalogueId='johannesburg-v1';
 const manifestPath=`demoCatalogues/${catalogueId}`;
-const ids=['demo-one','demo-two','demo-three'];
+const catalogueSeed=JSON.parse(readFileSync('scripts/demo-catalogue-seed.json','utf8'));
+const ids=catalogueSeed.manifest.entryIds;
 const targetId=id=>`starter-${catalogueId}-${id.slice('demo-'.length)}`;
 const db=(uid='alice',sid='session')=>env.authenticatedContext(uid,{passkey:true,sid}).firestore();
 const [emulatorHost,emulatorPort]=(process.env.FIRESTORE_EMULATOR_HOST||'127.0.0.1:8085').split(':');
@@ -24,16 +25,12 @@ beforeEach(async()=>{
   await env.withSecurityRulesDisabled(async ctx=>{
     const firestore=ctx.firestore();
     await setDoc(doc(firestore,'_sessions/session'),session);
-    await setDoc(doc(firestore,manifestPath),{version:1,label:'Fictional starter catalogue',entryIds:ids});
-    for(let i=0;i<ids.length;i+=1){
-      await setDoc(doc(firestore,manifestPath,'entries',ids[i]),{
-        title:`Fictional entry ${i+1}`,
-        body:`A short imagined scene, entry ${i+1}.`,
-        kind:i===1?'Story':'Journal',
-        protected:false,
-        perspective:i===2?'third':'first',
-        tags:['Starter'],
-        createdAt:Timestamp.fromMillis(1761300000000+i*1000),
+    await setDoc(doc(firestore,manifestPath),catalogueSeed.manifest);
+    for(const entry of catalogueSeed.entries){
+      const {id,createdAt,...fields}=entry;
+      await setDoc(doc(firestore,manifestPath,'entries',id),{
+        ...fields,
+        createdAt:Timestamp.fromDate(new Date(createdAt)),
       });
     }
   });
@@ -50,6 +47,8 @@ test('concurrent initializations create each starter once and record one marker'
   const marker=await getDoc(doc(firestore,'users/alice/starterCatalogues',catalogueId));
   assert.equal(marker.exists(),true);
   assert.deepEqual(marker.data().entryIds,ids.map(targetId));
+  assert.equal((await getDoc(doc(firestore,'users/alice/entries',targetId('demo-story-juniper-02')))).data().curatedDeck,'Juniper Street Garden');
+  assert.deepEqual((await getDoc(doc(firestore,'users/alice/entries',targetId('demo-story-juniper-02')))).data().tags,['Fiction','Neighbourhood','Part 2']);
   assert.equal(await ensureStarterEntries('alice',firestore),0);
 });
 

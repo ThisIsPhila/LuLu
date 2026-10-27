@@ -3,44 +3,54 @@ import {
   Search,
   Layers,
   ArrowRight,
-  BookOpen,
+  X,
 } from 'lucide-react';
 import type { Entry } from '../domain/journal';
-import { filterOrdinaryEntries, findCuratedDeck, type OrdinaryEntryFilter } from '../domain/ordinaryBrowse';
+import { filterOrdinaryEntries, findCuratedDeckEntries, findCuratedDecks, type OrdinaryEntryFilter } from '../domain/ordinaryBrowse';
+import { OrdinaryEntryCard } from './OrdinaryEntryCard';
 
 type Props = {
   entries: Entry[];
-  onSelectEntry: (entry: Entry) => void;
-  onOpenProtectedGate: () => void;
+  onSelectEntry: (entry: Entry, narrativeSequence?: Entry[]) => void;
+  initialFilter?: OrdinaryEntryFilter;
+  pageTitle: 'Journal' | 'Stories';
 };
 
-export const StoryLeavesView: React.FC<Props> = ({ entries, onSelectEntry }) => {
+export const StoryLeavesView: React.FC<Props> = ({ entries, onSelectEntry, initialFilter = 'All', pageTitle }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState<OrdinaryEntryFilter>('All');
+  const [activeFilter, setActiveFilter] = useState<OrdinaryEntryFilter>(initialFilter);
+  const [selectedDeck, setSelectedDeck] = useState<string | null>(null);
 
-  const visibleEntries = filterOrdinaryEntries(entries, searchQuery, activeFilter);
-  const curatedDeck = findCuratedDeck(visibleEntries);
+  const filteredEntries = filterOrdinaryEntries(entries, searchQuery, activeFilter);
+  const visibleEntries = selectedDeck
+    ? filteredEntries.filter(entry => entry.curatedDeck?.trim() === selectedDeck)
+    : filteredEntries;
+  const curatedDecks = findCuratedDecks(filterOrdinaryEntries(entries)).filter(deck =>
+    (!selectedDeck || deck.name === selectedDeck) &&
+    filteredEntries.some(entry => entry.curatedDeck?.trim() === deck.name),
+  );
   const filters: OrdinaryEntryFilter[] = ['All', 'Journal', 'Stories'];
 
-  const selectWithKeyboard = (event: React.KeyboardEvent<HTMLElement>, entry: Entry) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      onSelectEntry(entry);
-    }
-  };
+  function openDeck(name: string) {
+    setSelectedDeck(name);
+    setSearchQuery('');
+    setActiveFilter('All');
+  }
 
   return (
-    <div className="story-leaves-screen">
-      {curatedDeck && (
+    <main className="story-leaves-screen" data-ordinary-page-scroll={pageTitle.toLowerCase()} data-testid={`ordinary-page-scroll-${pageTitle.toLowerCase()}`}>
+      <h1 className="leaves-page-title">{pageTitle}</h1>
+      {pageTitle === 'Stories' && curatedDecks.length > 0 && (
         <section className="curated-deck-section" aria-label="Curated collection">
-          <div className="curated-deck-card">
+          {curatedDecks.map(curatedDeck => <div className="curated-deck-card" key={curatedDeck.name}>
             <div className="deck-card-head">
               <span className="deck-tag">CURATED DECK • {curatedDeck.count} {curatedDeck.count === 1 ? 'entry' : 'entries'}</span>
               <button
                 type="button"
                 className="deck-flip-trigger"
                 aria-label={`Open ${curatedDeck.name} collection`}
-                onClick={() => onSelectEntry(curatedDeck.entry)}
+                aria-pressed={selectedDeck === curatedDeck.name}
+                onClick={() => openDeck(curatedDeck.name)}
               >
                 <Layers size={14} />
               </button>
@@ -55,12 +65,12 @@ export const StoryLeavesView: React.FC<Props> = ({ entries, onSelectEntry }) => 
 
             <div className="deck-footer-row">
               <span className="deck-touch-meta">{curatedDeck.count} {curatedDeck.count === 1 ? 'entry' : 'entries'}</span>
-              <button type="button" className="deck-flip-btn" onClick={() => onSelectEntry(curatedDeck.entry)}>
-                <span>Open entry</span>
+              <button type="button" className="deck-flip-btn" aria-pressed={selectedDeck === curatedDeck.name} onClick={() => openDeck(curatedDeck.name)}>
+                <span>{selectedDeck === curatedDeck.name ? 'Showing collection' : 'Open collection'}</span>
                 <ArrowRight size={13} />
               </button>
             </div>
-          </div>
+          </div>)}
         </section>
       )}
 
@@ -69,6 +79,7 @@ export const StoryLeavesView: React.FC<Props> = ({ entries, onSelectEntry }) => 
         <input
           type="search"
           aria-label="Search ordinary entries"
+          data-ordinary-page-search="true"
           placeholder="Search titles, writing, and tags..."
           value={searchQuery}
           onChange={(event) => setSearchQuery(event.target.value)}
@@ -87,58 +98,34 @@ export const StoryLeavesView: React.FC<Props> = ({ entries, onSelectEntry }) => 
             <span>{filter}</span>
           </button>
         ))}
+        {selectedDeck && (
+          <button type="button" className="filter-pill active" aria-label={`Clear ${selectedDeck} collection filter`} onClick={() => setSelectedDeck(null)}>
+            <span>{selectedDeck}</span><X size={12} aria-hidden="true" />
+          </button>
+        )}
       </div>
 
       <div className="leaves-list" aria-live="polite">
         {visibleEntries.length > 0 ? visibleEntries.map(entry => (
-          <article
-            key={entry.id}
-            className="leaf-card"
-            role="button"
-            tabIndex={0}
-            aria-label={`Open ${entry.title}, ${entry.kind}, ${entry.groupDate}`}
-            onClick={() => onSelectEntry(entry)}
-            onKeyDown={event => selectWithKeyboard(event, entry)}
-          >
-            <div className="leaf-top-row">
-              <span className="leaf-meta-time">
-                {entry.groupDate}{entry.timeStr ? ` · ${entry.timeStr}` : ''} • {entry.kind}
-              </span>
-              {entry.curatedDeck && (
-                <span className="leaf-sheets-tag">
-                  <Layers size={11} />
-                  <span>{entry.curatedDeck}</span>
-                </span>
-              )}
-            </div>
-
-            <div className="leaf-body-row">
-              <div className="leaf-text-col">
-                <h3 className="leaf-title">{entry.title}</h3>
-                <p className="leaf-excerpt">{entry.body}</p>
-              </div>
-              {entry.imageUrl && <img src={entry.imageUrl} alt="" className="leaf-image-preview" />}
-            </div>
-
-            <div className="leaf-footer-row">
-              <div className="leaf-tags-group">
-                {entry.tags.map(tag => (
-                  <span key={tag} className="leaf-tag-pill">#{tag.toLowerCase()}</span>
-                ))}
-              </div>
-              <BookOpen size={14} aria-hidden="true" />
-            </div>
-          </article>
+          <OrdinaryEntryCard key={entry.id} entry={entry} onSelect={selectedEntry => {
+            const deckName = pageTitle === 'Stories' && selectedEntry.kind === 'Story' ? selectedEntry.curatedDeck?.trim() : '';
+            const narrativeSequence = deckName ? findCuratedDeckEntries(entries, deckName) : undefined;
+            onSelectEntry(selectedEntry, narrativeSequence);
+          }} />
         )) : (
           <p className="leaves-empty-state" role="status">
-            {searchQuery.trim()
+            {searchQuery.trim() && selectedDeck
+              ? `No entries in ${selectedDeck} match your search.`
+              : searchQuery.trim()
               ? 'No ordinary entries match your search.'
-              : activeFilter === 'All'
+              : selectedDeck
+                ? `No entries in ${selectedDeck} match these filters.`
+                : activeFilter === 'All'
                 ? 'Your ordinary entries will appear here.'
                 : `No ${activeFilter === 'Journal' ? 'journal entries' : 'stories'} yet.`}
           </p>
         )}
       </div>
-    </div>
+    </main>
   );
 };

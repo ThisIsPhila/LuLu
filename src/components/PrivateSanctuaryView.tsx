@@ -1,214 +1,111 @@
 import React, { useState } from 'react';
-import {
-  Shield,
-  PhoneCall,
-  Users,
-  Compass,
-  Lock,
-  X,
-  Volume2,
-  FileCheck,
-  ChevronRight,
-  ArrowLeft,
-  LifeBuoy,
-} from 'lucide-react';
+import { ChevronRight, Lock, Shield, Users, X } from 'lucide-react';
 import { LuLuLogo } from './Logo';
-import {TrustedContacts} from './TrustedContacts';
+import { TrustedContacts } from './TrustedContacts';
+import { SupportDirectory } from './SupportDirectory';
 
 type Props = {
-  uid:string;
+  uid: string;
   onQuickExit: () => void;
-  onOpenJournal: () => void;
 };
 
-export const PrivateSanctuaryView: React.FC<Props> = ({ uid, onQuickExit, onOpenJournal }) => {
-  const [showContacts,setShowContacts]=useState(false);
-  const [activeCategory, setActiveCategory] = useState<'Private' | 'Safety' | 'Resources'>('Private');
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
-  const [selectedPlanStep, setSelectedPlanStep] = useState<string | null>(null);
+type SanctuarySection = 'Private' | 'Safety' | 'Resources';
+
+const safetyPrompts = [
+  'Think about a person or service I could contact.',
+  'Consider a place I could go if I needed to leave.',
+  'Consider whether this device is safe for private records.',
+  'Review how to leave LuLu quickly.',
+];
+
+export const PrivateSanctuaryView: React.FC<Props> = ({ uid, onQuickExit }) => {
+  const [showContacts, setShowContacts] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<SanctuarySection>('Private');
+  const [checkedPrompts, setCheckedPrompts] = useState<Set<number>>(() => new Set());
+
+  const titles: Record<SanctuarySection, string> = {
+    Private: 'Your private space.',
+    Safety: 'At your own pace.',
+    Resources: 'Support when you choose.',
+  };
+  const descriptions: Record<SanctuarySection, string> = {
+    Private: 'Your private tools stay separate from everyday journal browsing.',
+    Safety: 'Use these optional prompts to think through what could help you feel safer. Nothing here contacts anyone.',
+    Resources: 'Review the source and current contact details, then choose whether to reach out.',
+  };
+
+  function chooseSection(section: SanctuarySection) {
+    setActiveCategory(section);
+    setShowContacts(false);
+  }
 
   return (
     <div className="sanctuary-screen">
-      {/* Top Header */}
       <header className="sanctuary-header">
-        <div className="header-left">
-          <LuLuLogo size="sm" dark />
-        </div>
+        <div className="header-left"><LuLuLogo size="sm" dark /></div>
         <div className="header-right">
-          <button className="quick-exit-btn-top" onClick={onQuickExit} title="Quick Exit to Journal">
-            <X size={14} />
-            <span>Quick exit</span>
+          <button className="quick-exit-btn-top" type="button" onClick={onQuickExit} title="Quick Exit to Journal">
+            <X size={14} /><span>Quick exit</span>
           </button>
         </div>
       </header>
 
-      {/* Sanctuary Sub-nav */}
-      <div className="sanctuary-pills-row">
-        <button
-          className={`sanctuary-pill ${activeCategory === 'Private' ? 'active' : ''}`}
-          onClick={() => setActiveCategory('Private')}
-        >
-          <span>• Private Sanctuary</span>
-        </button>
-        <button
-          className={`sanctuary-pill ${activeCategory === 'Safety' ? 'active' : ''}`}
-          onClick={() => setActiveCategory('Safety')}
-        >
-          <span>Safety Plan</span>
-        </button>
-        <button
-          className={`sanctuary-pill ${activeCategory === 'Resources' ? 'active' : ''}`}
-          onClick={() => setActiveCategory('Resources')}
-        >
-          <span>Helplines</span>
-        </button>
+      <div className="sanctuary-pills-row" aria-label="Private support sections">
+        {(['Private', 'Safety', 'Resources'] as const).map(section => <button
+          key={section}
+          className={`sanctuary-pill ${activeCategory === section ? 'active' : ''}`}
+          type="button"
+          aria-pressed={activeCategory === section}
+          onClick={() => chooseSection(section)}
+        >{section === 'Private' ? 'Private Sanctuary' : section === 'Safety' ? 'Safety Plan' : 'Helplines'}</button>)}
       </div>
 
-      {/* Main Sanctuary Content */}
       <main className="sanctuary-content">
         <div className="sanctuary-hero">
-          <h1 className="sanctuary-title">You're not alone.</h1>
-          <p className="sanctuary-subtitle">
-            Support, information and tools when you're ready. You choose what to record and when to take the next step.
-          </p>
+          <h1 className="sanctuary-title">{titles[activeCategory]}</h1>
+          <p className="sanctuary-subtitle">{descriptions[activeCategory]}</p>
         </div>
 
-        {/* Core GBV & Safety Support Cards */}
-        <section className="sanctuary-cards-list">
-          <div
-            className="sanctuary-card"
-            onClick={() =>
-              alert(
-                'Safety Planning Checklist:\n\n1. Safe word identified with trusted friend.\n2. Key documents (ID, passport, bank cards) safely backed up.\n3. Emergency transport or safe location identified.\n4. Device lock secured with personal passkey.'
-              )
-            }
-          >
-            <div className="sanctuary-card-icon">
-              <Shield size={18} />
-            </div>
-            <div className="sanctuary-card-info">
-              <h3>Safety planning</h3>
-              <p>Create a plan that feels right for you, step by step.</p>
-            </div>
-            <ChevronRight size={16} className="chevron" />
-          </div>
+        {activeCategory === 'Private' && (showContacts
+          ? <TrustedContacts uid={uid} onClose={() => setShowContacts(false)} />
+          : <section className="sanctuary-cards-list" aria-label="Private tools">
+              <button className="sanctuary-card" type="button" onClick={() => setShowContacts(true)}>
+                <span className="sanctuary-card-icon"><Users size={18} /></span>
+                <span className="sanctuary-card-info"><strong>Trusted contacts</strong><span>Keep numbers you may choose to call. LuLu sends no alerts.</span></span>
+                <ChevronRight size={16} className="chevron" aria-hidden="true" />
+              </button>
+              <div className="sanctuary-assurance-box">
+                <div className="assurance-icon"><Lock size={16} /></div>
+                <div className="assurance-text">
+                  <strong>Private storage details</strong>
+                  <p>Trusted contact details are encrypted before account storage. The encryption key is held by this browser; clearing its data can prevent access.</p>
+                </div>
+              </div>
+            </section>)}
 
-          <div
-            className="sanctuary-card"
-            onClick={() =>
-              alert(
-                'Understand Your Rights & Options:\n\n• Legal Protection Orders (Domestic Violence Act).\n• Medical care without police reporting requirement.\n• Confidential evidence preservation.\n• Non-profit legal advocacy.'
-              )
-            }
-          >
-            <div className="sanctuary-card-icon">
-              <Compass size={18} />
-            </div>
-            <div className="sanctuary-card-info">
-              <h3>Understand your options</h3>
-              <p>Learn about your rights, choices and what to expect.</p>
-            </div>
-            <ChevronRight size={16} className="chevron" />
-          </div>
+        {activeCategory === 'Safety' && <section className="sanctuary-plan" aria-label="Optional safety planning prompts">
+          <p className="sanctuary-support-note">These are private reflection prompts, not a complete safety plan. They stay only while this view is open and clear when you leave the private area. Skip anything that does not feel safe to record on this device.</p>
+          <ul className="sanctuary-plan-list">{safetyPrompts.map((prompt, index) => <li key={prompt}>
+            <label><input type="checkbox" checked={checkedPrompts.has(index)} onChange={event => setCheckedPrompts(current => {
+              const next = new Set(current);
+              if (event.target.checked) next.add(index); else next.delete(index);
+              return next;
+            })} /><span>{prompt}</span></label>
+          </li>)}</ul>
+          <button className="sanctuary-card sanctuary-plan-resource" type="button" onClick={() => chooseSection('Resources')}>
+            <span className="sanctuary-card-icon"><Shield size={18} /></span>
+            <span className="sanctuary-card-info"><strong>Review support numbers</strong><span>Open the source-linked South African directory.</span></span>
+            <ChevronRight size={16} className="chevron" aria-hidden="true" />
+          </button>
+        </section>}
 
-          <div
-            className="sanctuary-card"
-            onClick={() => setShowContacts(true)}
-          >
-            <div className="sanctuary-card-icon">
-              <Users size={18} />
-            </div>
-            <div className="sanctuary-card-info">
-              <h3>Trusted contacts</h3>
-              <p>Save people you trust and have them ready when you need them.</p>
-            </div>
-            <ChevronRight size={16} className="chevron" />
-          </div>
+        {activeCategory === 'Resources' && <SupportDirectory />}
 
-          <div
-            className="sanctuary-card"
-            onClick={() =>
-              alert(
-                'Support Helplines (South Africa):\n\n• GBV Command Centre: 0800 428 428 (Toll-free, 24/7)\n• Please Call Me: *120*7867#\n• TEARS Foundation: *134*7355#\n• Lifeline SA: 0861 322 322'
-              )
-            }
-          >
-            <div className="sanctuary-card-icon">
-              <LifeBuoy size={18} />
-            </div>
-            <div className="sanctuary-card-info">
-              <h3>Support resources</h3>
-              <p>Helplines, local services and trusted organisations.</p>
-            </div>
-            <ChevronRight size={16} className="chevron" />
-          </div>
-        </section>
-
-        {showContacts&&<TrustedContacts uid={uid} onClose={()=>setShowContacts(false)}/>}
-        {/* Privacy Assurance Box */}
-        <div className="sanctuary-assurance-box">
-          <div className="assurance-icon">
-            <Lock size={16} />
-          </div>
-          <div className="assurance-text">
-            <strong>This is your private space.</strong>
-            <p>
-              You're in control. Original records and trusted contacts are encrypted before cloud storage. Their key stays in this browser.
-            </p>
-          </div>
-        </div>
-
-        {/* Big Quick Exit Button */}
         <div className="quick-exit-action-container">
-          <button className="primary-quick-exit-button" onClick={onQuickExit}>
-            <X size={16} />
-            <span>Quick exit to notes</span>
+          <button className="primary-quick-exit-button" type="button" onClick={onQuickExit}>
+            <X size={16} /><span>Quick exit to notes</span>
           </button>
         </div>
-
-        {/* Calm Focus Section (Offline • Encrypted) */}
-        <section className="calm-focus-section">
-          <div className="calm-focus-header">
-            <span className="calm-focus-title">CALM FOCUS</span>
-            <span className="calm-focus-meta">Offline • Encrypted</span>
-          </div>
-
-          <div className="calm-focus-grid">
-            <div
-              className={`calm-card ${isPlayingAudio ? 'active' : ''}`}
-              onClick={() => setIsPlayingAudio(!isPlayingAudio)}
-            >
-              <img
-                src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=300&q=80"
-                alt="Grounding landscape"
-                className="calm-card-image"
-              />
-              <div className="calm-card-caption">
-                <h4>Grounding sound</h4>
-                <span>{isPlayingAudio ? 'Playing • Breathing cadence' : '4 min breathing'}</span>
-              </div>
-            </div>
-
-            <div
-              className="calm-card"
-              onClick={() =>
-                alert(
-                  'Step-by-step checklist:\n✓ Keep phone charged\n✓ Save safe emergency numbers\n✓ Keep evidence in LuLu protected enclave\n✓ Know your nearest sanctuary shelter'
-                )
-              }
-            >
-              <img
-                src="https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=300&q=80"
-                alt="Safety checklist eucalyptus"
-                className="calm-card-image"
-              />
-              <div className="calm-card-caption">
-                <h4>Safety checklist</h4>
-                <span>Step-by-step guide</span>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
     </div>
   );
