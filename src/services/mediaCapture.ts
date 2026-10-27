@@ -20,6 +20,7 @@ export interface AudioCaptureOptions {
   clearTimeout?: typeof globalThis.clearTimeout;
   onState?: (status: AudioCaptureStatus) => void;
   onCaptured?: (blob: Blob, metadata: AudioCaptureMetadata) => void;
+  onStream?: (stream: MediaStream) => void;
   /** Test/host override. Values above the privacy limits are clamped. */
   maxBytes?: number;
   maxDurationMs?: number;
@@ -283,6 +284,7 @@ export function createAudioCapture(options: AudioCaptureOptions = {}): AudioCapt
     }
     startedAt = now();
     update('recording');
+    safeCall(() => options.onStream?.(acquired));
     timer = schedule(() => stopForOperation(op), maxDurationMs);
   };
 

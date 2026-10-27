@@ -2,10 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+  <key>NSPhotoLibraryUsageDescription</key>
+  <string>LuLu accesses photos you choose to save privately.</string>
   <key>NSCameraUsageDescription</key>
   <string>LuLu uses the camera only when you choose to capture a private image.</string>
+  <key>NSSpeechRecognitionUsageDescription</key>
+  <string>LuLu uses on-device speech recognition when you choose to dictate a private thought.</string>
   <key>NSMicrophoneUsageDescription</key>
-  <string>LuLu uses the microphone only when you choose to record private audio.</string>
+  <string>LuLu uses the microphone only when you choose to record or dictate a private thought.</string>
   <key>CFBundleURLTypes</key>
   <array>
     <dict>
