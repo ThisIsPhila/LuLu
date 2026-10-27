@@ -96,15 +96,15 @@ For detailed and dated engineering evidence, see the [implementation tracker](do
 | **Web** | **[Open the live demo](https://lulu.thisisphila.co.za/)** | Recommended for demos and reviews; hosted release available. |
 | **PWA install** | Not available yet; use the regular web link above. | LuLu does not currently provide a web manifest/install prompt. Offline account access and private-vault recovery are not guaranteed. |
 | **Android** | [Download the development APK](https://github.com/ThisIsPhila/LuLu/releases/download/android-ios-preview-2026-10-27/LuLu-Android-preview.apk). | Debug-signed preview for Android 7.0 or later; not a Play Store release. |
-| **iOS** | [Download the registered-device iPhone build](https://github.com/ThisIsPhila/LuLu/releases/download/android-ios-preview-2026-10-27/LuLu-iOS-registered-device.zip). | Development build for the already registered iPhone, installed from a Mac with Xcode. No TestFlight or App Store download is available. |
+| **iOS** | Build from source or obtain the registered-device build privately from the project owner. | The development build is limited to the registered iPhone and installed from a Mac with Xcode. No TestFlight or App Store download is available. |
 
 ### Download and install a mobile preview
 
-The [mobile preview release](https://github.com/ThisIsPhila/LuLu/releases/tag/android-ios-preview-2026-10-27) contains both packages and [SHA-256 checksums](https://github.com/ThisIsPhila/LuLu/releases/download/android-ios-preview-2026-10-27/SHA256SUMS.txt). This repository is private, so you must sign in to a GitHub account with access to download them. The previews were built from the local development working tree on 27 October 2026, including changes not yet committed to GitHub main; the release tag identifies the main-branch baseline, not an exact source snapshot of these packages.
+The [mobile preview release](https://github.com/ThisIsPhila/LuLu/releases/tag/android-ios-preview-2026-10-27) contains the Android APK and its [SHA-256 checksum](https://github.com/ThisIsPhila/LuLu/releases/download/android-ios-preview-2026-10-27/SHA256SUMS.txt). The preview was built from the local development working tree on 27 October 2026, including changes not yet committed to GitHub main; the release tag identifies the main-branch baseline, not an exact source snapshot of the APK.
 
 **Android:** Download the APK on the phone, open it from Downloads, allow your browser or file manager to install apps when Android asks, and tap **Install**. The APK is version 1.0, build 1, signed with the development debug certificate. If Android reports an incompatible signature with an existing LuLu installation, preserve any local records before changing or removing that installation. This is a development preview; the full journal edit and restart journey has not yet been accepted on a device.
 
-**iPhone:** The ZIP contains `App.app` signed for the existing registered development iPhone; it is not an IPA or a TestFlight link and cannot be installed on an arbitrary iPhone. On a Mac with Xcode, connect and trust that registered phone, enable Developer Mode, then run:
+**iPhone:** The privately held ZIP contains `App.app` signed for the existing registered development iPhone; it is not an IPA or a TestFlight link and cannot be installed on an arbitrary iPhone. After obtaining the ZIP from the project owner, use a Mac with Xcode, connect and trust that registered phone, enable Developer Mode, then run:
 
 ```bash
 unzip LuLu-iOS-registered-device.zip -d lulu-ios
