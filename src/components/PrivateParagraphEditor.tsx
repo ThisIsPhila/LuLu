@@ -19,7 +19,10 @@ type ParagraphBlock = Paragraph & { separator: string };
  * Only the active paragraph's text is placed in an editable DOM value.
  */
 export function PrivateParagraphEditor({ value, onChange, sessionUnlocked }: PrivateParagraphEditorProps) {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  // A new, empty draft has nothing to conceal. Existing content still starts
+  // concealed until the user deliberately reveals a paragraph.
+  const [activeIndex, setActiveIndex] = useState<number | null>(() => sessionUnlocked && !value ? 0 : null);
+  const [focusRequested, setFocusRequested] = useState(false);
   const blocks = useMemo(() => splitParagraphs(value), [value]);
   const paragraphs = useMemo(() => blocks.map(({ id, text }) => ({ id, text })), [blocks]);
   const activeParagraphId = activeIndex !== null && paragraphs[activeIndex] ? paragraphs[activeIndex].id : null;
@@ -29,7 +32,7 @@ export function PrivateParagraphEditor({ value, onChange, sessionUnlocked }: Pri
   const projection = projectParagraphs(paragraphs, privacyState, sessionUnlocked);
 
   useEffect(() => {
-    if (!sessionUnlocked) setActiveIndex(null);
+    if (!sessionUnlocked) { setActiveIndex(null); setFocusRequested(false); }
   }, [sessionUnlocked]);
 
   const replaceParagraph = (index: number, text: string) => {
@@ -50,6 +53,7 @@ export function PrivateParagraphEditor({ value, onChange, sessionUnlocked }: Pri
     if (!sessionUnlocked) return;
     const insertionIndex = activeIndex === null ? blocks.length : Math.min(activeIndex + 1, blocks.length);
     if (blocks.length === 1 && blocks[0].text === '' && blocks[0].separator === '') {
+      setFocusRequested(true);
       setActiveIndex(0);
       return;
     }
@@ -61,6 +65,7 @@ export function PrivateParagraphEditor({ value, onChange, sessionUnlocked }: Pri
     if (previous) previous.separator = boundary;
     nextBlocks.splice(insertionIndex, 0, { id: '', text: '', separator: following ? boundary : '' });
     const normalized = assignIndexIds(nextBlocks);
+    setFocusRequested(true);
     setActiveIndex(insertionIndex);
     onChange(joinParagraphs(normalized));
   };
@@ -74,7 +79,7 @@ export function PrivateParagraphEditor({ value, onChange, sessionUnlocked }: Pri
             key={view.id}
             type="button"
             aria-label={`Reveal paragraph ${index + 1}`}
-            onClick={() => sessionUnlocked && setActiveIndex(index)}
+            onClick={() => { if (sessionUnlocked) { setFocusRequested(true); setActiveIndex(index); } }}
             disabled={!sessionUnlocked}
           >
             <span aria-hidden="true">••••••••••••••••</span>
@@ -88,7 +93,8 @@ export function PrivateParagraphEditor({ value, onChange, sessionUnlocked }: Pri
             onChange={event => replaceParagraph(index, event.target.value)}
             aria-label={`Edit paragraph ${index + 1}`}
             rows={Math.max(3, Math.min(12, view.displayText.split('\n').length + 1))}
-            autoFocus
+            autoFocus={focusRequested}
+            placeholder="Start writing…"
             spellCheck={false}
             autoComplete="off"
             autoCorrect="off"

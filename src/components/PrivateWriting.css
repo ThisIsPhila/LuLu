@@ -47,12 +47,6 @@
   text-decoration: none;
   cursor: pointer;
 }
-.lulu-app-root:has(.private-journal-page) > .account-actions button:last-child,
-.lulu-app-root:has(.private-draft-composer) > .account-actions button:last-child {
-  border-color: #4b564a;
-  background: #4b564a;
-  color: #fbf8f2;
-}
 .lulu-app-root:has(.private-journal-page) > .lulu-viewport-shell {
   min-height: calc(100dvh - 46px);
 }
@@ -353,12 +347,20 @@
 }
 .private-draft-composer .transform-header {
   flex: 0 0 56px;
+  min-height: 56px;
+  padding-top: 0;
   border-bottom-color: rgba(163, 153, 136, .3);
   background: rgba(250, 247, 240, .76);
 }
 .private-draft-composer .icon-btn-round { border: 1px solid rgba(145, 137, 120, .28); background: rgba(255,253,248,.65); }
 .private-draft-composer .icon-btn-round:hover { background: #e9ece4; }
-.private-draft-composer .transform-flow-body { gap: 10px; }
+.private-draft-composer .transform-flow-body {
+  gap: 10px;
+  justify-content: flex-start;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
 .private-draft-processing { padding: 2px 2px 0; }
 .private-draft-security-note {
   width: fit-content;
@@ -398,19 +400,16 @@
   box-shadow: 0 10px 28px rgba(69, 57, 42, .11), inset 0 1px 0 rgba(255,255,255,.96);
 }
 .private-draft-composer .composer-processing-panel {
+  flex: 0 0 auto;
   min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  overflow: visible;
 }
 .private-draft-composer .composer-input-dock {
+  margin-top: 0;
   min-height: 0;
-  max-height: min(58dvh, 510px);
-  flex: 0 1 auto;
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-gutter: stable;
+  max-height: none;
+  flex: 0 0 auto;
+  overflow: visible;
 }
 .private-draft-fields { display: grid; gap: 8px; min-width: 0; }
 .private-draft-explainer { color: #777165; font-size: 11px; line-height: 1.4; }
@@ -519,7 +518,6 @@
   .private-draft-explainer { font-size: 11px; }
   .private-draft-security-note { font-size: 11px; }
   .private-draft-save-status { padding: 5px 8px; font-size: 11px; }
-  .private-draft-composer .composer-input-dock { max-height: min(58dvh, 510px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -533,3 +531,12 @@
 /* The app shell already supplies Quick exit; retain the standalone component's
    control only when that shell control is absent. */
 .lulu-app-root:has(> .account-actions):has(.private-journal-page) .private-journal-exit { display: none; }
+
+.private-journal-record { border-radius: 18px; min-height: 78px; background: linear-gradient(140deg, #fffdf8, #f3eee5); box-shadow: 0 4px 15px rgba(54,49,39,.07); }
+.private-journal-record-mark { width: 44px; height: 44px; flex: 0 0 44px; border-radius: 14px; background: #e8ebdf; color: #65745d; }
+.private-journal-record-copy { gap: 6px; }
+.private-journal-record-copy > span { color: #767366; }
+
+.private-journal-filters { display:flex; gap:7px; flex-wrap:wrap; margin:0 0 12px; }
+.private-journal-filters button { min-height:34px; padding:0 12px; border:1px solid #dcd5c8; border-radius:999px; background:#fbf8f2; color:#5e6256; font:600 12px var(--font-heading, sans-serif); }
+.private-journal-filters button.is-active { border-color:#66755d; background:#e7ecdf; color:#394837; }

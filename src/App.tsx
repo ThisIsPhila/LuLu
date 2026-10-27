@@ -3,6 +3,7 @@ import { CircleAlert, X } from 'lucide-react';
 import type { Entry } from './domain/journal';
 import type { LibraryItem, LibraryItemDraft, LibraryItemKind } from './domain/libraryItems';
 import { filterOrdinaryEntries } from './domain/ordinaryBrowse';
+import { isPrivateSurface } from './domain/privacy/privateSurface';
 import { AuthBoundary } from './components/auth/AuthBoundary';
 import { watchEntries, saveEntry, readOriginal, updateEntry, deleteEntry } from './services/backend/journal';
 import { watchLibraryItems, createLibraryItem, updateLibraryItem, deleteLibraryItem } from './services/backend/libraryItems';
@@ -12,6 +13,7 @@ import { unlockPrivate, lockPrivate, logout, type AppSession } from './services/
 import type { Entity } from './domain/transform';
 import { LocalRepresentationVault } from './services/vault/localRepresentationVault';
 import { JournalHome } from './components/JournalHome';
+import { OwnerAccountActivity } from './components/OwnerAccountActivity';
 import { TransformProtectView } from './components/TransformProtectView';
 import { ProtectedWritingView } from './components/ProtectedWritingView';
 import { EntityInspectorView } from './components/EntityInspectorView';
@@ -32,7 +34,10 @@ import { deleteOrdinaryMedia } from './services/ordinaryMedia';
 import { readAppPreferences, writeAppPreferences, type AppPreferences } from './services/appPreferences';
 import { readDisplayName, writeDisplayName } from './services/displayName';
 import { auth } from './services/backend/firebase';
+import { request } from './services/backend/request';
+import { pendingJudgeInvitation, clearJudgeInvitation } from './services/judgeInvite';
 import { useEdgeSwipeNavigation } from './hooks/useEdgeSwipeNavigation';
+import { usePullToRefresh } from './hooks/usePullToRefresh';
 import { ProfileSettingsView } from './components/ProfileSettingsView';
 import { PrivacyModelSettings } from './components/PrivacyModelSettings';
 import { LooLuGuide, type LooLuDestination } from './components/LooLuGuide';
@@ -85,6 +90,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
 
   // Protected Mode & Modals
   const [protectedMode, setProtectedMode] = useState<boolean>(false);
+  const pullRefresh = usePullToRefresh({ enabled: isOrdinaryNavigationView && !protectedMode, onRefresh: async () => { setWatchAttempt(value => value + 1); setLibraryItemsAttempt(value => value + 1); } });
   const [representationsLoading, setRepresentationsLoading] = useState(false);
   const [representationsError, setRepresentationsError] = useState('');
   const [inspectorText, setInspectorText] = useState('');
@@ -106,6 +112,24 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   const accountSessionActive = () => !signingOut.current && Date.now() < session.expiresAt;
   const [isProtectedGateOpen, setIsProtectedGateOpen] = useState<boolean>(false);
   const [notice, setNotice] = useState<string>('');
+  const [judgeAccess, setJudgeAccess] = useState(false);
+  const [judgeInviteAttempt, setJudgeInviteAttempt] = useState(0);
+  const [showJudgeInvite, setShowJudgeInvite] = useState(() => Boolean(pendingJudgeInvitation()));
+  const [judgeInviteAccepted, setJudgeInviteAccepted] = useState(false);
+  useEffect(() => {
+    if (development) return;
+    let active = true;
+    const invitation = judgeInviteAccepted ? pendingJudgeInvitation() : '';
+    const action = invitation ? request<{judgeAccess:boolean}>('/judge/redeem', {invitation}) : request<{judgeAccess:boolean}>('/judge/access');
+    void action.then(result => {
+      if (!active || signingOut.current) return;
+      setJudgeAccess(result.judgeAccess === true);
+      if (invitation && result.judgeAccess) {clearJudgeInvitation();setJudgeInviteAccepted(false);setShowJudgeInvite(false);setNotice('Judge invitation linked to your account. Voice access is not available yet.');}
+    }).catch(() => {
+      if (active && invitation) setBackendError('Judge access could not be linked yet. Reopen your invitation or try again in Settings.');
+    });
+    return () => { active = false; };
+  }, [session.uid, judgeInviteAttempt, judgeInviteAccepted]);
   useEffect(() => {
     if (session.emailVerificationStatus === 'sent') setNotice('Check your inbox to verify your email address.');
     else if (session.emailVerificationStatus === 'failed') setNotice('Verification email could not be sent. Retry in Settings.');
@@ -402,9 +426,23 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     try{if(!development)await logout();}finally{onSignedOut();}
   }
 
+  // Ordinary journal and reader screens must not reveal that a private session
+  // exists. Private surfaces retain the immediate exit control.
+  const privateSurface = isPrivateSurface(currentView, {
+    editingOrdinaryEntry: Boolean(editingEntry), hasPrivatePreview: Boolean(privacySource),
+    readingProtectedEntry: Boolean(selectedEntry?.protected),
+  });
+
   return (
     <div className={`lulu-app-root ${currentView === 'vault' ? 'vault-dark-mode' : ''} ${currentView === 'settings' || currentView === 'model-settings' || currentView === 'privacy-demo' ? 'privacy-wide' : ''}`}>
-      {protectedMode&&<div className="account-actions"><button onClick={handleExitProtected}>Quick exit</button><button onClick={()=>setCurrentView('local-private')}>Private writing</button></div>}
+      {showJudgeInvite && <section className="judge-invite-overlay" role="dialog" aria-modal="true" aria-labelledby="judge-invite-title">
+        <div className="judge-invite-card"><h2 id="judge-invite-title">Judge invitation</h2>
+        <p>This shared link is for judges. Sign in or create your own account to link judge access.</p>
+        <p>Decisions are unlimited. Voice is not available yet; the trial plan is five active minutes, with another refill after 24 hours. An idle pause and usage tracking still need to be implemented.</p>
+        <button type="button" onClick={() => setShowJudgeInvite(false)}>Not now</button>{' '}
+        <button type="button" onClick={() => setJudgeInviteAccepted(true)}>Link invitation</button></div>
+      </section>}
+      {protectedMode && privateSurface && <div className="account-actions"><button type="button" onClick={handleExitProtected}>Quick exit</button></div>}
       {backendError&&<div className="backend-error" role="alert"><CircleAlert size={18} aria-hidden="true" /><span><strong>Something needs attention</strong>{backendError}</span><button type="button" onClick={()=>setBackendError('')} aria-label="Dismiss message"><X size={17} aria-hidden="true" /></button></div>}
       {/* Global Status Toast */}
       {notice && (
@@ -417,7 +455,8 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
       )}
 
       {/* Main Responsive Application Shell (Edge-to-Edge with clean Max-Width) */}
-      <div className={`lulu-viewport-shell ${isOrdinaryNavigationView ? 'ordinary-navigation-shell' : ''}`} data-ordinary-route={isOrdinaryNavigationView ? currentView : undefined}>
+      <div ref={pullRefresh.containerRef} className={`lulu-viewport-shell ${isOrdinaryNavigationView ? 'ordinary-navigation-shell' : ''}`} data-ordinary-route={isOrdinaryNavigationView ? currentView : undefined}>
+        {pullRefresh.state !== 'idle' && <div className="pull-refresh-indicator" role="status">{pullRefresh.state === 'refreshing' ? 'Refreshing…' : pullRefresh.state === 'ready' ? 'Release to refresh' : 'Pull to refresh'}</div>}
         {(currentView === 'home' || currentView === 'leaves' || currentView === 'stories' || currentView === 'library' || currentView === 'reader') && (personalState.status !== 'ready' || starterState.status !== 'ready' || onboardingImportState.status !== 'ready') && (
           <section className="journal-source-panel" aria-label="Journal status">
             {(personalState.status === 'loading' || starterState.status === 'loading' || onboardingImportState.status === 'loading') && <p className="journal-source-status" role="status">Preparing your journal…</p>}
@@ -461,7 +500,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
         )}
 
         {currentView === 'settings' && (
-          <ProfileSettingsView preferences={preferences} displayName={displayName} onDisplayNameChange={name => {displayNameEdited.current=true;setDisplayName(name);void writeDisplayName(session.uid, name).catch(()=>setNotice('Could not save your name on this device.'));}} uid={session.uid} authMethod={session.authMethod} emailVerificationStatus={session.emailVerificationStatus} isPrivateSessionActive={() => !signingOut.current && Date.now() < privateAuthority.current.until} onPreferencesChange={setPreferences}
+          <ProfileSettingsView preferences={preferences} displayName={displayName} onDisplayNameChange={name => {displayNameEdited.current=true;setDisplayName(name);void writeDisplayName(session.uid, name).catch(()=>setNotice('Could not save your name on this device.'));}} uid={session.uid} authMethod={session.authMethod} emailVerificationStatus={session.emailVerificationStatus} isPrivateSessionActive={() => !signingOut.current && Date.now() < privateAuthority.current.until} judgeAccess={judgeAccess} judgeInvitePending={Boolean(pendingJudgeInvitation())} onRetryJudgeInvite={() => {setShowJudgeInvite(true);setJudgeInviteAttempt(value => value + 1);}} onPreferencesChange={setPreferences}
             onBack={() => setCurrentView('home')} onOpenModelSettings={() => setCurrentView('model-settings')}
             onSignOut={() => void signOutAccount()} />
         )}
@@ -508,7 +547,6 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
             onDeleteOrdinary={handleDeleteOrdinaryEntry}
             isOrdinarySessionActive={()=>!signingOut.current && Date.now()<session.expiresAt}
             onOpenEntityInspector={(text) => navigatePrivate('inspector', text ?? '')}
-            onEnterPrivate={() => setIsProtectedGateOpen(true)}
             privateVault={localVault.current ?? undefined}
             privateMediaVault={localMediaVault.current ?? undefined}
             onPrivateSaved={() => {
@@ -531,9 +569,9 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
 
         {currentView === 'enclave-writing' && (
           <ProtectedWritingView
-            onBack={() => setCurrentView('home')}
+            onBack={() => { if (protectedMode) handleExitProtected(); else setCurrentView('home'); }}
             onOpenEntityInspector={() => navigatePrivate('inspector')}
-            onDone={() => setCurrentView('home')}
+            onDone={() => { if (protectedMode) handleExitProtected(); else setCurrentView('home'); }}
           />
         )}
 
@@ -565,6 +603,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
               protectedMode={protectedMode}
               onBack={() => {
                 originalReadRequest.current++;
+                if (selectedEntry.protected && privateAuthority.current.until > 0) handleExitProtected();
                 setSelectedEntry(null);setReaderStorySequence([]);
                 setCurrentView(readerReturnView.current);
               }}
@@ -587,6 +626,9 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
           <BottomNav
             currentView={currentView as any}
             onNavigate={(view) => {
+              // Leaving a private surface through ordinary navigation conceals
+              // it immediately and invalidates outstanding private operations.
+              if (privateAuthority.current.until > 0) handleExitProtected();
               if(currentViewRef.current==='inspector')setInspectorText('');
               if (view === 'compose') {
                 editorReturnView.current = currentViewRef.current === 'home' || currentViewRef.current === 'leaves' || currentViewRef.current === 'stories' || currentViewRef.current === 'library'
@@ -602,12 +644,13 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
         )}
       </div>
 
+      {!development && <OwnerAccountActivity uid={session.uid} />}
       <LooLuGuide
         currentView={currentView === 'leaves' ? 'journal' : currentView === 'compose' ? 'write' : currentView === 'model-settings' ? 'privacy-settings' : currentView === 'local-private' ? 'private-writing' : currentView}
-        privateAvailable={protectedMode && Date.now() < privateUntil}
+        privateAvailable={protectedMode && privateSurface && Date.now() < privateUntil}
         canLeaveCurrentView={guideMayLeave(currentView)}
         canStartDraft={!protectedMode && guideMayLeave(currentView)}
-        captureBlockReason={protectedMode ? 'Lu capture starts an ordinary unsaved draft. Exit private writing first.' : !guideMayLeave(currentView) ? 'Finish or leave this screen before starting another draft.' : ''}
+        captureBlockReason={protectedMode ? 'Finish or leave this screen before starting another draft.' : !guideMayLeave(currentView) ? 'Finish or leave this screen before starting another draft.' : ''}
         hasEntries={ordinaryEntries.length > 0}
         onNavigate={handleLooLuNavigate}
         onStartDraft={handleLooLuStartDraft}

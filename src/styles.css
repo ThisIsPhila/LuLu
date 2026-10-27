@@ -855,9 +855,6 @@ body {
   justify-content: space-between;
   border-bottom: 1px solid var(--stone-300);
 }
-.composer-private-link { min-height: 36px; padding: 0 10px; border: 1px solid transparent; border-radius: 999px; color: #53624d; background: transparent; font: 600 12px/1 var(--font-heading); white-space: nowrap; cursor: pointer; }
-.composer-private-link:hover { background: var(--stone-200); }
-.composer-private-link:focus-visible { outline: 2px solid #6e7966; outline-offset: 2px; }
 
 .icon-btn-round {
   width: 36px;
@@ -2617,6 +2614,7 @@ body {
 }
 
 .filter-pill {
+  color: var(--ink);
   background: var(--stone-100);
   border: 1px solid var(--stone-300);
   padding: 4px 12px;
@@ -2749,3 +2747,15 @@ body {
   font-size: 10px;
   color: var(--ink-faint);
 }
+
+.judge-invite-overlay { position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center; padding: 24px; background: rgba(0, 0, 0, .55); }
+.judge-invite-card { max-width: 480px; border-radius: 20px; padding: 24px; background: #fff; color: #20221e; }
+.judge-invite-card button { padding: 10px 16px; border-radius: 20px; cursor: pointer; }
+
+.pull-refresh-indicator { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 40; width: max-content; margin: 0 auto; padding: 8px 14px; border-radius: 999px; color: #4d5948; background: #f4f0e7; box-shadow: 0 3px 12px #302c261a; font: 600 12px var(--font-heading, sans-serif); }
+
+.owner-account-activity { position:fixed; z-index:60; left:16px; bottom:calc(100px + env(safe-area-inset-bottom, 0px)); font: 14px var(--font-sans, sans-serif); }
+.owner-account-activity > button { border:1px solid #d5d1c6; border-radius:20px; background:#fffdf8; color:#252921; padding:10px 14px; box-shadow:0 4px 18px #0002; }
+.owner-account-activity section { position:absolute; bottom:50px; left:0; width:min(340px, calc(100vw - 32px)); max-height:50vh; overflow:auto; background:#fffdf8; border:1px solid #d5d1c6; border-radius:16px; padding:16px; box-shadow:0 8px 28px #0002; }
+.owner-account-activity ul { padding-left:18px; } .owner-account-activity li { margin:8px 0; overflow-wrap:anywhere; } .owner-account-activity time, .owner-account-activity small { display:block; color:#666; font-size:12px; }
+.owner-account-activity-live { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }

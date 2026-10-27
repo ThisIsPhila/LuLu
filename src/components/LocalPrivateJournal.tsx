@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { LocalVault, LocalVaultDraft, LocalVaultRevision } from '../services/vault/localVault';
 import type { LocalMediaVault, MediaMetadata } from '../services/vault/localMediaVault';
 import { readPrivateText, readPrivateTextContent } from '../services/privateCapture';
-import { BookOpen, FilePenLine } from 'lucide-react';
+import { BookOpen, FilePenLine, Image as ImageIcon, Mic, ChevronRight } from 'lucide-react';
 import { PrivateDraftFields } from './PrivateDraftFields';
 import { LuLuLogo } from './Logo';
 import './PrivateWriting.css';
@@ -16,6 +16,7 @@ type Props = { vault: LocalVault; mediaVault?: LocalMediaVault; onExit: () => vo
 /** Mounted only within a live private session; no ordinary preview receives these values. */
 export function LocalPrivateJournal({vault, mediaVault, onExit, onCompose, onInspectText}: Props) {
   const [records, setRecords] = useState<LocalVaultRevision[]>([]);
+  const [filter, setFilter] = useState<'all' | 'writing' | 'photos' | 'audio'>('all');
   const [media, setMedia] = useState<MediaMetadata[]>([]);
   const [drafts, setDrafts] = useState<LocalVaultDraft[]>([]);
   const [selected, setSelected] = useState<LocalVaultRevision | null>(null);
@@ -122,6 +123,7 @@ export function LocalPrivateJournal({vault, mediaVault, onExit, onCompose, onIns
     ...records.map(record => ({type:'text' as const, date:record.clientCreatedAt, record})),
     ...media.map(record => ({type:'media' as const, date:record.clientCreatedAt, record})),
   ].sort((left,right)=>right.date.localeCompare(left.date));
+  const visibleItems = savedItems.filter(item => filter === 'all' || (filter === 'writing' && item.type === 'text') || (filter === 'photos' && item.type === 'media' && item.record.kind === 'image') || (filter === 'audio' && item.type === 'media' && item.record.kind === 'audio'));
   const text=selected ? readPrivateText(selected) : null;
   return <section className="stitch-main-stream private-journal-page" aria-label="Local private journal">
     <header className="private-journal-toolbar">
@@ -148,22 +150,24 @@ export function LocalPrivateJournal({vault, mediaVault, onExit, onCompose, onIns
         <ul className="private-journal-list private-journal-drafts">{drafts.map(draft=>{
           let label='Private draft';
           try {label=readPrivateTextContent(draft.content).title || label;} catch {}
-          return <li className="private-journal-list-item" key={draft.draftId}><button className="private-journal-record" onClick={()=>recover(draft)}><span className="private-journal-record-mark" aria-hidden="true"><FilePenLine size={17} strokeWidth={1.6} /></span><span className="private-journal-record-copy"><strong>{label}</strong><span>Continue recovery draft</span></span><span className="private-journal-record-arrow" aria-hidden="true">↗</span></button></li>;
+          return <li className="private-journal-list-item" key={draft.draftId}><button className="private-journal-record" onClick={()=>recover(draft)}><span className="private-journal-record-mark" aria-hidden="true"><FilePenLine size={17} strokeWidth={1.6} /></span><span className="private-journal-record-copy"><strong>{label}</strong><span>Continue recovery draft</span></span><span className="private-journal-record-arrow" aria-hidden="true"><ChevronRight size={18} /></span></button></li>;
         })}</ul>
       </section>}
       {!busy && savedItems.length===0 && <p className="private-journal-empty">No saved private records yet.</p>}
       {savedItems.length > 0 && <section className="private-journal-record-section" aria-label="Saved private records">
         <div className="private-journal-section-heading"><span className="private-writing-kicker">SAVED HERE</span><h2>Your records</h2></div>
-      <ul className="private-journal-list">{savedItems.map(item=>{
+      <div className="private-journal-filters" aria-label="Filter private records">{([['all','All'], ['writing','Writing'], ['photos','Photos'], ['audio','Voice notes']] as const).map(([id,label]) => <button type="button" key={id} className={filter === id ? 'is-active' : ''} aria-pressed={filter === id} onClick={() => setFilter(id)}>{label}</button>)}</div>
+      {visibleItems.length === 0 && <p className="private-journal-empty">No items in this category yet.</p>}
+      <ul className="private-journal-list">{visibleItems.map(item=>{
         if(item.type==='media') {
           const record=item.record;
-          const label=record.title || record.originalName || `Private ${record.kind}`;
-          return <li className="private-journal-list-item" key={`media-${record.mediaId}`}><button className="private-journal-record" onClick={()=>openMedia(record)}><span className="private-journal-record-mark" aria-hidden="true"><BookOpen size={17} strokeWidth={1.6} /></span><span className="private-journal-record-copy"><strong>{label}</strong><span>{record.kind==='image'?'Private image':'Private audio'} · Open private media</span></span><span className="private-journal-record-arrow" aria-hidden="true">↗</span></button></li>;
+          const label=record.title || record.originalName || (record.kind === 'image' ? 'Photo' : 'Voice note');
+          return <li className="private-journal-list-item" key={`media-${record.mediaId}`}><button className="private-journal-record" onClick={()=>openMedia(record)}><span className="private-journal-record-mark" aria-hidden="true">{record.kind === 'image' ? <ImageIcon size={19} /> : <Mic size={19} />}</span><span className="private-journal-record-copy"><strong>{label}</strong><span>{record.kind==='image'?'Photo':'Voice note'} · {formatPrivateDate(record.clientCreatedAt)}{record.durationMs !== undefined ? ` · ${Math.floor(record.durationMs / 60000)}:${String(Math.floor(record.durationMs / 1000) % 60).padStart(2, '0')}` : ''}</span></span><span className="private-journal-record-arrow" aria-hidden="true"><ChevronRight size={18} /></span></button></li>;
         }
         const record=item.record;
         let label='Private record';
         try {label=readPrivateText(record).title || label;} catch {}
-        return <li className="private-journal-list-item" key={`text-${record.recordId}`}><button className="private-journal-record" onClick={()=>open(record)}><span className="private-journal-record-mark" aria-hidden="true"><BookOpen size={17} strokeWidth={1.6} /></span><span className="private-journal-record-copy"><strong>{label}</strong><span>Open private record</span></span><span className="private-journal-record-arrow" aria-hidden="true">↗</span></button></li>;
+        return <li className="private-journal-list-item" key={`text-${record.recordId}`}><button className="private-journal-record" onClick={()=>open(record)}><span className="private-journal-record-mark" aria-hidden="true"><BookOpen size={17} strokeWidth={1.6} /></span><span className="private-journal-record-copy"><strong>{label}</strong><span>Writing · {formatPrivateDate(record.clientCreatedAt)}</span></span><span className="private-journal-record-arrow" aria-hidden="true"><ChevronRight size={18} /></span></button></li>;
       })}</ul></section>}
     </>}
     {selectedDraft && <PrivateDraftFields key={`draft-${selectedDraft.draftId}`} vault={vault} draft={selectedDraft} onSaved={saved} />}
@@ -218,3 +222,5 @@ export function LocalPrivateJournal({vault, mediaVault, onExit, onCompose, onIns
 function safeHistoryText(record:LocalVaultRevision) {
   try {return readPrivateText(record).body;} catch {return 'This revision format cannot be displayed here.';}
 }
+
+function formatPrivateDate(value: string) { const date = new Date(value); return Number.isNaN(date.getTime()) ? 'Date unavailable' : new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(date); }

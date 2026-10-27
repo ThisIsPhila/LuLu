@@ -46,7 +46,6 @@ type Props = {
   onDeleteOrdinary: (entryId: string) => Promise<void>;
   isOrdinarySessionActive: () => boolean;
   onOpenEntityInspector: (currentText?: string) => void;
-  onEnterPrivate: () => void;
   privateVault?: LocalVault;
   privateMediaVault?: LocalMediaVault;
   onPrivateSaved: (revision: LocalVaultRevision) => void;
@@ -64,7 +63,6 @@ export const TransformProtectView: React.FC<Props> = ({
   onDeleteOrdinary,
   isOrdinarySessionActive,
   onOpenEntityInspector,
-  onEnterPrivate,
   privateVault,
   privateMediaVault,
   onPrivateSaved,
@@ -277,7 +275,6 @@ export const TransformProtectView: React.FC<Props> = ({
         <div className="header-avatar-circle">
           <User size={15} />
         </div>
-        {!protectedMode && !editingEntry && <button type="button" className="composer-private-link" onClick={onEnterPrivate}>Write privately</button>}
       </header>
 
       {/* Main Flow */}
