@@ -1,12 +1,15 @@
 import { startRegistration, startAuthentication, browserSupportsWebAuthn } from '@simplewebauthn/browser';
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithCustomToken, signInWithPopup, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, EmailAuthProvider, GoogleAuthProvider, linkWithCredential, linkWithPopup, sendEmailVerification, sendPasswordResetEmail, signInWithCustomToken, signInWithPopup, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { auth, authReady } from './firebase';
 import { request, BackendRequestError } from './request';
+import { hasActivePasskeyLinkAuthority, isRestorableWebSession } from './sessionRestorePolicy';
 import { beginNativeAuthentication, resumeNativeAuthentication, restoreNativeSession } from '../../platform/nativeAuth';
 import { isNativePlatform } from '../../platform/runtime';
 
-export type AppSession = { uid: string; expiresAt: number; privateUntil: number; resumePrivate?: boolean };
+export type AppSession = { uid: string; expiresAt: number; privateUntil: number; authMethod?: 'passkey'|'email'|'google'; emailVerificationStatus?: 'sent'|'failed'; resumePrivate?: boolean };
 export { BackendRequestError, request } from './request';
+export type AccountLinkAuthority = Readonly<{uid:string;privateUntil:number}>;
+const verifiedLinkAuthorities = new WeakSet<object>();
 
 export async function authenticate(create: boolean): Promise<AppSession> {
   if (isNativePlatform()) {
@@ -33,9 +36,21 @@ async function finishProviderSignIn(): Promise<AppSession> {
 export async function authenticateWithEmail(email: string, password: string, create: boolean): Promise<AppSession> {
   await authReady;
   const normalizedEmail = email.trim();
-  if (create) await createUserWithEmailAndPassword(auth, normalizedEmail, password);
+  if (create) {
+    const credential = await createUserWithEmailAndPassword(auth, normalizedEmail, password);
+    let emailVerificationStatus: 'sent'|'failed' = 'sent';
+    try { await sendEmailVerification(credential.user); }
+    catch { emailVerificationStatus = 'failed'; }
+    return {...await finishProviderSignIn(), emailVerificationStatus};
+  }
   else await signInWithEmailAndPassword(auth, normalizedEmail, password);
   return finishProviderSignIn();
+}
+export async function requestEmailPasswordReset(email: string): Promise<void> {
+  await authReady;
+  const normalizedEmail=email.trim();
+  if (!normalizedEmail) throw new Error('Enter the email address for the account.');
+  await sendPasswordResetEmail(auth, normalizedEmail);
 }
 export async function authenticateWithGoogle(): Promise<AppSession> {
   await authReady;
@@ -60,6 +75,77 @@ export async function unlockPrivate(): Promise<number> {
 }
 export async function restorePendingNativeAuth() { return resumeNativeAuthentication(); }
 export async function restoreNativeAppSession() { return restoreNativeSession(); }
+export async function restoreWebAppSession(): Promise<AppSession|null> {
+  await authReady;
+  const user = auth.currentUser;
+  if (!user) return null;
+  try {
+    const session = await request<AppSession>('/session');
+    if (!isRestorableWebSession(session, user.uid)) {
+      await signOut(auth);
+      return null;
+    }
+    const locked = await request<{success?:boolean}>('/auth/lock');
+    if (locked.success !== true) throw new Error('LuLu could not confirm that the private session was locked.');
+    return {...session,privateUntil:0};
+  } catch (error) {
+    if (error instanceof BackendRequestError && (error.status === 401 || error.status === 403)) {
+      await signOut(auth);
+      return null;
+    }
+    throw error;
+  }
+}
+export async function linkGoogleAccount(expectedUid: string, authority: AccountLinkAuthority): Promise<void> {
+  assertLinkAuthority(expectedUid,authority);
+  const user = auth.currentUser;
+  if (!user || user.uid !== expectedUid) throw new Error('The active account changed. Sign in again before linking a provider.');
+  await linkWithPopup(user, new GoogleAuthProvider());
+  if (auth.currentUser?.uid !== expectedUid || !auth.currentUser.providerData.some(provider => provider.providerId === 'google.com')) {
+    throw new Error('Google did not finish linking to this account. Please check the sign-in methods and try again.');
+  }
+  await verifyLinkedSession(expectedUid);
+}
+export async function linkEmailAccount(expectedUid: string, email: string, password: string): Promise<'sent'|'failed'> {
+  await authReady;
+  const user = auth.currentUser;
+  if (!user || user.uid !== expectedUid) throw new Error('The active account changed. Sign in again before linking a provider.');
+  const authority=await assertAccountLinkAuthority(expectedUid);
+  assertLinkAuthority(expectedUid,authority);
+  const credential = EmailAuthProvider.credential(email.trim(), password);
+  const linked = await linkWithCredential(user, credential);
+  if (linked.user.uid !== expectedUid || !linked.user.providerData.some(provider => provider.providerId === 'password')) {
+    throw new Error('Email and password did not finish linking to this account. Please check the sign-in methods and try again.');
+  }
+  await verifyLinkedSession(expectedUid);
+  try { await sendEmailVerification(linked.user); return 'sent'; }
+  catch { return 'failed'; }
+}
+export async function resendEmailVerification(expectedUid: string): Promise<'sent'|'failed'> {
+  await authReady;
+  const user = auth.currentUser;
+  if (!user || user.uid !== expectedUid || !user.email || user.emailVerified) throw new Error('Email verification is not available for the active account.');
+  try { await sendEmailVerification(user); return 'sent'; }
+  catch { return 'failed'; }
+}
+async function verifyLinkedSession(expectedUid: string): Promise<void> {
+  try { await assertAccountLinkAuthority(expectedUid); }
+  catch { throw new Error('The provider linked, but LuLu could not confirm this passkey session. Sign in again before continuing.'); }
+}
+export async function assertAccountLinkAuthority(expectedUid: string): Promise<AccountLinkAuthority> {
+  const session=await request<AppSession>('/session');
+  if (!hasActivePasskeyLinkAuthority(session,expectedUid)) {
+    throw new Error('Verify this LuLu account with its passkey before linking another sign-in method.');
+  }
+  const authority=Object.freeze({uid:session.uid,privateUntil:session.privateUntil});
+  verifiedLinkAuthorities.add(authority);
+  return authority;
+}
+function assertLinkAuthority(expectedUid:string, authority:AccountLinkAuthority):void {
+  if (!authority || !verifiedLinkAuthorities.has(authority) || authority.uid!==expectedUid || !Number.isSafeInteger(authority.privateUntil) || authority.privateUntil<=Date.now()) {
+    throw new Error('Verify this LuLu account with its passkey before linking another sign-in method.');
+  }
+}
 export async function logout() {
   try { await request('/auth/logout'); }
   finally { await signOut(auth); }

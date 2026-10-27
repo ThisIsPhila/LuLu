@@ -164,7 +164,12 @@ export async function restoreNativeSession(): Promise<AppSession | null> {
   if (!isNativePlatform()) return null;
   await authReady;
   if (!auth.currentUser) return null;
-  try { return await request<AppSession>('/session'); }
+  try {
+    const session=await request<AppSession>('/session');
+    const locked=await request<{success?:boolean}>('/auth/lock');
+    if(locked.success!==true)throw new Error('LuLu could not confirm that the private session was locked.');
+    return {...session,privateUntil:0};
+  }
   catch (error) {
     if (error instanceof Error && error.name === 'BackendRequestError' && [401, 403].includes((error as BackendRequestError).status ?? 0)) {
       await signOut(auth);

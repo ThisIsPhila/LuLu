@@ -1,0 +1,21 @@
+.account-linking { display:grid; gap:16px; padding:20px; border:1px solid #ded7ca; border-radius:20px; background:#fffdf8; color:#343830; font:500 13px/1.5 'DM Sans',sans-serif; }
+.account-linking-heading span { color:#78816e; font-size:10px; font-weight:800; letter-spacing:.12em; }
+.account-linking-heading h2 { margin:5px 0; font:400 24px/1.15 'Literata',Georgia,serif; }
+.account-linking-heading p,.account-linking-note { margin:0; color:#74766d; }
+.account-linking-method { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:13px 0; border-top:1px solid #ece7dd; }
+.account-linking-method>div:first-child { display:grid; gap:2px; }
+.account-linking-method span { color:#74766d; font-size:12px; }
+.account-linking button { min-height:38px; padding:0 15px; border:1px solid #d7d4c8; border-radius:22px; color:#343830; background:#f8f6ef; font:700 12px 'DM Sans',sans-serif; cursor:pointer; }
+.account-linking button:disabled { opacity:.5; cursor:not-allowed; }
+.account-linking button:focus-visible,.account-linking input:focus-visible { outline:3px solid #7f8e76; outline-offset:2px; }
+.account-linking-form { display:grid; gap:12px; }
+.account-linking-form label { display:grid; gap:6px; color:#62655d; font-size:12px; font-weight:700; }
+.account-linking-form input { box-sizing:border-box; width:100%; min-height:42px; padding:9px 12px; border:1px solid #d9d5ca; border-radius:12px; color:#343830; background:#fffefa; font:500 14px 'DM Sans',sans-serif; }
+.account-linking-form button { justify-self:start; }
+.account-linking-actions { display:flex; flex-wrap:wrap; gap:7px; }
+.account-linking-native-guide { display:grid; gap:10px; justify-items:start; }
+.account-linking-actions button { padding:0 11px; }
+.account-linking-status,.account-linking-error { margin:0; padding:11px 13px; border-radius:12px; }
+.account-linking-status { color:#435744; background:#edf3ea; }
+.account-linking-error { color:#812f2b; background:#f9ece8; }
+@media(max-width:420px) { .account-linking-method { align-items:flex-start; flex-direction:column; } }

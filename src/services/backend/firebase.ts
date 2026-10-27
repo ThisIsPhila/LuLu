@@ -22,7 +22,7 @@ const native = isNativePlatform();
 export const auth = native ? initializeAuth(app, {
   persistence: [getPlatform() === 'ios' ? browserLocalPersistence : indexedDBLocalPersistence, inMemoryPersistence],
 }) : getAuth(app);
-// Wait for the initial native identity before attempting session restoration.
-// Web retains its existing in-memory authentication behavior.
-export const authReady = native ? auth.authStateReady() : setPersistence(auth, inMemoryPersistence);
+// Web auth survives reloads on this origin so the app can validate and restore
+// an existing LuLu session. Native persistence remains platform-specific above.
+export const authReady = native ? auth.authStateReady() : setPersistence(auth, browserLocalPersistence);
 export const database = getFirestore(app); // Memory cache; private records never use disk cache.

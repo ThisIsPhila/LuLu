@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { OnboardingAuth, type AuthActionResult } from '../OnboardingAuth';
 import { OnboardingJourney, type OnboardingJourneyScreen, type OnboardingJourneyState, type JourneyActionResult } from '../OnboardingJourney';
-import { authenticate, authenticateWithEmail, authenticateWithGoogle, authError, BackendRequestError, restoreNativeAppSession, restorePendingNativeAuth, type AppSession } from '../../services/backend/passkeys';
+import { authenticate, authenticateWithEmail, authenticateWithGoogle, authError, BackendRequestError, logout, requestEmailPasswordReset, restoreNativeAppSession, restorePendingNativeAuth, restoreWebAppSession, type AppSession } from '../../services/backend/passkeys';
 import { bindOnboardingDraft, discardUnreadableOnboardingDraft, loadOnboardingDraft, saveFirstOnboardingEntry, saveOnboardingProgress } from '../../services/onboardingDraft';
 import { isNativePlatform } from '../../platform/runtime';
 import { localDevelopmentAvailable, localDevelopmentSession } from '../../services/localDevelopment';
 import './auth.css';
+const localPreviewSessionKey = 'lulu.local-preview.active';
 export function AuthBoundary({children}: {children:(session:AppSession,onSignedOut:()=>void)=>ReactNode}) {
   const [session,setSession]=useState<AppSession|null>(null);
-  const [restoring,setRestoring]=useState(isNativePlatform());
+  const [restoring,setRestoring]=useState(true);
+  const [sessionRestoreError,setSessionRestoreError]=useState('');
   const [journeyReady,setJourneyReady]=useState(false);
   const [journeyError,setJourneyError]=useState('');
   const [draftReadFailed,setDraftReadFailed]=useState(false);
@@ -37,20 +39,47 @@ export function AuthBoundary({children}: {children:(session:AppSession,onSignedO
     return()=>{active=false;};
   },[route]);
   useEffect(()=>{
-    if(!isNativePlatform())return;
     let active=true;
     void (async()=>{
+      if (localDevelopmentAvailable() && sessionStorage.getItem(localPreviewSessionKey) === 'yes') {
+        if (active) { setSession(localDevelopmentSession()); setRestoring(false); }
+        return;
+      }
       let restored:AppSession|null=null;
-      try {
-        const resumed=await restorePendingNativeAuth();
-        restored=resumed?.session ?? null;
-      } catch { /* A stale pending exchange must not prevent ordinary session recovery. */ }
-      if(!restored){try{restored=await restoreNativeAppSession();}catch{/* Reauthentication remains available. */}}
+      if(isNativePlatform()){
+        try {
+          const resumed=await restorePendingNativeAuth();
+          restored=resumed?.session ?? null;
+        } catch { /* A stale pending exchange must not prevent ordinary session recovery. */ }
+        if(!restored){try{restored=await restoreNativeAppSession();}catch{if(active)setSessionRestoreError('LuLu could not confirm your saved account session. Your sign-in is still saved on this device. Reconnect and retry before continuing.');}}
+      } else {
+        try { restored=await restoreWebAppSession(); }
+        catch { if(active)setSessionRestoreError('LuLu could not confirm your account session or verify that private access is locked. Your sign-in is still saved on this device. Reconnect and retry before continuing.'); }
+      }
       if(active && restored){verified.current=restored;setSession(restored);}
       if(active)setRestoring(false);
     })();
     return()=>{active=false;};
   },[]);
+  async function retrySessionRestore() {
+    setRestoring(true);setSessionRestoreError('');
+    try {
+      let restored:AppSession|null=null;
+      if(isNativePlatform()){
+        try { restored=(await restorePendingNativeAuth())?.session ?? null; }
+        catch { /* Try the ordinary native session path after a stale handoff. */ }
+        if(!restored)restored=await restoreNativeAppSession();
+      } else restored=await restoreWebAppSession();
+      if(restored){verified.current=restored;setSession(restored);}
+    } catch {
+      setSessionRestoreError('LuLu still cannot confirm this session. Private content remains unavailable until the connection is restored.');
+    } finally {setRestoring(false);}
+  }
+  async function signOutDuringRestore() {
+    try { await logout(); }
+    catch { /* logout clears the Firebase credential even when the backend is unreachable. */ }
+    verified.current=null;setSession(null);setSessionRestoreError('');
+  }
   async function runAuthentication(action:()=>Promise<AppSession>):Promise<AuthActionResult> {
     try {verified.current=await action();return {status:'authenticated'};}
     catch(error){
@@ -99,8 +128,9 @@ export function AuthBoundary({children}: {children:(session:AppSession,onSignedO
       return {status:'error',message:`Your account is ready, but LuLu couldn't retain the local onboarding draft yet. Try again here. ${error instanceof Error?error.message:''}`};
     }
   }
-  if(session) return children(session,()=>{verified.current=null;setSession(null);});
+  if(session) return children(session,()=>{if(localDevelopmentAvailable())sessionStorage.removeItem(localPreviewSessionKey);verified.current=null;setSession(null);});
   if(restoring || (route==='journey' && !journeyReady))return <div className="auth-restore" role="status">Opening your LuLu journal…</div>;
+  if(sessionRestoreError)return <main className="auth-session-recovery" role="alert"><h1>We couldn’t confirm your session.</h1><p>{sessionRestoreError}</p><button type="button" onClick={()=>void retrySessionRestore()}>Retry connection</button><button type="button" onClick={()=>void signOutDuringRestore()}>Sign out on this device</button></main>;
   if(draftReadFailed && route==='journey')return <div className="auth-draft-recovery" role="alert">
     <h1>Your local draft could not be opened.</h1><p>{journeyError} The text stays on this device until you choose what to do.</p>
     <button type="button" onClick={()=>setRoute('signin')}>Sign in to an existing account</button>
@@ -123,9 +153,17 @@ export function AuthBoundary({children}: {children:(session:AppSession,onSignedO
     onRegister={()=>beginPasskey(true)}
     onSignIn={()=>beginPasskey(false)}
     onEmailAuth={(email,password,create)=>runAuthentication(()=>authenticateWithEmail(email,password,create))}
+    onForgotPassword={async email=>{
+      try {
+        await requestEmailPasswordReset(email);
+        return {status:'notice',message:'If an account can be reset with this address, Firebase has accepted a password-reset request. Check the inbox and spam folder.'};
+      } catch(error) {
+        return {status:'error',reason:error instanceof TypeError?'network':'unknown',message:authError(error)};
+      }
+    }}
     onGoogleSignIn={()=>runAuthentication(authenticateWithGoogle)}
     onStartOnboarding={()=>setRoute('journey')}
-    onDevelopmentEnter={import.meta.env?.DEV === true && localDevelopmentAvailable() ? ()=>setSession(localDevelopmentSession()) : undefined}
+    onDevelopmentEnter={localDevelopmentAvailable() ? ()=>{sessionStorage.setItem(localPreviewSessionKey,'yes');setSession(localDevelopmentSession());} : undefined}
     onAuthenticated={()=>{if(verified.current)setSession(verified.current);}}
   />;
 }
