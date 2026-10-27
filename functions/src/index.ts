@@ -11,6 +11,7 @@ import { browserOrigins as origins, nativeOrigins, isAllowedApiOrigin } from './
 import { configuredProvider, privacyCapability, validateReviewedPrivacyRequest } from './privacy-processing.js';
 import { judgeInviteDigest, isJudgeInviteActive } from './judge-invite.js';
 import { mayReadAccountActivity } from './owner-notifications.js';
+import { processAccountAlerts } from './account-alerts.js';
 import { scrubForLu, respondAsLu, LU_LANGUAGES } from './lu-chat.js';
 import { refillJudgeAllowance, type JudgeAllowance } from './judge-allowance.js';
 
@@ -78,8 +79,19 @@ async function issueSession(uid: string, setStage: (stage: FailureStage) => void
     () => { setStage('mint-token'); return identity.createCustomToken(uid, {sid, luluSession: true, authMethod, ...(authMethod === 'passkey' ? {passkey: true} : {})}); },
     () => { setStage('persist-session'); return sessions.doc(sid).create({uid, expiresAt, privateUntil: 0, authMethod, purgeAfter: Timestamp.fromMillis(expiresAt)}); },
   );
+  // Keep account access available even if the email provider is unavailable.
+  // The queue retries during later sign-ins. ACCOUNT_ALERTS_START_MS and the
+  // server-only RESEND_API_KEY must be configured before this can send.
+  try {
+    const cutoff=Number(process.env.ACCOUNT_ALERTS_START_MS);
+    if(process.env.ACCOUNT_ALERTS_START_MS && process.env.RESEND_API_KEY && Number.isFinite(cutoff)) {
+      const user=await identity.getUser(uid);
+      await processAccountAlerts(db,uid,user.metadata.creationTime,cutoff,process.env.RESEND_API_KEY);
+    }
+  } catch { console.error(JSON.stringify({event:'account-alert-queue-failed'})); }
   return {customToken, expiresAt};
 }
+
 async function loadNativeExchange(id: unknown, state: unknown) {
   const ref = nativeExchanges.doc(documentId(id));
   const snapshot = await ref.get();

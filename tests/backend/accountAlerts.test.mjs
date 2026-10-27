@@ -1,0 +1,23 @@
+import {test,after} from 'node:test';
+import {strict as assert} from 'node:assert';
+import {createRequire} from 'node:module';
+import {processAccountAlerts} from '../../functions/lib/account-alerts.js';
+const require=createRequire(new URL('../../functions/package.json',import.meta.url));
+const {initializeApp,deleteApp}=require('firebase-admin/app');
+const {getFirestore}=require('firebase-admin/firestore');
+const app=initializeApp({projectId:'demo-lulu-alerts'},'alerts-test');
+const db=getFirestore(app);
+after(()=>deleteApp(app));
+test('new account delivery retries on later sign-in and avoids duplicates',async()=>{
+  let attempts=0;
+  const send=async()=>{attempts++;if(attempts===1)throw Error('offline');};
+  const created='2026-10-27T10:00:00.000Z',cutoff=Date.parse('2026-10-27T09:00:00.000Z');
+  await processAccountAlerts(db,'user-one',created,cutoff,'test',send);
+  let docs=await db.collection('_accountAlerts').get();
+  assert.equal(docs.size,1);assert.equal(docs.docs[0].data().status,'pending');
+  await processAccountAlerts(db,'user-one',created,cutoff,'test',send);
+  docs=await db.collection('_accountAlerts').get();
+  assert.equal(docs.size,1);assert.equal(docs.docs[0].data().status,'sent');
+  await processAccountAlerts(db,'user-one',created,cutoff,'test',send);
+  assert.equal(attempts,2);
+});
