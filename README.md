@@ -6,9 +6,11 @@
 </p>
 
 <h1 align="center">Your story. Your safety. Your choice.</h1>
-<p align="center"><strong>An ordinary journal with an extraordinary purpose.</strong></p>
+<p align="center"><strong>A journal and storybook for everyday writing and protected personal documentation.</strong></p>
 <p align="center">
-  <a href="https://lulu.thisisphila.co.za/"><strong>Open LuLu</strong></a>
+  <a href="https://lulu.thisisphila.co.za/"><strong>Try the live web demo</strong></a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/ThisIsPhila/LuLu/releases/tag/android-ios-preview-2026-10-27">Download mobile previews</a>
   &nbsp;·&nbsp;
   <a href="#experience-lulu">Explore the experience</a>
   &nbsp;·&nbsp;
@@ -25,7 +27,7 @@
 
 Sometimes the first step is simply writing something down.
 
-LuLu brings **everyday journalling and protected personal documentation** into one familiar space. You can capture a thought, save an important moment and return to an ordinary journal. When something needs greater privacy, LuLu's protected-writing experience is designed to help preserve it without requiring you to decide immediately whether to disclose it or seek help.
+LuLu is a **journal and storybook for everyday writing and protected personal documentation**. You can capture a thought, save an important moment and return to an ordinary journal. When something needs greater privacy, LuLu's protected-writing experience is designed to help preserve it without requiring you to decide immediately whether to disclose it or seek help.
 
 The wider vision connects **capture → preservation → understanding → choice → support**: one continuous experience for people who may not yet know what to call what they're experiencing, what their options are, or when they will feel ready to act.
 
@@ -35,11 +37,11 @@ Created by **Team KHÔRA** for the **FNB App of the Year Hackathon 2026**, addre
 
 ## Experience LuLu
 
-### Start with the live application
+### For the demo, start with the live web app
 
-**[Launch LuLu in your browser](https://lulu.thisisphila.co.za/)**
+**[Open the live LuLu web app](https://lulu.thisisphila.co.za/)**
 
-The web release is the quickest way to explore the *currently deployed* experience. Create your own account using a passkey, email or Google sign-in; there is no shared demo password.
+This is the recommended way for judges and reviewers to try LuLu. It opens in a browser and does not require installing a native app. Create your own account using a passkey, email or Google sign-in; there is no shared demo password.
 
 | Step | What to do | What you'll see |
 | --- | --- | --- |
@@ -47,6 +49,8 @@ The web release is the quickest way to explore the *currently deployed* experien
 | **2. Explore the journal** | Open ordinary journal entries, edit one and save. | Fictional starter entries are added to new accounts; they can be edited. |
 | **3. Explore Stories** | Navigate to **Stories** in the ordinary experience. | A familiar, everyday writing surface. |
 | **4. Explore protected writing** | Select **Private** or **Write privately**. | Protected access is separate from signing in and uses a passkey check. |
+
+**Release update — 26 October:** The web app is hosted at the custom domain. Login opens directly and **Onboarding** is optional. Live synthetic email/password and passkey registration, returning sign-in and application-session tests passed, including private passkey step-up; both temporary accounts and seven test documents were removed. Product Implementation corrected the missing Google OAuth callback; interactive Google/native acceptance remains open. Broader private/mobile work is still local and needs owner-device acceptance. See the [release verification](docs/implementation/2026-10-26-auth-domain-release.md).
 
 Lu is available in the app to help you find your way around and open common actions.
 
@@ -61,15 +65,72 @@ Lu is available in the app to help you find your way around and open common acti
 | **Understand options** | Future privacy-aware interpretation and contextual information. | Help the user explore possible concerns and appropriate options without diagnosing. |
 | **Choose support** | Future selective sharing with companions and verified services. | Move forward only when and how the user chooses. |
 
+## What works today
+
+Rather than treating a design concept, a local implementation and a deployed release as equivalent, we track each separately.
+
+| Capability | Live hosted web app | Current repository source |
+| --- | --- | --- |
+| Passkey registration and sign-in | **Available · live synthetic check passed** | Available |
+| Email/password registration and sign-in | **Available · live synthetic check passed** | Available |
+| Google sign-in | Callback corrected; interactive acceptance pending | Implemented |
+| Optional onboarding | **Available from login** | Fourteen-screen flow |
+| Account-owned ordinary journal (Firestore) | **Available** | Available |
+| Three editable fictional starter entries | **Available** | Available |
+| Encrypted browser-local private text and media | Not in the current deployed web release | Implemented locally; device acceptance pending |
+| Private drafts, revisions and autosave | Not in the current deployed web release | Implemented locally; device acceptance pending |
+| Image/audio private attachments; export and deletion | Not in the current deployed web release | Implemented locally; device acceptance pending |
+| Password-encrypted per-record backup/restore | Not in the current deployed web release | Implemented locally; device acceptance pending |
+| Configured substitutions and narrative distancing | Not in the current deployed web release | Limited implementation; broader detection remains planned |
+| General contextual PII screening / OpenAI Decisions API integration | Not available | Planned |
+| Companion permissions and evidence sharing | Not available | Planned |
+| Safety Trails / live location sharing | Not available | Planned |
+| Verified professional portal and referrals | Not available | Planned |
+
+**Privacy implementation note.** In the newer source, private originals and media are encrypted using AES-GCM in browser IndexedDB. The vault's key resides in browser storage and is **not cryptographically bound to the passkey**. Clearing browser data may destroy access unless an appropriate backup exists. Full offline unlock, cross-device recovery and native-device security acceptance are not yet established. Older cloud-backed protected records use a separate legacy read path.
+
+For detailed and dated engineering evidence, see the [implementation tracker](docs/product/2026-10-25-task-status.md) and [Capacitor mobile report](docs/implementation/2026-10-26-capacitor-mobile.md).
+
 ## Availability and platforms
 
-| Platform | How to try LuLu |
-| --- | --- |
-| **Web** | [Open the live app](https://lulu.thisisphila.co.za/) in your browser. |
-| **Android** | [Download the Android preview APK](https://github.com/ThisIsPhila/LuLu/releases/download/android-ios-preview-2026-10-27/LuLu-Android-preview.apk). This is a test build. |
-| **iPhone** | A public download is not available yet. See the [iPhone options](docs/mobile-installation.md#iphone). |
+| Platform | How to access | Status |
+| --- | --- | --- |
+| **Web** | **[Open the live demo](https://lulu.thisisphila.co.za/)** | Recommended for demos and reviews; hosted release available. |
+| **PWA install** | Not available yet; use the regular web link above. | LuLu does not currently provide a web manifest/install prompt. Offline account access and private-vault recovery are not guaranteed. |
+| **Android** | [Download the development APK](https://github.com/ThisIsPhila/LuLu/releases/download/android-ios-preview-2026-10-27/LuLu-Android-preview.apk). | Debug-signed preview for Android 7.0 or later; not a Play Store release. |
+| **iOS** | Build from source or obtain the registered-device build privately from the project owner. | The development build is limited to the registered iPhone and installed from a Mac with Xcode. No TestFlight or App Store download is available. |
 
-**[Mobile download and installation guide](docs/mobile-installation.md)**
+### Download and install a mobile preview
+
+The [mobile preview release](https://github.com/ThisIsPhila/LuLu/releases/tag/android-ios-preview-2026-10-27) contains the Android APK and its [SHA-256 checksum](https://github.com/ThisIsPhila/LuLu/releases/download/android-ios-preview-2026-10-27/SHA256SUMS.txt). The preview was built from the local development working tree on 27 October 2026, including changes not yet committed to GitHub main; the release tag identifies the main-branch baseline, not an exact source snapshot of the APK.
+
+**Android:** Download the APK on the phone, open it from Downloads, allow your browser or file manager to install apps when Android asks, and tap **Install**. The APK is version 1.0, build 1, signed with the development debug certificate. If Android reports an incompatible signature with an existing LuLu installation, preserve any local records before changing or removing that installation. This is a development preview; the full journal edit and restart journey has not yet been accepted on a device.
+
+**iPhone:** The privately held ZIP contains `App.app` signed for the existing registered development iPhone; it is not an IPA or a TestFlight link and cannot be installed on an arbitrary iPhone. After obtaining the ZIP from the project owner, use a Mac with Xcode, connect and trust that registered phone, enable Developer Mode, then run:
+
+```bash
+unzip LuLu-iOS-registered-device.zip -d lulu-ios
+xcrun devicectl list devices
+xcrun devicectl device install app --device "<device-identifier>" lulu-ios/App.app
+```
+
+Replace `<device-identifier>` with the identifier shown for the registered iPhone. The included development provisioning profile expires **2 November 2026 at 05:22 UTC**; installation and launch after that require a renewed profile and rebuilt package. For a wider iPhone beta, [Apple TestFlight](https://developer.apple.com/testflight/) requires an App Store Connect build and tester setup. iPhone passkey sign-in was confirmed on the owner's device; full journal edit and restart persistence remains to be verified.
+
+The optional privacy model can be downloaded separately in the app under **Settings → On-device privacy model**. It requires roughly 192 MB and is stored in the app's WebView storage. It is an experimental English entity detector, and its download and inference have not yet been verified on these mobile builds.
+
+### Build a mobile version from source
+
+These steps are for developers with the platform toolchain. For a demo, use the **live web app** above.
+
+```bash
+npm install
+npm run native:sync
+```
+
+- **Android:** install Android Studio, the Android SDK and JDK 21, connect a physical Android device with developer debugging enabled, then run `npm run native:open:android`. Select the device in Android Studio and run the `app` configuration. A separate release signing key is required for a production APK/AAB.
+- **iOS:** on macOS, install Xcode, connect an iPhone, then run `npm run native:open:ios`. Select a signing team and the connected device in Xcode, then run the app. Apple signing is required before distributing an IPA or TestFlight build.
+
+The downloadable builds above are development previews. No Play Store, TestFlight or App Store release has been published.
 
 ## Behind the project
 
