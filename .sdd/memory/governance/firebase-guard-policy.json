@@ -1,12 +1,20 @@
 {
   "projectId": "khora-lulu-2026",
-  "firebaseRootKeys": ["hosting", "firestore", "functions", "auth"],
+  "firebaseRootKeys": [
+    "hosting",
+    "firestore",
+    "functions",
+    "auth"
+  ],
   "hostingSite": "khora-lulu-2026",
   "functionSource": "functions",
   "functionCodebase": "lulu",
   "functionRuntime": "nodejs22",
   "functionName": "api",
-  "functionSecretNames": ["OPENAI_API_KEY"],
+  "functionSecretNames": [
+    "OPENAI_API_KEY",
+    "RESEND_API_KEY"
+  ],
   "functionRegion": "africa-south1",
   "functionMemoryMiBMax": 256,
   "functionTimeoutSecondsMax": 30,

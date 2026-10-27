@@ -104,7 +104,7 @@ async function loadNativeExchange(id: unknown, state: unknown) {
 }
 
 /** Lu demo privacy processing accepts user-submitted text; private mappings and biometrics are never accepted. */
-export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInstances: 2, minInstances: 0, concurrency: 10, timeoutSeconds: 30, invoker: 'public', secrets: ['OPENAI_API_KEY']}, async (request, response) => {
+export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInstances: 2, minInstances: 0, concurrency: 10, timeoutSeconds: 30, invoker: 'public', secrets: ['OPENAI_API_KEY', 'RESEND_API_KEY']}, async (request, response) => {
   response.set('Cache-Control', 'no-store');
   response.set('X-Content-Type-Options', 'nosniff');
   const origin = request.get('origin') || '';

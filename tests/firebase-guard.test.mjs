@@ -77,11 +77,11 @@ test('rejects unknown function options and non-literal option expressions', () =
   assert.ok(codes(validateFirebase(dynamicOption)).includes('FUNCTION_OPTIONS_UNSUPPORTED'));
 });
 
-test('allows only the owner-reviewed literal OpenAI secret binding', () => {
+test('allows only the reviewed literal OpenAI and Resend secret bindings', () => {
   assert.deepEqual(codes(validateFirebase(input())), []);
-  const extra = input({ functionSource: functionSourceBase.replace("secrets: ['OPENAI_API_KEY']", "secrets: ['OPENAI_API_KEY', 'OTHER_SECRET']") });
-  const dynamic = input({ functionSource: functionSourceBase.replace("secrets: ['OPENAI_API_KEY']", 'secrets: [process.env.SECRET_NAME]') });
-  const computed = input({ functionSource: functionSourceBase.replace("secrets: ['OPENAI_API_KEY']", 'secrets: approvedSecrets') });
+  const extra = input({ functionSource: functionSourceBase.replace("secrets: ['OPENAI_API_KEY', 'RESEND_API_KEY']", "secrets: ['OPENAI_API_KEY', 'RESEND_API_KEY', 'OTHER_SECRET']") });
+  const dynamic = input({ functionSource: functionSourceBase.replace("secrets: ['OPENAI_API_KEY', 'RESEND_API_KEY']", 'secrets: [process.env.SECRET_NAME]') });
+  const computed = input({ functionSource: functionSourceBase.replace("secrets: ['OPENAI_API_KEY', 'RESEND_API_KEY']", 'secrets: approvedSecrets') });
   assert.ok(codes(validateFirebase(extra)).includes('FUNCTION_SECRET_BINDING'));
   assert.ok(codes(validateFirebase(dynamic)).includes('FUNCTION_OPTIONS_UNSUPPORTED'));
   assert.ok(codes(validateFirebase(computed)).includes('FUNCTION_OPTIONS_UNSUPPORTED'));

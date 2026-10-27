@@ -28,7 +28,7 @@ export async function processAccountAlerts(db:Firestore, uid:string, creationTim
     if(!claim)continue;
     try {
       await send({apiKey,accountId:entry.id,createdAt:claim});
-      await db.runTransaction(async tx=>{const current=await tx.get(entry.ref);if(current.data()?.lease===lease)tx.update(entry.ref,{status:'sent',sentAt:Timestamp.now(),leaseUntil:0});});
+      await db.runTransaction(async tx=>{const current=await tx.get(entry.ref);if(current.data()?.lease===lease)tx.update(entry.ref,{status:'accepted',acceptedAt:Timestamp.now(),leaseUntil:0});});
     } catch {
       await db.runTransaction(async tx=>{const current=await tx.get(entry.ref);if(current.data()?.lease===lease)tx.update(entry.ref,{leaseUntil:0,lastFailureAt:Timestamp.now()});});
     }

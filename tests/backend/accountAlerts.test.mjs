@@ -17,7 +17,7 @@ test('new account delivery retries on later sign-in and avoids duplicates',async
   assert.equal(docs.size,1);assert.equal(docs.docs[0].data().status,'pending');
   await processAccountAlerts(db,'user-one',created,cutoff,'test',send);
   docs=await db.collection('_accountAlerts').get();
-  assert.equal(docs.size,1);assert.equal(docs.docs[0].data().status,'sent');
+  assert.equal(docs.size,1);assert.equal(docs.docs[0].data().status,'accepted');
   await processAccountAlerts(db,'user-one',created,cutoff,'test',send);
   assert.equal(attempts,2);
 });
