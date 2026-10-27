@@ -1,0 +1,5 @@
+{
+  "status": "failed",
+  "error": "Error: Unexpected output shape 1,5",
+  "stack": "Error: Unexpected output shape 1,5\n    at decode (http://127.0.0.1:5186/@fs/private/tmp/lulu-privacy-spike/gliner-codec.mjs:32:87)\n    at document.querySelector.onclick (http://127.0.0.1:5186/main.js?t=1793019228791:26:24)"
+}

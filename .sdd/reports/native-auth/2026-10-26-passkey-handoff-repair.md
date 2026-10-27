@@ -26,4 +26,4 @@ A separate confirmed blocker followed successful authentication: native `/sessio
 
 ## Acceptance limits
 
-No personal passkey was exercised by the automated checks. The real iPhone passkey prompt, credential selection, callback, Firebase token redemption and journal session must be accepted interactively by the owner. Existing native installs request the hosted bridge at runtime; these server/bridge changes require no native binary rebuild.
+No personal passkey was exercised by the automated checks. After deployment, the owner retried on iPhone and confirmed the passkey prompt and return to the journal worked: “Done, it worked.” This is owner-reported iPhone acceptance; Android passkey acceptance and journal edit/restart persistence were not established by this check. Existing native installs request the hosted bridge at runtime; these server/bridge changes required no native binary rebuild.

@@ -1,0 +1,18 @@
+LuLu Story collection reading sequence
+Observed: 2026-10-26 17:00 UTC
+Environment: Existing local development preview at http://127.0.0.1:5173/, ChatGPT in-app browser tab 3; entered through the local-preview option with synthetic seed data. Not Firebase-authenticated owner acceptance or the deployed site.
+Working-tree base: ef3592e; implementation is uncommitted in a shared dirty working tree.
+
+Observed UI procedure:
+1. Opened Home → Stories using existing lower navigation.
+2. Opened the only seeded Story in the existing Reader.
+3. Confirmed the Reader showed the source Story and retained its established layout; the single-entry fixture correctly showed the existing separator and no sequence controls.
+4. Used Reader Back and confirmed return to the Stories list.
+
+Fixture limitation: the local seed contained one Story and no multi-entry curated collection. Previous/Next controls were therefore not exercised in the browser. Multi-entry ordering/privacy behavior was checked through the focused domain test below; full multi-entry browser acceptance remains open.
+
+No test records were created or saved. No emulator, production account, Firebase mutation, deployment, or credential prompt was used.
+
+Checks:
+- node --experimental-strip-types --test src/domain/ordinaryBrowse.test.ts — 5 tests passed, including oldest-first grouping and protected/Journal exclusion.
+- npm run build:app — passed TypeScript, production Vite build, and mobile package verification. Vite retained its advisory for one generated JavaScript chunk above 500 kB.

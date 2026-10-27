@@ -1,0 +1,1 @@
+error: Dependencies could not be resolved because root depends on 'capacitor-swift-pm' 8.5.3 and 'capacitor-onnx' depends on 'capacitor-swift-pm' 7.0.0..<8.0.0.

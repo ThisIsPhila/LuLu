@@ -1,0 +1,3 @@
+Browser tab: 5, Title: "LuLu — A private space for your true stories", URL: "http://127.0.0.1:5187/privacy-demo?review=web-pipeline".
+There has been no change in the accessibility tree.
+The focused UI element is 0 AXWebArea LuLu — A private space for your true stories, URL: 127.0.0.1:5187/privacy-demo?review=web-pipeline

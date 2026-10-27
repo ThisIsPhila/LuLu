@@ -1,0 +1,34 @@
+TAP version 13
+# Subtest: UTF-16 source spans preserve emoji, combining marks and repeated aliases
+ok 1 - UTF-16 source spans preserve emoji, combining marks and repeated aliases
+  ---
+  duration_ms: 0.776709
+  type: 'test'
+  ...
+# Subtest: processor uses local detection and optional existing distancing; disposed work cannot return
+ok 2 - processor uses local detection and optional existing distancing; disposed work cannot return
+  ---
+  duration_ms: 1.346875
+  type: 'test'
+  ...
+# Subtest: manager verifies complete package before atomic publication; removal is separate from runtime
+ok 3 - manager verifies complete package before atomic publication; removal is separate from runtime
+  ---
+  duration_ms: 5.276875
+  type: 'test'
+  ...
+# Subtest: journal-only needs no provider, local failure never selects a cloud demo
+ok 4 - journal-only needs no provider, local failure never selects a cloud demo
+  ---
+  duration_ms: 0.972875
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 197.471333

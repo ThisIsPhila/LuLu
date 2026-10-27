@@ -1,8 +1,48 @@
 # Active context
 
+## Launch copy and web release attempt — 26 October 2026
+
+The README now presents the hosted web app as the recommended demo, distinguishes source-built native apps from released downloads, and avoids claiming a PWA install prompt or mobile data-journey acceptance. The web document title/description now identify LuLu as a journal and storybook. README and `index.html` were updated on GitHub branch `codex/lulu-development-commits` (commits `055531ca65a3fee9228768df886c7c57ef15f61a` and `f8366c998e26cdebb3f821a15c1f67afaa8ca959`). GitHub About description/homepage fields remain unchanged: the connected tool has no metadata-write operation, and the browser session is signed out. Suggested About description: “A journal and storybook for everyday writing and protected personal documentation—your story, your safety, your choice.” Website field: `https://lulu.thisisphila.co.za/`.
+
+`npm run guard:firebase` passed with the recorded `native-email-password-sign-in` owner exception. `npm run build:hosted` and app-only packaging verification passed (37 LuLu files; demo, review, and test-fixture paths excluded). Hosting-only deploy was attempted with `CI=1` to avoid prompts and stopped because Firebase CLI credentials were expired; no service-account/CI credential is configured. No Hosting change went live, no Functions/Firestore/configuration mutation occurred, and visibility remains under owner control. Firebase MCP is unavailable in this session. Native icon work was deferred after owner direction; generated blue artwork was discarded and native icon assets restored.
+
+## Curated Story reading sequence — 26 October 2026
+
+When a saved Story is opened from Stories, its complete ordinary collection is passed into the existing Reader and ordered by saved timestamp, oldest first. The Reader shows accessible Previous/Next controls and a part count only for multi-entry groups, preserves each entry as its own source record, and scrolls to the top on part changes. The Stories collection name remains visible with the source kind. Five focused ordinary-browse tests pass, including chronology and protected/Journal exclusion; `build:app` passes. Local seeded browser check confirmed Stories → Reader → Stories with a single Story. No multi-entry live fixture was present, so the interactive multi-part controls were not browser-exercised. No new content, emulator, deployment or Firebase mutation. Report: ../../reports/story-sequence/2026-10-26-review.md; evidence: ../../evidence/story-sequence/.
+
+## Home quick note/task integration — 26 October 2026
+
+Home's existing reflection card now has low-emphasis Quick note and Task actions. Each routes to the matching Library Notes/Tasks section and opens the existing inline creation form with title focus; account-scoped service/CRUD remains shared. In the local seeded preview, both routes, cancel/empty states, normal Library navigation and spacing were inspected. No record saved. `tsc -b`, `npm run build:app`, and `git diff --check` pass; no Firebase release, emulator, auth prompt or target-device acceptance. Review: ../../reports/home-quick-capture/2026-10-26-review.md; observation record: ../../evidence/home-quick-capture/.
+
+## Screen-to-screen UI smoke pass — 26 October 2026
+
+Used the already-running local browser preview with seed data to traverse Home, Journal, Reader, Stories, Library Entries/Notes/Tasks, and Write, including back/edit/return routes and cancelling the inline note form. Checked alignment, card widths, spacing and empty states between screens. The existing “Write privately” header action had default browser button styling, so it now uses the app’s subtle text-link styling. TypeScript and `git diff --check` pass. No auth prompt, emulator, production-site mutation, deploy, or saved test content. This is local UI evidence only, not authenticated or deployed acceptance.
+
+## Home activity accuracy — 26 October 2026
+
+The fixed “06:00 AM Prompt” claim was removed; the existing reflection question is now labelled without a schedule. The seven-day Home total and seven-bar visual now derive from ordinary saved-entry timestamps, bucketed into rolling 24-hour periods. Static card layout is unchanged. Source review only; no tests, working-site/device acceptance or deployment.
+
+## Story collection membership — 26 October 2026
+
+The existing ordinary composer Options now lets an owner assign a Story collection name; the same label groups saved Story records in Stories. The account service validates/persists the optional field, the live watcher restores it, local development storage preserves it, and `firestore.rules` allows only a bounded label on ordinary Story records. Changing an entry to Journal clears membership. No collection description/cover editor, multi-entry collection manager, Firebase deployment, tests or working-site/device acceptance. Existing theme and navigation remain unchanged.
+
+## Local private disclosure review — 26 October 2026
+
+Saved text records in the active Firebase-authenticated/private session now expose a contextual disclosure review. The owner edits a separate in-memory copy, binds it to the exact saved revision, recipient label and stated purpose using the existing SHA-256 snapshot contract, reviews the frozen text, and can explicitly copy it to the device clipboard. Live vault authorization is rechecked before preparation and clipboard handoff. No copy persistence, outbound delivery, automatic PII/context detector, authenticated recipient, invitation, permission enforcement or audit is implemented. Clipboard copies can be exposed to other apps; the UI states that. Local source review only; no tests, working-site/device acceptance or deployment.
+
+## Private support hub — 26 October 2026
+
+The existing Private/Safety/Helplines controls now show distinct content. Safety prompts are session-only and explicitly not a complete plan. Helplines has a searchable, source-linked small South African national directory with checked dates and user-initiated phone links; no call/message is initiated by LuLu. Trusted contacts use the Firebase-authenticated UID and existing encrypted account service, with add/edit/remove/call controls; they are clearly described as saved phone notes, not authenticated companions or record-sharing grants. No invitation, recipient authentication, sharing, permissions, audit, referral, language/location search or verified-professional connection. Source review only; no tests, working-site/device acceptance or deployment.
+
 ## Physical iPhone startup repair — 26 October 2026
 
 Owner-reported blank white screen reproduced on the connected iPhone. WebView/React loaded and secure storage returned, but Firebase auth initialization stalled. Native now uses explicit initializeAuth without the browser redirect resolver; iOS auth persistence uses localStorage with in-memory fallback following Confessions; Android retains IndexedDB and web retains in-memory auth. Existing loading status is visible inside safe areas. Encrypted vault/draft/media records and key storage are unchanged. App build/package verification/sync, Firebase guard, simulator and signed device builds pass. Updated iPhone app renders complete onboarding on two cold launches; simulator and localhost web preview also render onboarding. Evidence/report: ../../evidence/ios-startup/ and ../../reports/ios-startup/2026-10-26-fix.md. Startup acceptance only; live provider sign-in and journal persistence remain open. No Firebase deployment or push. Concurrent product/status docs preserved.
+
+## Progress reader and screen alignment — 26 October 2026
+
+Owner requested a thorough progress refresh, onboarding handoff for UI Design and comparison with Product Implementation's plan. Internal HTML now includes Current progress, an updated production checklist, onboarding UI handoff and screen alignment. Sunday 7/10 is marked submitted. Native email/Google/provider configuration is local and not deployed. Android install/launch and physical iPhone install/launch are recorded; usable UI and authenticated journeys remain unverified. The older simulator black screen is a separate observation.
+
+Both existing chats were read without dispatching work. The private representation inspector correction is implemented locally; see `.sdd/reports/representation-inspector/2026-10-26-review.md`. UI Design last completed existing auth styling. The current-run app critique concerns newly built post-login pages; the previously approved welcome is outside that critique. Fourteen-screen onboarding is an unintegrated design flow with first-entry/auth order, secure temporary draft handling and Skip/resume decisions open. No tests/builds/cloud deployments were run for this documentation reconciliation.
 
 ## Durable private text delivery — 25 October 2026
 
@@ -181,3 +221,83 @@ Capacitor 8 local iOS/Android shells, app-only bundle verification, platform bou
 ## Per-record encrypted private backup and restore — 26 October 2026
 
 Existing private journal flow now backs up one saved text history or media original into a password-encrypted `.lulubackup`; same-account restore re-encrypts using the current device key. It excludes drafts, unsaved edits, whole-vault contents, passkeys and device keys. Conflict IDs are not overwritten; identical saved records are idempotent. Fresh-key IndexedDB restore and exact media bytes/metadata pass local tests. Nine backup-focused cases are part of 127 passing combined regressions; hosted build and Firebase guard pass. Browser download and synthetic two-version restore/reopen/quick-exit were observed; tab and server are closed. No real owner record, physical phone, cloud mutation, commit, push or deployment. See ../../implementation/2026-10-26-private-backup.md, ../../reports/private-backup/2026-10-26-review.md, and ../../evidence/private-backup/.
+
+## Privacy model compatibility spike — 26 October 2026
+
+This session owns technical privacy/model work from the complete saved discussion in docs/technical/2026-10-26-privacy-intelligence-context.md. Formal SDD remains paused. The initial isolated GLiNER ONNX/Capacitor compatibility spike is recorded below. Preserve concurrent UI/onboarding/auth work; Google authentication remains with Product Implementation. No external deployment, paid inference, push or publication authorized here.
+
+## Privacy model compatibility outcome — 26 October 2026
+
+Real GLiNER Small v2.1 INT8 runs in isolated desktop-browser WASM through Cantoo3.3.0 and the new shared PrivacyProcessor, with lightweight Tokenizers.js0.2.0; independent Rust tokenizer IDs/masks and Python CPU inference pass. Model/tokenizer/config download is192,063,469bytes; synthetic email miss and author-pronoun distancing limitation are recorded. Clean replay: model load1,257ms, nine inference calls113–180ms; desktop-only, no native/offline phone/memory claim.
+
+Published plugin's Swift Capacitor7.x constraint fails against LuLu8.5. Shared processor/detector contracts and explicit journal_only/local/cloud_demo selection remain. The browser work below uses direct ONNX Runtime Web and does not install the incompatible native plugin. The earlier spike evidence, accidental root npmci recovery, and existing limitations remain in .sdd/reports/privacy-model/2026-10-26-compatibility.md and docs/technical/2026-10-26-privacy-model-spike.md.
+
+## Browser privacy model demo — 26 October 2026
+
+Added an unauthenticated `/privacy-demo` route, an account-menu Settings screen, checksum-verified model storage in IndexedDB, local model discovery/removal/storage status, and a before/highlighted-source/after view with editable replacement-library choices. In local preview, model artifacts can be copied from the existing local cache. Settings can now prepare the ONNX session in tab memory, keep it warm across Settings/demo navigation, show readiness, and unload it; text processing only happens after an explicit Run action. Email and phone patterns have a separate visible “format check” label; GLiNER model matches show confidence. Repeated identical mentions share a replacement. Text is not sent or saved by the demo; only model/tokenizer files enter IndexedDB. The browser cannot offer a consistent arbitrary-folder picker, so this uses private site storage and explains that in Settings. The pinned package is about192MB. Production route fallback is already configured for Firebase Hosting, but no host deployment or model download from the production domain occurred.
+
+The Vite built-preview server exposes only four allowlisted files from `/tmp/lulu-privacy-spike` through a loopback-only development route. Settings detects those files and offers to copy them into IndexedDB locally; production still fetches the pinned Hugging Face artifacts. `npm run build:app` and its app-only bundle verifier pass. A local built preview is at http://127.0.0.1:5187/privacy-demo. The new direct ONNX Runtime Web installation, warm-up and inference path has not yet completed browser acceptance; only the earlier isolated plugin-based spike has inference evidence. Existing model email misses/English-only limits remain, every result needs review, and physical mobile behavior is untested. No cloud deployment, push, commit or publication.
+
+## Profile/settings destination — 26 October 2026
+
+Avatar Settings now routes to a full-screen account/settings page matching the warm paper direction; optional model settings remain a linked full-screen destination. Device-local preference storage supports reduced motion; text enlargement follows device/browser controls, and current English availability is stated. Storage wording distinguishes ordinary account entries from encrypted device-local private records and per-record export/backup. No side panel or bottom-nav change. Source changes were reviewed only; working-site/owner/device acceptance and deployment remain pending. No tests were run.
+
+## Stories collection navigation — 26 October 2026
+
+The existing Stories browse now derives each curated group from actual ordinary saved entries. Both existing collection actions filter the existing list to the group's complete source entries; search/type filters still apply, and a dismissible collection chip clears the selection. No new panel/layout or sample content. Source review only; no tests, working-site/device acceptance or deployment.
+
+## Everyday navigation and Library — 26 October 2026
+
+Lower navigation now uses the saved Home, Journal, Write, Stories and Library component-reference destinations. The existing Leaves list is reused for Journal and Stories with per-destination collection defaults. Library uses a separate page module and shared ordinary-entry card, with search, collection/favorite filters and tags derived from saved records. The former fictional People/Places/Protected controls are removed from this route. Notes/tasks still need a data model. Source review only; no tests, working-site/device acceptance or deployment.
+
+## Read/Edit behavior — 26 October 2026
+
+Read now conceals protected title/body/tags/date until verification; original display requires an active private session and loaded original bytes. Removed the fake Listen indicator and unavailable protected Edit button. Ordinary Back, Edit, save and delete retain the originating Home/Journal/Stories/Library route. The existing private journal still owns local revision history; ordinary history and richer provenance are not claimed. Source review only; no tests or site/device acceptance.
+
+## Ordinary composer exit guard — 26 October 2026
+
+The existing ordinary Write/Edit back action now checks for unsaved title, body, kind or collection edits and offers a focused Keep editing / Discard and leave confirmation. Styling follows the existing warm LuLu surface and the product screen plan's confirmation-sheet direction; no side panel or new destination was added. Private composer behavior is unchanged. Source review only; no tests, browser/site or device acceptance, deployment, push or commit.
+
+## Library ordinary metadata — 26 October 2026
+
+Library favorites and topic filters were disconnected from Firestore because the watcher always supplied `false` and an empty tag list. The existing composer Options now edits a favorite boolean and up to 12 comma-separated topics; cloud writes/snapshots and local development storage preserve them. Firestore rules bound the optional fields to ordinary entries, preventing private-entry metadata from being written in cleartext. No page or navigation changes. Source review only; no tests, rules deployment, working-site/device acceptance, push or commit.
+
+## Library notes and tasks — 26 October 2026
+
+Library now switches between Entries, Notes and Tasks within the existing destination. Notes and tasks use separate account-owned Firebase records with live updates; note/task creation, editing and scoped deletion are provided, and tasks can be completed/reopened. The local-development fixture has its own browser-storage collection. Firestore rules require the active authenticated session and bound fields. TypeScript passed; no rules deployment, tests or working-site/device acceptance.
+
+
+### Native passkey prompt repair — 2026-10-26
+
+Confirmed native exchange creation HTTP 200 followed by hosted options HTTP 500: undefined SimpleWebAuthn option fields were being cached in Firestore. Also confirmed native /session origin rejection. Repaired option JSON persistence, restricted native session origin policy, hosted error/retry controls, and explicit support for passkeys on either existing trusted LuLu hostname. API and Hosting deployed successfully; 15 backend tests and guarded live handoff/security checks passed. Hosted bridge asset verified. Commit c7935a1; report .sdd/reports/native-auth/2026-10-26-passkey-handoff-repair.md. Owner asked to retry iPhone; real biometric/callback acceptance remains pending. No native rebuild required for these hosted/backend changes.
+
+
+### iPhone passkey acceptance — 2026-10-26
+
+After the deployed native passkey repair (c7935a1), the owner confirmed the iPhone passkey prompt and return to journal succeeded: "Done, it worked." Android passkey acceptance and journal edit/restart persistence remain separate checks.
+
+### Privacy processing and guide release — 27 October 2026
+
+The owner-approved main app Hosting release `f7fc164cbd450924` is served by the custom domain. The existing Johannesburg API is active with the owner-created server-only `OPENAI_API_KEY` Secret Manager binding and `openai_decisions` selected; 20 requests per UTC day are enforced. No signed-in live OpenAI inference has yet been verified. The model inventory and Loo Lu's local navigation/capture guide are in the app. Local browser checks exercised guide navigation, unsaved capture and discard; hosted build, Firebase guard, 12 guard tests and 26 backend tests passed. Firestore rules and Auth configuration were not deployed. Review the full limits and evidence in `../../reports/web-privacy-pipeline/2026-10-27-release-and-guide.md`.
+
+Owner corrected the guide's name to **Lu**. User-facing labels and accessibility text were updated and deployed in Hosting release `7a94e0b97063407f` on 27 October 2026; the custom domain served the new bundle. Build and Firebase guard passed. Earlier references to “Loo Lu” record the previous name only.
+
+### Session, account and navigation work — 27 October 2026
+
+Owner requested the refresh, sign-in, email, header, greeting, swipe and Lu guide fixes and confirmed the orb remains floating. Local implementation and checks are recorded in `../../reports/2026-10-27-session-and-navigation.md`. No new deployment was authorized or performed for these changes. Live provider enablement, real linking/refresh and mobile gesture acceptance are unverified; in-app native Google linking and welcome/security notification delivery remain open.
+
+### README and public website link — 27 October 2026
+
+At the owner's request, replaced the verbose local README with a concise hackathon introduction, kept the top navigation and added `docs/mobile-installation.md` for Android and iPhone steps. Confirmed the existing Android preview APK and that no public iOS download exists. The GitHub repository About website field now points to `https://lulu.thisisphila.co.za/`; verified through the GitHub API. README and guide edits are local and have not been pushed.
+
+The owner clarified that the goal was to restore their earlier README presentation, not simply shorten it. Rebuilt the local README from the owner-authored `b56af3c` version, retained its original introduction, experience table, navigation and project context, removed release/status reporting, and updated only the live-domain and mobile-access information. README and guide remain local.
+
+
+### Mobile preview distribution — 2026-10-27
+
+Published private GitHub prerelease android-ios-preview-2026-10-27 with debug Android APK, existing registered-iPhone development App.app ZIP and SHA-256 checksums. Updated GitHub main README in e09f5ca and set repository description; verified downloaded package checksums, Android archive integrity and iOS app signature. Release packages were built from a dirty local working tree and are not reproducible from the tag; this is disclosed on GitHub. iPhone profile expires 2026-11-02 05:22 UTC. Exact published builds have not been device-accepted; TestFlight and full mobile journal/model acceptance remain pending. Report: .sdd/reports/mobile-distribution/2026-10-27-preview.md.
+
+
+### Public GitHub visibility — 2026-10-27
+
+Owner made ThisIsPhila/LuLu public in Arc and chose to keep the iPhone development archive private because its provisioning profile contains a device identifier. Removed that release asset; local verified ZIP remains in dist/mobile. Old iOS URL returned HTTP 404; Android APK URL returned HTTP 302. Release notes/checksum now reference Android only; GitHub main README updated in b28897c. The iOS asset may have been available during the short interval between the public visibility change and removal.

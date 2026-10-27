@@ -1,0 +1,164 @@
+{
+  "opsets": [
+    [
+      "",
+      14
+    ],
+    [
+      "com.microsoft",
+      1
+    ]
+  ],
+  "operators": {
+    "::Constant": 984,
+    "::Identity": 12,
+    "::ReduceMax": 2,
+    "::Gather": 100,
+    "::ReduceMean": 28,
+    "::Shape": 211,
+    "::Flatten": 3,
+    "::Unsqueeze": 212,
+    "::Equal": 21,
+    "::Greater": 2,
+    "::Cast": 136,
+    "::DequantizeLinear": 1,
+    "::Sub": 22,
+    "::NonZero": 3,
+    "::Range": 4,
+    "::Pow": 14,
+    "::Squeeze": 88,
+    "::ReduceSum": 2,
+    "::Transpose": 66,
+    "::Mul": 162,
+    "::Split": 3,
+    "::Add": 129,
+    "::Sqrt": 32,
+    "::Div": 46,
+    "::Reshape": 110,
+    "::Concat": 115,
+    "::Slice": 84,
+    "::MatMul": 36,
+    "::DynamicQuantizeLinear": 32,
+    "::MatMulInteger": 45,
+    "::ConstantOfShape": 37,
+    "::Where": 34,
+    "::Expand": 32,
+    "::Sign": 1,
+    "::Less": 3,
+    "::Abs": 1,
+    "::And": 1,
+    "::LessOrEqual": 1,
+    "::Log": 1,
+    "::Ceil": 1,
+    "::Neg": 1,
+    "::Clip": 2,
+    "::Tile": 12,
+    "::GatherElements": 14,
+    "::Softmax": 6,
+    "::Erf": 6,
+    "::ScatterND": 2,
+    "::TopK": 1,
+    "::ReduceProd": 1,
+    "::ScatterElements": 1,
+    "com.microsoft::DynamicQuantizeLSTM": 1,
+    "::Relu": 5,
+    "::Einsum": 1
+  },
+  "inputs": [
+    {
+      "name": "input_ids",
+      "type": "tensor(int64)",
+      "shape": [
+        "batch_size",
+        "sequence_length"
+      ]
+    },
+    {
+      "name": "attention_mask",
+      "type": "tensor(int64)",
+      "shape": [
+        "batch_size",
+        "sequence_length"
+      ]
+    },
+    {
+      "name": "words_mask",
+      "type": "tensor(int64)",
+      "shape": [
+        "batch_size",
+        "sequence_length"
+      ]
+    },
+    {
+      "name": "text_lengths",
+      "type": "tensor(int64)",
+      "shape": [
+        "batch_size",
+        "value"
+      ]
+    },
+    {
+      "name": "span_idx",
+      "type": "tensor(int64)",
+      "shape": [
+        "batch_size",
+        "num_spans",
+        "idx"
+      ]
+    },
+    {
+      "name": "span_mask",
+      "type": "tensor(bool)",
+      "shape": [
+        "batch_size",
+        "num_spans"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "name": "logits",
+      "type": "tensor(float)",
+      "shape": [
+        "batch_size",
+        "sequence_length",
+        "num_spans",
+        "num_classes"
+      ]
+    },
+    {
+      "name": "prompts_embedding",
+      "type": "tensor(float)",
+      "shape": [
+        "Addprompts_embedding_dim_0",
+        "Addprompts_embedding_dim_1",
+        512
+      ]
+    },
+    {
+      "name": "2973",
+      "type": "tensor(int64)",
+      "shape": [
+        "Cast2973_dim_0",
+        "Cast2973_dim_1"
+      ]
+    },
+    {
+      "name": "onnx::Shape_3287",
+      "type": "tensor(float)",
+      "shape": [
+        "Gatheronnx::Shape_3287_dim_0",
+        "Gatheronnx::Shape_3287_dim_1",
+        512
+      ]
+    },
+    {
+      "name": "onnx::Cast_3115",
+      "type": "tensor(bool)",
+      "shape": [
+        "Lessonnx::Cast_3115_dim_0",
+        "Gatheronnx::Shape_3287_dim_1"
+      ]
+    }
+  ]
+}

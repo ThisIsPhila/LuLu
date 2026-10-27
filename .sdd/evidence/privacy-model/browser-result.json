@@ -1,0 +1,478 @@
+{
+  "status": "passed",
+  "tokenizerPackage": "@huggingface/tokenizers@0.2.0",
+  "environment": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+  "crossOriginIsolated": false,
+  "modelBytes": 183403734,
+  "sha256": "c76c90920547fd937aaf505e7f2de5ec73168bf1c25abbb55a298104cb061400",
+  "tokenizerMs": 167.90000000223517,
+  "loaded": {
+    "sessionReady": true,
+    "latencyMs": 1089,
+    "warmed": false,
+    "executionProviderUsed": "wasm"
+  },
+  "cases": [
+    {
+      "processed": {
+        "sanitised": "[PERSON_1] met [PERSON_2] at [ORGANIZATION_1] in [LOCATION_1].",
+        "detectedEntities": [
+          {
+            "start": 0,
+            "end": 13,
+            "label": "person",
+            "confidence": 0.9200334404122841,
+            "detector": "gliner_small-v2.1-int8"
+          },
+          {
+            "start": 18,
+            "end": 23,
+            "label": "person",
+            "confidence": 0.8783723191387963,
+            "detector": "gliner_small-v2.1-int8"
+          },
+          {
+            "start": 27,
+            "end": 38,
+            "label": "organization",
+            "confidence": 0.7796670551407341,
+            "detector": "gliner_small-v2.1-int8"
+          },
+          {
+            "start": 42,
+            "end": 49,
+            "label": "location",
+            "confidence": 0.8967683273454188,
+            "detector": "gliner_small-v2.1-int8"
+          }
+        ],
+        "provider": "local",
+        "modelVersion": "8142fb0-int8",
+        "review": "required",
+        "distancing": "existing_phrase_rules"
+      },
+      "text": "Nomsa Dlamini met Sipho at Acme Clinic in Midrand.",
+      "words": 10,
+      "subwords": 29,
+      "preparationMs": 2.300000000745058,
+      "runsMs": [
+        170,
+        111,
+        110
+      ],
+      "outputNames": [
+        "2973",
+        "logits",
+        "prompts_embedding",
+        "onnx::Shape_3287",
+        "onnx::Cast_3115"
+      ],
+      "outputDims": [
+        1,
+        10,
+        12,
+        5
+      ],
+      "entities": [
+        {
+          "start": 0,
+          "end": 13,
+          "label": "person",
+          "confidence": 0.9200334404122841,
+          "detector": "gliner_small-v2.1-int8",
+          "text": "Nomsa Dlamini"
+        },
+        {
+          "start": 18,
+          "end": 23,
+          "label": "person",
+          "confidence": 0.8783723191387963,
+          "detector": "gliner_small-v2.1-int8",
+          "text": "Sipho"
+        },
+        {
+          "start": 27,
+          "end": 38,
+          "label": "organization",
+          "confidence": 0.7796670551407341,
+          "detector": "gliner_small-v2.1-int8",
+          "text": "Acme Clinic"
+        },
+        {
+          "start": 42,
+          "end": 49,
+          "label": "location",
+          "confidence": 0.8967683273454188,
+          "detector": "gliner_small-v2.1-int8",
+          "text": "Midrand"
+        }
+      ],
+      "inputIds": [
+        1,
+        128002,
+        604,
+        128002,
+        1250,
+        128002,
+        1416,
+        128002,
+        871,
+        128002,
+        932,
+        496,
+        128003,
+        585,
+        358,
+        268,
+        452,
+        108434,
+        1626,
+        33898,
+        8545,
+        288,
+        63290,
+        9928,
+        267,
+        7047,
+        38405,
+        323,
+        2
+      ],
+      "wordsMask": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        2,
+        3,
+        4,
+        0,
+        5,
+        6,
+        7,
+        8,
+        9,
+        0,
+        10,
+        0
+      ]
+    },
+    {
+      "processed": {
+        "sanitised": "🌿 Noël met [PERSON_1] in [LOCATION_1]. Email [PERSON_2]@example.invalid.",
+        "detectedEntities": [
+          {
+            "start": 13,
+            "end": 26,
+            "label": "person",
+            "confidence": 0.8969235196157233,
+            "detector": "gliner_small-v2.1-int8"
+          },
+          {
+            "start": 30,
+            "end": 42,
+            "label": "location",
+            "confidence": 0.939193928713034,
+            "detector": "gliner_small-v2.1-int8"
+          },
+          {
+            "start": 50,
+            "end": 55,
+            "label": "person",
+            "confidence": 0.8323363092091849,
+            "detector": "gliner_small-v2.1-int8"
+          }
+        ],
+        "provider": "local",
+        "modelVersion": "8142fb0-int8",
+        "review": "required",
+        "distancing": "existing_phrase_rules"
+      },
+      "text": "🌿 Noël met Nomsa Dlamini in Johannesburg. Email nomsa@example.invalid.",
+      "words": 17,
+      "subwords": 39,
+      "preparationMs": 2,
+      "runsMs": [
+        151,
+        148,
+        148
+      ],
+      "outputNames": [
+        "2973",
+        "logits",
+        "prompts_embedding",
+        "onnx::Shape_3287",
+        "onnx::Cast_3115"
+      ],
+      "outputDims": [
+        1,
+        17,
+        12,
+        5
+      ],
+      "entities": [
+        {
+          "start": 13,
+          "end": 26,
+          "label": "person",
+          "confidence": 0.8969235196157233,
+          "detector": "gliner_small-v2.1-int8",
+          "text": "Nomsa Dlamini"
+        },
+        {
+          "start": 30,
+          "end": 42,
+          "label": "location",
+          "confidence": 0.939193928713034,
+          "detector": "gliner_small-v2.1-int8",
+          "text": "Johannesburg"
+        },
+        {
+          "start": 50,
+          "end": 55,
+          "label": "person",
+          "confidence": 0.8323363092091849,
+          "detector": "gliner_small-v2.1-int8",
+          "text": "nomsa"
+        }
+      ],
+      "inputIds": [
+        1,
+        128002,
+        604,
+        128002,
+        1250,
+        128002,
+        1416,
+        128002,
+        871,
+        128002,
+        932,
+        496,
+        128003,
+        507,
+        124783,
+        585,
+        473,
+        34198,
+        2531,
+        1626,
+        585,
+        358,
+        268,
+        452,
+        108434,
+        267,
+        21103,
+        323,
+        6331,
+        363,
+        358,
+        268,
+        452,
+        1944,
+        738,
+        323,
+        9191,
+        323,
+        2
+      ],
+      "wordsMask": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        2,
+        0,
+        3,
+        4,
+        5,
+        6,
+        0,
+        0,
+        0,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        0,
+        0,
+        0,
+        13,
+        14,
+        15,
+        16,
+        17,
+        0
+      ]
+    },
+    {
+      "processed": {
+        "sanitised": "[PERSON_1] told [PERSON_2] that she needed money for transport. [PERSON_2] refused.",
+        "detectedEntities": [
+          {
+            "start": 0,
+            "end": 1,
+            "label": "person",
+            "confidence": 0.7780917600287551,
+            "detector": "gliner_small-v2.1-int8"
+          },
+          {
+            "start": 7,
+            "end": 12,
+            "label": "person",
+            "confidence": 0.9488341047196982,
+            "detector": "gliner_small-v2.1-int8"
+          },
+          {
+            "start": 48,
+            "end": 53,
+            "label": "person",
+            "confidence": 0.9514375037467256,
+            "detector": "gliner_small-v2.1-int8"
+          }
+        ],
+        "provider": "local",
+        "modelVersion": "8142fb0-int8",
+        "review": "required",
+        "distancing": "existing_phrase_rules"
+      },
+      "text": "I told David that I needed money for transport. David refused.",
+      "words": 13,
+      "subwords": 27,
+      "preparationMs": 0.6999999992549419,
+      "runsMs": [
+        110,
+        109,
+        109
+      ],
+      "outputNames": [
+        "2973",
+        "logits",
+        "prompts_embedding",
+        "onnx::Shape_3287",
+        "onnx::Cast_3115"
+      ],
+      "outputDims": [
+        1,
+        13,
+        12,
+        5
+      ],
+      "entities": [
+        {
+          "start": 0,
+          "end": 1,
+          "label": "person",
+          "confidence": 0.7780917600287551,
+          "detector": "gliner_small-v2.1-int8",
+          "text": "I"
+        },
+        {
+          "start": 7,
+          "end": 12,
+          "label": "person",
+          "confidence": 0.9488341047196982,
+          "detector": "gliner_small-v2.1-int8",
+          "text": "David"
+        },
+        {
+          "start": 48,
+          "end": 53,
+          "label": "person",
+          "confidence": 0.9514375037467256,
+          "detector": "gliner_small-v2.1-int8",
+          "text": "David"
+        }
+      ],
+      "inputIds": [
+        1,
+        128002,
+        604,
+        128002,
+        1250,
+        128002,
+        1416,
+        128002,
+        871,
+        128002,
+        932,
+        496,
+        128003,
+        273,
+        732,
+        1535,
+        272,
+        273,
+        858,
+        580,
+        270,
+        3190,
+        323,
+        1535,
+        4977,
+        323,
+        2
+      ],
+      "wordsMask": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        0
+      ]
+    }
+  ],
+  "memory": {
+    "usedJSHeapSize": 288130931,
+    "totalJSHeapSize": 309773251
+  }
+}

@@ -1,0 +1,20 @@
+LuLu Home quick Note/Task UI smoke
+Observed: 2026-10-26 16:20 UTC
+Environment: Existing local development preview, http://127.0.0.1:5173/, ChatGPT in-app browser tab 3; local-preview entry with synthetic seed records. This was not Firebase-authenticated owner acceptance or the deployed site.
+Working-tree base: ef3592e; working tree was already dirty with unrelated concurrent work. Current change was not committed.
+
+Procedure and observed states:
+1. Entered through the page's explicit “Continue without signing in” local-preview option; no credential or external account was used.
+2. Home showed the existing “Begin quick entry…” action and two compact actions, “Quick note” and “Task”, aligned under it inside the existing reflection card.
+3. “Quick note” opened Library with Notes selected and the existing “New note” inline form. Title input was focused. While editing, duplicate “Add note” and “No notes yet” elements were absent. Cancel returned to the Notes empty state.
+4. “Task” opened Library with Tasks selected and the existing “New task” inline form. Title input was focused. Cancel returned to the Tasks empty state.
+5. Home navigation returned to Home; ordinary Library navigation opened Entries by default, without reopening a pending create form.
+6. Screenshots were visually inspected in the active browser observation: Home actions align to the left edge of the existing card content; note/task forms use the same centered Library column and consistent input/action alignment. No overflow or side panel appeared at the observed viewport.
+
+No note or task was saved. No emulator, Firebase mutation, deployment, passkey prompt, or production data was used.
+
+Checks:
+- ./node_modules/.bin/tsc -b --pretty false — passed.
+- npm run build:app — passed, including TypeScript, Vite production build and mobile package verification. Vite reported its existing advisory that one generated JS chunk exceeds 500 kB.
+- git diff --check — passed.
+- Automated UI test suite was not run.

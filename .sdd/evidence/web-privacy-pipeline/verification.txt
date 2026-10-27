@@ -1,0 +1,14 @@
+26 October 2026 — local web privacy pipeline verification
+
+Commands:
+- npm run build:hosted: pass, main app and packaging checks. Existing >500KB chunk warning remains.
+- functions: npm run build && npm test: 26 passing tests after quota integration; fake transport only.
+- node --experimental-strip-types --test tests/entity-library.test.mjs tests/privacy-processor.test.mjs tests/privacy-cloud-contracts.test.ts tests/formatted-identifiers.test.mjs: 17 focused tests; final result recorded in report.
+- npm run guard:firebase: pass; pre-existing owner-reviewed auth provider exception preserved.
+- git diff --check: final check pending.
+
+Observed browser: actual app route on local preview, synthetic text only, GLiNER Small v2.1 INT8 pinned revision 8142fb00740ccea973e64b1272949ff48653df5e, ONNX Runtime Web WASM CPU. Installed package already present before this turn. Initial final-integration sample: five mentions, 202 ms measured inference. User alias correction Nomsa Dlamini -> Avery retained across second passage and applied to both occurrences, 256 ms. Date detected; 09:14 missed by model, prompting separate time-format check. See retained pre-fix snapshot. Timing is a local observation, not a benchmark.
+
+Test correction: an encrypted-storage test failed because random base64 ciphertext contained the short substring Ari. Replaced probabilistic substring assertion with strict metadata/envelope field allowlists and IV-format assertion; cross-session decryption already checks the saved alias. Production encryption was not changed.
+
+No deployment, external cloud resource/secret mutation, live OpenAI request, private user data processing, commit or push.

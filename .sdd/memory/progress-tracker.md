@@ -1,18 +1,18 @@
 # Progress tracker
 
-Updated 2026-10-24.
+Updated 26 October 2026. Formal SDD progression remains paused; Phase 001 is an unapproved requirements draft. Framework and hooks are preserved.
 
-- Sonke team registration: completed and observed.
-- SDD core: installed, full-stack+devsecops, version 2.2.0.
-- Visual workspace: installed; build and 39 tests pass; running locally.
-- Operating mode: build-first hackathon delivery; formal SDD progression paused by owner direction. Documentation and reverse traceability maintained alongside implementation.
-- Phase 001 Architecture Foundation: unapproved requirements draft preserved; formal progression paused.
-- Local app/demo: responsive unframed app at `/` and preserved framed demo at `/demo/`. Both production builds and all 12 domain tests pass. The interactive implementation remains a local starting point; production security and backend work are pending.
-- GitHub: private repository created at https://github.com/ThisIsPhila/LuLu; main pushed.
-- App/demo isolation: main unframed responsive shell at `/`, preserved framed implementation at `/demo/`; independent source trees, browser-storage keys and build outputs. Six latest warm/tactile references saved; visual integration remains next.
-- Hackathon materials: all nine canvas sections saved in Sonke; SSDLC submitted by owner and subsequently observed filled; HustleWindow pitch upload confirmed as a VIDEO submission. Scheduled-deadline acceptance is separate from upload success.
-- Internal library: Documents / Media / Tasks navigation, grouped references and files, platform/internal checklists and programme checkpoints. Manual task changes persist in the current browser only.
-- Pitch playback: local VP9/Opus WebM added ahead of original MP4 fallback; full 20.625-second playback with visible frames and no error verified in the in-app browser. Original Sonke upload unchanged. Video binaries are ignored and excluded from GitHub.
-- Next: owner is preparing page mockups. Preserve app/demo separation and use the latest warm/tactile design direction when implementing them. Formal SDD progression remains paused.
+- Main web app: existing passkey sign-in/direct entry are live. Main-only Hosting excludes the demo/internal reader. Latest recorded release: cf2ca69e213e14dd.
+- Privacy model demo: new public `/privacy-demo` route with Settings install/status/remove and per-tab prepare/unload for a pinned ~192 MB model in browser IndexedDB, plus local before/highlighted/after processing and replacement choices. Local preview can copy the existing model cache rather than re-fetch it. `npm run build:app` and app-only packaging pass. New direct ONNX Runtime Web flow still needs browser inference/download acceptance; no deployment. Local preview: `http://127.0.0.1:5187/privacy-demo`.
+- Ordinary journal: account-owned Firestore records and editable one-time starters exist. Lower navigation follows the saved Home/Journal/Write/Stories/Library component reference; Library searches/filter entries and has account-owned Notes/Tasks create/edit/delete and task completion. Home Quick note/Task actions now open the matching Library form. Favorite/topic metadata persists on ordinary entries. Local preview/build verified; browser/device acceptance and rule deployment remain open.
+- Stories: ordinary Story entries can be assigned a collection name in existing composer Options; matching sources appear in Stories and grouped entries now read chronologically in the existing Reader with previous/next navigation. Descriptions/covers, explicit ordering/curation, deployment and visual/device acceptance remain open. Avatar Settings has a full-screen account/settings route with local reduced-motion preference and honest storage/language status.
+- Read/Edit: protected content stays hidden until passkey verification, original reveal is tied to the loaded source, and editor/delete/back actions return to the source section. Removed simulated speech and a protected Edit affordance that could not work. Ordinary revision history and working-site/device acceptance remain open.
+- Private work: local encrypted text/history/drafts, paragraph concealment, quick exit, media, export, deletion and per-record encrypted backup/restore exist. Phone acceptance, offline authorization, whole-vault/key recovery and broader sharing remain open.
+- Native apps: Capacitor shells/platform adapters exist. Android install/launch and physical iPhone install/launch commands passed. Usable authenticated journeys are not recorded; earlier simulator black screen is a separate observation.
+- Auth providers: new email/password and Google paths/configuration are local; no related Firebase release is recorded. Private unlock still requires passkey step-up.
+- Design: final brand/logos, component reference, warm references and fourteen onboarding screens are saved. Current auth experience differs from the unintegrated fourteen-screen flow; first-entry/auth order and secure draft handling require decisions.
+- Product Implementation: the private inspector now uses configured references and encrypted session-bound storage; Library Notes/Tasks and favorite/topic persistence are implemented locally. Working-site/device acceptance and Firestore rules deployment remain open. UI Design last completed existing auth styling; current post-login page alignment remains to review.
+- Hackathon: canvas saved, SSDLC submitted and pitch uploaded. Sunday 7/10 submitted as a new entry; earlier 6/10 retained. Final app/materials and judge/repository access remain unchecked.
+- Internal reader: current progress, production checklist, onboarding handoff and screen alignment are updated. Videos remain local and ignored by Git.
 
-See project-context.md for programme checkpoints.
+Readable current views: /docs/hackathon/review.html#current-progress and #tasks-production. Details live in product task status, the progress assessment and cited evidence.
