@@ -32,6 +32,10 @@ The owner created the Secret Manager entry `OPENAI_API_KEY` in project `khora-lu
 
 The approved function-secret guard exception is limited to the literal binding `secrets: ['OPENAI_API_KEY']`; no other names or dynamic secret lists are permitted.
 
+## Owner update: remove Decisions request limits
+
+On 27 October 2026 the owner explicitly directed removal of the shared 20-requests-per-UTC-day Decisions limit and the additional Decisions-specific burst cap, and requested deployment of the updated app and API. This supersedes the earlier bounded request-count decision above. The existing authentication endpoint abuse controls and function resource limits remain. OpenAI and Google Cloud provider limits and usage charges still apply; this decision does not authorize enabling GPT Live or unrelated paid services. The owner also requested a shared private judge invitation link, redeemed by individual accounts after sign-in, using the existing project and database.
+
 ## Hosting boundary clarified by owner
 
 Only the main application is deployed to Firebase Hosting. The interactive frame/demo, independent historical prototype and internal document/media review pages remain local development tools. Do not publish them or add hosted preview/demo routes without a new owner instruction. Database mock content is fictional starter content copied once into each signed-in account as ordinary private/unprotected editable entries; it is not a shared read-only journal or a replacement for protected mode. Preserve user changes and deletions across sign-in/device changes.

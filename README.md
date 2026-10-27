@@ -39,14 +39,16 @@ Created by **Team KHÔRA** for the **FNB App of the Year Hackathon 2026**, addre
 
 **[Launch LuLu in your browser](https://lulu.thisisphila.co.za/)**
 
-The web release is the quickest way to explore the *currently deployed* experience. The application uses real device/browser passkey authentication; there is no shared demo password.
+The web release is the quickest way to explore the *currently deployed* experience. Create your own account using a passkey, email or Google sign-in; there is no shared demo password.
 
 | Step | What to do | What you'll see |
 | --- | --- | --- |
-| **1. Create your space** | Register or sign in with a passkey. | A device/browser authentication prompt, followed by your account-owned space. |
+| **1. Create your space** | Create an account or sign in. | Your own journal space, with a passkey prompt if you choose passkey sign-in. |
 | **2. Explore the journal** | Open ordinary journal entries, edit one and save. | Fictional starter entries are added to new accounts; they can be edited. |
 | **3. Explore Stories** | Navigate to **Stories** in the ordinary experience. | A familiar, everyday writing surface. |
 | **4. Explore protected writing** | Select **Private** or **Write privately**. | Protected access is separate from signing in and uses a passkey check. |
+
+Lu is available in the app to help you find your way around and open common actions.
 
 ### The experience we're building
 
@@ -83,7 +85,7 @@ For the full interactive reader, run `npm run dev` and visit **[localhost:5173/d
 
 LuLu uses **React, TypeScript and Vite** for the app; **WebAuthn/passkeys**, a custom verification backend and **Firebase Authentication** for account access; **Firestore** for account-owned ordinary journal entries; and a separate **AES-GCM encrypted IndexedDB vault** for newer browser-local private records. **Capacitor 8** packages the web application into Android and iOS projects.
 
-LuLu separates ordinary journal entries from protected records. Privacy processing and support features continue to evolve as the project develops.
+LuLu separates ordinary journal entries from protected records. Lu’s navigation guide is available in the app. Cloud-assisted text chat, voice conversations and multilingual support are in development; they are not yet available in the live release.
 
 ## Run from source
 
