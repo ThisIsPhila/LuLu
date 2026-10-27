@@ -43,12 +43,10 @@ The web release is the quickest way to explore the *currently deployed* experien
 
 | Step | What to do | What you'll see |
 | --- | --- | --- |
-| **1. Create your space** | Register or sign in with a passkey or email/password; Google is configured with its corrected OAuth callback. | A device/browser authentication prompt, followed by your account-owned space. |
-| **2. Explore the journal** | Open ordinary journal entries, edit one and save. | Three fictional starter entries are initially added to new accounts; they can be edited. |
+| **1. Create your space** | Register or sign in with a passkey. | A device/browser authentication prompt, followed by your account-owned space. |
+| **2. Explore the journal** | Open ordinary journal entries, edit one and save. | Fictional starter entries are added to new accounts; they can be edited. |
 | **3. Explore Stories** | Navigate to **Stories** in the ordinary experience. | A familiar, everyday writing surface. |
-| **4. Explore protected writing** | In a version exposing **Private** or **Write privately**, select that entry point. | Protected access is separate from signing in. Availability varies by release; see below. |
-
-**Release update — 26 October:** The main-app source is now published at the custom domain. Login opens directly and **Onboarding** is optional. Live synthetic email/password and passkey registration, returning sign-in and application-session tests passed, including private passkey step-up; both temporary accounts and seven test documents were removed. Product Implementation corrected the missing Google OAuth callback; interactive Google/native acceptance remains open. Broader private/mobile features have local evidence and still need owner-device acceptance. See the [release verification](docs/implementation/2026-10-26-auth-domain-release.md).
+| **4. Explore protected writing** | Select **Private** or **Write privately**. | Protected access is separate from signing in and uses a passkey check. |
 
 ### The experience we're building
 
@@ -61,42 +59,15 @@ The web release is the quickest way to explore the *currently deployed* experien
 | **Understand options** | Future privacy-aware interpretation and contextual information. | Help the user explore possible concerns and appropriate options without diagnosing. |
 | **Choose support** | Future selective sharing with companions and verified services. | Move forward only when and how the user chooses. |
 
-## What works today
-
-Rather than treating a design concept, a local implementation and a deployed release as equivalent, we track each separately.
-
-| Capability | Live hosted web app | Current repository source |
-| --- | --- | --- |
-| Passkey registration and sign-in | **Available · live synthetic check passed** | Available |
-| Email/password registration and sign-in | **Available · live synthetic check passed** | Available |
-| Google sign-in | Callback corrected; interactive acceptance pending | Implemented |
-| Optional onboarding | **Available from login** | Fourteen-screen flow |
-| Account-owned ordinary journal (Firestore) | **Available** | Available |
-| Three editable fictional starter entries | **Available** | Available |
-| Encrypted browser-local private text and media | Source deployed; device acceptance pending | Implemented; locally tested |
-| Private drafts, revisions and autosave | Source deployed; device acceptance pending | Implemented; locally tested |
-| Image/audio private attachments; export and deletion | Source deployed; device acceptance pending | Implemented; locally tested |
-| Password-encrypted per-record backup/restore | Source deployed; device acceptance pending | Implemented; locally tested |
-| Configured substitutions and narrative distancing | Source deployed; broader detection remains planned | Implemented |
-| General contextual PII screening / OpenAI Decisions API integration | Not available | Planned |
-| Companion permissions and evidence sharing | Not available | Planned |
-| Safety Trails / live location sharing | Not available | Planned |
-| Verified professional portal and referrals | Not available | Planned |
-
-**Privacy implementation note.** In the newer source, private originals and media are encrypted using AES-GCM in browser IndexedDB. The vault's key resides in browser storage and is **not cryptographically bound to the passkey**. Clearing browser data may destroy access unless an appropriate backup exists. Full offline unlock, cross-device recovery and native-device security acceptance are not yet established. Older cloud-backed protected records use a separate legacy read path.
-
-For detailed and dated engineering evidence, see the [implementation tracker](docs/product/2026-10-25-task-status.md) and [Capacitor mobile report](docs/implementation/2026-10-26-capacitor-mobile.md).
-
 ## Availability and platforms
 
-| Platform | How to access | Status |
-| --- | --- | --- |
-| **Web** | **[Open the live app](https://lulu.thisisphila.co.za/)** | Hosted release available. |
-| **PWA** | Install from a supported browser when offered. | Installability and offline behaviour must still be validated before publishing installation instructions. |
-| **Android** | Capacitor 8 Android project in source. | Builds have succeeded; no device-accepted APK download is currently published. |
-| **iOS** | Capacitor 8 iOS project in source. | Physical iPhone startup repaired; full device journey acceptance remains outstanding; no IPA/TestFlight link published. |
+| Platform | How to try LuLu |
+| --- | --- |
+| **Web** | [Open the live app](https://lulu.thisisphila.co.za/) in your browser. |
+| **Android** | [Download the Android preview APK](https://github.com/ThisIsPhila/LuLu/releases/download/android-ios-preview-2026-10-27/LuLu-Android-preview.apk). This is a test build. |
+| **iPhone** | A public download is not available yet. See the [iPhone options](docs/mobile-installation.md#iphone). |
 
-APK and iOS installation links will appear here **after** testable, signed builds exist. A successful project build alone is not evidence of a working mobile release.
+**[Mobile download and installation guide](docs/mobile-installation.md)**
 
 ## Behind the project
 
@@ -112,11 +83,11 @@ For the full interactive reader, run `npm run dev` and visit **[localhost:5173/d
 
 LuLu uses **React, TypeScript and Vite** for the app; **WebAuthn/passkeys**, a custom verification backend and **Firebase Authentication** for account access; **Firestore** for account-owned ordinary journal entries; and a separate **AES-GCM encrypted IndexedDB vault** for newer browser-local private records. **Capacitor 8** packages the web application into Android and iOS projects.
 
-The application deliberately distinguishes ordinary account data, original protected records and derived or selectively disclosed content. The proposed Decisions API layer, companion sharing and support integrations are subsequent development work, not dependencies hidden inside the current deployed release.
+LuLu separates ordinary journal entries from protected records. Privacy processing and support features continue to evolve as the project develops.
 
 ## Run from source
 
-Requirements: Node.js and npm. Local Vite development provides an **Open development app** button with a separate fictional journal saved in browser storage. Production and native builds retain real authentication; the local bypass is removed from production output.
+Requirements: Node.js and npm, plus configured development environment credentials for the relevant Firebase functionality.
 
 ```bash
 npm install
@@ -129,8 +100,6 @@ npm run dev
 | `http://127.0.0.1:5173/demo/` | Interactive local frame for the main application |
 | `http://127.0.0.1:5173/demo/legacy.html` | Independent historical prototype, not the current app |
 | `http://127.0.0.1:5173/docs/hackathon/review.html#canvas` | Interactive project documentation library |
-
-To review private-record functionality in local development, click **Open development app**, select **Private** or **Write privately**, create and reopen a protected record, and test **Quick exit**. The local workspace has its own identity and records and grants no access to a Firebase account. Use **Onboarding** from login to develop that flow separately.
 
 ### Builds and checks
 
