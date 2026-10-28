@@ -13,6 +13,7 @@ import { judgeInviteDigest, isJudgeInviteActive } from './judge-invite.js';
 import { mayReadAccountActivity } from './owner-notifications.js';
 import { processAccountAlerts } from './account-alerts.js';
 import { scrubForLu, respondAsLu, LU_LANGUAGES } from './lu-chat.js';
+import { createLuLiveSession } from './lu-live.js';
 import { refillJudgeAllowance, type JudgeAllowance } from './judge-allowance.js';
 
 const judgeVoicePolicy = {refillCredits: 300, maxCredits: 300, refillCooldownMs: 24 * 60 * 60_000, accessDurationMs: 24 * 60 * 60_000};
@@ -20,7 +21,7 @@ const judgeVoicePolicy = {refillCredits: 300, maxCredits: 300, refillCooldownMs:
 initializeApp();
 const db = getFirestore();
 const identity = getAuth();
-const knownRoutes = new Set(['/auth/register/options', '/auth/register/verify', '/auth/login/options', '/auth/login/verify', '/auth/stepup/options', '/auth/stepup/verify', '/auth/provider/session', '/auth/lock', '/auth/logout', '/session', '/judge/redeem', '/judge/access', '/owner/account-activity', '/lu/scrub', '/lu/chat', '/privacy/capability', '/privacy/understand', '/native/exchange/create', '/native/exchange/options', '/native/exchange/complete', '/native/exchange/provider-complete', '/native/exchange/redeem', '/native/exchange/cancel']);
+const knownRoutes = new Set(['/auth/register/options', '/auth/register/verify', '/auth/login/options', '/auth/login/verify', '/auth/stepup/options', '/auth/stepup/verify', '/auth/provider/session', '/auth/lock', '/auth/logout', '/session', '/judge/redeem', '/judge/access', '/owner/account-activity', '/lu/scrub', '/lu/chat', '/lu/live', '/privacy/capability', '/privacy/understand', '/native/exchange/create', '/native/exchange/options', '/native/exchange/complete', '/native/exchange/provider-complete', '/native/exchange/redeem', '/native/exchange/cancel']);
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
 const sessions = db.collection('_sessions');
 const challenges = db.collection('_challenges');
@@ -364,6 +365,16 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
     }
     stage = 'session-lookup';
     const current = await sessionFor(request.get('authorization'));
+    if (route === '/lu/live') {
+      // Owner-only until server-side judge voice allowance is enforced.
+      const user = await identity.getUser(current.uid);
+      if (!mayReadAccountActivity(user)) throw new ApiError(403, 'Live voice is currently available to the owner for testing.');
+      if (Object.keys(body).join(',') !== 'offer' || typeof body.offer !== 'string' || !body.offer.trim() || body.offer.length > 20000) throw new ApiError(400, 'Invalid voice connection.');
+      if (!process.env.OPENAI_API_KEY) throw new ApiError(503, 'Live voice is not configured.');
+      try { response.json(await createLuLiveSession(process.env.OPENAI_API_KEY, body.offer)); }
+      catch { throw new ApiError(502, 'Could not connect live voice. Please try again.'); }
+      return;
+    }
     if (route === '/lu/scrub') {
       await requireLuAiAccess(current.uid);
       if (Object.keys(body).length !== 1 || typeof body.text !== 'string' || !body.text.trim() || body.text.length > 4000) throw new ApiError(400, 'Enter text of up to 4,000 characters.');

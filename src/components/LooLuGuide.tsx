@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, MessageCircle, Mic, Radio, X } from 'lucide-react';
 import { LuOrb, type LuQuickAction } from './LuOrb';
 import { LuTextChat } from './LuTextChat';
+import { LuLiveChat } from './LuLiveChat';
 import { LuDock } from './LuDock';
 import type { Entry } from '../domain/journal';
 import './LooLuGuide.css';
@@ -26,25 +27,25 @@ type Props = {
 
 export function LooLuGuide({ canLeaveCurrentView, canStartDraft, hasEntries, onNavigate, onStartDraft, onQuickAction, dockEnabled, entries, onSelectEntry, onDockNavigate }: Props) {
   const [open, setOpen] = useState(false);
-  const [page, setPage] = useState<'menu' | 'chat'>('menu');
+  const [page, setPage] = useState<'menu' | 'chat' | 'live'>('menu');
   const [chatInitial, setChatInitial] = useState('');
   function closeGuide() { setOpen(false); setPage('menu'); setChatInitial(''); }
   function quickAction(action: LuQuickAction) { closeGuide(); onQuickAction(action); }
 
-  const orb = <LuOrb open={open} disabled={false} onOpen={() => { if (open) closeGuide(); else { setPage('menu'); setOpen(true); } }} onAction={quickAction} />;
+  const orb = <LuOrb open={open} disabled={false} onOpen={() => { if (open) closeGuide(); else { setPage('menu'); setOpen(true); } }} onLive={() => {setPage('live');setOpen(true);}} onAction={quickAction} />;
   return <div className={`lulu-guide-root${dockEnabled ? ' has-lu-dock' : ''}`}>
     {dockEnabled ? <LuDock anchor={orb} onDismissGuide={closeGuide} entries={entries} onNavigate={onDockNavigate} onGuideNavigate={onNavigate} hasEntries={hasEntries} onSelect={onSelectEntry} onChat={text => {setChatInitial(text);setPage('chat');setOpen(true);}} onDraft={onStartDraft} canStartDraft={canStartDraft} onCapture={quickAction} /> : orb}
-    {open && <section className={`lulu-guide-panel${page === 'chat' ? ' is-chat' : ''}`} role="dialog" aria-modal="false" aria-labelledby="lulu-guide-title">
+    {open && <section className={`lulu-guide-panel${page !== 'menu' ? ' is-chat' : ''}`} role="dialog" aria-modal="false" aria-labelledby="lulu-guide-title">
       <header className="lulu-guide-header">
-        {page === 'chat' ? <div className="lulu-guide-chat-heading"><button type="button" className="lulu-guide-close" aria-label="Back to Lu menu" onClick={() => setPage('menu')}><ArrowLeft size={18} /></button><div><span className="lulu-guide-kicker">YOUR LU GUIDE</span><h2 id="lulu-guide-title">Ask Lu</h2></div></div>
+        {page !== 'menu' ? <div className="lulu-guide-chat-heading"><button type="button" className="lulu-guide-close" aria-label="Back to Lu menu" onClick={() => setPage('menu')}><ArrowLeft size={18} /></button><div><span className="lulu-guide-kicker">YOUR LU GUIDE</span><h2 id="lulu-guide-title">{page === 'live' ? 'Talk to Lu' : 'Ask Lu'}</h2></div></div>
           : <div><span className="lulu-guide-kicker">YOUR LU GUIDE</span><h2 id="lulu-guide-title">How can I help?</h2></div>}
         <button type="button" className="lulu-guide-close" aria-label="Close Lu" onClick={closeGuide}><X size={18} /></button>
       </header>
       <div className="lulu-guide-content">
-      {page === 'chat' ? <>
+      {page === 'live' ? <LuLiveChat /> : page === 'chat' ? <>
         <div className="lulu-guide-chat-modes" aria-label="Chat modes">
           <span className="is-active"><MessageCircle size={15} /> Text</span>
-          <span aria-disabled="true"><Radio size={15} /> Live <small>Soon</small></span>
+          <button type="button" onClick={() => setPage('live')}><Radio size={15} /> Live</button>
           <span aria-disabled="true"><Mic size={15} /> Voice note <small>Soon</small></span>
         </div>
         <LuTextChat entries={entries} initialDraft={chatInitial} onLocalAction={action => { if (!canLeaveCurrentView) return; if (action.kind === 'navigate') onNavigate(action.destination); else onQuickAction(action.action); closeGuide(); }} />

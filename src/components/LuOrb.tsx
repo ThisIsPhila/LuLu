@@ -28,9 +28,9 @@ function actionAt(x: number, y: number, center: { x: number; y: number }): LuQui
   return actions[Math.round(angle / step) % actions.length].id;
 }
 
-type Props = { open: boolean; disabled: boolean; onOpen: () => void; onAction: (action: LuQuickAction) => void };
+type Props = { open: boolean; disabled: boolean; onOpen: () => void; onLive: () => void; onAction: (action: LuQuickAction) => void };
 
-export function LuOrb({ open, disabled, onOpen, onAction }: Props) {
+export function LuOrb({ open, disabled, onOpen, onLive, onAction }: Props) {
   const [wheel, setWheel] = useState(false);
   const [active, setActive] = useState<LuQuickAction | null>(null);
   const [center, setCenter] = useState({ x: 0, y: 0 });
@@ -67,6 +67,7 @@ export function LuOrb({ open, disabled, onOpen, onAction }: Props) {
       const action = moved.current ? actionAt(event.clientX, event.clientY, centerRef.current) : null;
       setWheel(false); setActive(null); selected.current = null;
       if (action && !disabled) actionRef.current(action);
+      else if (!moved.current && !disabled) onLive();
     };
     const onCancel = () => { setWheel(false); setActive(null); selected.current = null; };
     window.addEventListener('pointermove', onMove, { passive: false });
@@ -76,7 +77,7 @@ export function LuOrb({ open, disabled, onOpen, onAction }: Props) {
     document.addEventListener('keydown', closeOnEscape);
     window.addEventListener('resize', keepInView);
     return () => { document.removeEventListener('keydown', closeOnEscape); window.removeEventListener('resize', keepInView); window.removeEventListener('touchmove', preventTouchScroll); window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onEnd); window.removeEventListener('pointercancel', onCancel); root.style.overflow = rootOverflow; body.style.overflow = bodyOverflow; root.style.overscrollBehaviorY = rootOverscroll; body.style.overscrollBehaviorY = bodyOverscroll; };
-  }, [wheel, disabled]);
+  }, [wheel, disabled, onLive]);
 
   function openWheel(_x: number, _y: number) {
     window.getSelection()?.removeAllRanges();
@@ -108,6 +109,7 @@ export function LuOrb({ open, disabled, onOpen, onAction }: Props) {
       onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={clearTimer}
       onPointerCancel={() => { clearTimer(); held.current = false; setWheel(false); }}
       onContextMenu={event => event.preventDefault()}
+      onDoubleClick={event => { event.preventDefault(); onLive(); }}
       onClick={() => { if (held.current) { held.current = false; return; } onOpen(); }}>
       <span className="lu-orb-sphere" aria-hidden="true" /><img className="lu-orb-mark" src="/media/brand/lu-mark-white.png" alt="" draggable={false} />
     </button>
