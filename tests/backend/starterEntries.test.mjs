@@ -2,9 +2,8 @@ import {readFileSync} from 'node:fs';
 import {before,after,beforeEach,test} from 'node:test';
 import assert from 'node:assert/strict';
 import {initializeTestEnvironment,assertSucceeds} from '@firebase/rules-unit-testing';
-import {doc,setDoc,getDoc,deleteDoc,serverTimestamp,Timestamp} from 'firebase/firestore';
+import {doc,setDoc,getDoc,deleteDoc,updateDoc,serverTimestamp,Timestamp} from 'firebase/firestore';
 import {ensureStarterEntries} from '../../src/services/backend/demoCatalogue.ts';
-import {updateEntry} from '../../src/services/backend/journal.ts';
 
 let env;
 const session={uid:'alice',expiresAt:Date.now()+3600000,privateUntil:Date.now()+600000};
@@ -42,7 +41,7 @@ test('concurrent initializations create each starter once and record one marker'
     ensureStarterEntries('alice',firestore),
     ensureStarterEntries('alice',firestore),
   ]);
-  assert.deepEqual(results.sort(),[0,3]);
+  assert.deepEqual(results.sort((a,b)=>a-b),[0,ids.length]);
   for(const id of ids) assert.equal((await getDoc(doc(firestore,'users/alice/entries',targetId(id)))).exists(),true);
   const marker=await getDoc(doc(firestore,'users/alice/starterCatalogues',catalogueId));
   assert.equal(marker.exists(),true);
@@ -58,7 +57,7 @@ test('reinitialization preserves an edit and does not restore a deleted starter'
   const editedId=targetId(ids[0]);
   const deletedId=targetId(ids[1]);
   const before=await getDoc(doc(firestore,'users/alice/entries',editedId));
-  await updateEntry('alice',editedId,{title:'My edit',body:'My revised ordinary entry.'},firestore);
+  await updateDoc(doc(firestore,'users/alice/entries',editedId),{title:'My edit',body:'My revised ordinary entry.',updatedAt:serverTimestamp()});
   await assertSucceeds(deleteDoc(doc(firestore,'users/alice/entries',deletedId)));
 
   assert.equal(await ensureStarterEntries('alice',firestore),0);
@@ -79,7 +78,7 @@ test('a preexisting record at a starter ID is preserved while other starters are
     perspective:'first',createdAt:serverTimestamp(),updatedAt:serverTimestamp(),
   });
 
-  assert.equal(await ensureStarterEntries('alice',firestore),2);
+  assert.equal(await ensureStarterEntries('alice',firestore),ids.length - 1);
   const existing=await getDoc(doc(firestore,'users/alice/entries',existingId));
   assert.equal(existing.data().title,'My existing entry');
   assert.equal(existing.data().body,'Keep this content.');

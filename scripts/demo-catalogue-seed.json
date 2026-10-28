@@ -15,58 +15,81 @@
       "demo-story-juniper-02",
       "demo-story-juniper-03",
       "demo-story-lantern-01",
-      "demo-story-lantern-02"
+      "demo-story-lantern-02",
+      "demo-story-river-01",
+      "demo-story-river-02",
+      "demo-story-river-03"
     ]
   },
   "entries": [
     {
       "id": "demo-journal-quiet-start",
       "title": "A little room in the morning",
-      "body": "I left my phone on the table while the kettle warmed and opened the window to the cool air. The basil had leaned toward the light again, so I turned the pot and pinched off one dry leaf. Nothing dramatic happened; that was the good part. I ate toast slowly, wrote down the three things I wanted to carry into the day, and let the rest wait. By the time I picked up my messages, I felt more like I had arrived in the morning instead of being pulled into it.",
+      "body": "I left my phone on the table while the kettle warmed and opened the window to the cool air. The basil had leaned toward the light again, so I turned the pot and pinched off one dry leaf. Nothing dramatic happened; that was the good part. I ate toast slowly, wrote down the three things I wanted to carry into the day, and let the rest wait. By the time I picked up my messages, I felt more like I had arrived in the morning instead of being pulled into it.\n\nThe bus arrived late enough for me to notice the jacaranda tree across the road. I usually rush straight past it, but this morning the pavement was scattered with purple flowers, and someone had placed a small chair outside the corner shop. A woman was peeling an orange there while she waited for her granddaughter. She offered me a piece, and we talked about the weather without either of us checking the time.\n\nAt work I felt the familiar pull to answer everything immediately. Thandi asked whether I could take on another task before lunch, and for a moment I nearly said yes without looking at my diary. Instead I asked what could move if this was urgent. We rearranged two meetings and made a plan that left enough room to finish what I had already started. I was surprised by how ordinary the conversation felt once I had said what I needed.\n\nIn the evening I walked home with a bag of spinach, bread and a lemon. I called my sister, Zanele, while I cooked, and she reminded me about the family lunch on Sunday. We laughed about the time we tried to make pudding without reading the recipe. I wrote the date on the calendar, then left my phone charging in the kitchen while I ate.\n\nI want to keep this morning in mind. A quiet start did not make the rest of the day perfect, but it gave me a moment to decide what I could carry. Tomorrow I will water the basil again and take the earlier bus if I can. If I miss it, perhaps I will sit on the little chair and wait.",
       "kind": "Journal",
       "protected": false,
       "perspective": "first",
-      "tags": ["Morning", "Routine", "Reflection"],
+      "tags": [
+        "Morning",
+        "Routine",
+        "Reflection"
+      ],
       "createdAt": "2026-10-23T06:35:00.000Z"
     },
     {
       "id": "demo-journal-small-win",
       "title": "One thing finished",
-      "body": "I kept avoiding the first page of the community garden notes because I wanted the whole plan to sound clever straight away. Today I made a rough list instead: shade, water, somewhere to sit, and a way for neighbours to borrow tools. It took twenty minutes. The list is ordinary and incomplete, but now there is something to improve. I sent Rowan a photo of it and asked which question we should answer first. Starting badly turned out to be much easier than waiting to start perfectly.",
+      "body": "I kept avoiding the first page of the community garden notes because I wanted the whole plan to sound clever straight away. Today I made a rough list instead: shade, water, somewhere to sit, and a way for neighbours to borrow tools. It took twenty minutes. The list is ordinary and incomplete, but now there is something to improve. I sent Rowan a photo of it and asked which question we should answer first. Starting badly turned out to be much easier than waiting to start perfectly.\n\nI opened the notebook at the kitchen table, put the kettle on, and wrote the date at the top of a fresh page. The garden meeting was scheduled for Thursday at the community hall, and I wanted to arrive with something useful instead of an apology for being unprepared. I had imagined a polished proposal, but the page stayed empty whenever I tried to begin that way.\n\nRowan replied to my photograph after lunch. He liked the idea of a shared tool shelf and suggested asking the people who already use the pavement what they would want. His message was encouraging, although I noticed myself worrying that the list was too simple. I read it again later and realised that simplicity might make it easier for someone else to add an idea.\n\nAfter work I walked past the empty lot on Juniper Street. Mrs Dlamini was closing the gate next door, so I asked whether she had ever seen the tap behind the wall working. She said it had been repaired last summer and offered to show us where the valve was. We talked about the afternoon shade and the children who pass on their way home from school.\n\nI came home and added her notes to the page. The whole plan is still uncertain: we do not have permission, money or a schedule. But we have better questions and a person to speak to on Thursday. I am learning that finishing one small thing can create a path to the next, even when it does not look impressive on its own.",
       "kind": "Journal",
       "protected": false,
       "perspective": "first",
-      "tags": ["Writing", "Small wins", "Garden"],
+      "tags": [
+        "Writing",
+        "Small wins",
+        "Garden"
+      ],
       "createdAt": "2026-10-24T14:10:00.000Z"
     },
     {
       "id": "demo-journal-saturday-market",
       "title": "The Saturday market",
-      "body": "The market was busy, but the stallholders still had time to talk. I bought oranges from a woman who remembered that I like the small, tart ones, then walked the long way around the square with the paper bag tucked under my arm. A child was trying to teach a patient dog to sit beside the flower buckets. I wrote the scene down before it faded: orange peel on my fingers, the dog looking solemn, somebody laughing behind me. It is a small day, which feels like enough of a reason to remember it.",
+      "body": "The market was busy, but the stallholders still had time to talk. I bought oranges from a woman who remembered that I like the small, tart ones, then walked the long way around the square with the paper bag tucked under my arm. A child was trying to teach a patient dog to sit beside the flower buckets. I wrote the scene down before it faded: orange peel on my fingers, the dog looking solemn, somebody laughing behind me. It is a small day, which feels like enough of a reason to remember it.\n\nI met my friend Lerato at the taxi rank just after nine. She had a long shopping list for her mother and I had promised to help carry the heavier things, though we both knew we would stop for coffee first. We walked between the stalls slowly, greeting the people she knew and comparing the fruit at each table. The market smelled of bread, coriander and warm pavement after rain.\n\nAt a fabric stall, Lerato found a piece of yellow cloth that reminded her of the curtains in her grandmother's kitchen. The seller, Mrs Naidoo, told us where it came from and showed us a photograph of a dress her daughter had made. We stayed longer than we meant to. I bought two metres, unsure what I would do with it, and Lerato said I could learn to sew a cushion before attempting anything complicated.\n\nWe sat on a bench behind the library and shared a bag of vetkoek. Lerato talked about a difficult conversation at work. I wanted to offer a solution immediately, but she said she mostly needed someone to listen while she decided what to do. So I asked a few questions and let the silence be comfortable. Before we left she said she felt less alone with the problem, even though nothing had been settled.\n\nAt home I put the oranges in a bowl and the fabric over the back of a chair. The dog at the flower stall was still in my mind, serious and patient among the buckets. I wrote these details down because an ordinary Saturday can hold friendship, noise, colour and the beginning of a new skill. Next week I will ask Mrs Naidoo whether she knows someone who gives sewing lessons.",
       "kind": "Journal",
       "protected": false,
       "perspective": "first",
-      "tags": ["Weekend", "People", "Places"],
+      "tags": [
+        "Weekend",
+        "People",
+        "Places"
+      ],
       "createdAt": "2026-10-25T09:25:00.000Z"
     },
     {
       "id": "demo-journal-room-to-think",
       "title": "A quieter afternoon",
-      "body": "I had more on my list than the afternoon could hold. Instead of moving everything to tomorrow, I circled the one call that needed an answer and the laundry that was already waiting. I took both in turn, then sat by the window with tea and no screen for ten minutes. The other tasks are still there, but they feel like separate things now rather than one large cloud. I want to remember that a shorter list can be an honest plan, not a sign that I have given up.",
+      "body": "I had more on my list than the afternoon could hold. Instead of moving everything to tomorrow, I circled the one call that needed an answer and the laundry that was already waiting. I took both in turn, then sat by the window with tea and no screen for ten minutes. The other tasks are still there, but they feel like separate things now rather than one large cloud. I want to remember that a shorter list can be an honest plan, not a sign that I have given up.\n\nThe morning began with three messages about different deadlines, a leaking tap and a note from my brother asking whether I could help him on Saturday. I felt my shoulders rise before I had even finished breakfast. I made a second cup of tea and listed everything on a sheet of paper, including the small tasks I usually pretend do not count. The page looked crowded, but at least the tasks were no longer circling in my head.\n\nI phoned the landlord about the tap and left a message with the details. Then I replied to my brother, Sibusiso, to say I could help for two hours but could not stay the whole day. He was disappointed at first, and I felt guilty. We talked about what he needed most and agreed I would bring the boxes in the morning; his neighbour would help with the furniture later.\n\nBy mid-afternoon the work deadline had shifted, and I had finished the laundry. The list still contained four unfinished items, but the kitchen was quieter and the tap had stopped dripping after the plumber tightened a fitting. I sat by the window and watched the schoolchildren pass in pairs. One carried a cardboard model carefully in both hands, protecting it from the wind.\n\nI have a habit of calling a day unsuccessful when I cannot do everything. Today I want to describe it more accurately. I answered the urgent call, set a boundary, dealt with a practical problem and made room to breathe. I can return to the remaining tasks tomorrow without treating them as proof that I failed today.",
       "kind": "Journal",
       "protected": false,
       "perspective": "first",
-      "tags": ["Balance", "Reflection", "Routine"],
+      "tags": [
+        "Balance",
+        "Reflection",
+        "Routine"
+      ],
       "createdAt": "2026-10-25T15:40:00.000Z"
     },
     {
       "id": "demo-journal-end-of-week",
       "title": "What I want to keep",
-      "body": "This week went better when I asked for help early, ate lunch away from my desk, and stopped trying to solve every small problem before bed. I did not manage those things every day. I did notice the difference on the days I remembered. For next week, I am keeping the sketchbook by the door and leaving one evening open. I am not making a grand promise to become more organised; I am making the next useful step easier to find.",
+      "body": "This week went better when I asked for help early, ate lunch away from my desk, and stopped trying to solve every small problem before bed. I did not manage those things every day. I did notice the difference on the days I remembered. For next week, I am keeping the sketchbook by the door and leaving one evening open. I am not making a grand promise to become more organised; I am making the next useful step easier to find.\n\nOn Monday I stayed at my desk through lunch and wondered why I could not concentrate by three o'clock. On Tuesday I took a sandwich outside with my colleague Amina, and we sat beneath the trees for half an hour. We spoke about books and the rain rather than deadlines. I came back with more energy, although the work waiting for me had not changed.\n\nWednesday was harder. A meeting ran late and I agreed to take responsibility for a report I did not have time to finish. I was irritated with myself all evening. The next morning I told my manager, Daniel, that I needed another day and asked for help with the figures. He agreed, and a colleague offered to check the spreadsheet. I had spent more time fearing the conversation than it took to have it.\n\nOn Friday I visited my aunt in Soweto. She sent me home with a container of soup and asked whether I was still drawing. I said I had not opened my sketchbook for weeks. She put a pencil on the table and asked me to draw the cup in front of us. It was crooked, and we both laughed, but she kept it on the fridge when I left.\n\nLooking back, I do not need to turn these moments into strict rules. I want to remember what helped: asking early, eating away from the desk and leaving a little room for a person or an unexpected plan. I put the sketchbook beside the front door and wrote next week's important dates on the calendar. That is enough preparation for tonight.",
       "kind": "Journal",
       "protected": false,
       "perspective": "first",
-      "tags": ["Weekly reflection", "Habits", "Planning"],
+      "tags": [
+        "Weekly reflection",
+        "Habits",
+        "Planning"
+      ],
       "createdAt": "2026-10-26T17:05:00.000Z"
     },
     {
@@ -77,7 +100,11 @@
       "protected": false,
       "perspective": "third",
       "curatedDeck": "Juniper Street Garden",
-      "tags": ["Fiction", "Neighbourhood", "Part 1"],
+      "tags": [
+        "Fiction",
+        "Neighbourhood",
+        "Part 1"
+      ],
       "createdAt": "2026-10-22T16:30:00.000Z"
     },
     {
@@ -88,7 +115,11 @@
       "protected": false,
       "perspective": "third",
       "curatedDeck": "Juniper Street Garden",
-      "tags": ["Fiction", "Neighbourhood", "Part 2"],
+      "tags": [
+        "Fiction",
+        "Neighbourhood",
+        "Part 2"
+      ],
       "createdAt": "2026-10-23T16:30:00.000Z"
     },
     {
@@ -99,7 +130,11 @@
       "protected": false,
       "perspective": "third",
       "curatedDeck": "Juniper Street Garden",
-      "tags": ["Fiction", "Neighbourhood", "Part 3"],
+      "tags": [
+        "Fiction",
+        "Neighbourhood",
+        "Part 3"
+      ],
       "createdAt": "2026-10-24T16:30:00.000Z"
     },
     {
@@ -110,7 +145,11 @@
       "protected": false,
       "perspective": "third",
       "curatedDeck": "Lanternlight Notes",
-      "tags": ["Fiction", "Chance meetings", "Part 1"],
+      "tags": [
+        "Fiction",
+        "Chance meetings",
+        "Part 1"
+      ],
       "createdAt": "2026-10-25T18:45:00.000Z"
     },
     {
@@ -121,8 +160,57 @@
       "protected": false,
       "perspective": "third",
       "curatedDeck": "Lanternlight Notes",
-      "tags": ["Fiction", "Chance meetings", "Part 2"],
+      "tags": [
+        "Fiction",
+        "Chance meetings",
+        "Part 2"
+      ],
       "createdAt": "2026-10-26T18:15:00.000Z"
+    },
+    {
+      "id": "demo-story-river-01",
+      "title": "The letter in the blue tin",
+      "body": "Maya found the blue tin on a shelf above her mother's sewing machine, between a packet of buttons and a jar filled with chalk. Inside were letters tied with a faded ribbon, each addressed to the same house on River Road. The oldest envelope carried a date from more than thirty years ago. Maya was looking for a needle to mend her coat, but she sat down at the kitchen table and untied the ribbon instead.\n\nThe letters were from her grandfather, Yusuf, to a friend named Anna who had moved away after the old railway station closed. They were full of everyday details: a neighbour's stubborn lemon tree, a broken bicycle, the first rain after a dry winter. In one letter Yusuf described building a shelf for the community library with wood left over from a shop renovation. Maya recognised the shelf. She had borrowed books from it as a child without knowing who had made it.\n\nHer mother came in carrying groceries and stopped when she saw the envelopes. She explained that Yusuf had kept copies of the letters because Anna returned them years later, tucked into a parcel with photographs. The two friends had intended to meet again, but work, illness and distance repeatedly changed their plans. Nobody in the family knew whether Anna still lived at the address on the envelopes.\n\nMaya suggested looking for her. Her mother was hesitant; the letters belonged to another time, and she did not want to intrude on a stranger. They agreed to begin gently by asking the librarian whether anyone remembered Anna. Maya photographed the shelf, put the letters back in the tin, and wrote down the questions they wanted to ask. The next Saturday they would go together, with no expectation that the search had to end anywhere in particular.",
+      "kind": "Story",
+      "protected": false,
+      "perspective": "third",
+      "curatedDeck": "River Road Letters",
+      "tags": [
+        "Fiction",
+        "Family",
+        "Part 1"
+      ],
+      "createdAt": "2026-10-20T10:00:00.000Z"
+    },
+    {
+      "id": "demo-story-river-02",
+      "title": "A shelf with a history",
+      "body": "The librarian, Mr Molefe, remembered the shelf immediately. He had been a volunteer when Yusuf brought it in, although he had not known its maker well. He took Maya and her mother through the reading room to the back wall, where the wood had darkened under years of hands and sunlight. A small brass plate beneath the bottom ledge carried two initials that Maya had never noticed.\n\nMr Molefe did not know where Anna lived now, but he remembered that she had helped catalogue the library's first collection. He offered to search the old volunteer records and call if he found a safe way to contact her. Maya left her number, then spent the afternoon reading at a table near the window. Her mother chose a book about gardens and said she wanted to learn the names of the plants in their courtyard.\n\nA week passed before the librarian called. He had spoken to another former volunteer who knew Anna's daughter, but he did not hand over anyone's private details. Instead, he asked whether Maya was comfortable sharing a short note that he could pass along. Maya wrote that she had found the letters and would be glad to return copies if Anna wished. She added that there was no need to reply if the message was unwelcome.\n\nTwo days later a card arrived at the library. Anna was alive, living near the coast and delighted to hear about the tin. She remembered Yusuf's shelf, particularly the way one corner had needed a folded piece of paper to make it level. She invited Maya and her mother to send photographs and said she would write when her hands allowed it. Maya carried the card home carefully. The search had not recovered the past, but it had made room for a new conversation.",
+      "kind": "Story",
+      "protected": false,
+      "perspective": "third",
+      "curatedDeck": "River Road Letters",
+      "tags": [
+        "Fiction",
+        "Family",
+        "Part 2"
+      ],
+      "createdAt": "2026-10-21T10:00:00.000Z"
+    },
+    {
+      "id": "demo-story-river-03",
+      "title": "The photograph on the windowsill",
+      "body": "Anna's first letter arrived in a large envelope with a photograph of the coast. She wrote about the library, the long bus rides home and Yusuf's habit of arriving with more tools than a job required. She also remembered a disagreement they had once had about lending books to people who could not provide an address. They had argued for weeks before deciding to ask the readers what would make borrowing easier.\n\nMaya read the letter aloud to her mother on a rainy Sunday. They recognised Yusuf's stubbornness, but the story gave it a different shape: he had been willing to listen after the argument, and Anna had been willing to change her mind too. Maya wrote back with a photograph of the repaired shelf and asked whether Anna remembered the names of the first books placed on it.\n\nThe exchange continued slowly. Some weeks there was a postcard; other weeks there was only a short message passed through the librarian. Maya began visiting the library on Saturdays, helping children cover worn books with paper. Her mother joined a gardening group and brought cuttings from the courtyard. Neither of them had planned those changes when they opened the blue tin.\n\nAt the end of spring, Anna sent a photograph of herself and Yusuf standing beside the unfinished shelf. On its back she had written the date and the names of everyone who helped. Maya placed a copy on the kitchen windowsill, where the morning light reached it. The original returned to the tin with the letters, and the empty space beside it was left for whatever came next.",
+      "kind": "Story",
+      "protected": false,
+      "perspective": "third",
+      "curatedDeck": "River Road Letters",
+      "tags": [
+        "Fiction",
+        "Family",
+        "Part 3"
+      ],
+      "createdAt": "2026-10-22T10:00:00.000Z"
     }
   ]
 }

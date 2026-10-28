@@ -75,7 +75,7 @@ service cloud.firestore {
       return d.keys().hasAll(['version','label','entryIds'])
         && d.keys().hasOnly(['version','label','entryIds'])
         && d.version == 1 && d.label is string && d.label.size() > 0 && d.label.size() <= 80
-        && d.entryIds is list && d.entryIds.size() <= 10;
+        && d.entryIds is list && d.entryIds.size() <= 20;
     }
     match /users/{uid}/entries/{id} {
       allow get: if activeSession(uid);
@@ -109,25 +109,6 @@ service cloud.firestore {
         && request.resource.data.createdAt == resource.data.createdAt;
       allow delete: if activeSession(uid);
     }
-    function isValidLibraryItem(d) {
-      return d.keys().hasAll(['ownerId','kind','title','body','completed','createdAt','updatedAt'])
-        && d.keys().hasOnly(['ownerId','kind','title','body','completed','createdAt','updatedAt'])
-        && d.ownerId is string && d.ownerId.size() <= 128
-        && d.kind in ['note','task']
-        && d.title is string && d.title.size() > 0 && d.title.size() <= 200
-        && d.body is string && d.body.size() <= 10000
-        && d.completed is bool && d.createdAt is timestamp && d.updatedAt == request.time;
-    }
-    match /users/{uid}/notesTasks/{id} {
-      allow get: if activeSession(uid);
-      allow list: if activeSession(uid) && request.query.limit <= 100;
-      allow create: if activeSession(uid) && uidUnchanged(uid) && isValidLibraryItem(request.resource.data)
-        && request.resource.data.createdAt == request.time;
-      allow update: if activeSession(uid) && uidNotModified() && isValidLibraryItem(request.resource.data)
-        && request.resource.data.kind == resource.data.kind
-        && request.resource.data.createdAt == resource.data.createdAt;
-      allow delete: if activeSession(uid);
-    }
     // One-time initialization marker. Removing/editing a starter entry must never
     // cause it to be restored by a later sign-in or another device.
     function validStarterId(ids, i) {
@@ -138,13 +119,18 @@ service cloud.firestore {
       return d.keys().hasAll(['catalogueId','version','entryIds','completedAt'])
         && d.keys().hasOnly(['catalogueId','version','entryIds','completedAt'])
         && d.catalogueId == 'johannesburg-v1' && d.version == 1
-        && d.entryIds is list && d.entryIds.size() <= 10
+        && d.entryIds is list && d.entryIds.size() <= 20
         && d.entryIds.toSet().size() == d.entryIds.size()
         && validStarterId(d.entryIds,0) && validStarterId(d.entryIds,1)
         && validStarterId(d.entryIds,2) && validStarterId(d.entryIds,3)
         && validStarterId(d.entryIds,4) && validStarterId(d.entryIds,5)
         && validStarterId(d.entryIds,6) && validStarterId(d.entryIds,7)
         && validStarterId(d.entryIds,8) && validStarterId(d.entryIds,9)
+        && validStarterId(d.entryIds,10) && validStarterId(d.entryIds,11)
+        && validStarterId(d.entryIds,12) && validStarterId(d.entryIds,13)
+        && validStarterId(d.entryIds,14) && validStarterId(d.entryIds,15)
+        && validStarterId(d.entryIds,16) && validStarterId(d.entryIds,17)
+        && validStarterId(d.entryIds,18) && validStarterId(d.entryIds,19)
         && d.completedAt == request.time;
     }
     match /users/{uid}/starterCatalogues/{catalogueId} {
