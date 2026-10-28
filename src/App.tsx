@@ -13,7 +13,6 @@ import { unlockPrivate, lockPrivate, logout, type AppSession } from './services/
 import type { Entity } from './domain/transform';
 import { LocalRepresentationVault } from './services/vault/localRepresentationVault';
 import { JournalHome } from './components/JournalHome';
-import { OwnerAccountActivity } from './components/OwnerAccountActivity';
 import { TransformProtectView } from './components/TransformProtectView';
 import { ProtectedWritingView } from './components/ProtectedWritingView';
 import { EntityInspectorView } from './components/EntityInspectorView';
@@ -21,7 +20,6 @@ import { ReaderView } from './components/ReaderView';
 import { StoryLeavesView } from './components/StoryLeavesView';
 import { LibraryView } from './components/LibraryView';
 import { PrivateSanctuaryView } from './components/PrivateSanctuaryView';
-import { BottomNav } from './components/BottomNav';
 import { OrdinaryNavigationHeader } from './components/OrdinaryNavigationHeader';
 import { ProtectedGateModal } from './components/ProtectedGateModal';
 import { LocalPrivateJournal } from './components/LocalPrivateJournal';
@@ -311,7 +309,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     await deleteLibraryItem(session.uid, id);
   }
 
-  const guideMayLeave = (view: string) => ['home', 'leaves', 'stories', 'reader', 'settings', 'model-settings'].includes(view);
+  const guideMayLeave = (view: string) => ['home', 'leaves', 'stories', 'library', 'reader', 'settings', 'model-settings'].includes(view);
 
   function handleLooLuNavigate(destination: LooLuDestination) {
     if (!guideMayLeave(currentViewRef.current)) return;
@@ -333,13 +331,24 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     else if (destination === 'support') navigatePrivate('vault');
   }
 
-  function handleLooLuStartDraft(text: string) {
+  function handleLooLuStartDraft(text: string, kind: 'Journal' | 'Story' = 'Journal') {
     if (protectedMode || !guideMayLeave(currentViewRef.current) || !text.trim()) return;
     const source = currentViewRef.current;
     editorReturnView.current = source === 'home' || source === 'leaves' || source === 'stories' || source === 'library' ? source : 'home';
     const nonce = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    setComposingKind('Journal'); setEditingEntry(null); setSelectedEntry(null);
+    setComposingKind(kind); setEditingEntry(null); setSelectedEntry(null);
     setLooLuDraft({ text, nonce }); setCurrentView('compose');
+  }
+
+  function handleOrdinaryNavigate(view: 'home' | 'leaves' | 'stories' | 'library' | 'compose') {
+    if (privateAuthority.current.until > 0) handleExitProtected();
+    if (currentViewRef.current === 'inspector') setInspectorText('');
+    if (view === 'compose') {
+      const source = currentViewRef.current;
+      editorReturnView.current = source === 'home' || source === 'leaves' || source === 'stories' || source === 'library' ? source : 'home';
+      setComposingKind(source === 'stories' || (source === 'home' && activeCategoryTab === 'Stories') ? 'Story' : 'Journal');
+      setEditingEntry(null); setSelectedEntry(null); setCurrentView('compose');
+    } else setCurrentView(view);
   }
 
   async function handleConfirmRepresentations(next: Entity[]) {
@@ -467,6 +476,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
         )}
         {currentView === 'home' && (
           <JournalHome
+            notificationUid={development ? undefined : session.uid}
             entries={ordinaryEntries}
             displayName={displayName}
             activeTab={activeCategoryTab}
@@ -482,11 +492,15 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
             onOpenVault={() => navigatePrivate('vault')}
             onSignOut={() => void signOutAccount()}
             onOpenSettings={() => setCurrentView('settings')}
+            onNavigate={handleOrdinaryNavigate}
           />
         )}
 
         {isOrdinaryNavigationView && currentView !== 'home' && (
           <OrdinaryNavigationHeader
+            notificationUid={development ? undefined : session.uid}
+            currentView={currentView}
+            onNavigate={handleOrdinaryNavigate}
             protectedMode={protectedMode}
             onOpenVault={() => navigatePrivate('vault')}
             onOpenSettings={() => setCurrentView('settings')}
@@ -621,31 +635,14 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
             />
         )}
 
-        {/* Bottom Floating Navigation Dock (Hidden on Reader and Compose) */}
-        {currentView !== 'reader' && currentView !== 'compose' && currentView !== 'enclave-writing' && currentView !== 'settings' && currentView !== 'model-settings' && currentView !== 'privacy-demo' && (
-          <BottomNav
-            currentView={currentView as any}
-            onNavigate={(view) => {
-              // Leaving a private surface through ordinary navigation conceals
-              // it immediately and invalidates outstanding private operations.
-              if (privateAuthority.current.until > 0) handleExitProtected();
-              if(currentViewRef.current==='inspector')setInspectorText('');
-              if (view === 'compose') {
-                editorReturnView.current = currentViewRef.current === 'home' || currentViewRef.current === 'leaves' || currentViewRef.current === 'stories' || currentViewRef.current === 'library'
-                  ? currentViewRef.current : 'home';
-                setComposingKind(currentView === 'stories' || (currentView === 'home' && activeCategoryTab === 'Stories') ? 'Story' : 'Journal');
-                setEditingEntry(null);setSelectedEntry(null);
-                setCurrentView('compose');
-              } else {
-                setCurrentView(view);
-              }
-            }}
-          />
-        )}
+
       </div>
 
-      {!development && <OwnerAccountActivity uid={session.uid} />}
       <LooLuGuide
+        dockEnabled={isOrdinaryNavigationView}
+        entries={ordinaryEntries}
+        onSelectEntry={handleSelectEntry}
+        onDockNavigate={handleOrdinaryNavigate}
         currentView={currentView === 'leaves' ? 'journal' : currentView === 'compose' ? 'write' : currentView === 'model-settings' ? 'privacy-settings' : currentView === 'local-private' ? 'private-writing' : currentView}
         privateAvailable={protectedMode && privateSurface && Date.now() < privateUntil}
         canLeaveCurrentView={guideMayLeave(currentView)}

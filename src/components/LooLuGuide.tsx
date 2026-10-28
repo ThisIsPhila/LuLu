@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { ArrowLeft, BookOpen, Compass, FileText, LibraryBig, MessageCircle, Mic, PenLine, Radio, X } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Mic, Radio, X } from 'lucide-react';
 import { LuOrb, type LuQuickAction } from './LuOrb';
 import { LuTextChat } from './LuTextChat';
+import { LuDock } from './LuDock';
+import type { Entry } from '../domain/journal';
 import './LooLuGuide.css';
 
 export type LooLuDestination = 'home' | 'journal' | 'stories' | 'library' | 'reader' | 'write' | 'settings' | 'privacy-settings' | 'private-writing' | 'support';
@@ -13,57 +15,53 @@ type Props = {
   captureBlockReason: string;
   hasEntries: boolean;
   onNavigate: (destination: LooLuDestination) => void;
-  onStartDraft: (text: string) => void;
+  onStartDraft: (text: string, kind?: 'Journal' | 'Story') => void;
+  dockEnabled: boolean;
+  entries: Entry[];
+  onSelectEntry: (entry: Entry) => void;
+  onDockNavigate: (view: 'home' | 'leaves' | 'stories' | 'library' | 'compose') => void;
   onQuickAction: (action: LuQuickAction) => void;
 };
 
-const destinations: { id: LooLuDestination; title: string; icon: typeof BookOpen }[] = [
-  { id: 'home', title: 'Home', icon: BookOpen },
-  { id: 'journal', title: 'Journal', icon: FileText },
-  { id: 'stories', title: 'Stories', icon: BookOpen },
-  { id: 'library', title: 'Library', icon: LibraryBig },
-  { id: 'reader', title: 'Reader', icon: BookOpen },
-  { id: 'write', title: 'Write', icon: PenLine },
-  { id: 'settings', title: 'Settings', icon: Compass },
-];
 
-export function LooLuGuide({ currentView, canLeaveCurrentView, hasEntries, onNavigate, onQuickAction }: Props) {
+export function LooLuGuide({ canLeaveCurrentView, canStartDraft, hasEntries, onNavigate, onStartDraft, onQuickAction, dockEnabled, entries, onSelectEntry, onDockNavigate }: Props) {
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState<'menu' | 'chat'>('menu');
-  function closeGuide() { setOpen(false); setPage('menu'); }
+  const [chatInitial, setChatInitial] = useState('');
+  function closeGuide() { setOpen(false); setPage('menu'); setChatInitial(''); }
   function quickAction(action: LuQuickAction) { closeGuide(); onQuickAction(action); }
 
-  return <div className="lulu-guide-root">
-    <LuOrb open={open} disabled={false} onOpen={() => { if (open) closeGuide(); else { setPage('menu'); setOpen(true); } }} onAction={quickAction} />
+  const orb = <LuOrb open={open} disabled={false} onOpen={() => { if (open) closeGuide(); else { setPage('menu'); setOpen(true); } }} onAction={quickAction} />;
+  return <div className={`lulu-guide-root${dockEnabled ? ' has-lu-dock' : ''}`}>
+    {dockEnabled ? <LuDock anchor={orb} onDismissGuide={closeGuide} entries={entries} onNavigate={onDockNavigate} onGuideNavigate={onNavigate} hasEntries={hasEntries} onSelect={onSelectEntry} onChat={text => {setChatInitial(text);setPage('chat');setOpen(true);}} onDraft={onStartDraft} canStartDraft={canStartDraft} onCapture={quickAction} /> : orb}
     {open && <section className={`lulu-guide-panel${page === 'chat' ? ' is-chat' : ''}`} role="dialog" aria-modal="false" aria-labelledby="lulu-guide-title">
       <header className="lulu-guide-header">
         {page === 'chat' ? <div className="lulu-guide-chat-heading"><button type="button" className="lulu-guide-close" aria-label="Back to Lu menu" onClick={() => setPage('menu')}><ArrowLeft size={18} /></button><div><span className="lulu-guide-kicker">YOUR LU GUIDE</span><h2 id="lulu-guide-title">Ask Lu</h2></div></div>
-          : <div><span className="lulu-guide-kicker">YOUR LU GUIDE</span><h2 id="lulu-guide-title">Where would you like to go?</h2></div>}
+          : <div><span className="lulu-guide-kicker">YOUR LU GUIDE</span><h2 id="lulu-guide-title">How can I help?</h2></div>}
         <button type="button" className="lulu-guide-close" aria-label="Close Lu" onClick={closeGuide}><X size={18} /></button>
       </header>
+      <div className="lulu-guide-content">
       {page === 'chat' ? <>
         <div className="lulu-guide-chat-modes" aria-label="Chat modes">
           <span className="is-active"><MessageCircle size={15} /> Text</span>
           <span aria-disabled="true"><Radio size={15} /> Live <small>Soon</small></span>
           <span aria-disabled="true"><Mic size={15} /> Voice note <small>Soon</small></span>
         </div>
-        <LuTextChat onLocalAction={action => { if (!canLeaveCurrentView) return; if (action.kind === 'navigate') onNavigate(action.destination); else onQuickAction(action.action); closeGuide(); }} />
+        <LuTextChat initialDraft={chatInitial} onLocalAction={action => { if (!canLeaveCurrentView) return; if (action.kind === 'navigate') onNavigate(action.destination); else onQuickAction(action.action); closeGuide(); }} />
       </> : <>
-        {!canLeaveCurrentView && <p className="lulu-guide-notice" role="status">Finish or leave this screen before navigating with Lu, so your work is not interrupted.</p>}
-        <section className="lulu-guide-quick-section" aria-labelledby="lulu-guide-navigation"><h3 id="lulu-guide-navigation">Navigation</h3>
-          <nav className="lulu-guide-destinations" aria-label="LuLu screens">{destinations.map(({ id, title, icon: Icon }) =>
-            <button key={id} type="button" className="lulu-guide-destination" aria-current={currentView === id ? 'page' : undefined} disabled={!canLeaveCurrentView || (id === 'reader' && !hasEntries)} onClick={() => { onNavigate(id); closeGuide(); }}>
-              <span className="lulu-guide-icon"><Icon size={17} aria-hidden="true" /></span><span className="lulu-guide-destination-copy"><strong>{title}</strong></span>
-            </button>)}</nav>
-        </section>
-        <section className="lulu-guide-quick-section" aria-labelledby="lulu-guide-actions"><h3 id="lulu-guide-actions">Actions</h3>
-          <div className="lulu-guide-destinations lulu-guide-action-tiles">
-            <button type="button" className="lulu-guide-destination" onClick={() => setPage('chat')}><span className="lulu-guide-icon"><MessageCircle size={17} /></span><span className="lulu-guide-destination-copy"><strong>Ask Lu</strong></span></button>
-            <button type="button" className="lulu-guide-destination" disabled={!canLeaveCurrentView} onClick={() => { onNavigate('write'); closeGuide(); }}><span className="lulu-guide-icon"><PenLine size={17} /></span><span className="lulu-guide-destination-copy"><strong>Start a draft</strong></span></button>
-          </div>
-        </section>
-        <details className="lulu-guide-group"><summary>Info <span>About Lu</span></summary><p className="lulu-guide-footer">Press and hold Lu for quick actions.</p><p className="lulu-guide-footer">Live voice and voice messages are coming later.</p></details>
+        <div className="lulu-guide-info-list" aria-label="How Lu can help">
+          <div className="lulu-guide-help"><strong>Ask Lu</strong><small>Ask a question about using LuLu. Review your message before sending it.</small></div>
+          <div className="lulu-guide-help"><strong>Capture a thought</strong><small>Dictate a thought and save it to your private space on this device.</small></div>
+          <div className="lulu-guide-help"><strong>Quick actions</strong><small>Press and hold Lu to open the capture wheel.</small></div>
+        </div>
       </>}
+      </div>
+      {page === 'menu' && <section className="lulu-guide-quick-section lulu-guide-pinned-actions" aria-labelledby="lulu-guide-actions"><h3 id="lulu-guide-actions">Actions</h3>
+          <div className="lulu-guide-destinations lulu-guide-action-tiles">
+            <button type="button" className="lulu-guide-destination" onClick={() => setPage('chat')}><span className="lulu-guide-icon"><MessageCircle size={17} /></span><span className="lulu-guide-destination-copy"><strong>Ask Lu</strong><small>Get help with LuLu</small></span></button>
+            <button type="button" className="lulu-guide-destination" onClick={() => quickAction('dictate')}><span className="lulu-guide-icon"><Mic size={17} /></span><span className="lulu-guide-destination-copy"><strong>Dictate</strong><small>Capture a thought</small></span></button>
+          </div>
+        </section>}
     </section>}
   </div>;
 }

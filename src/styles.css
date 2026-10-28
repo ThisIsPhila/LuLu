@@ -2752,10 +2752,20 @@ body {
 .judge-invite-card { max-width: 480px; border-radius: 20px; padding: 24px; background: #fff; color: #20221e; }
 .judge-invite-card button { padding: 10px 16px; border-radius: 20px; cursor: pointer; }
 
-.pull-refresh-indicator { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 40; width: max-content; margin: 0 auto; padding: 8px 14px; border-radius: 999px; color: #4d5948; background: #f4f0e7; box-shadow: 0 3px 12px #302c261a; font: 600 12px var(--font-heading, sans-serif); }
+.pull-refresh-indicator { position: fixed; top: calc(68px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 100; width: max-content; margin: 0; padding: 8px 14px; border-radius: 999px; color: #4d5948; background: #f4f0e7; box-shadow: 0 3px 12px #302c261a; font: 600 12px var(--font-heading, sans-serif); }
 
-.owner-account-activity { position:fixed; z-index:60; left:16px; bottom:calc(100px + env(safe-area-inset-bottom, 0px)); font: 14px var(--font-sans, sans-serif); }
-.owner-account-activity > button { border:1px solid #d5d1c6; border-radius:20px; background:#fffdf8; color:#252921; padding:10px 14px; box-shadow:0 4px 18px #0002; }
-.owner-account-activity section { position:absolute; bottom:50px; left:0; width:min(340px, calc(100vw - 32px)); max-height:50vh; overflow:auto; background:#fffdf8; border:1px solid #d5d1c6; border-radius:16px; padding:16px; box-shadow:0 8px 28px #0002; }
+.owner-account-activity { position:relative; margin:0; font: 14px var(--font-sans, sans-serif); }
+.owner-account-activity > button { width:100%; text-align:left; border:1px solid #e0d9cc; border-radius:18px; background:#f7f2e9; color:#252921; padding:18px; }
+.owner-account-activity section { margin-top:8px; background:#faf7f0; border:1px solid #e0d9cc; border-radius:16px; padding:16px; }
 .owner-account-activity ul { padding-left:18px; } .owner-account-activity li { margin:8px 0; overflow-wrap:anywhere; } .owner-account-activity time, .owner-account-activity small { display:block; color:#666; font-size:12px; }
 .owner-account-activity-live { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+
+.owner-account-activity .owner-notification-button { position:relative; width:40px; height:40px; display:grid; place-items:center; padding:0; border-radius:50%; }
+.owner-notification-badge { position:absolute; top:-5px; right:-5px; min-width:19px; height:19px; padding:0 4px; border-radius:10px; display:grid; place-items:center; background:#6d7f60; color:white; font-size:10px; line-height:1; }
+.owner-account-activity .owner-notification-panel { position:absolute; right:0; top:calc(100% + 10px); z-index:100; width:min(330px, calc(100vw - 32px)); max-height: min(60vh, 420px); overflow:auto; box-shadow:0 12px 30px #302b211c; }
+.owner-notification-panel p { margin:10px 0; }
+.owner-notification-panel ul { list-style:none; padding:0; }
+.owner-notification-panel li { border-top:1px solid #e0d9cc; padding:10px 0; }
+
+.owner-notification-toast { position:fixed; right:16px; bottom:100px; z-index:120; width:min(330px, calc(100vw - 32px)); display:flex; align-items:center; gap:10px; padding:14px; border:1px solid #e0d9cc; border-radius:16px; background:#faf7f0; box-shadow:0 12px 30px #302b211c; color:#252921; }
+.owner-notification-toast button { border:0; background:transparent; color:inherit; font-weight:600; cursor:pointer; }

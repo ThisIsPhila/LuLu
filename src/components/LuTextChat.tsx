@@ -1,19 +1,16 @@
 import { useState } from 'react';
 import { MessageCircle, Send, ShieldCheck } from 'lucide-react';
 import { sendLuChatMessage, scrubLuMessage } from '../services/luChat';
-import { LU_CHAT_MAX_INPUT_CHARACTERS, type LuChatLanguage, type LuScrubResult } from '../services/luChatContracts';
+import { LU_CHAT_MAX_INPUT_CHARACTERS, type LuScrubResult } from '../services/luChatContracts';
 import { labelLuAction, matchLuTextAction, validateScrubbedLuCommand, type LuTextAction } from '../services/privacy/luTextActions';
 import './LuTextChat.css';
 
 type Message = { role: 'you' | 'lu'; text: string };
 type Stage = 'compose' | 'review';
 
-const languageLabels: Record<LuChatLanguage, string> = { English: 'English', Afrikaans: 'Afrikaans', isiZulu: 'isiZulu' };
-
-export function LuTextChat({ onLocalAction }: { onLocalAction?: (action: LuTextAction) => void }) {
+export function LuTextChat({ onLocalAction, initialDraft = '' }: { onLocalAction?: (action: LuTextAction) => void; initialDraft?: string }) {
   const [localAction, setLocalAction] = useState<LuTextAction | null>(null);
-  const [language, setLanguage] = useState<LuChatLanguage>('English');
-  const [draft, setDraft] = useState('');
+  const [draft, setDraft] = useState(initialDraft);
   const [scrubConsent, setScrubConsent] = useState(false);
   const [scrubbed, setScrubbed] = useState<LuScrubResult | null>(null);
   const [reviewed, setReviewed] = useState(false);
@@ -51,7 +48,7 @@ export function LuTextChat({ onLocalAction }: { onLocalAction?: (action: LuTextA
     setBusy(true); setError(''); setStatus('Sending the reviewed scrubbed text to Lu…');
     const submitted = scrubbed.scrubbed;
     try {
-      const result = await sendLuChatMessage({ ticket: scrubbed.ticket, text: submitted, language });
+      const result = await sendLuChatMessage({ ticket: scrubbed.ticket, text: submitted, language: 'English' });
       setMessages(current => [...current, { role: 'you', text: submitted }, { role: 'lu', text: result.reply }]);
       setScrubbed(null); setReviewed(false); setStage('compose'); setDraft(''); setScrubConsent(false);
       setStatus('Reply received. Follow-up messages are scrubbed and reviewed separately; Lu may not see earlier turns.');
@@ -72,11 +69,6 @@ export function LuTextChat({ onLocalAction }: { onLocalAction?: (action: LuTextA
       <strong>Original text goes to the cloud scrubber.</strong>
       <span>Your original message goes to the cloud scrubber. Review its result before sending it to Lu; scrubbing can miss details.</span>
     </aside>
-
-    <label className="lu-text-chat-field-label" htmlFor="lu-chat-language">Reply language</label>
-    <select id="lu-chat-language" value={language} disabled={busy} onChange={event => setLanguage(event.target.value as LuChatLanguage)}>
-      {(Object.entries(languageLabels) as [LuChatLanguage, string][]).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-    </select>
 
 
     {messages.length > 0 && <div className="lu-text-chat-thread" aria-label="Chat messages" aria-live="polite">

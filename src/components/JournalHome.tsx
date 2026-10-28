@@ -15,6 +15,7 @@ import { OrdinaryEntryCard } from './OrdinaryEntryCard';
 
 type Props = {
   entries: Entry[];
+  notificationUid?: string;
   displayName: string;
   activeTab: string;
   onTabChange: (tab: string) => void;
@@ -26,10 +27,12 @@ type Props = {
   onOpenVault: () => void;
   onSignOut: () => void;
   onOpenSettings: () => void;
+  onNavigate: (view: 'home' | 'leaves' | 'stories' | 'library' | 'compose') => void;
 };
 
 export const JournalHome: React.FC<Props> = ({
   entries,
+  notificationUid,
   displayName,
   activeTab,
   onTabChange,
@@ -41,6 +44,7 @@ export const JournalHome: React.FC<Props> = ({
   onOpenVault,
   onSignOut,
   onOpenSettings,
+  onNavigate,
 }) => {
   const [searching, setSearching] = useState(false);
   const [query, setQuery] = useState('');
@@ -74,6 +78,9 @@ export const JournalHome: React.FC<Props> = ({
   return (
     <div className="stitch-journal-home">
       <OrdinaryNavigationHeader
+        notificationUid={notificationUid}
+        currentView="home"
+        onNavigate={onNavigate}
         protectedMode={protectedMode}
         searchExpanded={searching}
         onOpenVault={onOpenVault}
