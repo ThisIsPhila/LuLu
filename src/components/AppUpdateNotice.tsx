@@ -26,7 +26,7 @@ export function AppUpdateSettings() {
       if(response.data && typeof response.data==='object' && response.data.status==='none') {setMessage('LuLu is up to date.');return;}
       const next=parseUpdateManifest(response.data);
       if(!next)throw new Error('The update information could not be read.');
-      if(next.nativeVersion!==info.version){setMessage('A new native app build is needed for the latest update.');return;}
+      if(next.nativeVersion!==info.version){setMessage(compareUpdateVersions(next.nativeVersion,info.version)<0 ? 'LuLu is up to date.' : 'A new native app build is needed for the latest update.');return;}
       if(compareUpdateVersions(next.version,current.bundle.version)>0){setUpdate(next);setMessage(`Version ${next.version} is available.`);}
       else setMessage('LuLu is up to date.');
     } catch (error) {setMessage(error instanceof Error ? `${error.message} Please try again.` : 'Could not check for updates. Please try again.');}

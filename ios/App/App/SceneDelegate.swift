@@ -90,6 +90,29 @@ public final class LuDictationPlugin: CAPPlugin, CAPBridgedPlugin {
     @objc func cancel(_ call: CAPPluginCall) { DispatchQueue.main.async { self.clear(); call.resolve() } }
 }
 
+@objc(LuAppearancePlugin)
+public final class LuAppearancePlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "LuAppearancePlugin"
+    public let jsName = "LuAppearance"
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "getIcon", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "setIcon", returnType: CAPPluginReturnPromise)
+    ]
+    @objc func getIcon(_ call: CAPPluginCall) {
+        DispatchQueue.main.async { call.resolve(["name": UIApplication.shared.alternateIconName ?? "default", "supported": UIApplication.shared.supportsAlternateIcons]) }
+    }
+    @objc func setIcon(_ call: CAPPluginCall) {
+        let name = call.getString("name") ?? "default"
+        guard ["default", "LuLinen", "LuPaper", "LuLeafy"].contains(name) else { call.reject("Unknown app icon."); return }
+        DispatchQueue.main.async {
+            guard UIApplication.shared.supportsAlternateIcons else { call.reject("App icon selection is unavailable on this device."); return }
+            UIApplication.shared.setAlternateIconName(name == "default" ? nil : name) { error in
+                if let error = error { call.reject(error.localizedDescription) } else { call.resolve(["name": name]) }
+            }
+        }
+    }
+}
+
 final class LuBridgeViewController: CAPBridgeViewController {
-    override func capacitorDidLoad() { bridge?.registerPluginInstance(LuDictationPlugin()) }
+    override func capacitorDidLoad() { bridge?.registerPluginInstance(LuDictationPlugin()); bridge?.registerPluginInstance(LuAppearancePlugin()) }
 }

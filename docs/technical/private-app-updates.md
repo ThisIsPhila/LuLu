@@ -6,10 +6,10 @@ The app accepts only encrypted bundles verified using its embedded public key. T
 
 ## Prepare and publish a compatible update
 
-Use a higher three-part update version each time. The second argument is the exact installed native app version; check it for both platforms before targeting them. The current debug builds use `1.0`.
+Use a higher three-part update version each time. The second argument is the exact installed native app version; check it for both platforms before targeting them. The current iOS debug build uses `1.1`; check Android independently.
 
 ```sh
-npm run ota:publish -- 1.0.2 1.0
+npm run ota:publish -- 1.1.1 1.1
 ```
 
 The preparation command builds the app, creates a signed encrypted archive and a manifest in `public/updates/`. Commit the generated manifest and signed release archive with the release so later Hosting deployments retain them. The previous release must remain hosted until the new deployment is ready. The command rejects an existing local bundle with the same version. Only use this path for updates compatible with the installed native app; native code, permissions, plugins, the updater itself and its signing key require a new native build and installation. Test each update on a device before relying on it.

@@ -1,0 +1,2 @@
+.lulu-loading-screen { min-height:100dvh; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:12px; padding:40px 24px max(56px,env(safe-area-inset-bottom)); background-color:#d8c3a9; background-size:cover; background-position:center; color:white; font:15px var(--font-heading,sans-serif); }
+.lulu-loading-screen img { width:100px; height:auto; filter:drop-shadow(0 2px 5px #0005); } .lulu-loading-screen span { text-shadow:0 2px 5px #0009; }

@@ -6,6 +6,7 @@ import { ProfileAvatar } from './ProfileAvatar';
 import { prepareProfilePhoto } from '../services/profilePhoto';
 import { AccountLinkingPanel } from './AccountLinkingPanel';
 import { AppUpdateSettings } from './AppUpdateNotice';
+import { AppearanceChoices } from './AppearanceChoices';
 import './ProfileSettingsView.css';
 
 type Props = {
@@ -110,6 +111,7 @@ export function ProfileSettingsView({ preferences, displayName, onDisplayNameCha
           </div>
         </section>
 
+        <AppearanceChoices />
         <section className="profile-settings-section" aria-labelledby="appearance-heading">
           <h2 id="appearance-heading">Appearance</h2>
           <div className="profile-settings-card">

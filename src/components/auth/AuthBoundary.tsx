@@ -7,6 +7,7 @@ import { isNativePlatform } from '../../platform/runtime';
 import { localDevelopmentAvailable, localDevelopmentSession } from '../../services/localDevelopment';
 import { pendingJudgeInvitation } from '../../services/judgeInvite';
 import './auth.css';
+import { LoadingScreen } from '../LoadingScreen';
 const localPreviewSessionKey = 'lulu.local-preview.active';
 // Temporarily disabled at the owner's request; keep the journey and its drafts.
 const ONBOARDING_ENABLED = false;
@@ -132,7 +133,7 @@ export function AuthBoundary({children}: {children:(session:AppSession,onSignedO
     }
   }
   if(session) return children(session,()=>{if(localDevelopmentAvailable())sessionStorage.removeItem(localPreviewSessionKey);verified.current=null;setSession(null);});
-  if(restoring || (route==='journey' && !journeyReady))return <div className="auth-restore" role="status">Opening your LuLu journal…</div>;
+  if(restoring || (route==='journey' && !journeyReady))return <LoadingScreen />;
   if(sessionRestoreError)return <main className="auth-session-recovery" role="alert"><h1>We couldn’t confirm your session.</h1><p>{sessionRestoreError}</p><button type="button" onClick={()=>void retrySessionRestore()}>Retry connection</button><button type="button" onClick={()=>void signOutDuringRestore()}>Sign out on this device</button></main>;
   if(draftReadFailed && route==='journey')return <div className="auth-draft-recovery" role="alert">
     <h1>Your local draft could not be opened.</h1><p>{journeyError} The text stays on this device until you choose what to do.</p>
