@@ -71,17 +71,17 @@ export function ProfileSettingsView({ preferences, displayName, onDisplayNameCha
           <h2 id="account-heading">Account</h2>
           <div className="profile-settings-card">
             <div className="profile-settings-name">
-              <label htmlFor="profile-name" className="profile-settings-copy"><strong>Your name</strong><small>Used in your greeting and saved encrypted on this device.</small></label>
-              <input id="profile-name" value={nameDraft} maxLength={80} autoComplete="given-name" onChange={event => {setNameDraft(event.target.value);setNameStatus('');}} placeholder="Add your name" />
-              <button type="button" className="profile-save-button" disabled={savingName || nameDraft.trim() === displayName.trim()} onClick={() => void saveName()}>Save name</button>
-              <small className="profile-save-status" role="status">{nameStatus}</small>
-            </div>
-            <div className="profile-settings-name">
               <span className="profile-settings-copy"><strong>Profile photo</strong><small>Your Google photo is used when available. A photo you choose is saved encrypted on this device.</small></span>
               <span className="profile-photo-preview"><ProfileAvatar photoUrl={photoDraft || photoUrl} /></span>
               <label className="profile-photo-picker">Choose photo<input type="file" accept="image/*" onChange={event => {void choosePhoto(event.target.files?.[0]);event.currentTarget.value='';}} /></label>
               <button type="button" className="profile-save-button" disabled={savingPhoto || !photoDraft} onClick={() => void savePhoto()}>Save photo</button>
               <small className="profile-save-status" role="status">{photoStatus}</small>
+            </div>
+            <div className="profile-settings-name">
+              <label htmlFor="profile-name" className="profile-settings-copy"><strong>Your name</strong><small>Used in your greeting and saved encrypted on this device.</small></label>
+              <input id="profile-name" value={nameDraft} maxLength={80} autoComplete="given-name" onChange={event => {setNameDraft(event.target.value);setNameStatus('');}} placeholder="Add your name" />
+              <button type="button" className="profile-save-button" disabled={savingName || nameDraft.trim() === displayName.trim()} onClick={() => void saveName()}>Save name</button>
+              <small className="profile-save-status" role="status">{nameStatus || (displayName && nameDraft.trim() === displayName.trim() ? `Saved name: ${displayName}` : nameDraft.trim() !== displayName.trim() ? 'Unsaved changes' : 'No name saved yet')}</small>
             </div>
             <div className="profile-settings-row static-row">
               <span className="profile-settings-copy"><strong>Signed in to LuLu</strong><small>Your account is needed to open your journal.</small></span>
@@ -103,7 +103,7 @@ export function ProfileSettingsView({ preferences, displayName, onDisplayNameCha
               <span className="profile-settings-status">Account</span>
             </div>
             <button className="profile-settings-link" type="button" onClick={onOpenModelSettings}>
-              <span className="profile-settings-copy"><strong>Privacy processing</strong><small>Manage the local model and check whether reviewed-text cloud interpretation is available.</small></span>
+              <span className="profile-settings-copy"><strong>Privacy processing</strong><small>See how the demo detects details on this device and uses the cloud.</small></span>
               <ChevronRight size={18} aria-hidden="true" />
             </button>
             <p className="profile-settings-note">Readable exports and encrypted backups are prepared from a saved record. They are not automatic account backups.</p>

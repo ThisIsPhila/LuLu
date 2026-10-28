@@ -19,3 +19,8 @@
 .account-linking-status { color:#435744; background:#edf3ea; }
 .account-linking-error { color:#812f2b; background:#f9ece8; }
 @media(max-width:420px) { .account-linking-method { align-items:flex-start; flex-direction:column; } }
+
+.account-google-label { display:flex; align-items:center; gap:8px; }
+.account-linking-email-details { border:1px solid #e8e1d4; border-radius:14px; padding:12px 14px; }
+.account-linking-email-details summary { cursor:pointer; font-weight:700; color:#454b3f; }
+.account-linking-email-details[open] .account-linking-form { margin-top:14px; }

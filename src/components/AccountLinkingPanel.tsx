@@ -159,23 +159,23 @@ export function AccountLinkingPanel({uid,authMethod,emailVerificationStatus,isPr
   const canLink=canLinkAdditionalProvider(authMethod) && !busy;
   return <section className="account-linking" aria-labelledby="account-linking-title">
     <div className="account-linking-heading"><span>ACCOUNT ACCESS</span><h2 id="account-linking-title">Sign-in methods</h2><p>Add a way to sign in to this same account. First verify your passkey, then choose the Google account or enter your email and password.</p></div>
-    <div className="account-linking-method"><div><strong>Google</strong><span>{googleLinked ? (googleEmail ? `Linked: ${googleEmail}` : 'Linked to this account (email unavailable)') : 'Not linked'}</span></div>
+    <div className="account-linking-method"><div><strong className="account-google-label"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 48 48"><path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11c-.5 2.5-1.9 4.6-4 6v5h6.5c3.8-3.5 6.1-8.6 6.1-14.7z"/><path fill="#34A853" d="M24 44c5.4 0 9.9-1.8 13.2-4.8l-6.5-5c-1.8 1.2-4.1 1.9-6.7 1.9-5.2 0-9.6-3.5-11.2-8.2H6.1v5.1C9.4 39.6 16.2 44 24 44z"/><path fill="#FBBC05" d="M12.8 27.9a12 12 0 0 1 0-7.8V15H6.1a20 20 0 0 0 0 18z"/><path fill="#EA4335" d="M24 11.9c2.9 0 5.5 1 7.5 2.9l5.7-5.7C33.9 6 29.4 4 24 4 16.2 4 9.4 8.4 6.1 15l6.7 5.1c1.6-4.7 6-8.2 11.2-8.2z"/></svg> Google</strong><span>{googleLinked ? (googleEmail ? `Linked: ${googleEmail}` : 'Linked to this account (email unavailable)') : 'Not linked'}</span></div>
       {!googleLinked && !isNativePlatform() && <div className="account-linking-actions">{!googleReady
         ? <button type="button" disabled={!canLink} onClick={()=>void prepareGoogleLink()}>{busy?'Verifying…':'Verify to link Google'}</button>
         : <><button type="button" disabled={busy} onClick={()=>void finishGoogleLink()}>{busy?'Opening Google…':'Continue with Google'}</button><button type="button" disabled={busy} onClick={()=>void cancelGoogleLink()}>Cancel</button></>}</div>}
     </div>
     {!googleLinked && isNativePlatform() && <div className="account-linking-native-guide"><p className="account-linking-note">To link Google: open LuLu in your phone browser, sign in with this same passkey, open Settings, then choose Verify to link Google. After verification, choose Continue with Google and select your Google account.</p><button type="button" onClick={()=>void openWebAccountSettings()}>Open LuLu in phone browser</button></div>}
-    <div className="account-linking-method"><div><strong>Email and password</strong><span>{emailLinked?(emailVerified?'Linked · email verified':'Linked · email unverified'):'Not linked'}</span></div>
+    <div className="account-linking-method"><div><strong>Email and password</strong><span>{emailLinked?(emailVerified?'Linked · email verified':'Linked · email unverified'):'Not configured'}</span></div>
       {emailLinked && !emailVerified && <div className="account-linking-actions"><button type="button" disabled={busy} onClick={()=>void resendVerification()}>Resend verification</button><button type="button" disabled={busy} onClick={()=>void refreshVerification()}>Check status</button></div>}
     </div>
-    {!emailLinked && <form className="account-linking-form" onSubmit={event=>{event.preventDefault();void linkEmail();}}>
+    {!emailLinked && <details className="account-linking-email-details"><summary>Set up email and password</summary><form className="account-linking-form" onSubmit={event=>{event.preventDefault();void linkEmail();}}>
       <label>Email address<input type="email" autoComplete="email" value={email} onChange={event=>setEmail(event.target.value)} disabled={!canLink} required /></label>
       <label>Password<input type="password" autoComplete="new-password" value={password} onChange={event=>setPassword(event.target.value)} disabled={!canLink} minLength={6} required /></label>
       <button type="submit" disabled={!canLink}>{busy?'Verifying…':'Link email and password'}</button>
-    </form>}
+    </form></details>}
     {!canLinkAdditionalProvider(authMethod) && <p className="account-linking-note">Sign in with this account’s passkey to link another method. Linking requires fresh private verification.</p>}
     {status && <p className="account-linking-status" role="status">{status}</p>}
     {error && <p className="account-linking-error" role="alert">{error}</p>}
-    <p className="account-linking-note">Firebase verification messages confirm the email address only. LuLu has no configured transactional email service for welcome or security notifications.</p>
+    <p className="account-linking-note">Verification emails confirm the email address. Account activity notifications are sent separately to the LuLu team.</p>
   </section>;
 }
