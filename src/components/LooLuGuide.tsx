@@ -47,7 +47,7 @@ export function LooLuGuide({ canLeaveCurrentView, canStartDraft, hasEntries, onN
           <span aria-disabled="true"><Radio size={15} /> Live <small>Soon</small></span>
           <span aria-disabled="true"><Mic size={15} /> Voice note <small>Soon</small></span>
         </div>
-        <LuTextChat initialDraft={chatInitial} onLocalAction={action => { if (!canLeaveCurrentView) return; if (action.kind === 'navigate') onNavigate(action.destination); else onQuickAction(action.action); closeGuide(); }} />
+        <LuTextChat entries={entries} initialDraft={chatInitial} onLocalAction={action => { if (!canLeaveCurrentView) return; if (action.kind === 'navigate') onNavigate(action.destination); else onQuickAction(action.action); closeGuide(); }} />
       </> : <>
         <div className="lulu-guide-info-list" aria-label="How Lu can help">
           <div className="lulu-guide-help"><strong>Ask Lu</strong><small>Ask a question about using LuLu. Review your message before sending it.</small></div>

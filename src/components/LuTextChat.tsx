@@ -4,13 +4,18 @@ import { sendLuChatMessage, scrubLuMessage } from '../services/luChat';
 import { LU_CHAT_MAX_INPUT_CHARACTERS, type LuScrubResult } from '../services/luChatContracts';
 import { labelLuAction, matchLuTextAction, validateScrubbedLuCommand, type LuTextAction } from '../services/privacy/luTextActions';
 import './LuTextChat.css';
+import type { Entry } from '../domain/journal';
 
 type Message = { role: 'you' | 'lu'; text: string };
 type Stage = 'compose' | 'review';
 
-export function LuTextChat({ onLocalAction, initialDraft = '' }: { onLocalAction?: (action: LuTextAction) => void; initialDraft?: string }) {
+export function LuTextChat({ onLocalAction, initialDraft = '', entries = [] }: { onLocalAction?: (action: LuTextAction) => void; initialDraft?: string; entries?: Entry[] }) {
   const [localAction, setLocalAction] = useState<LuTextAction | null>(null);
   const [draft, setDraft] = useState(initialDraft);
+  const [entryId, setEntryId] = useState('');
+  const ordinaryEntries = entries.filter(entry => !entry.protected);
+  const selectedEntry = ordinaryEntries.find(entry => entry.id === entryId);
+  const textForScrubbing = selectedEntry ? `User message:\n${draft}\n\nSelected journal entry:\n${selectedEntry.title}\n${selectedEntry.body}` : draft;
   const [scrubConsent, setScrubConsent] = useState(false);
   const [scrubbed, setScrubbed] = useState<LuScrubResult | null>(null);
   const [reviewed, setReviewed] = useState(false);
@@ -33,7 +38,7 @@ export function LuTextChat({ onLocalAction, initialDraft = '' }: { onLocalAction
     clearReview();
     setBusy(true); setError(''); setStatus('Sending original text to LuLu’s cloud privacy scrubber…');
     try {
-      const result = await scrubLuMessage(draft);
+      const result = await scrubLuMessage(textForScrubbing);
       setScrubbed(result);
       setStage('review');
       setStatus('Review the scrubbed version. It has not been sent to Lu’s chat model.');
@@ -50,7 +55,7 @@ export function LuTextChat({ onLocalAction, initialDraft = '' }: { onLocalAction
     try {
       const result = await sendLuChatMessage({ ticket: scrubbed.ticket, text: submitted, language: 'English' });
       setMessages(current => [...current, { role: 'you', text: submitted }, { role: 'lu', text: result.reply }]);
-      setScrubbed(null); setReviewed(false); setStage('compose'); setDraft(''); setScrubConsent(false);
+      setScrubbed(null); setReviewed(false); setStage('compose'); setDraft(''); setEntryId(''); setScrubConsent(false);
       setStatus('Reply received. Follow-up messages are scrubbed and reviewed separately; Lu may not see earlier turns.');
     } catch (cause) {
       setScrubbed(null); setReviewed(false); setStage('compose'); setScrubConsent(false);
@@ -80,8 +85,11 @@ export function LuTextChat({ onLocalAction, initialDraft = '' }: { onLocalAction
     {stage === 'compose' ? <>
       <label className="lu-text-chat-field-label" htmlFor="lu-chat-message">Your message</label>
       <textarea id="lu-chat-message" rows={4} maxLength={LU_CHAT_MAX_INPUT_CHARACTERS} value={draft} disabled={busy} onChange={event => { setDraft(event.target.value); setLocalAction(null); setScrubConsent(false); setError(''); setStatus(''); }} placeholder="How do I find my saved stories?" />
-      <label className="lu-text-chat-confirm"><input type="checkbox" checked={scrubConsent} disabled={busy} onChange={event => setScrubConsent(event.target.checked)} /> I understand my original message will be sent to LuLu’s cloud privacy-scrubbing service.</label>
-      <div className="lu-text-chat-compose-footer">{onLocalAction && <button type="button" className="is-secondary" disabled={busy || !draft.trim()} onClick={() => { const safe = validateScrubbedLuCommand(draft); const action = safe ? matchLuTextAction(safe) : null; setLocalAction(action); setStatus(action ? 'Found an action on this device.' : 'No matching app action found. Use a short command without personal details.'); }}>Find app action</button>}<small>{draft.length.toLocaleString()} / {LU_CHAT_MAX_INPUT_CHARACTERS.toLocaleString()}</small><button type="button" disabled={busy || !draft.trim() || !scrubConsent} onClick={() => void prepareMessage()}><ShieldCheck size={15} aria-hidden="true" /> Scrub and review</button></div>
+      {ordinaryEntries.length > 0 && <label className="lu-text-chat-field-label">Include an ordinary entry (optional)<select value={entryId} disabled={busy} onChange={event => {setEntryId(event.target.value);setScrubConsent(false);}}><option value="">No entry</option>{ordinaryEntries.map(entry => <option key={entry.id} value={entry.id}>{entry.title || 'Untitled entry'}</option>)}</select></label>}
+      {selectedEntry && <small>The selected ordinary entry and your message will go to the cloud privacy scrubber. Private entries are not available here.</small>}
+      {textForScrubbing.length > LU_CHAT_MAX_INPUT_CHARACTERS && <p className="lu-text-chat-error">Your message and selected entry exceed the 4,000 character limit. Choose a shorter entry or send only your message.</p>}
+      <label className="lu-text-chat-confirm"><input type="checkbox" checked={scrubConsent} disabled={busy} onChange={event => setScrubConsent(event.target.checked)} /> I understand my message and any selected entry will be sent to LuLu’s cloud privacy-scrubbing service.</label>
+      <div className="lu-text-chat-compose-footer">{onLocalAction && <button type="button" className="is-secondary" disabled={busy || !draft.trim()} onClick={() => { const safe = validateScrubbedLuCommand(draft); const action = safe ? matchLuTextAction(safe) : null; setLocalAction(action); setStatus(action ? 'Found an action on this device.' : 'No matching app action found. Use a short command without personal details.'); }}>Find app action</button>}<small>{draft.length.toLocaleString()} / {LU_CHAT_MAX_INPUT_CHARACTERS.toLocaleString()}</small><button type="button" disabled={busy || !draft.trim() || !scrubConsent || textForScrubbing.length > LU_CHAT_MAX_INPUT_CHARACTERS} onClick={() => void prepareMessage()}><ShieldCheck size={15} aria-hidden="true" /> Scrub and review</button></div>
     </> : scrubbed && <div className="lu-text-chat-review">
       <span className="lu-text-chat-field-label">Review text before it goes to the chat model</span>
       <div className="lu-text-chat-scrubbed" aria-label="Scrubbed message from the privacy service">{scrubbed.scrubbed}</div>
