@@ -27,3 +27,5 @@
 .lu-text-chat-status { color: #605a4d; }
 .lu-text-chat-error { color: #8a3c34; }
 .lu-text-chat-footnote { margin: 10px 0 0; color: #777061; font-size: 9px; line-height: 1.4; }
+
+.lu-text-chat-message mark { padding: 1px 4px; border-radius: 5px; background: #f6ddad; color: inherit; }

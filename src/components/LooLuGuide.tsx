@@ -51,7 +51,7 @@ export function LooLuGuide({ canLeaveCurrentView, canStartDraft, hasEntries, onN
         <LuTextChat entries={entries} initialDraft={chatInitial} onLocalAction={action => { if (!canLeaveCurrentView) return; if (action.kind === 'navigate') onNavigate(action.destination); else onQuickAction(action.action); closeGuide(); }} />
       </> : <>
         <div className="lulu-guide-info-list" aria-label="How Lu can help">
-          <div className="lulu-guide-help"><strong>Ask Lu</strong><small>Ask a question about using LuLu. Review your message before sending it.</small></div>
+          <div className="lulu-guide-help"><strong>Ask Lu</strong><small>Ask a question about using LuLu. Your message is privacy processed before Lu receives it.</small></div>
           <div className="lulu-guide-help"><strong>Capture a thought</strong><small>Dictate a thought and save it to your private space on this device.</small></div>
           <div className="lulu-guide-help"><strong>Quick actions</strong><small>Press and hold Lu to open the capture wheel.</small></div>
         </div>

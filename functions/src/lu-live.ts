@@ -5,7 +5,7 @@ export async function createLuLiveSession(apiKey:string, offer:string, fetcher:F
   if(!apiKey || typeof offer!=='string' || offer.length<1 || offer.length>20000) throw new Error('Invalid voice session request.');
   const response=await fetcher('https://api.openai.com/v1/live/sessions',{
     method:'POST',headers:{Authorization:`Bearer ${apiKey}`,'Content-Type':'application/json'},signal:AbortSignal.timeout(20_000),
-    body:JSON.stringify({session:{model:'gpt-live-1',instructions:'You are Lu, a friendly guide to the LuLu app. Be concise. Do not claim to have performed an action unless a connected app tool confirms it.'},transport:{type:'webrtc',sdp:offer}}),
+    body:JSON.stringify({session:{model:'gpt-live-1',instructions:'You are Lu, the friendly voice guide for LuLu, a personal journal and story app. Home shows recent writing and quick actions. Journal contains entries; Stories contains stories; Library brings writing, notes and tasks together; Write starts a new entry; Settings contains account, privacy, language and appearance options. Be concise and respond naturally in the user’s language when possible. You cannot access journal contents or operate the app in this voice session. Do not search for unavailable tools or claim to navigate, create or save anything. Explain the relevant steps and ask the user to use the app controls. Private writing is not provided to you.'},transport:{type:'webrtc',sdp:offer}}),
   });
   if(!response.ok) throw new Error('The voice session could not start.');
   const result=await response.json() as {session?:{id?:unknown};transport?:{type?:unknown;sdp?:unknown}};
