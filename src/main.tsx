@@ -8,7 +8,9 @@ import './fonts.css';
 import './styles.css';
 import './app-layout.css';
 import './privacy-demo.css';
+import { LoadingScreen } from './components/LoadingScreen';
 
+document.documentElement.dataset.luluPlatform = Capacitor.getPlatform();
 if (Capacitor.isNativePlatform()) void CapacitorUpdater.notifyAppReady();
 registerOfflineShell();
 captureJudgeInvitation();
@@ -18,7 +20,7 @@ const App = React.lazy(() => import('./App'));
 const PrivacyDemoEntry = React.lazy(() => import('./components/PrivacyDemoEntry').then(module => ({ default: module.PrivacyDemoEntry })));
 const NativeAuthBridge = React.lazy(() => import('./platform/NativeAuthBridge').then(module => ({ default: module.NativeAuthBridge })));
 createRoot(document.getElementById('root')!).render(
-  <StrictMode><Suspense fallback={<main className="privacy-demo-page"><p role="status">Loading LuLu…</p></main>}>
+  <StrictMode><Suspense fallback={<LoadingScreen />}>
     {route === '/native-auth-bridge' ? <NativeAuthBridge /> : route === '/privacy-demo' && localPrivacyDemo ? <PrivacyDemoEntry /> : <App />}
   </Suspense></StrictMode>,
 );

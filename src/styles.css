@@ -2770,3 +2770,9 @@ body {
 .owner-notification-toast { position:fixed; right:16px; bottom:100px; z-index:120; width:min(330px, calc(100vw - 32px)); display:flex; align-items:center; gap:10px; padding:14px; border:1px solid #e0d9cc; border-radius:16px; background:#faf7f0; box-shadow:0 12px 30px #302b211c; color:#252921; }
 .owner-notification-toast button { border:0; background:transparent; color:inherit; font-weight:600; cursor:pointer; }
 .user-avatar-circle .profile-avatar-image { width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; }
+
+/* iOS WebKit zooms into editable controls smaller than 16px. Keep controls
+   readable without disabling the user's pinch-to-zoom accessibility gesture. */
+html[data-lulu-platform="ios"] :is(input, textarea, select) { font-size: max(16px, 1em) !important; }
+html[data-lulu-platform="ios"], html[data-lulu-platform="ios"] body, html[data-lulu-platform="ios"] #root { max-width:100%; overflow-x:clip; }
+html[data-lulu-platform="ios"] .lulu-app-root, html[data-lulu-platform="ios"] .lulu-viewport-shell { min-width:0; max-width:100%; }
