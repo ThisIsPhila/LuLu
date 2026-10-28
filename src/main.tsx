@@ -2,11 +2,14 @@ import React, { StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import { registerOfflineShell } from './offline/registerOfflineShell';
 import { captureJudgeInvitation } from './services/judgeInvite';
+import { Capacitor } from '@capacitor/core';
+import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import './fonts.css';
 import './styles.css';
 import './app-layout.css';
 import './privacy-demo.css';
 
+if (Capacitor.isNativePlatform()) void CapacitorUpdater.notifyAppReady();
 registerOfflineShell();
 captureJudgeInvitation();
 const route = window.location.pathname.replace(/\/$/, '');

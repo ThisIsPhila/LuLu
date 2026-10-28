@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { ArrowLeft, ChevronRight, LogOut, ShieldCheck, Type } from 'lucide-react';
 import type { AppPreferences } from '../services/appPreferences';
 import { ProfileAvatar } from './ProfileAvatar';
@@ -100,6 +101,8 @@ export function ProfileSettingsView({ preferences, displayName, onDisplayNameCha
             </div>
           </div>
         </section>
+
+        {Capacitor.isNativePlatform() && <section className="profile-settings-section"><h2>App updates</h2><div className="profile-settings-card"><button className="profile-settings-link" type="button" onClick={() => window.dispatchEvent(new Event('lulu:check-update'))}><span className="profile-settings-copy"><strong>Check for updates</strong><small>Download available LuLu updates over the air.</small></span><ChevronRight size={18} aria-hidden="true" /></button></div></section>}
 
         <section className="profile-settings-section" aria-labelledby="privacy-heading">
           <h2 id="privacy-heading">Privacy & storage</h2>

@@ -1,3 +1,4 @@
+import { AppUpdateNotice } from './components/AppUpdateNotice';
 import React, { useState, useEffect, useRef, useMemo, useLayoutEffect, Suspense } from 'react';
 import { CircleAlert, X } from 'lucide-react';
 import type { Entry } from './domain/journal';
@@ -462,6 +463,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
 
   return (
     <div className={`lulu-app-root ${currentView === 'vault' ? 'vault-dark-mode' : ''} ${currentView === 'settings' || currentView === 'model-settings' || currentView === 'privacy-demo' ? 'privacy-wide' : ''}`}>
+      <AppUpdateNotice />
       {showJudgeInvite && <section className="judge-invite-overlay" role="dialog" aria-modal="true" aria-labelledby="judge-invite-title">
         <div className="judge-invite-card"><h2 id="judge-invite-title">Judge invitation</h2>
         <p>This shared link is for judges. Sign in or create your own account to link judge access.</p>

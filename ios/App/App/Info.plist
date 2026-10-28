@@ -9,7 +9,7 @@
   <key>NSSpeechRecognitionUsageDescription</key>
   <string>LuLu uses on-device speech recognition when you choose to dictate a private thought.</string>
   <key>NSMicrophoneUsageDescription</key>
-  <string>LuLu uses the microphone only when you choose to record or dictate a private thought.</string>
+  <string>LuLu uses the microphone when you choose to record, dictate, or start a live voice conversation.</string>
   <key>CFBundleURLTypes</key>
   <array>
     <dict>
