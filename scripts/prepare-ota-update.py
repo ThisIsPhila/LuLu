@@ -7,6 +7,11 @@ if len(sys.argv)!=3 or not re.fullmatch(r'\d+\.\d+\.\d+',sys.argv[1]) or not re.
 version,native=sys.argv[1:]
 key=pathlib.Path.home()/'.config/lulu-updates/private.pem'
 if not key.is_file(): raise SystemExit('The LuLu update signing key is missing.')
+key_info=subprocess.run(['openssl','rsa','-in',str(key),'-noout','-text'],check=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True).stdout
+if not key_info.startswith('Private-Key: (2048 bit'):
+    raise SystemExit('The installed updater requires a 2048-bit RSA signing key.')
+pub=subprocess.run(['openssl','rsa','-in',str(key),'-RSAPublicKey_out'],check=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE).stdout
+if pub != (root/'ota-public.pem').read_bytes(): raise SystemExit('The signing key does not match the app public key.')
 subprocess.run(['npm','run','build:app'],cwd=root,check=True)
 with tempfile.TemporaryDirectory(prefix='lulu-ota-') as tmp:
     archive=str(pathlib.Path(tmp)/'bundle.zip')
