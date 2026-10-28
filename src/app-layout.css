@@ -376,3 +376,10 @@ body { background: var(--bg); }
 
 @media (max-width: 799px) { .ordinary-mobile-menu, .ordinary-header-search, .ordinary-desktop-account { display:none; } }
 @media (min-width: 800px) { .ordinary-mobile-profile { display:none; } }
+
+/* A quiet paper texture for the journal writing surface. */
+.composer-input-dock .original-entry-card {
+  background-color: #fffdf8;
+  background-image: radial-gradient(circle, rgba(113, 110, 91, .16) .7px, transparent .8px);
+  background-size: 15px 15px;
+}
