@@ -5,6 +5,10 @@ root=pathlib.Path(__file__).resolve().parent.parent
 if len(sys.argv)!=3 or not re.fullmatch(r'\d+\.\d+\.\d+',sys.argv[1]) or not re.fullmatch(r'\d+(?:\.\d+){1,2}',sys.argv[2]):
     raise SystemExit('Usage: python3 scripts/prepare-ota-update.py <update-version, e.g. 1.0.1> <native-version, e.g. 1.0>')
 version,native=sys.argv[1:]
+def version_parts(value):
+    return tuple(map(int, (value.split('.') + ['0', '0'])[:3]))
+if version_parts(version) <= version_parts(native):
+    raise SystemExit('Update version must be greater than the native app version so a fresh install can receive it.')
 key=pathlib.Path.home()/'.config/lulu-updates/private.pem'
 if not key.is_file(): raise SystemExit('The LuLu update signing key is missing.')
 key_info=subprocess.run(['openssl','rsa','-in',str(key),'-noout','-text'],check=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True).stdout
