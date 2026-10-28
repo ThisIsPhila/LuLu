@@ -3,6 +3,7 @@ import { AudioLines, Camera, ImagePlus, Mic, BookOpen } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import './LuOrb.css';
 import { LuEyes } from './LuEyes';
+import { nativeHaptic } from '../services/nativeHaptic';
 
 export type LuQuickAction = 'dictate' | 'record' | 'camera' | 'upload' | 'private-content';
 
@@ -98,7 +99,7 @@ export function LuOrb({ open, disabled, onOpen, onLive, onAction }: Props) {
     clearTimer(); held.current = false; moved.current = false;
     start.current = { x: event.clientX, y: event.clientY };
     event.currentTarget.setPointerCapture(event.pointerId);
-    timer.current = setTimeout(() => { held.current = true; openWheel(start.current.x, start.current.y); }, 450);
+    timer.current = setTimeout(() => { held.current = true; void nativeHaptic(); openWheel(start.current.x, start.current.y); }, 450);
   }
   function pointerMove(event: ReactPointerEvent<HTMLButtonElement>) {
     if (Math.hypot(event.clientX - start.current.x, event.clientY - start.current.y) > 12) moved.current = true;

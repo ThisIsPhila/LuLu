@@ -225,6 +225,7 @@ public final class NativeRefreshPlugin: CAPPlugin, CAPBridgedPlugin {
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "setEnabled", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "end", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "haptic", returnType: CAPPluginReturnPromise),
     ]
 
     private var refreshControl: UIRefreshControl?
@@ -238,6 +239,15 @@ public final class NativeRefreshPlugin: CAPPlugin, CAPBridgedPlugin {
     private var pullSoundPlayed = false
     private var pullGestureActive = false
     private let refreshSoundVolume: Float = 0.35
+
+    @objc func haptic(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            let feedback = UIImpactFeedbackGenerator(style: .medium)
+            feedback.prepare()
+            feedback.impactOccurred()
+            call.resolve()
+        }
+    }
 
     @objc override public func load() {
         guard let scrollView = webView?.scrollView else { return }

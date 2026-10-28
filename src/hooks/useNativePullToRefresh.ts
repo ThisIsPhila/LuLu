@@ -4,6 +4,7 @@ import { Capacitor, registerPlugin, type PluginListenerHandle } from '@capacitor
 interface NativeRefreshPlugin {
   setEnabled(options: {enabled: boolean}): Promise<void>;
   end(): Promise<void>;
+  haptic(): Promise<void>;
   addListener(event: 'refresh', listener: () => void): Promise<PluginListenerHandle>;
   addListener(event: 'progress', listener: (value: {distance:number;refreshing:boolean}) => void): Promise<PluginListenerHandle>;
 }
