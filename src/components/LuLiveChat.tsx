@@ -1,5 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
 import {request} from '../services/backend/request';
+import {LuActivity} from './LuActivity';
 
 type Bubble = {speaker: 'You' | 'Lu'; text: string};
 type LiveAnswer = {sessionId: string; answer: string};
@@ -61,7 +62,7 @@ export function LuLiveChat() {
   }
   return <section className="lu-live-chat" aria-label="Live conversation with Lu">
     <p>For this cloud demo, your voice goes directly to the live AI service and may contain personal details. Private journal entries are not sent.</p>
-    <p role="status">{status}</p>
+    {busy ? <LuActivity state="connecting" label={status} /> : connected && status === 'Listening' ? <LuActivity state="listening" label={status} /> : <p role="status">{status}</p>}
     <audio ref={audio} controls autoPlay aria-label="Lu voice playback" />
     <div className="lu-text-chat-thread" aria-label="Conversation" aria-live="polite">{bubbles.map((bubble,index)=><article className={`lu-text-chat-message ${bubble.speaker==='You'?'is-you':'is-lu'}`} key={index}><small>{bubble.speaker}</small><p>{bubble.text}</p></article>)}</div>
     {connected || busy ? <button type="button" onClick={() => {close();setStatus('Conversation ended.');}}>End conversation</button> : <button type="button" onClick={() => void start()}>Start voice conversation</button>}

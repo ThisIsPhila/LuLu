@@ -4,6 +4,7 @@ import { sendLuChatMessage, scrubLuMessage } from '../services/luChat';
 import { LU_CHAT_MAX_INPUT_CHARACTERS, type LuScrubResult } from '../services/luChatContracts';
 import { labelLuAction, matchLuTextAction, validateScrubbedLuCommand, type LuTextAction } from '../services/privacy/luTextActions';
 import './LuTextChat.css';
+import { LuActivity } from './LuActivity';
 import type { Entry } from '../domain/journal';
 
 type Message = { role: 'you' | 'lu'; text: string };
@@ -22,6 +23,7 @@ export function LuTextChat({ onLocalAction, initialDraft = '', entries = [] }: {
   const [stage, setStage] = useState<Stage>('compose');
   const [messages, setMessages] = useState<Message[]>([]);
   const [busy, setBusy] = useState(false);
+  const [activity, setActivity] = useState<'scrubbing' | 'replying' | null>(null);
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
 
@@ -36,21 +38,22 @@ export function LuTextChat({ onLocalAction, initialDraft = '', entries = [] }: {
   async function prepareMessage() {
     if (!draft.trim() || !scrubConsent || busy) return;
     clearReview();
-    setBusy(true); setError(''); setStatus('Sending original text to LuLu’s cloud privacy scrubber…');
+    setActivity('scrubbing'); setBusy(true); setError(''); setStatus('Sending original text to LuLu’s cloud privacy scrubber…');
     try {
       const result = await scrubLuMessage(textForScrubbing);
       setScrubbed(result);
       setStage('review');
       setStatus('Review the scrubbed version. It has not been sent to Lu’s chat model.');
     } catch (cause) {
+      setStatus('');
       setError(cause instanceof Error ? cause.message : 'The text could not be scrubbed. It was not sent to chat.');
       setStatus('');
-    } finally { setBusy(false); }
+    } finally { setBusy(false); setActivity(null); }
   }
 
   async function sendReviewedMessage() {
     if (!scrubbed || !reviewed || busy) return;
-    setBusy(true); setError(''); setStatus('Sending the reviewed scrubbed text to Lu…');
+    setActivity('replying'); setBusy(true); setError(''); setStatus('Sending the reviewed scrubbed text to Lu…');
     const submitted = scrubbed.scrubbed;
     try {
       const result = await sendLuChatMessage({ ticket: scrubbed.ticket, text: submitted, language: 'English' });
@@ -58,10 +61,10 @@ export function LuTextChat({ onLocalAction, initialDraft = '', entries = [] }: {
       setScrubbed(null); setReviewed(false); setStage('compose'); setDraft(''); setEntryId(''); setScrubConsent(false);
       setStatus('Reply received. Follow-up messages are scrubbed and reviewed separately; Lu may not see earlier turns.');
     } catch (cause) {
-      setScrubbed(null); setReviewed(false); setStage('compose'); setScrubConsent(false);
+      setScrubbed(null); setReviewed(false); setStage('compose'); setScrubConsent(false); setStatus('');
       setError(`${cause instanceof Error ? cause.message : 'Lu could not return a reply.'} Please scrub and review the message again before retrying.`);
       setStatus('');
-    } finally { setBusy(false); }
+    } finally { setBusy(false); setActivity(null); }
   }
 
   return <section className="lu-text-chat" aria-labelledby="lu-text-chat-title">
@@ -98,7 +101,7 @@ export function LuTextChat({ onLocalAction, initialDraft = '', entries = [] }: {
     </div>}
 
     {localAction && onLocalAction && <button type="button" onClick={() => onLocalAction(localAction)}>{labelLuAction(localAction)}</button>}
-    {status && <p className="lu-text-chat-status" role="status">{status}</p>}
+    {activity ? <LuActivity state={activity === 'scrubbing' ? 'working' : 'composing'} label={activity === 'scrubbing' ? 'Preparing your text for review…' : 'Lu is preparing a reply…'} /> : status && <p className="lu-text-chat-status" role="status">{status}</p>}
     {error && <p className="lu-text-chat-error" role="alert">{error}</p>}
     <details className="lu-text-chat-footnote"><summary>About this chat</summary><p>Chat history is not saved or added to your journal. Each message is reviewed separately and Lu may not see earlier turns. Replies can be wrong; this is not counselling, diagnosis, or an emergency service. Language quality may vary.</p></details>
   </section>;

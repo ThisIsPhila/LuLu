@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } f
 import { AudioLines, Camera, ImagePlus, Mic, BookOpen } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import './LuOrb.css';
+import { LuEyes } from './LuEyes';
 
 export type LuQuickAction = 'dictate' | 'record' | 'camera' | 'upload' | 'private-content';
 
@@ -111,12 +112,12 @@ export function LuOrb({ open, disabled, onOpen, onLive, onAction }: Props) {
       onContextMenu={event => event.preventDefault()}
       onDoubleClick={event => { event.preventDefault(); onLive(); }}
       onClick={() => { if (held.current) { held.current = false; return; } onOpen(); }}>
-      <span className="lu-orb-sphere" aria-hidden="true" /><img className="lu-orb-mark" src="/media/brand/lu-mark-white.png" alt="" draggable={false} />
+      <span className="lu-orb-sphere" aria-hidden="true" /><LuEyes />
     </button>
     <button type="button" className="lu-orb-keyboard-actions" onClick={() => openWheel(window.innerWidth / 2, window.innerHeight / 2)}>Open Lu quick actions</button>
     {wheel && createPortal(<div className="lu-wheel-overlay" onContextMenu={event => event.preventDefault()} onPointerDown={event => { if (event.target === event.currentTarget) setWheel(false); }}>
       <div className="lu-wheel" role="dialog" aria-label="Lu quick actions" style={{ left: center.x, top: center.y }}>
-        <div className="lu-wheel-rings" aria-hidden="true" /><span className="lu-wheel-orb lu-orb-sphere" aria-hidden="true" /><img className="lu-wheel-mark" src="/media/brand/lu-mark-white.png" alt="" draggable={false} />
+        <div className="lu-wheel-rings" aria-hidden="true" /><span className="lu-wheel-orb lu-orb-sphere" aria-hidden="true" /><LuEyes wheel />
         {actions.map(({ id, label, icon: Icon }, index) => {
           const angle = -Math.PI / 2 + index * 2 * Math.PI / actions.length;
           return <button key={id} type="button" disabled={disabled}

@@ -18,3 +18,12 @@
 .lu-wheel-hint { position: absolute; left: -100px; top: 139px; width: 200px; color: #fffdf7; text-align: center; font: 12px/1.4 var(--font-sans, sans-serif); text-shadow: 0 1px 5px #4a463c; }
 .lu-wheel-close { position: absolute; left: -28px; top: 163px; width: 56px; min-height: 36px; border: 0; border-radius: 999px; background: #faf5eb; color: #514f43; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) { .lu-orb-launcher .lu-orb-sphere, .lu-wheel-action { transition: none; } }
+
+.lu-orb-eyes { position:absolute; display:flex; align-items:center; justify-content:center; gap:7px; transform:translateY(-1px); pointer-events:none; }
+.lu-orb-eyes > span { display:block; width:5px; height:8px; border-radius:999px; background:linear-gradient(135deg,#fff,#e9e9d9); box-shadow:0 1px 3px #4a4c3a80; animation:lu-eyes-blink 3.6s ease-in-out infinite; }
+.lu-orb-eyes > span + span { animation-delay:60ms; }
+.lu-orb-eyes-wheel { left:-24px; top:-8px; width:48px; gap:14px; }
+.lu-orb-eyes-wheel > span { width:9px; height:15px; }
+@keyframes lu-eyes-blink { 0%,88%,100% { transform:scaleY(1); } 93%,97% { transform:scaleY(.07); } }
+@media (prefers-reduced-motion: reduce) { .lu-orb-eyes > span { animation:none; } }
+:root[data-lulu-reduce-motion="true"] .lu-orb-eyes > span { animation:none !important; }
