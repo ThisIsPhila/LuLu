@@ -383,3 +383,11 @@ body { background: var(--bg); }
   background-image: radial-gradient(circle, rgba(113, 110, 91, .16) .7px, transparent .8px);
   background-size: 15px 15px;
 }
+
+/* On iPhone, let WKWebView's document scroll view own ordinary-page pulls.
+   The native refresh control observes that scroll view, not nested CSS scrollers. */
+html[data-lulu-platform="ios"] .lulu-viewport-shell.ordinary-navigation-shell { height:auto; min-height:100dvh; overflow:visible; }
+html[data-lulu-platform="ios"] .ordinary-navigation-shell .stitch-journal-home,
+html[data-lulu-platform="ios"] .ordinary-navigation-shell .stitch-main-stream,
+html[data-lulu-platform="ios"] .ordinary-navigation-shell .story-leaves-screen { min-height:0; overflow:visible; overscroll-behavior-y:auto; }
+html[data-lulu-platform="ios"] .ordinary-navigation-header { position:sticky; top:0; z-index:60; }
