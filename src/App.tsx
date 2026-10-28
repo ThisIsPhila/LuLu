@@ -74,7 +74,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   const [watchAttempt, setWatchAttempt] = useState(0);
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
   const [composingKind, setComposingKind] = useState<Entry['kind']>('Journal');
-  const [looLuDraft, setLooLuDraft] = useState<{ text: string; nonce: string } | null>(null);
+  const [looLuDraft, setLooLuDraft] = useState<{ text: string; title: string; nonce: string } | null>(null);
   const [quickCapture, setQuickCapture] = useState<Exclude<LuQuickAction, 'private-content'> | null>(null);
   const signingOut = useRef(false);
   const [entities, setEntities] = useState<Entity[]>([]);
@@ -356,13 +356,13 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     else if (destination === 'support') navigatePrivate('vault');
   }
 
-  function handleLooLuStartDraft(text: string, kind: 'Journal' | 'Story' = 'Journal') {
+  function handleLooLuStartDraft(text: string, kind: 'Journal' | 'Story' = 'Journal', title = '') {
     if (protectedMode || !guideMayLeave(currentViewRef.current) || !text.trim()) return;
     const source = currentViewRef.current;
     editorReturnView.current = source === 'home' || source === 'leaves' || source === 'stories' || source === 'library' ? source : 'home';
     const nonce = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     setComposingKind(kind); setEditingEntry(null); setSelectedEntry(null);
-    setLooLuDraft({ text, nonce }); setCurrentView('compose');
+    setLooLuDraft({ text, title, nonce }); setCurrentView('compose');
   }
 
   function handleOrdinaryNavigate(view: 'home' | 'leaves' | 'stories' | 'library' | 'compose') {
@@ -584,6 +584,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
             editingEntry={editingEntry ?? undefined}
             initialKind={composingKind}
             initialDraft={!protectedMode ? looLuDraft?.text : undefined}
+            initialDraftTitle={!protectedMode ? looLuDraft?.title : undefined}
             onBack={() => {setLooLuDraft(null);setCurrentView(editorReturnView.current);}}
             onSaveProtected={handleSaveProtectedEntry}
             onDeleteOrdinary={handleDeleteOrdinaryEntry}

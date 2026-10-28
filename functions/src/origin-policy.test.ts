@@ -25,6 +25,7 @@ test('native apps can reach privacy endpoints without opening them to unrelated 
   for (const origin of ['capacitor://localhost', 'https://localhost']) {
     assert.equal(isAllowedApiOrigin(origin, '/privacy/capability'), true);
     assert.equal(isAllowedApiOrigin(origin, '/privacy/understand'), true);
+    assert.equal(isAllowedApiOrigin(origin, '/lu/live/action'), true);
   }
   assert.equal(isAllowedApiOrigin('https://untrusted.example', '/privacy/capability'), false);
   assert.equal(isAllowedApiOrigin('https://untrusted.example', '/privacy/understand'), false);

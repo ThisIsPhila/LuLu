@@ -32,6 +32,7 @@ type Props = {
   editingEntry?: Entry;
   initialKind?: Entry['kind'];
   initialDraft?: string;
+  initialDraftTitle?: string;
   onBack: () => void;
   onSaveProtected: (data: {
     entryId: string;
@@ -58,6 +59,7 @@ export const TransformProtectView: React.FC<Props> = ({
   editingEntry,
   initialKind = 'Journal',
   initialDraft,
+  initialDraftTitle,
   onBack,
   onSaveProtected,
   onDeleteOrdinary,
@@ -70,7 +72,7 @@ export const TransformProtectView: React.FC<Props> = ({
   const viewport = useWritingViewport();
   const [entryId] = useState(() => editingEntry?.id ?? crypto.randomUUID());
   const [naturalText, setNaturalText] = useState(editingEntry?.body ?? initialDraft ?? '');
-  const [title, setTitle] = useState(editingEntry?.title ?? '');
+  const [title, setTitle] = useState(editingEntry?.title ?? initialDraftTitle ?? '');
   const [kind, setKind] = useState<Entry['kind']>(editingEntry?.kind ?? initialKind);
   const [curatedDeck, setCuratedDeck] = useState(editingEntry?.curatedDeck ?? '');
   const [favorite, setFavorite] = useState(editingEntry?.favorite ?? false);

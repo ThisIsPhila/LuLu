@@ -1,33 +1,142 @@
-import {useEffect, useRef, useState} from 'react';
-import {Mic, MicOff, Phone, Radio, ShieldCheck} from 'lucide-react';
-import {request} from '../services/backend/request';
-import {LuActivity} from './LuActivity';
+import { useEffect, useRef, useState } from 'react';
+import { ExternalLink, Mic, MicOff, Phone, Radio, ShieldCheck } from 'lucide-react';
+import { request } from '../services/backend/request';
+import type { LuAgentAction, LuSurfaceReference } from '../services/luChatContracts';
+import { LuActivity } from './LuActivity';
 import './LuLiveChat.css';
 
-type Bubble={speaker:'You'|'Lu';text:string};
-type LiveAnswer={sessionId:string;answer:string};
+type Bubble = { speaker: 'You'|'Lu'; text: string };
+type LiveAnswer = { sessionId: string; answer: string; expiresAt: number };
+type LiveToolResult = { output: unknown; action: LuAgentAction|null; references: LuSurfaceReference[] };
+type LiveEvent = { type?: string; delta?: unknown; transcript?: unknown; item?: unknown; event?: unknown; response?: unknown };
 
-export function LuLiveChat(){
- const [status,setStatus]=useState('Ready when you are');
- const [connected,setConnected]=useState(false);
- const [busy,setBusy]=useState(false);
- const [muted,setMuted]=useState(false);
- const [bubbles,setBubbles]=useState<Bubble[]>([]);
- const connection=useRef<RTCPeerConnection|null>(null);
- const stream=useRef<MediaStream|null>(null);
- const channel=useRef<RTCDataChannel|null>(null);
- const audio=useRef<HTMLAudioElement>(null);
- const alive=useRef(true);
- const generation=useRef(0);
- function close(){generation.current++;if(channel.current?.readyState==='open')channel.current.send(JSON.stringify({type:'session.close'}));channel.current?.close();channel.current=null;connection.current?.close();connection.current=null;stream.current?.getTracks().forEach(track=>track.stop());stream.current=null;if(audio.current)audio.current.srcObject=null;if(alive.current){setConnected(false);setBusy(false);setMuted(false);}}
- useEffect(()=>{alive.current=true;return()=>{alive.current=false;close();};},[]);
- async function start(){if(busy||connected)return;setBusy(true);setStatus('Connecting to Lu…');const attempt=++generation.current;try{const media=await navigator.mediaDevices.getUserMedia({audio:true});if(attempt!==generation.current){media.getTracks().forEach(track=>track.stop());return;}stream.current=media;const peer=new RTCPeerConnection();connection.current=peer;peer.ontrack=event=>{if(audio.current){audio.current.srcObject=event.streams[0]??new MediaStream([event.track]);void audio.current.play().catch(()=>setStatus('Audio is ready. Tap to hear Lu.'));}};media.getAudioTracks().forEach(track=>peer.addTrack(track,media));const events=peer.createDataChannel('oai-events');channel.current=events;events.onmessage=event=>{try{const data=JSON.parse(String(event.data)) as {type?:string;delta?:unknown};if(data.type==='session.started'){setConnected(true);setBusy(false);setStatus('Listening');}if(data.type==='session.closed'){close();setStatus('Conversation ended');}if((data.type==='session.input_transcript.delta'||data.type==='session.output_transcript.delta')&&typeof data.delta==='string'){const speaker=data.type==='session.input_transcript.delta'?'You':'Lu';setBubbles(current=>{const last=current.at(-1);return last?.speaker===speaker?[...current.slice(0,-1),{speaker,text:last.text+data.delta}]:[...current,{speaker,text:data.delta as string}];});}}catch{}};events.onclose=()=>{if(attempt===generation.current){close();setStatus('Conversation disconnected');}};const offer=await peer.createOffer();await peer.setLocalDescription(offer);const result=await request<LiveAnswer>('/lu/live',{offer:offer.sdp});if(attempt!==generation.current)return;await peer.setRemoteDescription({type:'answer',sdp:result.answer});}catch(error){if(attempt!==generation.current)return;close();setStatus(error instanceof Error?error.message:'Could not start voice.');}}
- function toggleMute(){const next=!muted;setMuted(next);stream.current?.getAudioTracks().forEach(track=>track.enabled=!next);}
- return <section className="lu-live-chat" aria-label="Live conversation with Lu">
-  <aside className="lu-live-disclosure"><ShieldCheck size={18}/><span><strong>Cloud voice demo</strong><small>Your voice goes to the live AI service and may contain personal details. Private journal entries are not sent.</small></span></aside>
-  <div className="lu-live-stage"><div className={`lu-live-orb${connected?' is-listening':''}${busy?' is-connecting':''}`} aria-hidden="true"><span>Lu</span></div><strong className="lu-live-status" role="status">{busy||connected?<LuActivity state={busy?'connecting':'listening'} label={status}/>:status}</strong><span className="lu-live-hint">{connected?'Speak naturally. Lu is listening.':'Start a conversation with Lu about using the app.'}</span></div>
-  <div className="lu-live-thread" aria-label="Conversation" aria-live="polite">{bubbles.map((bubble,index)=><article className={`lu-live-bubble is-${bubble.speaker==='You'?'you':'lu'}`} key={index}><small>{bubble.speaker}</small><p>{bubble.text}</p></article>)}</div>
-  <div className="lu-live-controls">{connected?<><button type="button" className="lu-live-secondary" onClick={toggleMute}>{muted?<MicOff size={19}/>:<Mic size={19}/>}<span>{muted?'Unmute':'Mute'}</span></button><button type="button" className="lu-live-end" onClick={()=>{close();setStatus('Conversation ended');}}><Phone size={19}/><span>End conversation</span></button></>:<button type="button" className="lu-live-start" disabled={busy} onClick={()=>void start()}>{busy?<Radio size={19}/>:<Mic size={19}/>}<span>{busy?'Connecting…':'Start talking'}</span></button>}</div>
-  <audio ref={audio} autoPlay className="lu-live-audio" aria-hidden="true" />
- </section>;
+export function LuLiveChat({ onAgentAction }: { onAgentAction?: (action: LuAgentAction) => void }) {
+  const [status, setStatus] = useState('Ready when you are');
+  const [connected, setConnected] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const [bubbles, setBubbles] = useState<Bubble[]>([]);
+  const [references, setReferences] = useState<LuSurfaceReference[]>([]);
+  const connection = useRef<RTCPeerConnection|null>(null);
+  const stream = useRef<MediaStream|null>(null);
+  const channel = useRef<RTCDataChannel|null>(null);
+  const audio = useRef<HTMLAudioElement>(null);
+  const alive = useRef(true);
+  const generation = useRef(0);
+  const currentUserTranscript = useRef('');
+  const sessionId = useRef('');
+  const sessionTimer = useRef<ReturnType<typeof setTimeout>|null>(null);
+
+  function addTranscript(speaker: Bubble['speaker'], delta: string) {
+    setBubbles(current => {
+      const last = current.at(-1);
+      return last?.speaker === speaker
+        ? [...current.slice(0,-1), { speaker, text: last.text + delta }]
+        : [...current, { speaker, text: delta }];
+    });
+  }
+  function setFinalUserTranscript(transcript: string) {
+    currentUserTranscript.current = transcript;
+    setBubbles(current => {
+      const last = current.at(-1);
+      return last?.speaker === 'You'
+        ? [...current.slice(0,-1), { speaker:'You', text:transcript }]
+        : [...current, { speaker:'You', text:transcript }];
+    });
+  }
+  function close(sendClose = true) {
+    if (sessionTimer.current) clearTimeout(sessionTimer.current);
+    sessionTimer.current = null;
+    if (sendClose && channel.current?.readyState === 'open') channel.current.send(JSON.stringify({ type:'session.close' }));
+    generation.current++;
+    channel.current?.close(); channel.current = null;
+    connection.current?.close(); connection.current = null;
+    stream.current?.getTracks().forEach(track => track.stop()); stream.current = null;
+    if (audio.current) audio.current.srcObject = null;
+    sessionId.current = '';
+    if (alive.current) { setConnected(false); setBusy(false); setMuted(false); }
+  }
+  useEffect(() => { alive.current = true; return () => { alive.current = false; close(); }; }, []);
+
+  async function runFunction(itemValue: unknown, attempt: number) {
+    if (!itemValue || typeof itemValue !== 'object') return;
+    const item = itemValue as { type?:unknown; name?:unknown; arguments?:unknown; call_id?:unknown };
+    if (item.type !== 'function_call' || typeof item.name !== 'string' || typeof item.arguments !== 'string' || typeof item.call_id !== 'string') return;
+    if (attempt !== generation.current || !sessionId.current) return;
+    setStatus(item.name === 'search_surface_entries' ? 'Lu is searching your writing…' : 'Lu is working in LuLu…');
+    setBusy(true);
+    let output: unknown = { error:'Lu could not complete that app action.' };
+    try {
+      const args: unknown = JSON.parse(item.arguments);
+      if (!args || typeof args !== 'object' || Array.isArray(args)) throw new Error('Invalid action request.');
+      const result = await request<LiveToolResult>('/lu/live/action', {
+        sessionId:sessionId.current,
+        name:item.name,
+        arguments:args,
+        transcript:currentUserTranscript.current,
+      });
+      output = result.output;
+      if (result.references.length) setReferences(result.references);
+      if (result.action) onAgentAction?.(result.action);
+    } catch (error) {
+      output = { error:error instanceof Error ? error.message : 'Lu could not complete that app action.' };
+    }
+    const dataChannel = channel.current;
+    if (attempt === generation.current && dataChannel?.readyState === 'open') {
+      dataChannel.send(JSON.stringify({ type:'response.item.create', item:{ type:'function_call_output', call_id:item.call_id, output:JSON.stringify(output) } }));
+      dataChannel.send(JSON.stringify({ type:'response.create' }));
+    }
+    if (alive.current && attempt === generation.current) { setBusy(false); setStatus('Listening'); }
+  }
+  function handleEvent(eventValue: unknown, attempt: number) {
+    if (!eventValue || typeof eventValue !== 'object') return;
+    const data = eventValue as LiveEvent;
+    if (data.type === 'session.started') { setConnected(true); setBusy(false); setStatus('Listening'); return; }
+    if (data.type === 'session.closed') { close(false); setStatus('Conversation ended'); return; }
+    if (data.type === 'session.input_audio_buffer.speech_started' || data.type === 'input_audio_buffer.speech_started') currentUserTranscript.current = '';
+    if (data.type === 'session.input_transcript.delta' && typeof data.delta === 'string') {
+      currentUserTranscript.current += data.delta; addTranscript('You', data.delta); return;
+    }
+    if (data.type === 'session.input_transcript.done' && typeof data.transcript === 'string') { setFinalUserTranscript(data.transcript); return; }
+    if (data.type === 'session.output_transcript.delta' && typeof data.delta === 'string') { addTranscript('Lu', data.delta); return; }
+    const nested = data.type === 'response.event' && data.event && typeof data.event === 'object' ? data.event as LiveEvent : data;
+    if (nested.type === 'response.output_item.done' && nested.item) void runFunction(nested.item, attempt);
+  }
+
+  async function start() {
+    if (busy || connected) return;
+    setBusy(true); setReferences([]); setStatus('Connecting to Lu…'); const attempt = ++generation.current;
+    try {
+      const media = await navigator.mediaDevices.getUserMedia({ audio:true });
+      if (attempt !== generation.current) { media.getTracks().forEach(track=>track.stop()); return; }
+      stream.current = media;
+      const peer = new RTCPeerConnection(); connection.current = peer;
+      peer.ontrack = event => { if (audio.current) { audio.current.srcObject = event.streams[0] ?? new MediaStream([event.track]); void audio.current.play().catch(()=>setStatus('Audio is ready. Tap to hear Lu.')); } };
+      media.getAudioTracks().forEach(track=>peer.addTrack(track,media));
+      const events = peer.createDataChannel('oai-events'); channel.current = events;
+      events.onmessage = event => { try { handleEvent(JSON.parse(String(event.data)),attempt); } catch { /* Ignore malformed provider event payloads. */ } };
+      events.onclose = () => { if (attempt === generation.current) { close(false); setStatus('Conversation disconnected'); } };
+      const offer = await peer.createOffer(); await peer.setLocalDescription(offer);
+      const result = await request<LiveAnswer>('/lu/live',{offer:offer.sdp});
+      if (attempt !== generation.current) return;
+      sessionId.current = result.sessionId;
+      const remaining = Math.max(1,result.expiresAt-Date.now());
+      sessionTimer.current = setTimeout(()=>{if(attempt===generation.current){close();setStatus('This five-minute demo voice session ended. Start a new conversation to continue.');}},remaining);
+      await peer.setRemoteDescription({type:'answer',sdp:result.answer});
+    } catch (error) {
+      if (attempt !== generation.current) return;
+      close(); setStatus(error instanceof Error ? error.message : 'Could not start voice.');
+    }
+  }
+  function toggleMute() { const next=!muted; setMuted(next); stream.current?.getAudioTracks().forEach(track=>track.enabled=!next); }
+
+  return <section className="lu-live-chat" aria-label="Live conversation with Lu">
+    <aside className="lu-live-disclosure"><ShieldCheck size={18}/><span><strong>Cloud voice demo · GPT-Live + GPT-6 Luna</strong><small>GPT-Live receives your audio directly and may hear personal details. Lu’s GPT-6 Luna backend can search scrubbed excerpts from ordinary Journal and Story entries and carry out app actions you request. Protected private writing is never available to its tools.</small></span></aside>
+    <div className="lu-live-stage"><div className={`lu-live-orb${connected?' is-listening':''}${busy?' is-connecting':''}`} aria-hidden="true"><span>Lu</span></div><strong className="lu-live-status" role="status">{busy||connected?<LuActivity state={busy?'connecting':'listening'} label={status}/>:status}</strong><span className="lu-live-hint">{connected?'Speak naturally. Lu can use the app tools while you talk.':'Start a conversation with Lu about using the app.'}</span></div>
+    <div className="lu-live-thread" aria-label="Conversation" aria-live="polite">{bubbles.map((bubble,index)=><article className={`lu-live-bubble is-${bubble.speaker==='You'?'you':'lu'}`} key={index}><small>{bubble.speaker}</small><p>{bubble.text}</p></article>)}
+      {references.map(reference=><article className="lu-live-reference" key={reference.reference}><small>{reference.kind} · {reference.reference.replace('_',' ')}</small><strong>{reference.title||'Untitled entry'}</strong><p>{reference.content}</p><button type="button" onClick={()=>onAgentAction?.({kind:'open-entry',entryId:reference.entryId})}><ExternalLink size={14}/>Open entry</button></article>)}
+    </div>
+    <div className="lu-live-controls">{connected?<><button type="button" className="lu-live-secondary" onClick={toggleMute}>{muted?<MicOff size={19}/>:<Mic size={19}/>}<span>{muted?'Unmute':'Mute'}</span></button><button type="button" className="lu-live-end" onClick={()=>{close();setStatus('Conversation ended');}}><Phone size={19}/><span>End conversation</span></button></>:<button type="button" className="lu-live-start" disabled={busy} onClick={()=>void start()}>{busy?<Radio size={19}/>:<Mic size={19}/>}<span>{busy?'Connecting…':'Start talking'}</span></button>}</div>
+    <audio ref={audio} autoPlay className="lu-live-audio" aria-hidden="true" />
+  </section>;
 }

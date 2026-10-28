@@ -12,7 +12,8 @@ import { configuredProvider, privacyCapability, validateReviewedPrivacyRequest }
 import { judgeInviteDigest, isJudgeInviteActive } from './judge-invite.js';
 import { mayReadAccountActivity } from './owner-notifications.js';
 import { processAccountAlerts } from './account-alerts.js';
-import { scrubForLu, respondAsLu, LU_LANGUAGES } from './lu-chat.js';
+import { scrubForLu, scrubTextsForLu, respondAsLuWithTools, LU_LANGUAGES, type LuAgentAction, type LuAgentHistoryMessage, type LuSurfaceReference } from './lu-chat.js';
+import { explicitlyRequestsDestination, explicitlyRequestsDraft, explicitlyRequestsOpen, explicitlyRequestsSurfaceSearch, luSearchTerms } from './lu-agent-policy.js';
 import { createLuLiveSession } from './lu-live.js';
 import { refillJudgeAllowance, type JudgeAllowance } from './judge-allowance.js';
 
@@ -21,7 +22,7 @@ const judgeVoicePolicy = {refillCredits: 300, maxCredits: 300, refillCooldownMs:
 initializeApp();
 const db = getFirestore();
 const identity = getAuth();
-const knownRoutes = new Set(['/auth/register/options', '/auth/register/verify', '/auth/login/options', '/auth/login/verify', '/auth/stepup/options', '/auth/stepup/verify', '/auth/provider/session', '/auth/lock', '/auth/logout', '/session', '/judge/redeem', '/judge/access', '/owner/account-activity', '/lu/scrub', '/lu/chat', '/lu/live', '/privacy/capability', '/privacy/understand', '/native/exchange/create', '/native/exchange/options', '/native/exchange/complete', '/native/exchange/provider-complete', '/native/exchange/redeem', '/native/exchange/cancel']);
+const knownRoutes = new Set(['/auth/register/options', '/auth/register/verify', '/auth/login/options', '/auth/login/verify', '/auth/stepup/options', '/auth/stepup/verify', '/auth/provider/session', '/auth/lock', '/auth/logout', '/session', '/judge/redeem', '/judge/access', '/owner/account-activity', '/lu/scrub', '/lu/chat', '/lu/live', '/lu/live/action', '/privacy/capability', '/privacy/understand', '/native/exchange/create', '/native/exchange/options', '/native/exchange/complete', '/native/exchange/provider-complete', '/native/exchange/redeem', '/native/exchange/cancel']);
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
 const sessions = db.collection('_sessions');
 const challenges = db.collection('_challenges');
@@ -62,6 +63,74 @@ async function limitRequest(ip: string) {
     if (count >= 60) throw new ApiError(429, 'Please wait before trying again.');
     tx.set(ref, {count: count + 1, expiresAt: Timestamp.fromMillis((bucket + 2) * 900_000)});
   });
+}
+
+
+async function searchOrdinaryEntries(uid: string, sourceText: string, modelQuery: string, kind: string, apiKey: string) {
+  if (!explicitlyRequestsSurfaceSearch(sourceText)) return {output:{error:'Only search saved writing when the user clearly asks to find or discuss it.'},references:[],ids:new Map<string,string>()};
+  const requestedKind = kind === 'Journal' || kind === 'Story' ? kind : 'Any';
+  const terms = [...new Set([...luSearchTerms(sourceText), ...luSearchTerms(modelQuery)])];
+  const snapshot = await db.collection('users').doc(uid).collection('entries').orderBy('createdAt','desc').limit(100).get();
+  const candidates = snapshot.docs.flatMap(doc => {
+    const data = doc.data();
+    // Only explicitly ordinary records are searchable. Missing/true protected flags fail closed.
+    if (data.ownerId !== uid || data.protected !== false || (data.kind !== 'Journal' && data.kind !== 'Story') ||
+        (requestedKind !== 'Any' && data.kind !== requestedKind) || typeof data.body !== 'string') return [];
+    const title = typeof data.title === 'string' ? data.title : '';
+    const searchable = `${title}\n${data.body}`.normalize('NFKC').toLocaleLowerCase('und');
+    const score = terms.reduce((total, term) => total + (title.toLocaleLowerCase('und').includes(term) ? 3 : searchable.includes(term) ? 1 : 0), 0);
+    const createdAt = data.createdAt && typeof data.createdAt.toMillis === 'function' ? data.createdAt.toMillis() : 0;
+    return [{id:doc.id,kind:data.kind as 'Journal'|'Story',title,body:data.body as string,score,createdAt}];
+  });
+  const ranked = candidates.filter(item => terms.length === 0 || item.score > 0).sort((a,b) => b.score-a.score || b.createdAt-a.createdAt).slice(0,3);
+  const selected: Array<{reference:string;entryId:string;kind:'Journal'|'Story';title:string;excerpt:string}> = [];
+  const ids = new Map<string,string>();
+  for (const [index,item] of ranked.entries()) {
+    const reference = `entry_${index+1}`;
+    const bodyLower = item.body.normalize('NFKC').toLocaleLowerCase('und');
+    const firstMatch = terms.map(term => bodyLower.indexOf(term)).filter(index => index >= 0).sort((a,b)=>a-b)[0] ?? 0;
+    const start = Math.max(0, firstMatch - 350);
+    const excerpt = item.body.slice(start, start + 1000);
+    selected.push({reference,entryId:item.id,kind:item.kind,title:item.title.slice(0,200),excerpt});
+    ids.set(reference,item.id);
+  }
+  if(selected.length===0)return {output:{matches:[]},references:[],ids};
+  // Scrub all matching excerpts together; the response model only receives this sanitized batch.
+  const scrubbedBatch=await scrubTextsForLu(apiKey,selected.flatMap(item=>[item.title,item.excerpt]));
+  const references:LuSurfaceReference[]=selected.map((item,index)=>({reference:item.reference,entryId:item.entryId,kind:item.kind,title:scrubbedBatch[index*2],content:scrubbedBatch[index*2+1]}));
+  for(const item of references)if(item.title==='[unable to safely scrub]'||item.content==='[unable to safely scrub]')ids.delete(item.reference);
+  const safeReferences=references.filter(item=>ids.has(item.reference));
+  return {output:{matches:safeReferences.map(({reference,kind,title,content})=>({reference,kind,title,content}))},references:safeReferences,ids};
+}
+async function executeLuTool(uid:string,sourceText:string,call:{name:string;arguments:Record<string,unknown>},apiKey:string,entryIds:Map<string,string>) {
+  const args=call.arguments;
+  if(call.name==='search_surface_entries'){
+    if(typeof args.query!=='string'||args.query.length>300||!['Journal','Story','Any'].includes(args.kind as string))return {output:{error:'Invalid search request.'}};
+    const search=await searchOrdinaryEntries(uid,sourceText,args.query,args.kind as string,apiKey);
+    for(const [reference,id] of search.ids)entryIds.set(reference,id);
+    return {output:search.output,references:search.references};
+  }
+  if(call.name==='navigate_app'){
+    if(typeof args.destination!=='string'||!explicitlyRequestsDestination(sourceText,args.destination))return {output:{error:'Navigate only when the user explicitly requested that destination.'}};
+    const action:LuAgentAction={kind:'navigate',destination:args.destination as Extract<LuAgentAction,{kind:'navigate'}>['destination']};
+    return {output:{navigated:true,destination:args.destination},action};
+  }
+  if(call.name==='open_entry'){
+    if(typeof args.reference!=='string'||!explicitlyRequestsOpen(sourceText))return {output:{error:'Open an entry only when the user explicitly asks to open or read one.'}};
+    const entryId=entryIds.get(args.reference);
+    if(!entryId)return {output:{error:'That entry was not found in the current search results.'}};
+    const action:LuAgentAction={kind:'open-entry',entryId};
+    return {output:{opened:true},action};
+  }
+  if(call.name==='create_draft'){
+    if(!explicitlyRequestsDraft(sourceText)||typeof args.title!=='string'||typeof args.body!=='string'||args.title.length>300||args.body.length>6000||!['Journal','Story'].includes(args.kind as string))return {output:{error:'Create a draft only after an explicit request for a journal or story draft.'}};
+    const [title,draftBody]=await scrubTextsForLu(apiKey,[args.title,args.body]);
+    if(title==='[unable to safely scrub]'||draftBody==='[unable to safely scrub]')return {output:{error:'The draft could not be safely prepared.'}};
+    const entryKind=args.kind as 'Journal'|'Story';
+    const action:LuAgentAction={kind:'create-draft',title,body:draftBody,entryKind};
+    return {output:{draftPrepared:true,entryKind},action};
+  }
+  return {output:{error:'That Lu tool is not available.'}};
 }
 async function takeChallenge(id: unknown, kind: Challenge['kind'], origin: string): Promise<Challenge> {
   const ref = challenges.doc(documentId(id));
@@ -371,32 +440,61 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
       if (!mayReadAccountActivity(user)) throw new ApiError(403, 'Live voice is currently available to the owner for testing.');
       if (Object.keys(body).join(',') !== 'offer' || typeof body.offer !== 'string' || !body.offer.trim() || body.offer.length > 20000) throw new ApiError(400, 'Invalid voice connection.');
       if (!process.env.OPENAI_API_KEY) throw new ApiError(503, 'Live voice is not configured.');
-      try { response.json(await createLuLiveSession(process.env.OPENAI_API_KEY, body.offer)); }
+      try {
+        const live=await createLuLiveSession(process.env.OPENAI_API_KEY, body.offer);
+        const createdAt=Date.now();
+        await db.collection('_luLiveSessions').doc(hash(live.sessionId)).create({uid:current.uid,sessionId:live.sessionId,createdAt,expiresAt:createdAt+5*60_000,status:'active',references:{},purgeAfter:Timestamp.fromMillis(createdAt+60*60_000)});
+        response.json({...live,expiresAt:createdAt+5*60_000});
+      }
       catch { throw new ApiError(502, 'Could not connect live voice. Please try again.'); }
       return;
+    }
+    if(route==='/lu/live/action'){
+      const user=await identity.getUser(current.uid);
+      if(!mayReadAccountActivity(user))throw new ApiError(403,'Live voice actions are currently available to the owner for testing.');
+      if(Object.keys(body).sort().join(',')!=='arguments,name,sessionId,transcript'||typeof body.sessionId!=='string'||!/^live_[A-Za-z0-9_-]{1,120}$/.test(body.sessionId)||typeof body.name!=='string'||typeof body.transcript!=='string'||!body.transcript.trim()||body.transcript.length>4000||!body.arguments||typeof body.arguments!=='object'||Array.isArray(body.arguments))throw new ApiError(400,'Invalid Lu voice action.');
+      if(!process.env.OPENAI_API_KEY)throw new ApiError(503,'Lu voice actions are not configured.');
+      const sessionRef=db.collection('_luLiveSessions').doc(hash(body.sessionId));
+      const snapshot=await sessionRef.get();
+      const session=snapshot.data();
+      if(!session||session.uid!==current.uid||session.status!=='active'||typeof session.expiresAt!=='number'||session.expiresAt<=Date.now())throw new ApiError(403,'This voice session has ended. Start a new conversation.');
+      const referencesData=session.references&&typeof session.references==='object'?session.references as Record<string,unknown>:{};
+      const entryIds=new Map<string,string>(Object.entries(referencesData).filter((item):item is [string,string]=>typeof item[1]==='string'));
+      const call={name:body.name,arguments:body.arguments as Record<string,unknown>};
+      const result=await executeLuTool(current.uid,body.transcript,call,process.env.OPENAI_API_KEY,entryIds);
+      if(result.references?.length){await sessionRef.update({references:Object.fromEntries(entryIds)});}
+      response.json({output:result.output,action:result.action??null,references:result.references??[]});return;
     }
     if (route === '/lu/scrub') {
       await requireLuAiAccess(current.uid);
       if (Object.keys(body).length !== 1 || typeof body.text !== 'string' || !body.text.trim() || body.text.length > 4000) throw new ApiError(400, 'Enter text of up to 4,000 characters.');
       if (!process.env.OPENAI_API_KEY) throw new ApiError(503, 'Cloud privacy processing is not configured.');
-      const scrubbed = await scrubForLu(process.env.OPENAI_API_KEY, body.text);
+      const scrubbed = (await scrubForLu(process.env.OPENAI_API_KEY, body.text)).trim();
       if (scrubbed === '[unable to safely scrub]') throw new ApiError(422, 'The text could not be prepared safely. Please edit it and try again.');
       const ticket = randomUUID();
-      await db.collection('_luReviews').doc(hash(ticket)).create({uid:current.uid, textHash:hash(scrubbed), expiresAt:Date.now()+10*60_000});
+      await db.collection('_luReviews').doc(hash(ticket)).create({uid:current.uid, sourceHash:hash(body.text), textHash:hash(scrubbed), expiresAt:Date.now()+10*60_000});
       response.json({scrubbed, ticket}); return;
     }
     if (route === '/lu/chat') {
       await requireLuAiAccess(current.uid);
-      if (Object.keys(body).sort().join(',') !== 'language,text,ticket' || typeof body.text !== 'string' || body.text.length > 12000 || typeof body.ticket !== 'string' || !/^[0-9a-f-]{36}$/.test(body.ticket) || !LU_LANGUAGES.includes(body.language)) throw new ApiError(400, 'Invalid reviewed chat request.');
+      if (Object.keys(body).sort().join(',') !== 'history,language,sourceText,text,ticket' || typeof body.text !== 'string' || body.text.length > 12000 || typeof body.sourceText !== 'string' || !body.sourceText.trim() || body.sourceText.length > 4000 || typeof body.ticket !== 'string' || !/^[0-9a-f-]{36}$/.test(body.ticket) || !LU_LANGUAGES.includes(body.language) || !Array.isArray(body.history) || body.history.length>6 || body.history.some((item:unknown)=>!item||typeof item!=='object'||!['user','assistant'].includes((item as {role?:unknown}).role as string)||typeof (item as {text?:unknown}).text!=='string'||!(item as {text:string}).text.trim()||(item as {text:string}).text.length>1200) || body.history.reduce((sum:number,item:{text:string})=>sum+item.text.length,0)>7200) throw new ApiError(400, 'Invalid reviewed chat request.');
       const ref=db.collection('_luReviews').doc(hash(body.ticket));
       await db.runTransaction(async transaction => {
         const review=await transaction.get(ref); const data=review.data();
-        if (!data || data.uid!==current.uid || data.expiresAt<=Date.now() || data.textHash!==hash(body.text)) throw new ApiError(403, 'Review the prepared text again before sending.');
+        if (!data || data.uid!==current.uid || data.expiresAt<=Date.now() || data.textHash!==hash(body.text) || data.sourceHash!==hash(body.sourceText)) throw new ApiError(403, 'Review the prepared text again before sending.');
         transaction.delete(ref);
       });
       if (!process.env.OPENAI_API_KEY) throw new ApiError(503, 'Lu chat is not configured.');
-      const reply=await respondAsLu(process.env.OPENAI_API_KEY,body.text,body.language);
-      response.json({reply}); return;
+      const apiKey=process.env.OPENAI_API_KEY;
+      const safeHistory=body.history.length ? await scrubTextsForLu(apiKey,body.history.map((item:{text:string})=>item.text)) : [];
+      const history:LuAgentHistoryMessage[]=body.history.map((item:{role:'user'|'assistant'},index:number)=>({role:item.role,text:safeHistory[index]}));
+      const entryIds=new Map<string,string>();
+      const result=await respondAsLuWithTools(apiKey,body.text,body.language,{
+        history,
+        execute:call=>executeLuTool(current.uid,body.sourceText,call,apiKey,entryIds),
+      });
+      // Only open entries returned by the server's current ordinary-entry search.
+      response.json({reply:result.reply,actions:result.actions,references:result.references}); return;
     }
     if (route === '/owner/account-activity') {
       if (Object.keys(body).length !== 0) throw new ApiError(400, 'Invalid request.');

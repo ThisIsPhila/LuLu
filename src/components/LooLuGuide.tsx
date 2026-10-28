@@ -6,6 +6,7 @@ import { LuTextChat } from './LuTextChat';
 import { LuLiveChat } from './LuLiveChat';
 import { LuDock } from './LuDock';
 import type { Entry } from '../domain/journal';
+import type { LuAgentAction } from '../services/luChatContracts';
 import './LooLuGuide.css';
 
 export type LooLuDestination = 'home' | 'journal' | 'stories' | 'library' | 'reader' | 'write' | 'settings' | 'privacy-settings' | 'private-writing' | 'support';
@@ -17,7 +18,7 @@ type Props = {
   captureBlockReason: string;
   hasEntries: boolean;
   onNavigate: (destination: LooLuDestination) => void;
-  onStartDraft: (text: string, kind?: 'Journal' | 'Story') => void;
+  onStartDraft: (text: string, kind?: 'Journal' | 'Story', title?: string) => void;
   dockEnabled: boolean;
   entries: Entry[];
   onSelectEntry: (entry: Entry) => void;
@@ -32,6 +33,19 @@ export function LooLuGuide({ canLeaveCurrentView, canStartDraft, hasEntries, onN
   const [chatInitial, setChatInitial] = useState('');
   function closeGuide() { setOpen(false); setPage('menu'); setChatInitial(''); }
   function quickAction(action: LuQuickAction) { closeGuide(); onQuickAction(action); }
+  function runAgentAction(action: LuAgentAction, keepGuideOpen = false) {
+    if (!canLeaveCurrentView) return;
+    if (action.kind === 'navigate') { if(!keepGuideOpen)closeGuide(); onNavigate(action.destination); return; }
+    if (action.kind === 'open-entry') {
+      const entry=entries.find(item=>item.id===action.entryId&&!item.protected);
+      if (!entry) return;
+      if(!keepGuideOpen)closeGuide(); void onSelectEntry(entry); return;
+    }
+    if (action.kind === 'create-draft') {
+      if (!canStartDraft) return;
+      if(!keepGuideOpen)closeGuide(); onStartDraft(action.body,action.entryKind,action.title);
+    }
+  }
 
   const orb = <LuOrb open={open} disabled={false} onOpen={() => { if (open) closeGuide(); else { setPage('menu'); setOpen(true); } }} onLive={() => {setPage('live');setOpen(true);}} onAction={quickAction} />;
   return <div className={`lulu-guide-root${dockEnabled ? ' has-lu-dock' : ''}`}>
@@ -57,7 +71,7 @@ export function LooLuGuide({ canLeaveCurrentView, canStartDraft, hasEntries, onN
         </section>}
     </section> : createPortal(<section className="lu-conversation-page" role="dialog" aria-modal="true" aria-labelledby="lu-conversation-title">
       <header className="lu-conversation-header"><button type="button" className="lulu-guide-close" aria-label="Back to Lu menu" onClick={() => setPage('menu')}><ArrowLeft size={20}/></button><h2 id="lu-conversation-title">{page === 'live' ? 'Talk to Lu' : 'Ask Lu'}</h2><button type="button" className="lulu-guide-close" aria-label="Close Lu" onClick={closeGuide}><X size={20}/></button></header>
-      {page === 'live' ? <LuLiveChat /> : <LuTextChat entries={entries} initialDraft={chatInitial} onLocalAction={action => { if (!canLeaveCurrentView) return; if (action.kind === 'navigate') onNavigate(action.destination); else onQuickAction(action.action); closeGuide(); }} />}
+      {page === 'live' ? <LuLiveChat onAgentAction={action=>runAgentAction(action,true)} /> : <LuTextChat initialDraft={chatInitial} onAgentAction={runAgentAction} onLocalAction={action => { if (!canLeaveCurrentView) return; if (action.kind === 'navigate') onNavigate(action.destination); else onQuickAction(action.action); closeGuide(); }} />}
     </section>, document.body))}
   </div>;
 }
