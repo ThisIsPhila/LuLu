@@ -107,3 +107,9 @@
 .lulu-guide-help { padding: 10px 8px; }
 .lulu-guide-help strong, .lulu-guide-help small { display:block; }
 .lulu-guide-help small { margin-top:4px; color:#716c60; font-size:12px; line-height:1.45; }
+
+/* A conversation is a workspace, not a floating menu. */
+.lu-conversation-page { position:fixed; inset:0; z-index:200; display:flex; flex-direction:column; background:#faf8f3; color:#302e29; font-family:var(--font-sans, sans-serif); padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
+.lu-conversation-header { flex:none; display:flex; align-items:center; gap:16px; padding:18px clamp(20px, 5vw, 64px); border-bottom:1px solid #e8e2d8; }
+.lu-conversation-header h2 { flex:1; margin:0; font:500 26px/1.2 var(--font-serif, Georgia, serif); }
+.lu-conversation-page > .lu-live-chat { width:min(100% - 40px, 800px); margin:24px auto; overflow:auto; }

@@ -15,6 +15,8 @@ test('privacy and Lu are separate calls and do not store provider responses',asy
  assert.equal(bodies[0].store,false);assert.equal(bodies[1].store,false);
  assert.equal(bodies[1].model,'gpt-6-luna'); assert.equal(bodies[1].reasoning.effort,'high');
  assert.match(bodies[1].instructions,/language of the user’s message/);
+ assert.match(bodies[1].instructions,/unrelated to LuLu/);
+ assert.match(bodies[1].instructions,/do not answer the unrelated question/);
  assert.doesNotMatch(bodies[1].instructions,/Reply in isiZulu/);
 });
 test('invalid model responses and unsupported languages fail closed',async()=>{
