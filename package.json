@@ -15,7 +15,7 @@
     "test:demo": "node --experimental-strip-types --test demo/src/domain/transform.test.ts",
     "build:hosted": "npm run build:app && node scripts/package-hosting.mjs",
     "native:sync": "npm run build:app && cap sync",
-    "native:ios": "npm run build:app && cap sync ios && cap build ios",
+    "native:ios": "npm run build:app && node scripts/bump-ios-build-number.mjs && cap sync ios && cap build ios",
     "native:android": "npm run build:app && cap sync android && cap build android",
     "native:open:ios": "cap open ios",
     "native:open:android": "cap open android",
