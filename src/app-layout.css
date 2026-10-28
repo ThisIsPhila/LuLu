@@ -391,3 +391,6 @@ html[data-lulu-platform="ios"] .ordinary-navigation-shell .stitch-journal-home,
 html[data-lulu-platform="ios"] .ordinary-navigation-shell .stitch-main-stream,
 html[data-lulu-platform="ios"] .ordinary-navigation-shell .story-leaves-screen { min-height:0; overflow:visible; overscroll-behavior-y:auto; }
 html[data-lulu-platform="ios"] .ordinary-navigation-header { position:sticky; top:0; z-index:60; }
+html[data-lulu-platform="ios"] .ordinary-navigation-header { position:fixed; top:0; left:0; right:0; width:100%; }
+html[data-lulu-platform="ios"] .ordinary-navigation-shell { padding-top:calc(56px + env(safe-area-inset-top, 0px)); }
+.native-pull-indicator { top:calc(66px + env(safe-area-inset-top, 0px)); }

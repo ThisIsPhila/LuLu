@@ -99,7 +99,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   // Protected Mode & Modals
   const [protectedMode, setProtectedMode] = useState<boolean>(false);
   const refreshOrdinary = async () => { setWatchAttempt(value => value + 1); setLibraryItemsAttempt(value => value + 1); };
-  useNativePullToRefresh(isOrdinaryNavigationView && !protectedMode, refreshOrdinary);
+  const nativePull = useNativePullToRefresh(isOrdinaryNavigationView && !protectedMode, refreshOrdinary);
   const pullRefresh = usePullToRefresh({ enabled: isOrdinaryNavigationView && !protectedMode && !(Capacitor.getPlatform() === 'ios' && Capacitor.isPluginAvailable('NativeRefresh')), onRefreshStart: prepareRefreshFeedback, onThresholdReached: () => { navigator.vibrate?.(20); }, onRefresh: async () => { await refreshOrdinary(); await playRefreshFeedback(); } });
   const [representationsLoading, setRepresentationsLoading] = useState(false);
   const [representationsError, setRepresentationsError] = useState('');
@@ -490,6 +490,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
 
       {/* Main Responsive Application Shell (Edge-to-Edge with clean Max-Width) */}
       <div ref={pullRefresh.containerRef} className={`lulu-viewport-shell ${isOrdinaryNavigationView ? 'ordinary-navigation-shell' : ''}`} data-ordinary-route={isOrdinaryNavigationView ? currentView : undefined}>
+        {nativePull.distance > 0 && <div className="pull-refresh-indicator native-pull-indicator" role="status"><span className={nativePull.refreshing ? 'update-refresh-spinning' : undefined}>↻</span>{nativePull.refreshing ? 'Refreshing…' : nativePull.distance >= 96 ? 'Release to refresh' : 'Pull to refresh'}</div>}
         {pullRefresh.state !== 'idle' && <div className="pull-refresh-indicator" role="status" style={{ marginTop: Math.max(0, Math.min(pullRefresh.pullDistance,128)-30) }}><span className={`pull-refresh-icon${pullRefresh.isRefreshing ? ' is-refreshing' : ''}`} style={{'--pull-progress': `${Math.min(pullRefresh.pullDistance/80,1)*360}deg`} as React.CSSProperties}><span>{pullRefresh.isRefreshing ? '↻' : <span style={{display:'inline-block',transform:`rotate(${Math.min(pullRefresh.pullDistance/80,1)*180}deg)`}}>↓</span>}</span></span>{pullRefresh.state === 'refreshing' ? 'Refreshing…' : pullRefresh.state === 'ready' ? 'Release to refresh' : 'Pull to refresh'}</div>}
         {(currentView === 'home' || currentView === 'leaves' || currentView === 'stories' || currentView === 'library' || currentView === 'reader') && (personalState.status !== 'ready' || starterState.status !== 'ready' || onboardingImportState.status !== 'ready') && (
           <section className="journal-source-panel" aria-label="Journal status">

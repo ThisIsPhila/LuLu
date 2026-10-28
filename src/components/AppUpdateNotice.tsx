@@ -20,7 +20,7 @@ export function AppUpdateSettings() {
     setLoading(true);setMessage('Checking for updates…');setUpdate(null);
     try {
       const [info,current]=await Promise.all([NativeApp.getInfo(),CapacitorUpdater.current()]);
-      setNativeVersion(info.version);setCurrentVersion(current.bundle.version);
+      setNativeVersion(`${info.version} (build ${info.build})`);setCurrentVersion(current.bundle.id === 'builtin' ? 'Bundled interface' : current.bundle.version);
       const response=await CapacitorHttp.get({url:`${manifestUrl}?check=${Date.now()}`,headers:{'Cache-Control':'no-cache'}});
       if(response.status!==200)throw new Error('The update server is unavailable.');
       if(response.data && typeof response.data==='object' && response.data.status==='none') {setMessage('LuLu is up to date.');return;}
@@ -40,7 +40,7 @@ export function AppUpdateSettings() {
     catch {setBusy(false);setProgress(null);setMessage('The update could not be installed. Your current app is still available.');}
   }
   return <section className="profile-settings-section" aria-labelledby="app-updates-heading"><h2 id="app-updates-heading">App updates</h2><div className="profile-settings-card">
-    <div className="profile-settings-row static-row"><span className="profile-settings-copy"><strong>Current version</strong><small>{currentVersion ? `App update ${currentVersion} · native app ${nativeVersion}` : 'Loading version…'}</small></span></div>
+    <div className="profile-settings-row static-row"><span className="profile-settings-copy"><strong>Current version</strong><small>{currentVersion ? `${currentVersion} · iPhone app ${nativeVersion}` : 'Loading version…'}</small></span></div>
     <div className="profile-settings-row static-row"><span className="profile-settings-copy"><strong>{update ? 'Update available' : 'Update status'}</strong><small role="status">{message}</small></span></div>
     {busy && <div className="profile-settings-row"><span className="profile-settings-copy"><strong>Downloading update {progress === null ? '' : `${progress}%`}</strong><progress max={100} value={progress ?? undefined} aria-label="Update download progress" /></span></div>}
     {update && <button className="profile-settings-link" type="button" disabled={busy || loading} onClick={()=>void apply()}><span className="profile-settings-copy"><strong>{busy?'Installing…':`Install update ${update.version}`}</strong><small>LuLu will reopen to finish the update.</small></span></button>}

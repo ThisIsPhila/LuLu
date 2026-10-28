@@ -260,6 +260,7 @@ public final class NativeRefreshPlugin: CAPPlugin, CAPBridgedPlugin {
             let indicator = RefreshIndicatorView(frame: .zero)
             indicator.translatesAutoresizingMaskIntoConstraints = false
             control.addSubview(indicator)
+            indicator.isHidden = true
             NSLayoutConstraint.activate([
                 indicator.centerXAnchor.constraint(equalTo: control.centerXAnchor),
                 indicator.centerYAnchor.constraint(equalTo: control.centerYAnchor, constant: 24),
@@ -306,6 +307,7 @@ public final class NativeRefreshPlugin: CAPPlugin, CAPBridgedPlugin {
                 return
             }
             self.refreshing = false
+            self.notifyListeners("progress", data: ["distance": 0, "refreshing": false])
             self.refreshControl?.endRefreshing()
             self.indicatorView?.update(distance: 0, refreshing: false)
             if !self.pullGestureActive {
@@ -320,6 +322,7 @@ public final class NativeRefreshPlugin: CAPPlugin, CAPBridgedPlugin {
 
         refreshing = true
         indicatorView?.update(distance: 96, refreshing: true)
+        notifyListeners("progress", data: ["distance": 96, "refreshing": true])
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.prepare()
         generator.impactOccurred()
@@ -358,6 +361,7 @@ public final class NativeRefreshPlugin: CAPPlugin, CAPBridgedPlugin {
         let distance = max(0, -(scrollView.contentOffset.y + scrollView.adjustedContentInset.top))
         maximumPullDistance = max(maximumPullDistance, distance)
         indicatorView?.update(distance: distance, refreshing: false)
+        notifyListeners("progress", data: ["distance": Double(distance), "refreshing": false])
 
         let steps: [CGFloat] = [20, 42, 64, 80]
         while hapticStep < steps.count && distance >= steps[hapticStep] {
@@ -374,6 +378,7 @@ public final class NativeRefreshPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     private func resetPullProgress() {
+        if !refreshing { notifyListeners("progress", data: ["distance": 0, "refreshing": false]) }
         maximumPullDistance = 0
         hapticStep = 0
         pullSoundPlayed = false
