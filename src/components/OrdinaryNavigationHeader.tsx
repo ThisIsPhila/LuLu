@@ -44,7 +44,7 @@ export const OrdinaryNavigationHeader: React.FC<Props> = ({
       <nav className="ordinary-desktop-links" aria-label="Main navigation">{navigationItems.map(item => <button key={item.view} type="button" aria-current={currentView === item.view ? 'page' : undefined} onClick={() => onNavigate(item.view)}>{item.label}</button>)}</nav>
 
       <div className="topbar-actions">
-        <OwnerAccountActivity uid={notificationUid ?? 'local-preview'} enabled={Boolean(notificationUid)} />
+        <OwnerAccountActivity uid={notificationUid ?? 'local-preview'} enabled={Boolean(notificationUid)} onOpenSettings={onOpenSettings} />
 
         <button type="button" className="user-avatar-circle ordinary-mobile-profile" aria-label="Profile" onClick={onOpenSettings}><ProfileAvatar photoUrl={photoUrl} /></button>
         <details className="account-menu ordinary-desktop-account">

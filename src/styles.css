@@ -2776,3 +2776,11 @@ body {
 html[data-lulu-platform="ios"] :is(input, textarea, select) { font-size: max(16px, 1em) !important; }
 html[data-lulu-platform="ios"], html[data-lulu-platform="ios"] body, html[data-lulu-platform="ios"] #root { max-width:100%; overflow-x:clip; }
 html[data-lulu-platform="ios"] .lulu-app-root, html[data-lulu-platform="ios"] .lulu-viewport-shell { min-width:0; max-width:100%; }
+.update-notification-item { display:grid; gap:4px; width:100%; margin-top:12px; padding:12px; border:1px solid #ded8ca; border-radius:12px; background:#f4f0e7; color:#30352c; text-align:left; cursor:pointer; }
+.update-notification-item span { color:#6a6b60; font-size:12px; line-height:1.4; }
+.pull-refresh-indicator { display:flex; align-items:center; gap:8px; pointer-events:none; transition:margin-top .12s ease-out; }
+.pull-refresh-icon { width:30px; height:30px; display:grid; place-items:center; border-radius:50%; background:conic-gradient(#64755b var(--pull-progress), #dce2d5 0); }
+.pull-refresh-icon > span { width:23px; height:23px; display:grid; place-items:center; border-radius:50%; background:#faf8f2; font-size:17px; }
+.pull-refresh-icon.is-refreshing > span { animation:lulu-pull-spin 1s linear infinite; }
+@keyframes lulu-pull-spin { to { transform:rotate(360deg); } }
+@media (prefers-reduced-motion:reduce) { .pull-refresh-icon.is-refreshing > span { animation:none; } }
