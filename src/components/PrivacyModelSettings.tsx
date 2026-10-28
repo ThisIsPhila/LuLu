@@ -120,7 +120,7 @@ export function PrivacyModelSettings({ onBack, onOpenDemo }: Props) {
       <button type="button" className="privacy-back" onClick={onBack}><ArrowLeft size={18} /> Back</button>
       <span className="privacy-settings-kicker">SETTINGS · ON-DEVICE AI</span>
       <h1>Privacy model</h1>
-      <p>Download the model once. The browser keeps its files on this device and runs text through them here.</p>
+      <p>This privacy demo uses a downloaded model on this device to highlight possible personal details. A separate cloud assessment is available after you review the transformed text. Lu chat uses a cloud privacy scrubber; it does not use this downloaded model.</p>
     </header>
 
     <section className="privacy-model-card" aria-label="GLiNER model download">
@@ -139,7 +139,7 @@ export function PrivacyModelSettings({ onBack, onOpenDemo }: Props) {
       <p className="privacy-model-origin">{localCacheAvailable && !installed ? 'This local preview found the existing model files on this computer. The files are checksum-checked before being copied into browser storage.' : 'Model files come from Hugging Face:'} <a href="https://huggingface.co/onnx-community/gliner_small-v2.1/tree/8142fb00740ccea973e64b1272949ff48653df5e" target="_blank" rel="noreferrer">onnx-community / gliner_small-v2.1 <ExternalLink size={12} /></a>. No text is sent to that source.</p>
     </section>
     <section className="privacy-cloud-card" aria-labelledby="privacy-cloud-heading">
-      <div className="privacy-cloud-heading"><div><span className="privacy-settings-kicker">OPTIONAL SERVICE</span><h2 id="privacy-cloud-heading">Cloud contextual assessment</h2></div><span className={`privacy-cloud-badge ${cloudCapability?.enabled ? 'available' : ''}`}>{cloudCapability?.enabled ? 'Available' : 'Unavailable'}</span></div>
+      <div className="privacy-cloud-heading"><div><span className="privacy-settings-kicker">SEPARATE CLOUD STEP</span><h2 id="privacy-cloud-heading">Cloud contextual assessment</h2></div><span className={`privacy-cloud-badge ${cloudCapability?.enabled ? 'available' : ''}`}>{cloudCapability?.enabled ? 'Available' : 'Unavailable'}</span></div>
       <p>This is a separate, on-demand step. It receives the exact transformed text you review and approve in the demo. Review it carefully: the local detector may miss identifying details.</p>
       <p className={cloudCapability?.enabled ? 'privacy-cloud-status available' : 'privacy-cloud-status'} role="status">{cloudMessage}</p>
       {cloudCapability && <small>Accepted input: reviewed pseudonymised text · limit {cloudCapability.maxCharacters.toLocaleString()} characters · service: {cloudCapability.provider === 'openai_decisions' ? 'OpenAI Decisions · gpt-6-luna' : cloudCapability.provider === 'openai_responses' ? 'OpenAI Responses · server-selected model (advisory)' : 'not configured'}</small>}

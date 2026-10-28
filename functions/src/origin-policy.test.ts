@@ -20,3 +20,12 @@ test('native and untrusted origins cannot perform hosted WebAuthn ceremonies', (
   assert.equal(isAllowedApiOrigin('capacitor://localhost', 'unknown'), false);
   assert.equal(isAllowedApiOrigin('https://lulu.thisisphila.co.za', '/native/exchange/options'), true);
 });
+
+test('native apps can reach privacy endpoints without opening them to unrelated origins', () => {
+  for (const origin of ['capacitor://localhost', 'https://localhost']) {
+    assert.equal(isAllowedApiOrigin(origin, '/privacy/capability'), true);
+    assert.equal(isAllowedApiOrigin(origin, '/privacy/understand'), true);
+  }
+  assert.equal(isAllowedApiOrigin('https://untrusted.example', '/privacy/capability'), false);
+  assert.equal(isAllowedApiOrigin('https://untrusted.example', '/privacy/understand'), false);
+});
