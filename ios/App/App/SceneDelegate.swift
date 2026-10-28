@@ -245,7 +245,12 @@ public final class NativeRefreshPlugin: CAPPlugin, CAPBridgedPlugin {
         DispatchQueue.main.async { [weak self, weak scrollView] in
             guard let self, let scrollView else { return }
 
-            
+            let paper = UIColor(red: 250.0 / 255, green: 249.0 / 255, blue: 246.0 / 255, alpha: 1)
+            self.webView?.isOpaque = false
+            self.webView?.backgroundColor = paper
+            self.webView?.superview?.backgroundColor = paper
+            self.bridge?.viewController?.view.backgroundColor = paper
+            scrollView.backgroundColor = paper
 
             scrollView.bounces = true
             scrollView.alwaysBounceVertical = true
