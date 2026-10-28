@@ -107,7 +107,10 @@ public final class LuAppearancePlugin: CAPPlugin, CAPBridgedPlugin {
         DispatchQueue.main.async {
             guard UIApplication.shared.supportsAlternateIcons else { call.reject("App icon selection is unavailable on this device."); return }
             UIApplication.shared.setAlternateIconName(name == "default" ? nil : name) { error in
-                if let error = error { call.reject(error.localizedDescription) } else { call.resolve(["name": name]) }
+                if let error = error { call.reject(error.localizedDescription); return }
+                let actual = UIApplication.shared.alternateIconName ?? "default"
+                guard actual == name else { call.reject("iOS did not apply the selected icon. Please try again."); return }
+                call.resolve(["name": actual])
             }
         }
     }
