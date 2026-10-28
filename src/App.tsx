@@ -1,4 +1,3 @@
-import { AppUpdateNotice } from './components/AppUpdateNotice';
 import React, { useState, useEffect, useRef, useMemo, useLayoutEffect, Suspense } from 'react';
 import { CircleAlert, X } from 'lucide-react';
 import type { Entry } from './domain/journal';
@@ -84,6 +83,8 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   const isOrdinaryNavigationView = currentView === 'home' || currentView === 'leaves' || currentView === 'stories' || currentView === 'library';
   const currentViewRef = useRef(currentView);
   currentViewRef.current = currentView;
+  const settingsReturnView = useRef<typeof currentView>('home');
+  const openSettings = () => { if (currentViewRef.current !== 'settings') settingsReturnView.current = currentViewRef.current; setCurrentView('settings'); };
   useEdgeSwipeNavigation(currentView, setCurrentView);
 
   const [activeCategoryTab, setActiveCategoryTab] = useState<string>('All');
@@ -344,7 +345,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
       const source = currentViewRef.current;
       editorReturnView.current = source === 'home' || source === 'leaves' || source === 'stories' || source === 'library' ? source : 'home';
       setLooLuDraft(null); setComposingKind('Journal'); setEditingEntry(null); setSelectedEntry(null); setCurrentView('compose');
-    } else if (destination === 'settings') setCurrentView('settings');
+    } else if (destination === 'settings') openSettings();
     else if (destination === 'privacy-settings') setCurrentView('model-settings');
     else if (destination === 'private-writing' && protectedMode && Date.now() < privateUntil) setCurrentView('local-private');
     else if (destination === 'support') navigatePrivate('vault');
@@ -463,7 +464,6 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
 
   return (
     <div className={`lulu-app-root ${currentView === 'vault' ? 'vault-dark-mode' : ''} ${currentView === 'settings' || currentView === 'model-settings' || currentView === 'privacy-demo' ? 'privacy-wide' : ''}`}>
-      <AppUpdateNotice />
       {showJudgeInvite && <section className="judge-invite-overlay" role="dialog" aria-modal="true" aria-labelledby="judge-invite-title">
         <div className="judge-invite-card"><h2 id="judge-invite-title">Judge invitation</h2>
         <p>This shared link is for judges. Sign in or create your own account to link judge access.</p>
@@ -512,7 +512,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
             protectedMode={protectedMode}
             onOpenVault={() => navigatePrivate('vault')}
             onSignOut={() => void signOutAccount()}
-            onOpenSettings={() => setCurrentView('settings')}
+            onOpenSettings={openSettings}
             onNavigate={handleOrdinaryNavigate}
           />
         )}
@@ -525,7 +525,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
             onNavigate={handleOrdinaryNavigate}
             protectedMode={protectedMode}
             onOpenVault={() => navigatePrivate('vault')}
-            onOpenSettings={() => setCurrentView('settings')}
+            onOpenSettings={openSettings}
             onSignOut={() => void signOutAccount()}
             onSearch={() => {
               const search = document.querySelector<HTMLInputElement>('[data-ordinary-page-search]');
@@ -537,7 +537,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
 
         {currentView === 'settings' && (
           <ProfileSettingsView preferences={preferences} displayName={displayName} onDisplayNameChange={async name => {await writeDisplayName(session.uid, name);displayNameEdited.current=true;setDisplayName(name);}} photoUrl={photoUrl} onPhotoSave={async photo => {await writeProfilePhoto(session.uid, photo);setCustomPhoto(photo);}} uid={session.uid} authMethod={session.authMethod} emailVerificationStatus={session.emailVerificationStatus} isPrivateSessionActive={() => !signingOut.current && Date.now() < privateAuthority.current.until} judgeAccess={judgeAccess} judgeInvitePending={Boolean(pendingJudgeInvitation())} onRetryJudgeInvite={() => {setShowJudgeInvite(true);setJudgeInviteAttempt(value => value + 1);}} onPreferencesChange={setPreferences}
-            onBack={() => setCurrentView('home')} onOpenModelSettings={() => setCurrentView('model-settings')}
+            onBack={() => setCurrentView(settingsReturnView.current)} onOpenModelSettings={() => setCurrentView('model-settings')}
             onSignOut={() => void signOutAccount()} />
         )}
 

@@ -5,6 +5,7 @@ import type { AppPreferences } from '../services/appPreferences';
 import { ProfileAvatar } from './ProfileAvatar';
 import { prepareProfilePhoto } from '../services/profilePhoto';
 import { AccountLinkingPanel } from './AccountLinkingPanel';
+import { AppUpdateSettings } from './AppUpdateNotice';
 import './ProfileSettingsView.css';
 
 type Props = {
@@ -56,9 +57,9 @@ export function ProfileSettingsView({ preferences, displayName, onDisplayNameCha
   return (
     <main className="profile-settings-page">
       <header className="profile-settings-header">
-        <button className="profile-settings-back" type="button" onClick={onBack} aria-label="Back to journal">
+        <button className="profile-settings-back" type="button" onClick={onBack} aria-label="Go back">
           <ArrowLeft size={17} aria-hidden="true" />
-          <span>Journal</span>
+          <span>Back</span>
         </button>
         <span className="profile-settings-kicker">YOUR ACCOUNT</span>
         <h1>Profile & settings</h1>
@@ -66,59 +67,6 @@ export function ProfileSettingsView({ preferences, displayName, onDisplayNameCha
       </header>
 
       <div className="profile-settings-sections">
-        <section className="profile-settings-section" aria-labelledby="accessibility-heading">
-          <h2 id="accessibility-heading">Accessibility</h2>
-          <div className="profile-settings-card">
-            <div className="profile-settings-row static-row">
-              <span className="profile-settings-icon"><Type size={18} aria-hidden="true" /></span>
-              <span className="profile-settings-copy"><strong>Text size</strong><small>Use your device or browser text-size controls to enlarge LuLu.</small></span>
-            </div>
-            <div className="profile-settings-row">
-              <span className="profile-settings-icon"><ShieldCheck size={18} aria-hidden="true" /></span>
-              <span className="profile-settings-copy"><strong>Reduce motion</strong><small>Limit animation and movement in LuLu on this device.</small></span>
-              <input
-                className="profile-settings-toggle"
-                type="checkbox"
-                role="switch"
-                aria-label="Reduce motion"
-                checked={preferences.reduceMotion}
-                onChange={event => onPreferencesChange({ ...preferences, reduceMotion: event.target.checked })}
-              />
-            </div>
-          </div>
-        </section>
-
-        <section className="profile-settings-section" aria-labelledby="appearance-heading">
-          <h2 id="appearance-heading">Appearance</h2>
-          <div className="profile-settings-card">
-            <div className="profile-settings-row static-row">
-              <span className="profile-settings-copy"><strong>Warm paper</strong><small>LuLu’s current reading and writing theme.</small></span>
-              <span className="profile-settings-value">Current</span>
-            </div>
-            <div className="profile-settings-row static-row">
-              <span className="profile-settings-copy"><strong>Language</strong><small>English is currently available.</small></span>
-              <span className="profile-settings-value">English</span>
-            </div>
-          </div>
-        </section>
-
-        {Capacitor.isNativePlatform() && <section className="profile-settings-section"><h2>App updates</h2><div className="profile-settings-card"><button className="profile-settings-link" type="button" onClick={() => window.dispatchEvent(new Event('lulu:check-update'))}><span className="profile-settings-copy"><strong>Check for updates</strong><small>Download available LuLu updates over the air.</small></span><ChevronRight size={18} aria-hidden="true" /></button></div></section>}
-
-        <section className="profile-settings-section" aria-labelledby="privacy-heading">
-          <h2 id="privacy-heading">Privacy & storage</h2>
-          <div className="profile-settings-card">
-            <div className="profile-settings-row static-row">
-              <span className="profile-settings-copy"><strong>Everyday journal</strong><small>Your ordinary entries are stored with your LuLu account.</small></span>
-              <span className="profile-settings-status">Account</span>
-            </div>
-            <button className="profile-settings-link" type="button" onClick={onOpenModelSettings}>
-              <span className="profile-settings-copy"><strong>Privacy processing</strong><small>Manage the local model and check whether reviewed-text cloud interpretation is available.</small></span>
-              <ChevronRight size={18} aria-hidden="true" />
-            </button>
-            <p className="profile-settings-note">Readable exports and encrypted backups are prepared from a saved record. They are not automatic account backups.</p>
-          </div>
-        </section>
-
         <section className="profile-settings-section" aria-labelledby="account-heading">
           <h2 id="account-heading">Account</h2>
           <div className="profile-settings-card">
@@ -147,6 +95,58 @@ export function ProfileSettingsView({ preferences, displayName, onDisplayNameCha
           </div>
         </section>
         <AccountLinkingPanel uid={uid} authMethod={authMethod} emailVerificationStatus={emailVerificationStatus} isPrivateSessionActive={isPrivateSessionActive} />
+        <section className="profile-settings-section" aria-labelledby="privacy-heading">
+          <h2 id="privacy-heading">Privacy & storage</h2>
+          <div className="profile-settings-card">
+            <div className="profile-settings-row static-row">
+              <span className="profile-settings-copy"><strong>Everyday journal</strong><small>Your ordinary entries are stored with your LuLu account.</small></span>
+              <span className="profile-settings-status">Account</span>
+            </div>
+            <button className="profile-settings-link" type="button" onClick={onOpenModelSettings}>
+              <span className="profile-settings-copy"><strong>Privacy processing</strong><small>Manage the local model and check whether reviewed-text cloud interpretation is available.</small></span>
+              <ChevronRight size={18} aria-hidden="true" />
+            </button>
+            <p className="profile-settings-note">Readable exports and encrypted backups are prepared from a saved record. They are not automatic account backups.</p>
+          </div>
+        </section>
+
+        <section className="profile-settings-section" aria-labelledby="appearance-heading">
+          <h2 id="appearance-heading">Appearance</h2>
+          <div className="profile-settings-card">
+            <div className="profile-settings-row static-row">
+              <span className="profile-settings-copy"><strong>Warm paper</strong><small>LuLu’s current reading and writing theme.</small></span>
+              <span className="profile-settings-value">Current</span>
+            </div>
+            <div className="profile-settings-row static-row">
+              <span className="profile-settings-copy"><strong>Language</strong><small>English is currently available.</small></span>
+              <span className="profile-settings-value">English</span>
+            </div>
+          </div>
+        </section>
+
+        <section className="profile-settings-section" aria-labelledby="accessibility-heading">
+          <h2 id="accessibility-heading">Accessibility</h2>
+          <div className="profile-settings-card">
+            <div className="profile-settings-row static-row">
+              <span className="profile-settings-icon"><Type size={18} aria-hidden="true" /></span>
+              <span className="profile-settings-copy"><strong>Text size</strong><small>Use your device or browser text-size controls to enlarge LuLu.</small></span>
+            </div>
+            <div className="profile-settings-row">
+              <span className="profile-settings-icon"><ShieldCheck size={18} aria-hidden="true" /></span>
+              <span className="profile-settings-copy"><strong>Reduce motion</strong><small>Limit animation and movement in LuLu on this device.</small></span>
+              <input
+                className="profile-settings-toggle"
+                type="checkbox"
+                role="switch"
+                aria-label="Reduce motion"
+                checked={preferences.reduceMotion}
+                onChange={event => onPreferencesChange({ ...preferences, reduceMotion: event.target.checked })}
+              />
+            </div>
+          </div>
+        </section>
+
+        {Capacitor.isNativePlatform() && <AppUpdateSettings />}
       </div>
     </main>
   );

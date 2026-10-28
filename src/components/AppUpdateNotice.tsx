@@ -1,41 +1,46 @@
 import {useEffect, useState} from 'react';
-import {Capacitor, CapacitorHttp} from '@capacitor/core';
+import {CapacitorHttp} from '@capacitor/core';
 import {App as NativeApp} from '@capacitor/app';
 import {CapacitorUpdater} from '@capgo/capacitor-updater';
-import './AppUpdateNotice.css';
-
 import {parseUpdateManifest, compareUpdateVersions, type LuLuUpdate} from '../services/otaManifest';
+
 const manifestUrl='https://lulu.thisisphila.co.za/updates/latest.json';
 
-export function AppUpdateNotice() {
+/** Update status and actions live within Settings, never over the app content. */
+export function AppUpdateSettings() {
   const [update,setUpdate]=useState<LuLuUpdate|null>(null);
-  const [message,setMessage]=useState('');
+  const [nativeVersion,setNativeVersion]=useState('');
+  const [currentVersion,setCurrentVersion]=useState('');
+  const [message,setMessage]=useState('Checking for updates…');
   const [busy,setBusy]=useState(false);
-  useEffect(()=>{
-    if (!Capacitor.isNativePlatform()) return;
-    let active=true;
-    async function check(manual=false) {
-      try {
-        const [info,current,response]=await Promise.all([NativeApp.getInfo(),CapacitorUpdater.current(),CapacitorHttp.get({url:`${manifestUrl}?check=${Date.now()}`,headers:{'Cache-Control':'no-cache'}})]);
-        if (!active) return;
-        const next=parseUpdateManifest(response.data);
-        if (!next || response.status!==200) {if(manual)setMessage('No app update is available.');return;}
-        if(next.nativeVersion!==info.version){if(manual)setMessage('This update requires a new native app build.');return;}
-        if(compareUpdateVersions(next.version,current.bundle.version)>0){setUpdate(next);setMessage('A LuLu update is ready to download.');}
-        else if(manual)setMessage('LuLu is up to date.');
-      } catch {if(active && manual)setMessage('Could not check for updates. Check your connection and try again.');}
-    }
-    const manual=()=>void check(true);window.addEventListener('lulu:check-update',manual);
-    const listener=NativeApp.addListener('appStateChange',state=>{if(state.isActive)void check();});
-    void check();
-    return()=>{active=false;window.removeEventListener('lulu:check-update',manual);void listener.then(handle=>handle.remove());};
-  },[]);
-  if(!Capacitor.isNativePlatform() || (!message && !update))return null;
+  const [loading,setLoading]=useState(false);
+  async function check() {
+    setLoading(true);setMessage('Checking for updates…');setUpdate(null);
+    try {
+      const [info,current]=await Promise.all([NativeApp.getInfo(),CapacitorUpdater.current()]);
+      setNativeVersion(info.version);setCurrentVersion(current.bundle.version);
+      const response=await CapacitorHttp.get({url:`${manifestUrl}?check=${Date.now()}`,headers:{'Cache-Control':'no-cache'}});
+      if(response.status!==200)throw new Error('The update server is unavailable.');
+      if(response.data && typeof response.data==='object' && response.data.status==='none') {setMessage('LuLu is up to date.');return;}
+      const next=parseUpdateManifest(response.data);
+      if(!next)throw new Error('The update information could not be read.');
+      if(next.nativeVersion!==info.version){setMessage('A new native app build is needed for the latest update.');return;}
+      if(compareUpdateVersions(next.version,current.bundle.version)>0){setUpdate(next);setMessage(`Version ${next.version} is available.`);}
+      else setMessage('LuLu is up to date.');
+    } catch (error) {setMessage(error instanceof Error ? `${error.message} Please try again.` : 'Could not check for updates. Please try again.');}
+    finally {setLoading(false);}
+  }
+  useEffect(()=>{void check();},[]);
   async function apply() {
     if(!update || busy)return;
     setBusy(true);setMessage('Downloading and verifying your update…');
     try {const bundle=await CapacitorUpdater.download(update);await CapacitorUpdater.set({id:bundle.id});}
     catch {setBusy(false);setMessage('The update could not be installed. Your current app is still available.');}
   }
-  return <aside className="app-update-notice" role="status"><span>{message}</span>{update && <button type="button" disabled={busy} onClick={()=>void apply()}>{busy?'Updating…':'Update'}</button>}<button type="button" disabled={busy} aria-label="Dismiss update notice" onClick={()=>{setMessage('');setUpdate(null);}}>×</button></aside>;
+  return <section className="profile-settings-section" aria-labelledby="app-updates-heading"><h2 id="app-updates-heading">App updates</h2><div className="profile-settings-card">
+    <div className="profile-settings-row static-row"><span className="profile-settings-copy"><strong>Current version</strong><small>{currentVersion ? `App update ${currentVersion} · native app ${nativeVersion}` : 'Loading version…'}</small></span></div>
+    <div className="profile-settings-row static-row"><span className="profile-settings-copy"><strong>{update ? 'Update available' : 'Update status'}</strong><small role="status">{message}</small></span></div>
+    {update && <button className="profile-settings-link" type="button" disabled={busy || loading} onClick={()=>void apply()}><span className="profile-settings-copy"><strong>{busy?'Installing…':`Install update ${update.version}`}</strong><small>LuLu will reopen to finish the update.</small></span></button>}
+    <button className="profile-settings-link" type="button" disabled={busy || loading} onClick={()=>void check()}><span className="profile-settings-copy"><strong>{loading?'Checking…':'Check for updates'}</strong><small>Check the latest version available for this app.</small></span></button>
+  </div></section>;
 }

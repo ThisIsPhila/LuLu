@@ -1,6 +1,6 @@
 # Private LuLu app updates
 
-The iOS and Android builds contain a native updater. While LuLu is open, it checks the LuLu-hosted update manifest on launch and when the app returns to the foreground. An available update appears in the app; the user chooses **Update**. Settings also has **Check for updates**. This is an in-app notice, not a push notification while the app is closed.
+The iOS and Android builds contain a native updater. Open **Settings → App updates** to see the installed version. LuLu checks when that section opens, and **Check for updates** checks again. If a compatible update is available, choose **Install update**. No floating prompt or push notification is used.
 
 The app accepts only encrypted bundles verified using its embedded public key. The installed updater requires an RSA-2048 signing key. The matching private key is stored locally at `~/.config/lulu-updates/private.pem` and must not be committed or shared. Back it up securely: if it is lost or replaced, a new native build containing a new public key is required. The updater rolls back when the newly loaded bundle fails to report readiness at startup; that does not guarantee rollback for every later runtime error.
 
