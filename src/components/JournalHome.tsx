@@ -16,6 +16,7 @@ import { OrdinaryEntryCard } from './OrdinaryEntryCard';
 type Props = {
   entries: Entry[];
   notificationUid?: string;
+  photoUrl?: string;
   displayName: string;
   activeTab: string;
   onTabChange: (tab: string) => void;
@@ -33,6 +34,7 @@ type Props = {
 export const JournalHome: React.FC<Props> = ({
   entries,
   notificationUid,
+  photoUrl,
   displayName,
   activeTab,
   onTabChange,
@@ -79,6 +81,7 @@ export const JournalHome: React.FC<Props> = ({
     <div className="stitch-journal-home">
       <OrdinaryNavigationHeader
         notificationUid={notificationUid}
+        photoUrl={photoUrl}
         currentView="home"
         onNavigate={onNavigate}
         protectedMode={protectedMode}

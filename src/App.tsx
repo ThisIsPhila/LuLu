@@ -31,6 +31,8 @@ import { isLocalDevelopment } from './services/localDevelopment';
 import { deleteOrdinaryMedia } from './services/ordinaryMedia';
 import { readAppPreferences, writeAppPreferences, type AppPreferences } from './services/appPreferences';
 import { readDisplayName, writeDisplayName } from './services/displayName';
+import { readProfilePhoto, writeProfilePhoto } from './services/profilePhoto';
+import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './services/backend/firebase';
 import { request } from './services/backend/request';
 import { pendingJudgeInvitation, clearJudgeInvitation } from './services/judgeInvite';
@@ -56,7 +58,10 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   const [libraryItemsState, setLibraryItemsState] = useState<{ status: 'loading' | 'ready' | 'error'; message?: string }>({ status: 'loading' });
   const [libraryItemsAttempt, setLibraryItemsAttempt] = useState(0);
   const [preferences, setPreferences] = useState<AppPreferences>(readAppPreferences);
-  const [displayName, setDisplayName] = useState(() => auth.currentUser?.displayName || '');
+  const [displayName, setDisplayName] = useState(() => auth.currentUser?.uid === session.uid ? auth.currentUser.displayName || '' : '');
+  const [googlePhoto, setGooglePhoto] = useState('');
+  const [customPhoto, setCustomPhoto] = useState('');
+  const photoUrl = customPhoto || googlePhoto;
   const displayNameEdited = useRef(false);
   const [personalState, setPersonalState] = useState<{ status: 'loading' | 'ready' | 'error'; message?: string }>({ status: 'loading' });
   const [starterState, setStarterState] = useState<{ status: 'loading' | 'ready' | 'error'; message?: string }>({ status: 'loading' });
@@ -141,6 +146,19 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     let active = true;
     void readDisplayName(session.uid).then(name => { if (active && name && !displayNameEdited.current) setDisplayName(name); });
     return () => { active = false; };
+  }, [session.uid]);
+
+  useEffect(() => {
+    let active = true;
+    void readProfilePhoto(session.uid).then(photo => { if (active) setCustomPhoto(photo); });
+    const unsubscribe = onAuthStateChanged(auth, user => {
+      if (!active || user?.uid !== session.uid) { if (active) setGooglePhoto(''); return; }
+      const google = user.providerData.find(provider => provider.providerId === 'google.com');
+      const candidate = google?.photoURL || (google ? user.photoURL : '') || '';
+      setGooglePhoto(candidate.startsWith('https://') ? candidate : '');
+      if (!displayNameEdited.current && user.displayName) setDisplayName(current => current || user.displayName || '');
+    });
+    return () => { active = false; unsubscribe(); };
   }, [session.uid]);
 
   const [backendError,setBackendError]=useState('');
@@ -477,6 +495,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
         {currentView === 'home' && (
           <JournalHome
             notificationUid={development ? undefined : session.uid}
+            photoUrl={photoUrl}
             entries={ordinaryEntries}
             displayName={displayName}
             activeTab={activeCategoryTab}
@@ -499,6 +518,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
         {isOrdinaryNavigationView && currentView !== 'home' && (
           <OrdinaryNavigationHeader
             notificationUid={development ? undefined : session.uid}
+            photoUrl={photoUrl}
             currentView={currentView}
             onNavigate={handleOrdinaryNavigate}
             protectedMode={protectedMode}
@@ -514,7 +534,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
         )}
 
         {currentView === 'settings' && (
-          <ProfileSettingsView preferences={preferences} displayName={displayName} onDisplayNameChange={name => {displayNameEdited.current=true;setDisplayName(name);void writeDisplayName(session.uid, name).catch(()=>setNotice('Could not save your name on this device.'));}} uid={session.uid} authMethod={session.authMethod} emailVerificationStatus={session.emailVerificationStatus} isPrivateSessionActive={() => !signingOut.current && Date.now() < privateAuthority.current.until} judgeAccess={judgeAccess} judgeInvitePending={Boolean(pendingJudgeInvitation())} onRetryJudgeInvite={() => {setShowJudgeInvite(true);setJudgeInviteAttempt(value => value + 1);}} onPreferencesChange={setPreferences}
+          <ProfileSettingsView preferences={preferences} displayName={displayName} onDisplayNameChange={async name => {await writeDisplayName(session.uid, name);displayNameEdited.current=true;setDisplayName(name);}} photoUrl={photoUrl} onPhotoSave={async photo => {await writeProfilePhoto(session.uid, photo);setCustomPhoto(photo);}} uid={session.uid} authMethod={session.authMethod} emailVerificationStatus={session.emailVerificationStatus} isPrivateSessionActive={() => !signingOut.current && Date.now() < privateAuthority.current.until} judgeAccess={judgeAccess} judgeInvitePending={Boolean(pendingJudgeInvitation())} onRetryJudgeInvite={() => {setShowJudgeInvite(true);setJudgeInviteAttempt(value => value + 1);}} onPreferencesChange={setPreferences}
             onBack={() => setCurrentView('home')} onOpenModelSettings={() => setCurrentView('model-settings')}
             onSignOut={() => void signOutAccount()} />
         )}

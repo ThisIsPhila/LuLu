@@ -1,11 +1,13 @@
 import React from 'react';
-import { LogOut, Menu, Search, Settings2, UserRound } from 'lucide-react';
+import { LogOut, Menu, Settings2 } from 'lucide-react';
 import { LuLuLogo } from './Logo';
 import { OwnerAccountActivity } from './OwnerAccountActivity';
+import { ProfileAvatar } from './ProfileAvatar';
 
 type Props = {
   protectedMode: boolean;
   notificationUid?: string;
+  photoUrl?: string;
   searchExpanded?: boolean;
   onSearch: () => void;
   onOpenVault: () => void;
@@ -23,9 +25,8 @@ const navigationItems = [
 
 /** Shared ordinary-route navigation chrome. Immersive/private routes keep their own headers. */
 export const OrdinaryNavigationHeader: React.FC<Props> = ({
-  searchExpanded,
   notificationUid,
-  onSearch,
+  photoUrl,
   onOpenSettings,
   onSignOut,
   currentView,
@@ -43,14 +44,11 @@ export const OrdinaryNavigationHeader: React.FC<Props> = ({
       <nav className="ordinary-desktop-links" aria-label="Main navigation">{navigationItems.map(item => <button key={item.view} type="button" aria-current={currentView === item.view ? 'page' : undefined} onClick={() => onNavigate(item.view)}>{item.label}</button>)}</nav>
 
       <div className="topbar-actions">
-        {notificationUid && <OwnerAccountActivity uid={notificationUid} />}
-        <button type="button" className="topbar-circle-btn ordinary-header-search" onClick={onSearch} aria-label="Search entries" aria-expanded={searchExpanded}>
-          <Search size={16} aria-hidden="true" />
-        </button>
+        <OwnerAccountActivity uid={notificationUid ?? 'local-preview'} enabled={Boolean(notificationUid)} />
 
-        <button type="button" className="user-avatar-circle ordinary-mobile-profile" aria-label="Profile" onClick={onOpenSettings}><UserRound size={18} aria-hidden="true" /></button>
+        <button type="button" className="user-avatar-circle ordinary-mobile-profile" aria-label="Profile" onClick={onOpenSettings}><ProfileAvatar photoUrl={photoUrl} /></button>
         <details className="account-menu ordinary-desktop-account">
-          <summary className="user-avatar-circle" aria-label="Account menu" title="Account menu"><UserRound size={18} aria-hidden="true" /></summary>
+          <summary className="user-avatar-circle" aria-label="Account menu" title="Account menu"><ProfileAvatar photoUrl={photoUrl} /></summary>
           <div className="account-menu-panel">
             <span className="account-menu-label">Your account</span>
             <button type="button" onClick={onOpenSettings}><Settings2 size={16} aria-hidden="true" />Settings</button>

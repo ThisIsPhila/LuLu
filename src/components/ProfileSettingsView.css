@@ -38,3 +38,10 @@
 }
 .profile-settings-name { display: grid; gap: 8px; padding: 14px 16px; }
 .profile-settings-name input { width: 100%; padding: 10px 12px; border: 1px solid #d8d0c2; border-radius: 10px; color: #302f2a; background: #fffdf8; font: 14px var(--font-heading); }
+.profile-avatar-image { width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; }
+.profile-photo-preview { width:56px; height:56px; display:grid; place-items:center; border-radius:50%; overflow:hidden; background:#eee9df; border:1px solid #ded8cc; color:#5b6251; }
+.profile-photo-picker, .profile-save-button { justify-self:start; min-height:38px; padding:8px 14px; border:1px solid #d4ccbd; border-radius:999px; color:#394338; background:#f5f5ee; font:600 12px var(--font-heading); cursor:pointer; }
+.profile-photo-picker input { position:absolute; width:1px; height:1px; opacity:0; }
+.profile-photo-picker:focus-within, .profile-save-button:focus-visible { outline:2px solid #6e7966; outline-offset:2px; }
+.profile-save-button:disabled { opacity:.5; cursor:default; }
+.profile-save-status { color:#59624e; font:12px/1.4 var(--font-heading); }

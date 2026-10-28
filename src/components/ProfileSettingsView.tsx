@@ -1,12 +1,17 @@
+import { useEffect, useState } from 'react';
 import { ArrowLeft, ChevronRight, LogOut, ShieldCheck, Type } from 'lucide-react';
 import type { AppPreferences } from '../services/appPreferences';
+import { ProfileAvatar } from './ProfileAvatar';
+import { prepareProfilePhoto } from '../services/profilePhoto';
 import { AccountLinkingPanel } from './AccountLinkingPanel';
 import './ProfileSettingsView.css';
 
 type Props = {
   preferences: AppPreferences;
   displayName: string;
-  onDisplayNameChange: (name: string) => void;
+  onDisplayNameChange: (name: string) => Promise<void>;
+  photoUrl: string;
+  onPhotoSave: (photo: string) => Promise<void>;
   uid: string;
   authMethod?: 'passkey' | 'email' | 'google';
   emailVerificationStatus?: 'sent' | 'failed';
@@ -20,7 +25,33 @@ type Props = {
   onSignOut: () => void;
 };
 
-export function ProfileSettingsView({ preferences, displayName, onDisplayNameChange, uid, authMethod, emailVerificationStatus, isPrivateSessionActive, judgeAccess, judgeInvitePending, onRetryJudgeInvite, onPreferencesChange, onBack, onOpenModelSettings, onSignOut }: Props) {
+export function ProfileSettingsView({ preferences, displayName, onDisplayNameChange, photoUrl, onPhotoSave, uid, authMethod, emailVerificationStatus, isPrivateSessionActive, judgeAccess, judgeInvitePending, onRetryJudgeInvite, onPreferencesChange, onBack, onOpenModelSettings, onSignOut }: Props) {
+  const [nameDraft, setNameDraft] = useState(displayName);
+  const [nameStatus, setNameStatus] = useState('');
+  useEffect(() => setNameDraft(displayName), [displayName]);
+  const [photoDraft, setPhotoDraft] = useState('');
+  const [photoStatus, setPhotoStatus] = useState('');
+  const [savingName, setSavingName] = useState(false);
+  const [savingPhoto, setSavingPhoto] = useState(false);
+  async function saveName() {
+    setSavingName(true); setNameStatus('Saving…');
+    try { await onDisplayNameChange(nameDraft.trim()); setNameStatus('Name saved on this device.'); }
+    catch { setNameStatus('Could not save your name. Please try again.'); }
+    finally { setSavingName(false); }
+  }
+  async function choosePhoto(file?: File) {
+    if (!file) return;
+    setPhotoStatus('Preparing photo…');
+    try { setPhotoDraft(await prepareProfilePhoto(file)); setPhotoStatus('Photo ready to save.'); }
+    catch (error) { setPhotoStatus(error instanceof Error ? error.message : 'Could not read this photo.'); }
+  }
+  async function savePhoto() {
+    if (!photoDraft) return;
+    setSavingPhoto(true); setPhotoStatus('Saving…');
+    try { await onPhotoSave(photoDraft); setPhotoDraft(''); setPhotoStatus('Photo saved on this device.'); }
+    catch { setPhotoStatus('Could not save your photo. Please try again.'); }
+    finally { setSavingPhoto(false); }
+  }
   return (
     <main className="profile-settings-page">
       <header className="profile-settings-header">
@@ -88,10 +119,19 @@ export function ProfileSettingsView({ preferences, displayName, onDisplayNameCha
         <section className="profile-settings-section" aria-labelledby="account-heading">
           <h2 id="account-heading">Account</h2>
           <div className="profile-settings-card">
-            <label className="profile-settings-name">
-              <span className="profile-settings-copy"><strong>Your name</strong><small>Used in your greeting and saved encrypted on this device.</small></span>
-              <input aria-label="Your name" value={displayName} maxLength={80} autoComplete="given-name" onChange={event => onDisplayNameChange(event.target.value)} placeholder="Add your name" />
-            </label>
+            <div className="profile-settings-name">
+              <label htmlFor="profile-name" className="profile-settings-copy"><strong>Your name</strong><small>Used in your greeting and saved encrypted on this device.</small></label>
+              <input id="profile-name" value={nameDraft} maxLength={80} autoComplete="given-name" onChange={event => {setNameDraft(event.target.value);setNameStatus('');}} placeholder="Add your name" />
+              <button type="button" className="profile-save-button" disabled={savingName || nameDraft.trim() === displayName.trim()} onClick={() => void saveName()}>Save name</button>
+              <small className="profile-save-status" role="status">{nameStatus}</small>
+            </div>
+            <div className="profile-settings-name">
+              <span className="profile-settings-copy"><strong>Profile photo</strong><small>Your Google photo is used when available. A photo you choose is saved encrypted on this device.</small></span>
+              <span className="profile-photo-preview"><ProfileAvatar photoUrl={photoDraft || photoUrl} /></span>
+              <label className="profile-photo-picker">Choose photo<input type="file" accept="image/*" onChange={event => {void choosePhoto(event.target.files?.[0]);event.currentTarget.value='';}} /></label>
+              <button type="button" className="profile-save-button" disabled={savingPhoto || !photoDraft} onClick={() => void savePhoto()}>Save photo</button>
+              <small className="profile-save-status" role="status">{photoStatus}</small>
+            </div>
             <div className="profile-settings-row static-row">
               <span className="profile-settings-copy"><strong>Signed in to LuLu</strong><small>Your account is needed to open your journal.</small></span>
             </div>
