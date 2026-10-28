@@ -1,3 +1,6 @@
+import { Capacitor } from '@capacitor/core';
+import { prepareRefreshFeedback, playRefreshFeedback } from './services/refreshFeedback';
+import { useNativePullToRefresh } from './hooks/useNativePullToRefresh';
 import React, { useState, useEffect, useRef, useMemo, useLayoutEffect, Suspense } from 'react';
 import { CircleAlert, X } from 'lucide-react';
 import type { Entry } from './domain/journal';
@@ -95,7 +98,9 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
 
   // Protected Mode & Modals
   const [protectedMode, setProtectedMode] = useState<boolean>(false);
-  const pullRefresh = usePullToRefresh({ enabled: isOrdinaryNavigationView && !protectedMode, onRefresh: async () => { setWatchAttempt(value => value + 1); setLibraryItemsAttempt(value => value + 1); } });
+  const refreshOrdinary = async () => { setWatchAttempt(value => value + 1); setLibraryItemsAttempt(value => value + 1); };
+  useNativePullToRefresh(isOrdinaryNavigationView && !protectedMode, refreshOrdinary);
+  const pullRefresh = usePullToRefresh({ enabled: isOrdinaryNavigationView && !protectedMode && !(Capacitor.getPlatform() === 'ios' && Capacitor.isPluginAvailable('NativeRefresh')), onRefreshStart: prepareRefreshFeedback, onThresholdReached: () => { navigator.vibrate?.(20); }, onRefresh: async () => { await refreshOrdinary(); await playRefreshFeedback(); } });
   const [representationsLoading, setRepresentationsLoading] = useState(false);
   const [representationsError, setRepresentationsError] = useState('');
   const [inspectorText, setInspectorText] = useState('');
