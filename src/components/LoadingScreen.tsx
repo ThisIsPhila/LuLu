@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { loginModeScenes } from '../services/loginScenes';
 import { loadingBackground } from '../services/appearance';
+import { loginModeScenes } from '../services/loginScenes';
 import { getSystemTheme, readAppPreferences, resolveAppTheme, type AppTheme } from '../services/appPreferences';
 import './LoadingScreen.css';
 
@@ -21,7 +21,6 @@ export function LoadingScreen({ theme: providedTheme }: { theme?: AppTheme }) {
     <div className="lulu-loading-landscape" style={{backgroundImage:`url("${landscape.url}")`,filter:`blur(${scene.blurLevel * 1.5}px)`}} aria-hidden="true" />
     <div className="lulu-loading-tone" style={{backgroundColor:toneColor,opacity:toneStrength}} aria-hidden="true" />
     <div className="lulu-loading-content">
-      <div className="lulu-loading-portrait" style={{backgroundImage:`linear-gradient(180deg, #3b302219 0%, transparent 29%, #26241caa 100%), url("${scene.portrait.src}")`}} aria-hidden="true" />
       <img className="lulu-loading-wordmark" src="/media/brand/lulu-wordmark-white.png" alt="LuLu" />
       <span>Opening your journal…</span>
       <i className="lulu-loading-indicator" aria-hidden="true" />

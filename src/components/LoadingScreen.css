@@ -3,12 +3,10 @@
 .lulu-loading-landscape { background-position:center; background-size:cover; transform:scale(1.04); }
 .lulu-loading-tone { inset:0; }
 .lulu-loading-content { display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center; text-shadow:0 2px 6px #0009; }
-.lulu-loading-portrait { width:clamp(148px,30vw,228px); aspect-ratio:4/5; margin-bottom:10px; border:1px solid #ffffff8c; border-radius:22px; background-color:#69685a; background-position:center; background-size:cover; box-shadow:0 22px 62px #0006, inset 0 1px #fff7; }
 .lulu-loading-wordmark { width:92px; height:auto; filter:drop-shadow(0 2px 5px #0006); }
 .lulu-loading-content > span { letter-spacing:.01em; }
 .lulu-loading-indicator { width:18px; height:18px; margin-top:5px; border:1.5px solid #ffffff75; border-top-color:#fff; border-radius:50%; animation:lulu-loading-spin 1s linear infinite; }
 @keyframes lulu-loading-spin { to { transform:rotate(360deg); } }
-:root[data-lulu-theme="dark"] .lulu-loading-portrait { border-color:#d8ddcd80; box-shadow:0 22px 62px #0008, inset 0 1px #ffffff1c; }
-@media (max-height:620px) { .lulu-loading-portrait { width:clamp(110px,22vh,155px); margin-bottom:2px; } .lulu-loading-content { gap:8px; } }
+@media (max-height:620px) { .lulu-loading-content { gap:8px; } }
 @media (prefers-reduced-motion:reduce) { .lulu-loading-indicator { animation:none; border-top-color:#ffffff75; } }
 :root[data-lulu-reduce-motion="true"] .lulu-loading-indicator { animation:none; border-top-color:#ffffff75; }
