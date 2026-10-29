@@ -26,7 +26,7 @@ const parseLimit = (value: string, label: string): number | null => {
   return number;
 };
 
-export function OwnerAiAccessSettings({ onBack }: { onBack: () => void }) {
+export function OwnerAiAccessSettings() {
   const [accounts, setAccounts] = useState<AiAccount[]>([]);
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
   const [status, setStatus] = useState<'loading'|'ready'|'error'>('loading');
@@ -99,7 +99,6 @@ export function OwnerAiAccessSettings({ onBack }: { onBack: () => void }) {
 
   return <main className="owner-ai-access-page">
     <header className="owner-ai-access-header">
-      <button type="button" className="profile-settings-back" onClick={onBack}>‹ <span>Settings</span></button>
       <span className="profile-settings-kicker">OWNER · TEST ACCOUNTS</span>
       <h1>AI access by account</h1>
       <p>Access is checked after sign-in. New accounts remain ordinary LuLu accounts unless you enable AI for them or they use the private judge invitation.</p>

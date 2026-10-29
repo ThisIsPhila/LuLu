@@ -21,6 +21,7 @@ const bandLabel: Record<PatternBand, string> = {
 
 type Props = {
   onBack: () => void;
+  showBackButton?: boolean;
   entries?: Entry[];
   accountActive: () => boolean;
   privateSession?: LocalVaultSession;
@@ -58,7 +59,7 @@ function newRevision() {
   return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-export function CloudPrivacyDemo({ onBack, entries = [], accountActive, privateSession, onUnlockPrivate, onOpenSupport, onAskLu }: Props) {
+export function CloudPrivacyDemo({ onBack, showBackButton = true, entries = [], accountActive, privateSession, onUnlockPrivate, onOpenSupport, onAskLu }: Props) {
   const [sourceText, setSourceText] = useState(EXAMPLE);
   const [sourceEntryCount, setSourceEntryCount] = useState(0);
   const [entryQuery, setEntryQuery] = useState('');
@@ -254,7 +255,7 @@ export function CloudPrivacyDemo({ onBack, entries = [], accountActive, privateS
 
   return <main className="cloud-privacy-page">
     <header className="cloud-privacy-header">
-      <button type="button" className="privacy-back" onClick={onBack}><ArrowLeft size={18}/> Back</button>
+      {showBackButton && <button type="button" className="privacy-back" onClick={onBack}><ArrowLeft size={18}/> Back</button>}
       <span className="privacy-settings-kicker">CLOUD DEMO · LIVE SERVICES</span>
       <h1>See what the models do</h1>
       <p>Follow your own writing through LuLu’s privacy step, review the exact replacements, then send only that reviewed version to look for described patterns across up to three entries.</p>

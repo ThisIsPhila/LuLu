@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { ArrowDownToLine, ArrowLeft, CheckCircle2, Cpu, ExternalLink, Fingerprint, HardDrive, Trash2 } from 'lucide-react';
 import { detectLocalPreviewModelCache, privacyModelManager, PRIVACY_MODEL } from '../services/privacy/modelPackage';
 import type { ModelState } from '../services/privacy/contracts';
@@ -8,9 +9,11 @@ import { getCloudProcessingCapability, type CloudProcessingCapability } from '..
 const totalBytes = PRIVACY_MODEL.artifacts.reduce((sum, artifact) => sum + artifact.bytes, 0);
 const formatBytes = (bytes: number) => `${(bytes / 1_000_000).toFixed(0)} MB`;
 
-type Props = { onBack: () => void; onOpenLocalDemo: () => void; onOpenCloudDemo?: () => void };
+type Props = { onBack?: () => void; onOpenLocalDemo: () => void; onOpenCloudDemo?: () => void };
 
 export function PrivacyModelSettings({ onBack, onOpenLocalDemo, onOpenCloudDemo }: Props) {
+  const nativeApp = Capacitor.isNativePlatform();
+  const localStorageName = nativeApp ? 'this LuLu app on this device' : 'this browser on this device';
   const [modelState, setModelState] = useState<ModelState>({ status: 'not_installed' });
   const [storage, setStorage] = useState<{ usage?: number; quota?: number; persistent?: boolean }>({});
   const [busy, setBusy] = useState(false);
@@ -69,8 +72,8 @@ export function PrivacyModelSettings({ onBack, onOpenLocalDemo, onOpenCloudDemo 
       await installation;
       await refresh();
       setMessage(localCacheAvailable
-        ? 'Existing local model files copied into this browser’s storage. No internet model download was needed.'
-        : 'Model downloaded and saved in this browser on this device.');
+        ? `Existing local model files copied into ${localStorageName} storage. No internet model download was needed.`
+        : `Model downloaded and saved inside ${localStorageName}.`);
     } catch (error) {
       setModelState(privacyModelManager.state());
       setMessage(error instanceof Error ? error.message : 'The model could not be downloaded. Check your connection and available storage.');
@@ -84,17 +87,17 @@ export function PrivacyModelSettings({ onBack, onOpenLocalDemo, onOpenCloudDemo 
       setRuntimeState('not_loaded');
       await privacyModelManager.remove();
       await refresh();
-      setMessage('Model files removed from this browser.');
+      setMessage(`Model files removed from ${localStorageName}.`);
     } catch (error) { setMessage(error instanceof Error ? error.message : 'The model could not be removed.'); }
     finally { setBusy(false); }
   }
 
   async function prepareRuntime() {
-    setBusy(true); setRuntimeState('loading'); setMessage('Loading the model into this browser tab. No text is being processed.');
+    setBusy(true); setRuntimeState('loading'); setMessage(`Loading the model into ${nativeApp ? 'this LuLu app session' : 'this browser tab'}. No text is being processed.`);
     try {
       await prepareGlinerBrowserModel();
       setRuntimeState('ready');
-      setMessage('Model ready in this tab. It will stay loaded while you open the demo.');
+      setMessage(`Model ready in ${nativeApp ? 'this LuLu app session' : 'this browser tab'}. It will stay loaded while you open the demo.`);
     } catch (error) {
       setRuntimeState(getBrowserModelRuntimeState());
       setMessage(error instanceof Error ? error.message : 'The model could not be prepared in this browser.');
@@ -106,7 +109,7 @@ export function PrivacyModelSettings({ onBack, onOpenLocalDemo, onOpenCloudDemo 
     try {
       await unloadGlinerBrowserModel();
       setRuntimeState('not_loaded');
-      setMessage('Model unloaded from this tab’s memory. Its downloaded files remain in browser storage.');
+      setMessage(`Model unloaded from ${nativeApp ? 'this LuLu app session' : 'this browser tab'} memory. Its downloaded files remain in ${localStorageName}.`);
     } catch (error) { setMessage(error instanceof Error ? error.message : 'The model could not be unloaded.'); }
     finally { setBusy(false); }
   }
@@ -117,10 +120,10 @@ export function PrivacyModelSettings({ onBack, onOpenLocalDemo, onOpenCloudDemo 
 
   return <main className="privacy-settings-page">
     <header className="privacy-settings-header">
-      <button type="button" className="privacy-back" onClick={onBack}><ArrowLeft size={18} /> Back</button>
+      {onBack && <button type="button" className="privacy-back" onClick={onBack}><ArrowLeft size={18} /> Back</button>}
       <span className="privacy-settings-kicker">SETTINGS · AI PROCESSING</span>
       <h1>AI processing</h1>
-      <p>The current demo runs in the cloud: LuLu first detects and highlights possible personal details, then sends only the exact version you review to OpenAI Decisions. The downloaded GLiNER model below is an optional, separate on-device experiment.</p>
+      <p>The cloud demo detects and highlights possible personal details, then sends only the exact version you review to OpenAI Decisions. The separate GLiNER model below can scan text on this device; it is not currently used by Lu chat or the cloud demo.</p>
       <div className="privacy-settings-header-actions">{onOpenCloudDemo && <button type="button" className="privacy-button primary" onClick={onOpenCloudDemo}><Fingerprint size={17}/> Open cloud processing demo <ExternalLink size={15}/></button>}<span className={`privacy-cloud-badge ${cloudCapability?.enabled ? 'available' : ''}`}>{cloudCapability?.enabled ? cloudCapability.provider === 'openai_decisions' ? 'Cloud AI connected' : 'Cloud scrub connected' : 'Cloud AI unavailable'}</span></div>
     </header>
 
@@ -128,12 +131,12 @@ export function PrivacyModelSettings({ onBack, onOpenLocalDemo, onOpenCloudDemo 
       <span className="privacy-settings-kicker privacy-optional-kicker">OPTIONAL · ON-DEVICE EXPERIMENT</span>
       <div className="privacy-model-card-title"><span className="privacy-model-icon"><Cpu size={21} /></span><div><h2>GLiNER Small v2.1</h2><p>Quantized ONNX · English entity detection</p></div></div>
       <div className="privacy-model-facts"><span><HardDrive size={15} /> About {formatBytes(totalBytes)}</span><span><CheckCircle2 size={15} /> Files are checksum-checked</span></div>
-      {installed ? <div className="privacy-installed-state" role="status"><CheckCircle2 size={18} /> Downloaded in this browser on this device</div> : downloading ? <div className="privacy-download-progress" role="status"><div className="privacy-progress-copy"><span>{localCacheAvailable ? 'Copying existing model files into this browser…' : 'Downloading model files…'}</span><span>{formatBytes(modelState.receivedBytes)} / {formatBytes(modelState.totalBytes)}</span></div><progress max={100} value={progress} aria-label="Model download progress" /></div> : modelState.status === 'unsupported' ? <p className="privacy-inline-error">This browser does not support the storage needed for the model.</p> : <p className="privacy-storage-note">{localCacheAvailable ? 'Verified model files are already present on this computer. Use them to fill this browser’s private site storage without downloading them from the internet.' : 'Stored in this site’s private browser storage, not as a file in Downloads. Browser settings can clear this storage.'}</p>}
-      {installed && <div className={`privacy-runtime-state ${runtimeState === 'ready' ? 'is-ready' : ''}`} role="status"><span className="live-dot" />{runtimeState === 'ready' ? 'Model loaded in this tab and ready. Text has not been processed.' : runtimeState === 'loading' ? 'Loading model into this tab’s memory…' : 'Model files are here; the model is not loaded in memory yet.'}</div>}
-      {storage.usage !== undefined && storage.quota !== undefined && <p className="privacy-storage-footnote">This site is using {formatBytes(storage.usage)} of about {formatBytes(storage.quota)} browser storage{storage.persistent ? ' · browser storage persistence enabled' : ''}.</p>}
+      {installed ? <div className="privacy-installed-state" role="status"><CheckCircle2 size={18} /> Downloaded inside {localStorageName}</div> : downloading ? <div className="privacy-download-progress" role="status"><div className="privacy-progress-copy"><span>{localCacheAvailable ? 'Copying existing model files into local storage…' : 'Downloading model files…'}</span><span>{formatBytes(modelState.receivedBytes)} / {formatBytes(modelState.totalBytes)}</span></div><progress max={100} value={progress} aria-label="Model download progress" /></div> : modelState.status === 'unsupported' ? <p className="privacy-inline-error">This device’s browser storage is not available for the model.</p> : <p className="privacy-storage-note">{localCacheAvailable ? 'Verified model files are already present on this computer. Use them to fill this browser’s private site storage without downloading them from the internet.' : `Stored in ${localStorageName} private storage, not as a file in Downloads. Removing the app or clearing its website data can remove the model.`}</p>}
+      {installed && <div className={`privacy-runtime-state ${runtimeState === 'ready' ? 'is-ready' : ''}`} role="status"><span className="live-dot" />{runtimeState === 'ready' ? 'Model loaded in this session and ready. Text has not been processed.' : runtimeState === 'loading' ? 'Loading model into memory…' : 'Model files are here; load them into memory before scanning.'}</div>}
+      {storage.usage !== undefined && storage.quota !== undefined && <p className="privacy-storage-footnote">{nativeApp ? 'LuLu is' : 'This site is'} using {formatBytes(storage.usage)} of about {formatBytes(storage.quota)} {nativeApp ? 'app storage' : 'browser storage'}{storage.persistent ? ' · storage persistence enabled' : ''}.</p>}
       {message && <p className={modelState.status === 'failed' || /could not|only |unavailable|not support|failed/i.test(message) ? 'privacy-inline-error' : 'privacy-inline-success'} role="status">{message}</p>}
       <div className="privacy-model-actions">
-        {installed ? <button className="privacy-button secondary" type="button" disabled={busy} onClick={() => void remove()}><Trash2 size={17} /> Remove model</button> : <button className="privacy-button primary" type="button" disabled={busy || downloading || modelState.status === 'unsupported'} onClick={() => void install()}><ArrowDownToLine size={17} /> {busy ? 'Preparing…' : localCacheAvailable ? 'Use model files already on this computer' : 'Download model to this browser'}</button>}
+        {installed ? <button className="privacy-button secondary" type="button" disabled={busy} onClick={() => void remove()}><Trash2 size={17} /> Remove model</button> : <button className="privacy-button primary" type="button" disabled={busy || downloading || modelState.status === 'unsupported'} onClick={() => void install()}><ArrowDownToLine size={17} /> {busy ? 'Preparing…' : localCacheAvailable ? 'Use model files already on this computer' : `Download model to ${nativeApp ? 'this LuLu app' : 'this browser'}`}</button>}
         {installed && runtimeState !== 'ready' && <button className="privacy-button secondary" type="button" disabled={busy || runtimeState === 'loading'} onClick={() => void prepareRuntime()}><Cpu size={17} /> {runtimeState === 'loading' ? 'Preparing model…' : 'Prepare model for this session'}</button>}
         {installed && runtimeState === 'ready' && <button className="privacy-button secondary" type="button" disabled={busy} onClick={() => void unloadRuntime()}>Unload from memory</button>}
         {installed && <button className="privacy-button primary" type="button" disabled={busy || runtimeState === 'loading'} onClick={onOpenLocalDemo}>{runtimeState === 'ready' ? 'Open local demo — model ready' : 'Open local model demo'} <ExternalLink size={16} /></button>}

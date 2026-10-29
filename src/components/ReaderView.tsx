@@ -20,6 +20,7 @@ type Props = {
   onBack: () => void;
   onEdit: () => void;
   onEnterProtected: () => void;
+  showNavigationHeader?: boolean;
   storySequence?: readonly Entry[];
   onSelectStorySequenceEntry?: (entry: Entry) => void;
 };
@@ -31,6 +32,7 @@ export const ReaderView: React.FC<Props> = ({
   onBack,
   onEdit,
   onEnterProtected,
+  showNavigationHeader = true,
   storySequence = [],
   onSelectStorySequenceEntry,
 }) => {
@@ -58,12 +60,12 @@ export const ReaderView: React.FC<Props> = ({
   return (
     <div className={`story-reading-screen theme-${colorTheme}`}>
       {/* Top Header */}
-      <header className="reading-header">
+      {showNavigationHeader && <header className="reading-header">
         <button className="icon-btn-round" type="button" onClick={onBack} aria-label="Go back">
           <ArrowLeft size={18} />
         </button>
         <div className="header-brand-title">
-          <LuLuLogo size="sm" />
+          <LuLuLogo size="sm" dark={colorTheme === 'dark' || document.documentElement.dataset.luluTheme === 'dark'} />
           {hasReadAccess && <span className="composer-label">{entry.kind === 'Story' ? 'Story' : 'Journal'}</span>}
         </div>
         <div className="header-right-tools">
@@ -71,7 +73,7 @@ export const ReaderView: React.FC<Props> = ({
             <Pencil size={16} />
           </button>}
         </div>
-      </header>
+      </header>}
 
       {/* Reader Body */}
       <main className="reading-content-container">

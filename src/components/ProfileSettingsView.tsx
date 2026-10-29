@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
-import { ArrowLeft, ChevronRight, LogOut, Moon, ShieldCheck, Sparkles, Type } from 'lucide-react';
+import { ChevronRight, LogOut, Moon, ShieldCheck, Sparkles, Type } from 'lucide-react';
 import type { AppPreferences, AppTheme } from '../services/appPreferences';
 import { ProfileAvatar } from './ProfileAvatar';
 import { prepareProfilePhoto } from '../services/profilePhoto';
@@ -35,12 +35,11 @@ type Props = {
   judgeInvitePending: boolean;
   onRetryJudgeInvite: () => void;
   onPreferencesChange: (preferences: AppPreferences) => void;
-  onBack: () => void;
   onOpenModelSettings: () => void;
   onSignOut: () => void;
 };
 
-export function ProfileSettingsView({ preferences, effectiveTheme, appearanceStatus, onUseSystemAppearance, displayName, onDisplayNameChange, photoUrl, onPhotoSave, uid, authMethod, emailVerificationStatus, isPrivateSessionActive, judgeAccess, judgeVoiceSeconds, judgeVoiceDailyLimit, judgeDecisionsPerDay, judgeLuMessagesPerDay, judgeDecisionsUsedToday, judgeLuMessagesUsedToday, judgeVoiceRefillAt, isOwnerAccount, onOpenAiAccess, judgeInvitePending, onRetryJudgeInvite, onPreferencesChange, onBack, onOpenModelSettings, onSignOut }: Props) {
+export function ProfileSettingsView({ preferences, effectiveTheme, appearanceStatus, onUseSystemAppearance, displayName, onDisplayNameChange, photoUrl, onPhotoSave, uid, authMethod, emailVerificationStatus, isPrivateSessionActive, judgeAccess, judgeVoiceSeconds, judgeVoiceDailyLimit, judgeDecisionsPerDay, judgeLuMessagesPerDay, judgeDecisionsUsedToday, judgeLuMessagesUsedToday, judgeVoiceRefillAt, isOwnerAccount, onOpenAiAccess, judgeInvitePending, onRetryJudgeInvite, onPreferencesChange, onOpenModelSettings, onSignOut }: Props) {
   const [nameDraft, setNameDraft] = useState(displayName);
   const [nameStatus, setNameStatus] = useState('');
   useEffect(() => setNameDraft(displayName), [displayName]);
@@ -70,10 +69,6 @@ export function ProfileSettingsView({ preferences, effectiveTheme, appearanceSta
   return (
     <main className="profile-settings-page">
       <header className="profile-settings-header">
-        <button className="profile-settings-back" type="button" onClick={onBack} aria-label="Go back">
-          <ArrowLeft size={17} aria-hidden="true" />
-          <span>Back</span>
-        </button>
         <span className="profile-settings-kicker">YOUR ACCOUNT</span>
         <h1>Profile & settings</h1>
         <p>Choose how LuLu feels to use and review where your writing is kept.</p>

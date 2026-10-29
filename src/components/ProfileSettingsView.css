@@ -5,8 +5,7 @@
   background: radial-gradient(ellipse at 84% 0%, rgba(217, 202, 188, .32), transparent 34%), #f7f2e9;
 }
 .profile-settings-header, .profile-settings-sections { width: min(100%, 720px); margin-inline: auto; }
-.profile-settings-back { display: inline-flex; min-height: 40px; align-items: center; gap: 8px; padding: 0 13px; border: 1px solid rgba(182, 174, 161, .55); border-radius: 999px; color: #45443e; background: rgba(251, 248, 242, .84); font: 600 13px var(--font-heading); cursor: pointer; }
-.profile-settings-back:focus-visible, .profile-settings-toggle:focus-visible, .profile-settings-link:focus-visible, .profile-settings-signout:focus-visible, .profile-use-system:focus-visible { outline: 3px solid #68745f; outline-offset: 3px; }
+.profile-settings-toggle:focus-visible, .profile-settings-link:focus-visible, .profile-settings-signout:focus-visible, .profile-use-system:focus-visible { outline: 3px solid #68745f; outline-offset: 3px; }
 .profile-settings-kicker { display: block; margin-top: 30px; color: #737362; font: 600 10px var(--font-mono); letter-spacing: .13em; }
 .profile-settings-header h1 { margin-top: 6px; color: #292824; font: 400 clamp(29px, 7vw, 39px)/1.14 var(--font-serif); letter-spacing: -.035em; }
 .profile-settings-header > p { max-width: 530px; margin-top: 8px; color: #6c665d; font: 15px/1.6 var(--font-serif); }
@@ -19,7 +18,11 @@
 .profile-settings-copy { display: grid; min-width: 0; gap: 3px; }
 .profile-settings-copy strong { color: #302f2a; font: 600 14px/1.35 var(--font-heading); }
 .profile-settings-copy small { color: #777166; font: 12px/1.45 var(--font-heading); }
-.profile-settings-toggle { flex: 0 0 42px; width: 42px; height: 24px; margin-left: auto; accent-color: #59694f; cursor: pointer; }
+.profile-settings-toggle { position: relative; flex: 0 0 42px; width: 42px; height: 24px; margin-left: auto; padding: 2px; appearance: none; -webkit-appearance: none; border: 1px solid #c5c1b6; border-radius: 999px; background: #dedbd2; cursor: pointer; transition: background-color .18s ease, border-color .18s ease; }
+.profile-settings-toggle::after { content: ""; display: block; width: 18px; height: 18px; border-radius: 50%; background: #fffdf8; box-shadow: 0 1px 3px rgba(36,36,33,.22); transition: transform .18s ease; }
+.profile-settings-toggle:checked { border-color: #69765e; background: #69765e; }
+.profile-settings-toggle:checked::after { transform: translateX(18px); }
+.profile-settings-toggle:disabled { cursor: not-allowed; opacity: .55; }
 .appearance-system-row { align-items: center; }
 .appearance-system-row .profile-settings-copy { flex: 1; }
 .profile-use-system { flex: 0 0 auto; min-height: 38px; padding: 0 12px; border: 1px solid #d4ccbd; border-radius: 999px; color: #394338; background: #f5f5ee; font: 600 11px/1.3 var(--font-heading); cursor: pointer; }
@@ -48,7 +51,8 @@
 .profile-settings-name input { width: 100%; padding: 10px 12px; border: 1px solid #d8d0c2; border-radius: 10px; color: #302f2a; background: #fffdf8; font: 14px var(--font-heading); }
 .profile-avatar-image { width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; }
 .profile-photo-preview { width:56px; height:56px; display:grid; place-items:center; border-radius:50%; overflow:hidden; background:#eee9df; border:1px solid #ded8cc; color:#5b6251; }
-.profile-photo-picker, .profile-save-button { justify-self:start; min-height:38px; padding:8px 14px; border:1px solid #d4ccbd; border-radius:999px; color:#394338; background:#f5f5ee; font:600 12px var(--font-heading); cursor:pointer; }
+.profile-photo-picker, .profile-save-button { justify-self:start; min-height:38px; padding:8px 14px; border:1px solid #d4ccbd; border-radius:999px; color:#394338; background:#f5f5ee; font:600 12px var(--font-heading); cursor:pointer; transition:background-color .16s ease,border-color .16s ease; }
+.profile-photo-picker:hover, .profile-save-button:hover:not(:disabled) { background:#eeeee5; border-color:#bfc4b1; }
 .profile-photo-picker input { position:absolute; width:1px; height:1px; opacity:0; }
 .profile-photo-picker:focus-within, .profile-save-button:focus-visible { outline:2px solid #6e7966; outline-offset:2px; }
 .profile-save-button:disabled { opacity:.5; cursor:default; }

@@ -12,6 +12,7 @@ import {
 import { LuLuLogo } from './Logo';
 import type { Entity } from '../domain/transform';
 import type { Entry } from '../domain/journal';
+import type { HeaderNavigationRequest, HeaderNavigationView } from './OrdinaryNavigationHeader';
 import { useWritingViewport } from '../hooks/useWritingViewport';
 import type { LocalVault, LocalVaultRevision } from '../services/vault/localVault';
 import { PrivateDraftComposer } from './PrivateDraftComposer';
@@ -39,6 +40,10 @@ type Props = {
   initialDraft?: string;
   initialDraftTitle?: string;
   onBack: () => void;
+  showNavigationHeader?: boolean;
+  onHeaderNavigate?: (view: HeaderNavigationView) => void;
+  onHeaderOpenSettings?: () => void;
+  onRegisterHeaderNavigation?: (handler: ((request: HeaderNavigationRequest) => void) | null) => void;
   onSaveProtected: (data: {
     entryId: string;
     title: string;
@@ -115,6 +120,10 @@ export const TransformProtectView: React.FC<Props> = ({
   initialDraft,
   initialDraftTitle,
   onBack,
+  showNavigationHeader = true,
+  onHeaderNavigate,
+  onHeaderOpenSettings,
+  onRegisterHeaderNavigation,
   onSaveProtected,
   onDeleteOrdinary,
   isOrdinarySessionActive,
@@ -136,6 +145,7 @@ export const TransformProtectView: React.FC<Props> = ({
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState('');
   const [confirmDiscard,setConfirmDiscard]=useState(false);
+  const [pendingHeaderNavigation,setPendingHeaderNavigation]=useState<HeaderNavigationRequest|null>(null);
   const [menuAction,setMenuAction]=useState<'menu'|'export'|'delete'>('menu');
   const [deleteAcknowledged,setDeleteAcknowledged]=useState(false);
   const [deleteBusy,setDeleteBusy]=useState(false);
@@ -162,6 +172,7 @@ export const TransformProtectView: React.FC<Props> = ({
   const exportTimers=useRef(new Set<ReturnType<typeof setTimeout>>());
   const editingSegmentPosition=useRef<number|null>(null);
   const segmentRequests=useRef(new Set<string>());
+  const headerNavigationRequest=useRef<(request:HeaderNavigationRequest)=>void>(()=>{});
 
   useEffect(()=>{
     mounted.current=true;
@@ -344,11 +355,26 @@ export const TransformProtectView: React.FC<Props> = ({
     else if(!confirmDiscard && dialog.open)dialog.close();
   },[confirmDiscard]);
 
-  function requestBack(){
-    if(busy || deleteBusy)return;
-    if(isDirty)setConfirmDiscard(true);
-    else onBack();
+  function completeHeaderNavigation(request:HeaderNavigationRequest){
+    if(request.type==='back')onBack();
+    else if(request.type==='settings')onHeaderOpenSettings?.();
+    else onHeaderNavigate?.(request.view);
   }
+  function requestHeaderNavigation(request:HeaderNavigationRequest){
+    if(busy || deleteBusy)return;
+    if(isDirty){setPendingHeaderNavigation(request);setConfirmDiscard(true);}
+    else completeHeaderNavigation(request);
+  }
+  function requestBack(){
+    requestHeaderNavigation({type:'back'});
+  }
+
+  headerNavigationRequest.current=requestHeaderNavigation;
+  useEffect(()=>{
+    if(!onRegisterHeaderNavigation)return;
+    onRegisterHeaderNavigation(request=>headerNavigationRequest.current(request));
+    return()=>onRegisterHeaderNavigation(null);
+  },[onRegisterHeaderNavigation]);
 
   const handleSave = async () => {
     if (busy || deleteBusy) return;
@@ -443,9 +469,9 @@ export const TransformProtectView: React.FC<Props> = ({
   }
 
   return (
-    <div className="transform-protect-screen keyboard-writing-screen" style={viewport}>
+    <div className={`transform-protect-screen keyboard-writing-screen${showNavigationHeader ? '' : ' uses-app-navigation-header'}`} style={!showNavigationHeader ? {...viewport, top: viewport.top + 56, height: Math.max(0, viewport.height - 56)} : viewport}>
       {/* Header */}
-      <header className="transform-header">
+      {showNavigationHeader && <header className="transform-header">
         <button className="icon-btn-round" onClick={requestBack} aria-label="Go back" disabled={busy || deleteBusy}>
           <ArrowLeft size={18} />
         </button>
@@ -453,7 +479,7 @@ export const TransformProtectView: React.FC<Props> = ({
         <div className="header-avatar-circle">
           <User size={15} />
         </div>
-      </header>
+      </header>}
 
       {/* Main Flow */}
       <main className="transform-flow-body">
@@ -600,7 +626,7 @@ export const TransformProtectView: React.FC<Props> = ({
         <p id="discard-copy">Your writing has not been saved.</p>
         <div className="composer-discard-actions">
           <button type="button" className="composer-discard-keep" onClick={()=>setConfirmDiscard(false)}>Keep editing</button>
-          <button type="button" className="composer-discard-leave" onClick={()=>{setConfirmDiscard(false);onBack();}}>Discard and leave</button>
+          <button type="button" className="composer-discard-leave" onClick={()=>{setConfirmDiscard(false);const request=pendingHeaderNavigation;setPendingHeaderNavigation(null);if(request)completeHeaderNavigation(request);else onBack();}}>Discard and leave</button>
         </div>
       </dialog>
     </div>

@@ -1,8 +1,8 @@
 import { Capacitor } from '@capacitor/core';
 import { prepareRefreshFeedback, playRefreshFeedback } from './services/refreshFeedback';
 import { useNativePullToRefresh } from './hooks/useNativePullToRefresh';
-import React, { useState, useEffect, useRef, useMemo, useLayoutEffect, Suspense } from 'react';
-import { ArrowLeft, CircleAlert, X } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo, useLayoutEffect, useCallback, Suspense } from 'react';
+import { ArrowLeft, CircleAlert, Pencil, X } from 'lucide-react';
 import type { Entry } from './domain/journal';
 import type { LibraryItem, LibraryItemDraft, LibraryItemKind } from './domain/libraryItems';
 import { filterOrdinaryEntries } from './domain/ordinaryBrowse';
@@ -23,7 +23,7 @@ import { ReaderView } from './components/ReaderView';
 import { StoryLeavesView } from './components/StoryLeavesView';
 import { LibraryView } from './components/LibraryView';
 import { PrivateSanctuaryView } from './components/PrivateSanctuaryView';
-import { OrdinaryNavigationHeader } from './components/OrdinaryNavigationHeader';
+import { OrdinaryNavigationHeader, type HeaderNavigationRequest, type HeaderNavigationView } from './components/OrdinaryNavigationHeader';
 import { ProtectedGateModal } from './components/ProtectedGateModal';
 import { LocalPrivateJournal } from './components/LocalPrivateJournal';
 import { LocalVault } from './services/vault/localVault';
@@ -53,6 +53,8 @@ import type { LuQuickAction } from './components/LuOrb';
 import './privacy-demo.css';
 
 const PrivacyModelDemo = React.lazy(() => import('./components/PrivacyModelDemo').then(module => ({ default: module.PrivacyModelDemo })));
+
+type AppView = 'home' | 'leaves' | 'stories' | 'library' | 'compose' | 'enclave-writing' | 'vault' | 'inspector' | 'reader' | 'local-private' | 'settings' | 'ai-access' | 'model-settings' | 'privacy-demo' | 'cloud-privacy-demo' | 'support';
 
 export default function App() {
   return <AuthBoundary>{(session,onSignedOut)=><JournalApp key={session.uid} session={session} onSignedOut={onSignedOut}/>}</AuthBoundary>;
@@ -89,18 +91,32 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   const [entities, setEntities] = useState<Entity[]>([]);
   const ordinaryEntries = filterOrdinaryEntries(entries);
 
-  const [currentView, setCurrentView] = useState<
-    'home' | 'leaves' | 'stories' | 'library' | 'compose' | 'enclave-writing' | 'vault' | 'inspector' | 'reader' | 'local-private' | 'settings' | 'ai-access' | 'model-settings' | 'privacy-demo' | 'cloud-privacy-demo' | 'support'
-  >('home');
+  const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
+  const [currentView, setCurrentViewState] = useState<AppView>('home');
   const isOrdinaryNavigationView = currentView === 'home' || currentView === 'leaves' || currentView === 'stories' || currentView === 'library';
   const currentViewRef = useRef(currentView);
   currentViewRef.current = currentView;
-  const settingsReturnView = useRef<typeof currentView>('home');
+  const navigationHistory = useRef<AppView[]>([]);
+  const setCurrentView = useCallback<React.Dispatch<React.SetStateAction<AppView>>>((next) => {
+    const current = currentViewRef.current;
+    const target = typeof next === 'function' ? next(current) : next;
+    if (target === current) return;
+    const privateRoute = (view: AppView) => view === 'vault' || view === 'inspector' || view === 'local-private' || view === 'enclave-writing';
+    if (privateRoute(current) || privateRoute(target)) navigationHistory.current = [];
+    else if (navigationHistory.current[navigationHistory.current.length - 1] === target) navigationHistory.current.pop();
+    else navigationHistory.current = [...navigationHistory.current, current].slice(-40);
+    currentViewRef.current = target;
+    setCurrentViewState(target);
+  }, []);
+  const composerHeaderRequest = useRef<((request: HeaderNavigationRequest) => void) | null>(null);
+  const registerComposerHeaderRequest = useCallback((handler: ((request: HeaderNavigationRequest) => void) | null) => {
+    composerHeaderRequest.current = handler;
+  }, []);
+  const settingsReturnView = useRef<AppView>('home');
   const openSettings = () => { if (currentViewRef.current !== 'settings') settingsReturnView.current = currentViewRef.current; setCurrentView('settings'); };
   useEdgeSwipeNavigation(currentView, setCurrentView);
 
   const [activeCategoryTab, setActiveCategoryTab] = useState<string>('All');
-  const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
   const [readerStorySequence, setReaderStorySequence] = useState<Entry[]>([]);
   const readerReturnView = useRef<'home' | 'leaves' | 'stories' | 'library'>('home');
   const editorReturnView = useRef<'home' | 'leaves' | 'stories' | 'library' | 'reader' | 'local-private'>('home');
@@ -365,6 +381,84 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
         setBackendError(e instanceof Error?e.message:'Could not open the original.');}
     }
   };
+  function handleReaderBack() {
+    originalReadRequest.current++;
+    if (selectedEntry?.protected && privateAuthority.current.until > 0) handleExitProtected();
+    setSelectedEntry(null);
+    setReaderStorySequence([]);
+    setCurrentView(readerReturnView.current);
+  }
+  function handleHeaderBack() {
+    if (currentViewRef.current === 'compose' && composerHeaderRequest.current) {
+      composerHeaderRequest.current({ type: 'back' });
+      return;
+    }
+    if (currentViewRef.current === 'reader') { handleReaderBack(); return; }
+    if (currentViewRef.current === 'cloud-privacy-demo') { handleCloudPrivacyBack(); return; }
+    const current = currentViewRef.current;
+    if (current === 'home') return;
+    let target = navigationHistory.current.pop();
+    while (target === current) target = navigationHistory.current.pop();
+    target ??= current === 'settings' && settingsReturnView.current !== 'settings'
+      ? settingsReturnView.current
+      : current === 'ai-access' || current === 'model-settings' ? 'settings' : 'home';
+    currentViewRef.current = target;
+    setCurrentViewState(target);
+  }
+  function handleHeaderNavigate(view: HeaderNavigationView) {
+    const current = currentViewRef.current;
+    if (view === 'compose') {
+      if (current !== 'compose') handleOrdinaryNavigate('compose');
+      return;
+    }
+    if (current === 'home' && view === 'home') {
+      const homeScroll = document.querySelector<HTMLElement>('[data-ordinary-page-scroll="home"]');
+      homeScroll?.scrollTo({ top: 0, behavior: preferences.reduceMotion ? 'auto' : 'smooth' });
+      window.scrollTo({ top: 0, behavior: preferences.reduceMotion ? 'auto' : 'smooth' });
+      return;
+    }
+    if (current === 'reader') {
+      setSelectedEntry(null);
+      setReaderStorySequence([]);
+    }
+    if (current === 'privacy-demo') setPrivacySource(null);
+    if (current === 'compose' || current === 'reader') {
+      navigationHistory.current = navigationHistory.current.filter(route => route !== 'compose' && route !== 'reader');
+      if (navigationHistory.current[navigationHistory.current.length - 1] === view) navigationHistory.current.pop();
+      setLooLuDraft(null);
+      setEditingEntry(null);
+      setSelectedEntry(null);
+      setReaderStorySequence([]);
+      currentViewRef.current = view;
+      setCurrentViewState(view);
+      return;
+    }
+    handleOrdinaryNavigate(view);
+  }
+  function handleComposerOpenSettings() {
+    const returnView = editorReturnView.current;
+    navigationHistory.current = [...navigationHistory.current.filter(route => route !== 'compose' && route !== 'reader'), returnView].slice(-40);
+    settingsReturnView.current = returnView;
+    setLooLuDraft(null);
+    setEditingEntry(null);
+    currentViewRef.current = 'settings';
+    setCurrentViewState('settings');
+  }
+  function handleHeaderRequest(request: HeaderNavigationRequest) {
+    if (currentViewRef.current === 'compose' && composerHeaderRequest.current) {
+      composerHeaderRequest.current(request);
+      return;
+    }
+    if (request.type === 'back') handleHeaderBack();
+    else if (request.type === 'settings') openSettings();
+    else handleHeaderNavigate(request.view);
+  }
+  function handleEditSelectedEntry() {
+    if (!selectedEntry || selectedEntry.protected) return;
+    editorReturnView.current = 'reader';
+    setEditingEntry(selectedEntry);
+    setCurrentView('compose');
+  }
   const handleSaveProtectedEntry = async (data:{entryId:string;title:string;body:string;originalBody:string;kind:'Journal'|'Story';curatedDeck:string;favorite:boolean;tags:string[]}) => {
     const routeToken = currentComposeRouteToken();
     if (!accountSessionActive()) throw new Error('Account session expired. Sign in again before saving.');
@@ -519,6 +613,10 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     setCurrentView('home');setIsProtectedGateOpen(false);setPendingView(null);
     if(!development)void lockPrivate().catch(()=>{});
   }
+  function handleCloudPrivacyBack() {
+    if (protectedMode) handleExitProtected();
+    setCurrentView('model-settings');
+  }
   async function signOutAccount(){
     signingOut.current=true;
     setQuickCapture(null);
@@ -534,6 +632,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     editingOrdinaryEntry: Boolean(editingEntry), hasPrivatePreview: Boolean(privacySource),
     readingProtectedEntry: Boolean(selectedEntry?.protected),
   });
+  const showSharedNavigationHeader = (!privateSurface || (currentView === 'compose' && !protectedMode)) && currentView !== 'vault';
 
   return (
     <div className={`lulu-app-root ${currentView === 'vault' ? 'vault-dark-mode' : ''} ${currentView === 'settings' || currentView === 'ai-access' || currentView === 'model-settings' || currentView === 'privacy-demo' || currentView === 'cloud-privacy-demo' || currentView === 'support' ? 'privacy-wide' : ''}`} data-lulu-theme={effectiveTheme}>
@@ -557,7 +656,25 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
       )}
 
       {/* Main Responsive Application Shell (Edge-to-Edge with clean Max-Width) */}
-      <div ref={pullRefresh.containerRef} className={`lulu-viewport-shell ${isOrdinaryNavigationView ? 'ordinary-navigation-shell' : ''}`} data-ordinary-route={isOrdinaryNavigationView ? currentView : undefined}>
+      <div ref={pullRefresh.containerRef} className={`lulu-viewport-shell ${isOrdinaryNavigationView ? 'ordinary-navigation-shell' : ''} ${currentView === 'reader' && showSharedNavigationHeader ? 'reader-navigation-shell' : ''}`} data-ordinary-route={isOrdinaryNavigationView ? currentView : undefined}>
+        {showSharedNavigationHeader && <OrdinaryNavigationHeader
+          notificationUid={development ? undefined : session.uid}
+          photoUrl={photoUrl}
+          currentView={currentView}
+          onNavigate={view => handleHeaderRequest({ type: 'navigate', view })}
+          onHome={() => handleHeaderRequest({ type: 'navigate', view: 'home' })}
+          onOpenSettings={() => handleHeaderRequest({ type: 'settings' })}
+        />}
+        {showSharedNavigationHeader && currentView !== 'home' && (
+          <button type="button" className="topbar-circle-btn ordinary-floating-back-button" aria-label="Go back" title="Go back" onClick={() => handleHeaderRequest({ type: 'back' })}>
+            <ArrowLeft size={20} aria-hidden="true" />
+          </button>
+        )}
+        {showSharedNavigationHeader && currentView === 'reader' && selectedEntry && !selectedEntry.protected && (
+          <button type="button" className="topbar-circle-btn ordinary-floating-edit-button" aria-label="Edit entry" title="Edit entry" onClick={handleEditSelectedEntry}>
+            <Pencil size={16} aria-hidden="true" />
+          </button>
+        )}
         {nativePull.distance > 0 && <div className="pull-refresh-indicator native-pull-indicator" role="status"><span className={nativePull.refreshing ? 'update-refresh-spinning' : undefined}>↻</span>{nativePull.refreshing ? 'Refreshing…' : nativePull.distance >= 96 ? 'Release to refresh' : 'Pull to refresh'}</div>}
         {pullRefresh.state !== 'idle' && <div className="pull-refresh-indicator" role="status" style={{ marginTop: Math.max(0, Math.min(pullRefresh.pullDistance,128)-30) }}><span className={`pull-refresh-icon${pullRefresh.isRefreshing ? ' is-refreshing' : ''}`} style={{'--pull-progress': `${Math.min(pullRefresh.pullDistance/80,1)*360}deg`} as React.CSSProperties}><span>{pullRefresh.isRefreshing ? '↻' : <span style={{display:'inline-block',transform:`rotate(${Math.min(pullRefresh.pullDistance/80,1)*180}deg)`}}>↓</span>}</span></span>{pullRefresh.state === 'refreshing' ? 'Refreshing…' : pullRefresh.state === 'ready' ? 'Release to refresh' : 'Pull to refresh'}</div>}
         {(currentView === 'home' || currentView === 'leaves' || currentView === 'stories' || currentView === 'library' || currentView === 'reader') && (personalState.status !== 'ready' || starterState.status !== 'ready' || onboardingImportState.status !== 'ready') && (
@@ -570,8 +687,6 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
         )}
         {currentView === 'home' && (
           <JournalHome
-            notificationUid={development ? undefined : session.uid}
-            photoUrl={photoUrl}
             entries={ordinaryEntries}
             displayName={displayName}
             activeTab={activeCategoryTab}
@@ -583,48 +698,26 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
             }}
             onSelectEntry={handleSelectEntry}
             onOpenProtectedGate={() => setIsProtectedGateOpen(true)}
-            protectedMode={protectedMode}
-            onOpenVault={() => navigatePrivate('vault')}
-            onSignOut={() => void signOutAccount()}
-            onOpenSettings={openSettings}
-            onNavigate={handleOrdinaryNavigate}
-          />
-        )}
-
-        {isOrdinaryNavigationView && currentView !== 'home' && (
-          <OrdinaryNavigationHeader
-            notificationUid={development ? undefined : session.uid}
-            photoUrl={photoUrl}
-            currentView={currentView}
-            onNavigate={handleOrdinaryNavigate}
-            protectedMode={protectedMode}
-            onOpenVault={() => navigatePrivate('vault')}
-            onOpenSettings={openSettings}
-            onSignOut={() => void signOutAccount()}
-            onSearch={() => {
-              const search = document.querySelector<HTMLInputElement>('[data-ordinary-page-search]');
-              search?.focus({ preventScroll: true });
-              search?.scrollIntoView({ block: 'nearest' });
-            }}
           />
         )}
 
         {currentView === 'settings' && (
           <ProfileSettingsView preferences={preferences} effectiveTheme={effectiveTheme} appearanceStatus={appearanceStatus} onUseSystemAppearance={() => setPreferences(current => ({...current,theme:'system',themeSet:true}))} onPreferencesChange={next => {writeAppPreferences(next);setPreferences(next);}} displayName={displayName} onDisplayNameChange={async name => {await writeDisplayName(session.uid, name);displayNameEdited.current=true;setDisplayName(name);}} photoUrl={photoUrl} onPhotoSave={async photo => {await writeProfilePhoto(session.uid, photo);setCustomPhoto(photo);}} uid={session.uid} authMethod={session.authMethod} emailVerificationStatus={session.emailVerificationStatus} isPrivateSessionActive={() => !signingOut.current && Date.now() < privateAuthority.current.until} judgeAccess={judgeAccess} judgeVoiceSeconds={judgeVoiceSeconds} judgeVoiceDailyLimit={judgeVoiceDailyLimit} judgeDecisionsPerDay={judgeDecisionsPerDay} judgeLuMessagesPerDay={judgeLuMessagesPerDay} judgeDecisionsUsedToday={judgeDecisionsUsedToday} judgeLuMessagesUsedToday={judgeLuMessagesUsedToday} judgeVoiceRefillAt={judgeVoiceRefillAt} isOwnerAccount={isVerifiedOwner} onOpenAiAccess={() => setCurrentView('ai-access')} judgeInvitePending={Boolean(pendingJudgeInvitation()||reusableJudgeInvitation())} onRetryJudgeInvite={() => {setShowJudgeInvite(true);setJudgeInviteAttempt(value => value + 1);}}
-            onBack={() => setCurrentView(settingsReturnView.current)} onOpenModelSettings={() => setCurrentView('model-settings')}
+            onOpenModelSettings={() => setCurrentView('model-settings')}
             onSignOut={() => void signOutAccount()} />
         )}
 
         {currentView === 'ai-access' && isVerifiedOwner && (
-          <OwnerAiAccessSettings onBack={() => setCurrentView('settings')} />
+          <OwnerAiAccessSettings />
         )}
 
         {currentView === 'model-settings' && (
-          <PrivacyModelSettings onBack={() => setCurrentView('settings')} onOpenLocalDemo={() => {setPrivacySource(null);setCurrentView('privacy-demo');}} onOpenCloudDemo={() => setCurrentView('cloud-privacy-demo')} />
+          <PrivacyModelSettings onOpenLocalDemo={() => {setPrivacySource(null);setCurrentView('privacy-demo');}} onOpenCloudDemo={() => setCurrentView('cloud-privacy-demo')} />
         )}
 
         {currentView === 'cloud-privacy-demo' && <CloudPrivacyDemo
-          onBack={() => { if (protectedMode) { handleExitProtected(); setCurrentView('model-settings'); } else setCurrentView('model-settings'); }}
+          onBack={handleCloudPrivacyBack}
+          showBackButton={!showSharedNavigationHeader}
           entries={ordinaryEntries}
           accountActive={accountSessionActive}
           privateSession={privacySession}
@@ -635,7 +728,6 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
 
         {currentView === 'support' && <main className="cloud-privacy-page support-directory-page">
           <header className="cloud-privacy-header">
-            <button type="button" className="privacy-back" onClick={() => setCurrentView('home')}><ArrowLeft size={18}/> Back to LuLu</button>
             <span className="privacy-settings-kicker">SUPPORT WHEN YOU CHOOSE</span>
             <h1>Talk to a person</h1>
             <p>Choose a service and contact it yourself. LuLu does not send your journal, make calls, or share your details.</p>
@@ -647,6 +739,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
           <Suspense fallback={<main className="privacy-demo-page"><p role="status">Loading the local model runtime…</p></main>}>
             <PrivacyModelDemo key={privacySource?.revision ?? 'ordinary-model-review'}
               onBack={() => {setCurrentView(privacySource?'local-private':'model-settings');setPrivacySource(null);}}
+              showBackButton={!showSharedNavigationHeader}
               entries={privacySource?[]:ordinaryEntries} initialText={privacySource?.text} initialRevision={privacySource?.revision}
               privateSession={privacySession} onUnlockPrivate={handleProtectedSuccess} />
           </Suspense>
@@ -678,6 +771,10 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
             initialDraft={!protectedMode ? looLuDraft?.text : undefined}
             initialDraftTitle={!protectedMode ? looLuDraft?.title : undefined}
             onBack={() => {setLooLuDraft(null);setCurrentView(editorReturnView.current);}}
+            onHeaderNavigate={handleHeaderNavigate}
+            onHeaderOpenSettings={handleComposerOpenSettings}
+            onRegisterHeaderNavigation={registerComposerHeaderRequest}
+            showNavigationHeader={!showSharedNavigationHeader}
             onSaveProtected={handleSaveProtectedEntry}
             onDeleteOrdinary={handleDeleteOrdinaryEntry}
             isOrdinarySessionActive={()=>!signingOut.current && Date.now()<session.expiresAt}
@@ -739,17 +836,9 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
               entry={selectedEntry}
               mediaOwnerId={session.uid}
               protectedMode={protectedMode}
-              onBack={() => {
-                originalReadRequest.current++;
-                if (selectedEntry.protected && privateAuthority.current.until > 0) handleExitProtected();
-                setSelectedEntry(null);setReaderStorySequence([]);
-                setCurrentView(readerReturnView.current);
-              }}
-              onEdit={() => {
-                if(selectedEntry.protected) {setBackendError('Protected entries cannot be edited in this view. Open protected access to work with protected content.');return;}
-                editorReturnView.current='reader';
-                setEditingEntry(selectedEntry);setCurrentView('compose');
-              }}
+              onBack={handleReaderBack}
+              onEdit={handleEditSelectedEntry}
+              showNavigationHeader={!showSharedNavigationHeader}
               onEnterProtected={() => setIsProtectedGateOpen(true)}
               storySequence={readerStorySequence}
               onSelectStorySequenceEntry={entry => {

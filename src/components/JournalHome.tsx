@@ -7,7 +7,6 @@ import {
   StickyNote,
   CheckSquare,
 } from 'lucide-react';
-import { OrdinaryNavigationHeader } from './OrdinaryNavigationHeader';
 import type { Entry } from '../domain/journal';
 import type { LibraryItemKind } from '../domain/libraryItems';
 import { filterOrdinaryEntries } from '../domain/ordinaryBrowse';
@@ -15,8 +14,6 @@ import { OrdinaryEntryCard } from './OrdinaryEntryCard';
 
 type Props = {
   entries: Entry[];
-  notificationUid?: string;
-  photoUrl?: string;
   displayName: string;
   activeTab: string;
   onTabChange: (tab: string) => void;
@@ -24,17 +21,10 @@ type Props = {
   onQuickCreateLibraryItem: (kind: LibraryItemKind) => void;
   onSelectEntry: (entry: Entry) => void;
   onOpenProtectedGate: () => void;
-  protectedMode: boolean;
-  onOpenVault: () => void;
-  onSignOut: () => void;
-  onOpenSettings: () => void;
-  onNavigate: (view: 'home' | 'leaves' | 'stories' | 'library' | 'compose') => void;
 };
 
 export const JournalHome: React.FC<Props> = ({
   entries,
-  notificationUid,
-  photoUrl,
   displayName,
   activeTab,
   onTabChange,
@@ -42,14 +32,7 @@ export const JournalHome: React.FC<Props> = ({
   onQuickCreateLibraryItem,
   onSelectEntry,
   onOpenProtectedGate,
-  protectedMode,
-  onOpenVault,
-  onSignOut,
-  onOpenSettings,
-  onNavigate,
 }) => {
-  const [searching, setSearching] = useState(false);
-  const [query, setQuery] = useState('');
   const [openCollection, setOpenCollection] = useState<'Journal' | 'Stories' | null>(null);
   const spreadId = React.useId();
   const now = new Date();
@@ -75,23 +58,10 @@ export const JournalHome: React.FC<Props> = ({
     return true;
   });
 
-  const visibleEntries = filterOrdinaryEntries(filteredEntries, query);
+  const visibleEntries = filterOrdinaryEntries(filteredEntries);
 
   return (
     <div className="stitch-journal-home">
-      <OrdinaryNavigationHeader
-        notificationUid={notificationUid}
-        photoUrl={photoUrl}
-        currentView="home"
-        onNavigate={onNavigate}
-        protectedMode={protectedMode}
-        searchExpanded={searching}
-        onOpenVault={onOpenVault}
-        onOpenSettings={onOpenSettings}
-        onSignOut={onSignOut}
-        onSearch={() => { if (searching) setQuery(''); setSearching(!searching); }}
-      />
-
       {/* Main Stream */}
       <main className="stitch-main-stream" data-ordinary-page-scroll="home" data-testid="ordinary-page-scroll-home">
         {/* Temporal Greeting */}
@@ -172,22 +142,19 @@ export const JournalHome: React.FC<Props> = ({
           </section>
         )}
 
-        {searching && <input className="home-search-input" type="search" aria-label="Search entries" data-ordinary-page-search="true" placeholder="Search your entries…" value={query} onChange={e => setQuery(e.target.value)} autoFocus />}
         <div className="home-collection-stacks" aria-label="Your collections">
           {(['Journal', 'Stories'] as const).map(title => (
             <EntryStack
               key={title}
               title={title}
               entries={visibleEntries.filter(e => e.kind === (title === 'Journal' ? 'Journal' : 'Story'))}
-              expanded={openCollection === title || Boolean(query.trim())}
+              expanded={openCollection === title}
               onToggle={() => setOpenCollection(current => current === title ? null : title)}
               controls={spreadId}
             />
           ))}
         </div>
-        {query.trim() ? (
-          <EntrySpread id={spreadId} title="Search results" entries={visibleEntries} onSelectEntry={onSelectEntry} />
-        ) : openCollection && (
+        {openCollection && (
           <EntrySpread
             id={spreadId}
             title={openCollection}
@@ -195,7 +162,7 @@ export const JournalHome: React.FC<Props> = ({
             onSelectEntry={onSelectEntry}
           />
         )}
-        {!query.trim() && <section className="home-latest-writing" aria-labelledby="home-latest-writing-title">
+        <section className="home-latest-writing" aria-labelledby="home-latest-writing-title">
           <div className="home-latest-writing-heading">
             <h2 id="home-latest-writing-title">Your latest writing</h2>
             <span>{visibleEntries.length} {visibleEntries.length === 1 ? 'entry' : 'entries'}</span>
@@ -203,7 +170,7 @@ export const JournalHome: React.FC<Props> = ({
           {visibleEntries.length ? <div className="home-latest-writing-list">
             {visibleEntries.slice(0, 3).map(entry => <OrdinaryEntryCard key={`latest-${entry.id}`} entry={entry} onSelect={onSelectEntry} />)}
           </div> : <p className="home-latest-writing-empty">Your saved entries will appear here.</p>}
-        </section>}
+        </section>
         {/* Recent writing count and seven rolling 24-hour buckets */}
         <section className="clarity-rhythm-card">
           <div className="clarity-left">
