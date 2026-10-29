@@ -2,7 +2,7 @@ import { Capacitor } from '@capacitor/core';
 import { prepareRefreshFeedback, playRefreshFeedback } from './services/refreshFeedback';
 import { useNativePullToRefresh } from './hooks/useNativePullToRefresh';
 import React, { useState, useEffect, useRef, useMemo, useLayoutEffect, Suspense } from 'react';
-import { CircleAlert, X } from 'lucide-react';
+import { ArrowLeft, CircleAlert, X } from 'lucide-react';
 import type { Entry } from './domain/journal';
 import type { LibraryItem, LibraryItemDraft, LibraryItemKind } from './domain/libraryItems';
 import { filterOrdinaryEntries } from './domain/ordinaryBrowse';
@@ -45,10 +45,12 @@ import { ProfileSettingsView } from './components/ProfileSettingsView';
 import { OwnerAiAccessSettings } from './components/OwnerAiAccessSettings';
 import { PrivacyModelSettings } from './components/PrivacyModelSettings';
 import { CloudPrivacyDemo } from './components/CloudPrivacyDemo';
+import { SupportDirectory } from './components/SupportDirectory';
 import { LooLuGuide, type LooLuDestination } from './components/LooLuGuide';
 import { PrivateQuickCapture } from './components/PrivateQuickCapture';
 import type { LuQuickAction } from './components/LuOrb';
 import './privacy-demo.css';
+import './theme.css';
 
 const PrivacyModelDemo = React.lazy(() => import('./components/PrivacyModelDemo').then(module => ({ default: module.PrivacyModelDemo })));
 
@@ -84,7 +86,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   const ordinaryEntries = filterOrdinaryEntries(entries);
 
   const [currentView, setCurrentView] = useState<
-    'home' | 'leaves' | 'stories' | 'library' | 'compose' | 'enclave-writing' | 'vault' | 'inspector' | 'reader' | 'local-private' | 'settings' | 'ai-access' | 'model-settings' | 'privacy-demo' | 'cloud-privacy-demo'
+    'home' | 'leaves' | 'stories' | 'library' | 'compose' | 'enclave-writing' | 'vault' | 'inspector' | 'reader' | 'local-private' | 'settings' | 'ai-access' | 'model-settings' | 'privacy-demo' | 'cloud-privacy-demo' | 'support'
   >('home');
   const isOrdinaryNavigationView = currentView === 'home' || currentView === 'leaves' || currentView === 'stories' || currentView === 'library';
   const currentViewRef = useRef(currentView);
@@ -166,6 +168,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   useEffect(() => {
     writeAppPreferences(preferences);
     document.documentElement.dataset.luluReduceMotion = String(preferences.reduceMotion);
+    document.documentElement.dataset.luluTheme = preferences.theme;
   }, [preferences]);
   useEffect(() => {
     let active = true;
@@ -354,7 +357,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     await deleteLibraryItem(session.uid, id);
   }
 
-  const guideMayLeave = (view: string) => ['home', 'leaves', 'stories', 'library', 'reader', 'settings', 'ai-access', 'model-settings', 'privacy-demo', 'cloud-privacy-demo'].includes(view);
+  const guideMayLeave = (view: string) => ['home', 'leaves', 'stories', 'library', 'reader', 'settings', 'ai-access', 'model-settings', 'privacy-demo', 'cloud-privacy-demo', 'support'].includes(view);
 
   function handleLooLuNavigate(destination: LooLuDestination) {
     if (!guideMayLeave(currentViewRef.current)) return;
@@ -374,7 +377,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     else if (destination === 'privacy-settings') setCurrentView('model-settings');
     else if (destination === 'cloud-demo') setCurrentView('cloud-privacy-demo');
     else if (destination === 'private-writing' && protectedMode && Date.now() < privateUntil) setCurrentView('local-private');
-    else if (destination === 'support') navigatePrivate('vault','', 'Resources');
+    else if (destination === 'support') setCurrentView('support');
   }
 
   function handleLooLuStartDraft(text: string, kind: 'Journal' | 'Story' = 'Journal', title = '') {
@@ -489,7 +492,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   });
 
   return (
-    <div className={`lulu-app-root ${currentView === 'vault' ? 'vault-dark-mode' : ''} ${currentView === 'settings' || currentView === 'ai-access' || currentView === 'model-settings' || currentView === 'privacy-demo' || currentView === 'cloud-privacy-demo' ? 'privacy-wide' : ''}`}>
+    <div className={`lulu-app-root ${currentView === 'vault' ? 'vault-dark-mode' : ''} ${currentView === 'settings' || currentView === 'ai-access' || currentView === 'model-settings' || currentView === 'privacy-demo' || currentView === 'cloud-privacy-demo' || currentView === 'support' ? 'privacy-wide' : ''}`} data-lulu-theme={preferences.theme}>
       {showJudgeInvite && <section className="judge-invite-overlay" role="dialog" aria-modal="true" aria-labelledby="judge-invite-title">
         <div className="judge-invite-card"><h2 id="judge-invite-title">Judge invitation</h2>
         <p>This shared judge link can be used with your own account. It also lets you request another voice refill after the 24-hour waiting period.</p>
@@ -581,9 +584,19 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
           accountActive={accountSessionActive}
           privateSession={privacySession}
           onUnlockPrivate={handleProtectedSuccess}
-          onOpenSupport={() => navigatePrivate('vault', '', 'Resources')}
+          onOpenSupport={() => setCurrentView('support')}
           onAskLu={message => setLuChatRequest(previous => ({id:(previous?.id ?? 0)+1,message}))}
         />}
+
+        {currentView === 'support' && <main className="cloud-privacy-page support-directory-page">
+          <header className="cloud-privacy-header">
+            <button type="button" className="privacy-back" onClick={() => setCurrentView('home')}><ArrowLeft size={18}/> Back to LuLu</button>
+            <span className="privacy-settings-kicker">SUPPORT WHEN YOU CHOOSE</span>
+            <h1>Talk to a person</h1>
+            <p>Choose a service and contact it yourself. LuLu does not send your journal, make calls, or share your details.</p>
+          </header>
+          <SupportDirectory />
+        </main>}
 
         {currentView === 'privacy-demo' && (
           <Suspense fallback={<main className="privacy-demo-page"><p role="status">Loading the local model runtime…</p></main>}>
@@ -625,6 +638,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
             isOrdinarySessionActive={()=>!signingOut.current && Date.now()<session.expiresAt}
             onOpenEntityInspector={(text) => navigatePrivate('inspector', text ?? '')}
             onAskLu={message => setLuChatRequest(previous => ({id:(previous?.id ?? 0)+1,message}))}
+            onOpenSupport={() => setCurrentView('support')}
             privateVault={localVault.current ?? undefined}
             privateMediaVault={localMediaVault.current ?? undefined}
             onPrivateSaved={() => {

@@ -1,12 +1,21 @@
 import {test} from 'node:test';
 import {strict as assert} from 'node:assert';
-import {explicitlyRequestsDestination,explicitlyRequestsDraft,explicitlyRequestsOpen,explicitlyRequestsSurfaceSearch,isLuLuScopeRequest,outOfScopeReply,luSearchTerms} from './lu-agent-policy.js';
+import {explicitlyRequestsDestination,explicitlyRequestsDraft,explicitlyRequestsOpen,explicitlyRequestsSurfaceSearch,isJournalAccessCapabilityQuestion,isLuLuScopeRequest,journalAccessCapabilityReply,outOfScopeReply,luSearchTerms} from './lu-agent-policy.js';
 
 test('only clear writing requests enable journal search',()=>{
  assert.equal(explicitlyRequestsSurfaceSearch('Find my journal entry about the garden.'),true);
  assert.equal(explicitlyRequestsSurfaceSearch('Can you access my journals?'),false);
  assert.equal(explicitlyRequestsSurfaceSearch('Open Settings.'),false);
  assert.equal(explicitlyRequestsSurfaceSearch('Tell me how Lu works.'),false);
+});
+
+test('journal access questions explain the available tool without searching',()=>{
+ assert.equal(isJournalAccessCapabilityQuestion('Can you not access my journals?'),true);
+ assert.equal(isJournalAccessCapabilityQuestion('Can you access my journals?'),true);
+ assert.equal(isJournalAccessCapabilityQuestion('Find my journal entry about the garden.'),false);
+ assert.match(journalAccessCapabilityReply('English'),/search ordinary Journal and Story entries when you ask/i);
+ assert.match(journalAccessCapabilityReply('Afrikaans'),/wanneer jy my vra/);
+ assert.match(journalAccessCapabilityReply('isiZulu'),/uma ungicela/);
 });
 
 test('navigation, opening and drafting require an explicit matching request',()=>{

@@ -27,6 +27,8 @@ import type { OrdinaryMediaRef } from '../domain/journal';
 import { extractCompletedWritingInput } from '../domain/writingSegments';
 import { scrubLuMessage } from '../services/luChat';
 import { LU_CHAT_MAX_INPUT_CHARACTERS, type LuScrubbedEntity } from '../services/luChatContracts';
+import { assessReviewedPatterns } from '../services/privacy/cloudProcessingClient';
+import type { PatternAssessment } from '../services/privacy/patternIntelligenceContracts';
 
 type Props = {
   entities: Entity[];
@@ -51,6 +53,7 @@ type Props = {
   isOrdinarySessionActive: () => boolean;
   onOpenEntityInspector: (currentText?: string) => void;
   onAskLu?: (message: string) => void;
+  onOpenSupport?: () => void;
   privateVault?: LocalVault;
   privateMediaVault?: LocalMediaVault;
   onPrivateSaved: (revision: LocalVaultRevision) => void;
@@ -63,10 +66,14 @@ type WritingSegment = {
   scrubbedText?: string;
   entities: LuScrubbedEntity[];
   message?: string;
+  assessmentConsent: boolean;
+  assessmentStatus: 'idle' | 'assessing' | 'ready' | 'error';
+  assessment?: PatternAssessment;
+  assessmentMessage?: string;
 };
 
 function makeWritingSegment(originalText: string, status: WritingSegment['status']): WritingSegment {
-  return { id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`, originalText, status, entities: [] };
+  return { id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`, originalText, status, entities: [], assessmentConsent: false, assessmentStatus: 'idle' };
 }
 
 function renderSourceHighlights(text: string, entities: LuScrubbedEntity[]): React.ReactNode[] {
@@ -113,6 +120,7 @@ export const TransformProtectView: React.FC<Props> = ({
   isOrdinarySessionActive,
   onOpenEntityInspector,
   onAskLu,
+  onOpenSupport,
   privateVault,
   privateMediaVault,
   onPrivateSaved,
@@ -181,11 +189,41 @@ export const TransformProtectView: React.FC<Props> = ({
     try {
       const result = await scrubLuMessage(segment.originalText);
       if (!isOrdinarySessionActive()) throw new Error('Your LuLu session expired. Sign in again before cloud processing.');
-      if (mounted.current) setWritingSegments(current => current.map(item => item.id === segment.id ? { ...item, status: 'ready', scrubbedText: result.scrubbed, entities: result.entities, message: undefined } : item));
+      if (mounted.current) setWritingSegments(current => current.map(item => item.id === segment.id ? { ...item, status: 'ready', scrubbedText: result.scrubbed, entities: result.entities, message: undefined, assessmentConsent: false, assessmentStatus: 'idle', assessment: undefined, assessmentMessage: undefined } : item));
     } catch (cause) {
       if (mounted.current) setWritingSegments(current => current.map(item => item.id === segment.id ? { ...item, status: 'error', message: cause instanceof Error ? cause.message : 'Cloud review failed. Your original writing is still here.' } : item));
     } finally {
       segmentRequests.current.delete(segment.id);
+    }
+  }
+
+  function setPatternConsent(segmentId: string, allowed: boolean) {
+    setWritingSegments(current => current.map(item => item.id === segmentId
+      ? { ...item, assessmentConsent: allowed, assessmentStatus: 'idle', assessment: undefined, assessmentMessage: undefined }
+      : item));
+  }
+
+  async function assessWritingSegment(segment: WritingSegment) {
+    if (segment.status !== 'ready' || !segment.scrubbedText || !segment.assessmentConsent || segment.assessmentStatus === 'assessing') return;
+    if (!isOrdinarySessionActive()) {
+      setWritingSegments(current => current.map(item => item.id === segment.id ? { ...item, assessmentStatus: 'error', assessmentMessage: 'Your LuLu session expired. Sign in again before requesting Decisions.' } : item));
+      return;
+    }
+    setWritingSegments(current => current.map(item => item.id === segment.id ? { ...item, assessmentStatus: 'assessing', assessmentMessage: 'Sending only the scrubbed paragraph to Decisions…', assessment: undefined } : item));
+    try {
+      const assessment = await assessReviewedPatterns({
+        text: segment.scrubbedText,
+        revision: segment.id,
+        purpose: 'Understand possible behaviour patterns described in this reviewed journal passage',
+        isAccountSessionActive: isOrdinarySessionActive,
+      });
+      if (mounted.current && isOrdinarySessionActive()) setWritingSegments(current => current.map(item => item.id === segment.id
+        ? { ...item, assessmentStatus: 'ready', assessment, assessmentMessage: undefined }
+        : item));
+    } catch (cause) {
+      if (mounted.current) setWritingSegments(current => current.map(item => item.id === segment.id
+        ? { ...item, assessmentStatus: 'error', assessmentMessage: cause instanceof Error ? cause.message : 'Decisions could not assess this paragraph. Your writing is unchanged.' }
+        : item));
     }
   }
 
@@ -478,6 +516,25 @@ export const TransformProtectView: React.FC<Props> = ({
               <div className="ordinary-writing-copy is-safe"><small>After · scrubbed text available to Lu</small><p>{renderScrubbedHighlights(segment.originalText, segment.scrubbedText, segment.entities)}</p>{segment.entities.length === 0 && <em>No identifying details were detected. A cloud scan can miss details.</em>}</div>
               {segment.entities.length > 0 && <p className="ordinary-writing-entity-legend">Highlighted labels show what was replaced with generic names such as Person A or Place A.</p>}
               {onAskLu && <button type="button" className="ordinary-writing-ask-lu" onClick={() => onAskLu(segment.scrubbedText!)}>Ask Lu about this scrubbed paragraph</button>}
+              <div className="ordinary-writing-pattern-action">
+                <label><input type="checkbox" checked={segment.assessmentConsent} disabled={segment.assessmentStatus === 'assessing'} onChange={event => setPatternConsent(segment.id, event.target.checked)} /><span>I reviewed this scrubbed paragraph and allow OpenAI Decisions to assess possible patterns in it. This is not a prediction, diagnosis, or finding about what happened.</span></label>
+                <button type="button" className="ordinary-writing-ask-lu" disabled={!segment.assessmentConsent || segment.assessmentStatus === 'assessing'} onClick={() => void assessWritingSegment(segment)}>
+                  {segment.assessmentStatus === 'assessing' ? 'Reviewing pattern signals…' : segment.assessmentStatus === 'ready' ? 'Assess this paragraph again' : 'Understand patterns in this paragraph'}
+                </button>
+                {segment.assessmentMessage && <p className={segment.assessmentStatus === 'error' ? 'ordinary-writing-pattern-error' : 'ordinary-writing-pattern-status'} role={segment.assessmentStatus === 'error' ? 'alert' : 'status'}>{segment.assessmentMessage}</p>}
+              </div>
+              {segment.assessment && <section className="ordinary-writing-pattern-results" aria-label="Advisory pattern signals">
+                <header><strong>Signals in this passage</strong><small>OpenAI Decisions · GPT-6 Luna · advisory only</small></header>
+                <p>Scores describe how strongly the scrubbed wording matches a pattern. They do not estimate whether an event happened or predict what someone will do. The model can miss context.</p>
+                {segment.assessment.patterns.some(item => item.probability !== null && item.probability >= .4)
+                  ? <ul>{segment.assessment.patterns.filter(item => item.probability !== null && item.probability >= .4).sort((a,b)=>(b.probability ?? 0)-(a.probability ?? 0)).map(item => <li key={item.id}><span><strong>{item.title}</strong><small>{item.explanation}</small></span><b>{Math.round((item.probability ?? 0) * 100)}% text signal</b></li>)}</ul>
+                  : <p className="ordinary-writing-pattern-status">No pattern reached the display threshold in this paragraph. That does not mean nothing happened.</p>}
+                {segment.assessment.immediateSafety.probability !== null && segment.assessment.immediateSafety.probability >= .65 && <aside role="note"><strong>Possible urgent wording cue.</strong> This signal can be wrong and does not contact anyone. If you choose, open support options.</aside>}
+                <div className="ordinary-writing-pattern-actions">
+                  {onAskLu && <button type="button" onClick={() => onAskLu(`Please explain these advisory pattern signals using only this reviewed pseudonymised passage:\n\n${segment.scrubbedText}`)}>Ask Lu about these signals</button>}
+                  {onOpenSupport && <button type="button" onClick={onOpenSupport}>Find support options</button>}
+                </div>
+              </section>}
             </div> : segment.status === 'error' ? <div className="ordinary-writing-error"><p>{segment.message}</p><button type="button" disabled={!cloudScrubConsent} onClick={() => void processWritingSegment(segment)}>Try cloud review again</button></div> : null}
           </article>)}
         </section>

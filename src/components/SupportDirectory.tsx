@@ -8,7 +8,7 @@ export function SupportDirectory() {
   const resources = useMemo(() => searchSupportResources(query), [query]);
 
   return <section className="sanctuary-support-directory" aria-label="South African support resources">
-    <p className="sanctuary-support-note">South African national numbers. Choose a number to open your phone app. LuLu does not place calls or send messages.</p>
+    <p className="sanctuary-support-note">South African support services. Call or visit a service yourself; LuLu does not place calls, send messages, or share your writing.</p>
     <label className="sanctuary-support-search">Find a service
       <input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Name, type or number" />
     </label>
@@ -17,7 +17,10 @@ export function SupportDirectory() {
         <article className="sanctuary-support-card">
           <div className="sanctuary-support-card-heading">
             <div><h3>{resource.name}</h3><span>{resource.category}{resource.availability ? ` · ${resource.availability}` : ''}</span></div>
-            <a className="sanctuary-support-call" href={`tel:${resource.tel}`} aria-label={`Call ${resource.name} at ${resource.phone}`}><Phone size={15} /> Call</a>
+            <div className="sanctuary-support-actions">
+              <a className="sanctuary-support-call" href={`tel:${resource.tel}`} aria-label={`Call ${resource.name} at ${resource.phone}`}><Phone size={15} /> Call</a>
+              {resource.serviceUrl && <a className="sanctuary-support-visit" href={resource.serviceUrl} target="_blank" rel="noreferrer">Visit service <ExternalLink size={12} aria-hidden="true" /></a>}
+            </div>
           </div>
           <p>{resource.description}</p>
           <strong className="sanctuary-support-number">{resource.phone}</strong>

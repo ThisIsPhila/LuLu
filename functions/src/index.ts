@@ -13,7 +13,7 @@ import { judgeInviteDigest, isJudgeInviteActive } from './judge-invite.js';
 import { mayReadAccountActivity } from './owner-notifications.js';
 import { processAccountAlerts } from './account-alerts.js';
 import { scrubForLuDetailed, scrubTextsForLu, respondAsLuWithTools, LU_LANGUAGES, type LuAgentAction, type LuAgentHistoryMessage, type LuSurfaceReference } from './lu-chat.js';
-import { explicitlyRequestsDestination, explicitlyRequestsDraft, explicitlyRequestsOpen, explicitlyRequestsSurfaceSearch, isLuLuScopeRequest, outOfScopeReply, luSearchTerms } from './lu-agent-policy.js';
+import { explicitlyRequestsDestination, explicitlyRequestsDraft, explicitlyRequestsOpen, explicitlyRequestsSurfaceSearch, isJournalAccessCapabilityQuestion, isLuLuScopeRequest, journalAccessCapabilityReply, outOfScopeReply, luSearchTerms } from './lu-agent-policy.js';
 import { createLuLiveSession } from './lu-live.js';
 import { refillJudgeAllowance, reserveJudgeVoice, settleJudgeVoice, type JudgeAllowance } from './judge-allowance.js';
 import { assessBehaviourPatterns } from './pattern-intelligence.js';
@@ -583,6 +583,9 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
       const history:LuAgentHistoryMessage[]=body.history.map((item:{role:'user'|'assistant'},index:number)=>({role:item.role,text:safeHistory[index]}));
       if (!isLuLuScopeRequest(body.text, history)) {
         response.json({reply:outOfScopeReply(body.language),actions:[],references:[]}); return;
+      }
+      if (isJournalAccessCapabilityQuestion(body.text)) {
+        response.json({reply:journalAccessCapabilityReply(body.language),actions:[],references:[]}); return;
       }
       const entryIds=new Map<string,string>();
       const result=await respondAsLuWithTools(apiKey,body.text,body.language,{

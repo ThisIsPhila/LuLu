@@ -19,6 +19,12 @@ export function outOfScopeReply(language: string): string {
   return 'I’m Lu, your guide inside LuLu. I can help with LuLu’s pages and tools or writing you choose to share. I can’t help with topics outside the app.';
 }
 
+export function journalAccessCapabilityReply(language: string): string {
+  if (language === 'Afrikaans') return 'Ek kan gewone Joernaal- en Storie-inskrywings soek wanneer jy my vra. Ek blaai nie outomaties daardeur nie. Beskermde private skryfwerk bly ontoeganklik.';
+  if (language === 'isiZulu') return 'Ngingasesha okufakiwe okujwayelekile kuJenali naseZindabeni uma ungicela. Angikubheki ngokuzenzakalelayo. Okubhaliwe okuyimfihlo okuvikelwe akufinyeleleki.';
+  return 'I can search ordinary Journal and Story entries when you ask me to. I do not browse them automatically. Protected private writing stays unavailable to me.';
+}
+
 export function luSearchTerms(value: string): string[] {
   return [...new Set((value.normalize('NFKC').toLocaleLowerCase('und').match(/[\p{L}\p{N}]{3,}/gu) ?? [])
     .filter(word => !searchStopWords.has(word)))].slice(0,24);
@@ -28,6 +34,14 @@ export function explicitlyRequestsSurfaceSearch(value: string): boolean {
   const asksToFind = /\b(find|search|look\s+for|read|show\s+me|summari[sz]e|what\s+did\s+i\s+(?:write|say|save)|where\s+did\s+i\s+(?:write|mention)|what\s+does\s+my\s+(?:journal|story|entry)\s+say)\b/iu.test(value);
   const namesWriting = /\b(journal|journals|story|stories|entry|entries|saved\s+writing|what\s+i\s+wrote)\b/iu.test(value);
   return asksToFind && namesWriting;
+}
+
+/** Answer access questions accurately without making Lu search the journal. */
+export function isJournalAccessCapabilityQuestion(value: string): boolean {
+  const asksAboutCapability = /\b(can|could|do|does|are|is|am)\b[^.!?]{0,80}\b(access|browse|see|read|search|look through|look at)\b/iu.test(value);
+  const namesJournal = /\b(my|our|the|your)?\s*(journal|journals|story|stories|entry|entries|saved writing)\b/iu.test(value);
+  const asksForAnAction = explicitlyRequestsSurfaceSearch(value) || explicitlyRequestsOpen(value);
+  return asksAboutCapability && namesJournal && !asksForAnAction;
 }
 
 export function explicitlyRequestsOpen(value: string): boolean {

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build --mode app && vite build --mode demo",
-    "test": "node --experimental-strip-types --test src/domain/transform.test.ts src/domain/writingSegments.test.ts",
+    "test": "node --experimental-strip-types --test src/domain/transform.test.ts src/domain/writingSegments.test.ts src/services/supportDirectory.test.ts",
     "guard:firebase": "node scripts/firebase-guard.mjs",
     "test:firebase-guard": "node --test tests/firebase-guard.test.mjs",
     "dev:demo": "vite --host 127.0.0.1 --port 5174",
