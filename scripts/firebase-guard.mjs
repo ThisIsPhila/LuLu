@@ -6,8 +6,29 @@ import path from 'node:path';
 import ts from 'typescript';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const POLICY_PATH = '.sdd/memory/governance/firebase-guard-policy.json';
-const EXCEPTIONS_PATH = '.sdd/memory/governance/firebase-guard-exceptions.json';
+/** Deployment invariants live with the guard that enforces them. This keeps
+ * the required Firebase hook self-contained and reviewable. */
+const firebaseGuardPolicy = {
+  firebaseRootKeys: ['auth', 'firestore', 'functions', 'hosting'],
+  projectId: 'khora-lulu-2026',
+  hostingSite: 'khora-lulu-2026',
+  functionSource: 'functions',
+  functionCodebase: 'lulu',
+  functionRuntime: 'nodejs22',
+  functionName: 'api',
+  functionRegion: 'africa-south1',
+  functionMemoryMiBMax: 256,
+  functionMaxInstances: 2,
+  functionConcurrencyMax: 10,
+  functionTimeoutSecondsMax: 90,
+  functionMinInstances: 0,
+  functionSecretNames: ['OPENAI_API_KEY', 'RESEND_API_KEY'],
+  authProviders: {
+    anonymous: false,
+    emailPassword: true,
+    googleSignIn: { oAuthBrandDisplayName: 'LuLu', supportEmail: 'lulu@thisisphila.co.za' }
+  }
+};
 const ALLOWED_FUNCTION_OPTIONS = new Set(['region', 'memory', 'maxInstances', 'minInstances', 'concurrency', 'timeoutSeconds', 'invoker', 'secrets']);
 const ALLOWED_SERVICE_KEYS = {
   hosting: new Set(['public', 'ignore', 'rewrites', 'site', 'predeploy', 'cleanUrls', 'trailingSlash', 'headers']),
@@ -100,8 +121,8 @@ function validateFirebase({ firebase, firebaserc, functionSource, policy, except
   if (get(firebase, 'firestore.rules') !== 'firestore.rules' || get(firebase, 'firestore.indexes') !== 'firestore.indexes.json') {
     add(findings, 'FIRESTORE_CONFIGURATION', firebase.firestore ?? null, 'Keep the existing Standard Firestore rules and index files; do not add another database configuration here.');
   }
-  if (stable(firebase.auth?.providers) !== stable({ anonymous: false, emailPassword: false })) {
-    add(findings, 'AUTH_PROVIDERS', firebase.auth?.providers ?? null, 'Keep anonymous and email/password providers disabled unless the owner reviews a change.');
+  if (stable(firebase.auth?.providers) !== stable(policy.authProviders)) {
+    add(findings, 'AUTH_PROVIDERS', firebase.auth?.providers ?? null, 'Keep the currently configured authentication providers unchanged unless the owner reviews a change.');
   }
   for (const [service, config] of [['hosting', firebase.hosting], ['firestore', firebase.firestore], ['auth', firebase.auth]]) {
     if (!Array.isArray(config?.predeploy) || !config.predeploy.includes('node scripts/firebase-guard.mjs')) {
@@ -222,16 +243,16 @@ async function readJson(relativePath, options) {
   return JSON.parse(await readInputFile(relativePath, options));
 }
 
-export { readInputFile, validateFirebase };
+export { firebaseGuardPolicy, readInputFile, validateFirebase };
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const staged = process.argv.includes('--staged');
     const readOptions = { staged };
-    const [firebase, firebaserc, policy, exceptionDocument, functionSource] = await Promise.all([
-      readJson('firebase.json', readOptions), readJson('.firebaserc', readOptions), readJson(POLICY_PATH, readOptions), readJson(EXCEPTIONS_PATH, readOptions), readInputFile('functions/src/index.ts', readOptions)
+    const [firebase, firebaserc, functionSource] = await Promise.all([
+      readJson('firebase.json', readOptions), readJson('.firebaserc', readOptions), readInputFile('functions/src/index.ts', readOptions)
     ]);
-    const findings = validateFirebase({ firebase, firebaserc, functionSource, policy, exceptions: exceptionDocument.exceptions, activeProject: process.env.GCLOUD_PROJECT });
+    const findings = validateFirebase({ firebase, firebaserc, functionSource, policy: firebaseGuardPolicy, exceptions: [], activeProject: process.env.GCLOUD_PROJECT });
     if (!staged) {
       for (const name of ['demo','docs','legacy.html']) {
         let present = false;

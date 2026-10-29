@@ -4,22 +4,20 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { readInputFile, validateFirebase } from '../scripts/firebase-guard.mjs';
+import { firebaseGuardPolicy, readInputFile, validateFirebase } from '../scripts/firebase-guard.mjs';
 
-const [firebaseBase, firebasercBase, policy, exceptionDocument, functionSourceBase] = await Promise.all([
+const [firebaseBase, firebasercBase, functionSourceBase] = await Promise.all([
   readFile(new URL('../firebase.json', import.meta.url), 'utf8').then(JSON.parse),
   readFile(new URL('../.firebaserc', import.meta.url), 'utf8').then(JSON.parse),
-  readFile(new URL('../.sdd/memory/governance/firebase-guard-policy.json', import.meta.url), 'utf8').then(JSON.parse),
-  readFile(new URL('../.sdd/memory/governance/firebase-guard-exceptions.json', import.meta.url), 'utf8').then(JSON.parse),
   readFile(new URL('../functions/src/index.ts', import.meta.url), 'utf8')
 ]);
 
 const input = (changes = {}) => ({
   firebase: structuredClone(firebaseBase),
   firebaserc: structuredClone(firebasercBase),
-  policy,
+  policy: firebaseGuardPolicy,
   functionSource: functionSourceBase,
-  exceptions: exceptionDocument.exceptions,
+  exceptions: [],
   now: new Date('2026-10-25T12:00:00Z'),
   ...changes
 });
