@@ -18,7 +18,7 @@ export function LoadingScreen({ theme: providedTheme }: { theme?: AppTheme }) {
   const toneStrength = (scene.toneOpacity / 100) * (Math.abs(scene.toneLevel - 5) / 5);
   const toneColor = scene.toneLevel < 5 ? '#171914' : '#fff9ed';
   return <main className={`lulu-loading-screen is-${theme}`} role="status" aria-live="polite">
-    <div className="lulu-loading-landscape" style={{backgroundImage:`url("${landscape.url}")`,filter:`blur(${scene.blurLevel * 1.5}px)`}} aria-hidden="true" />
+    <div className="lulu-loading-landscape" style={{backgroundImage:`url("${landscape.url}")`,filter:'none'}} aria-hidden="true" />
     <div className="lulu-loading-tone" style={{backgroundColor:toneColor,opacity:toneStrength}} aria-hidden="true" />
     <div className="lulu-loading-content">
       <img className="lulu-loading-wordmark" src="/media/brand/lulu-wordmark-white.png" alt="LuLu" />

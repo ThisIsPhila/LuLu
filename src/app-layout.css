@@ -437,12 +437,7 @@ body:has(.lulu-app-root)::-webkit-scrollbar,
 .ordinary-header-logo:focus-visible { outline: 2px solid var(--sage-dark); outline-offset: 2px; }
 .ordinary-header-action { flex: 0 0 36px; }
 .ordinary-navigation-header .topbar-actions { flex: 0 0 auto; }
-.ordinary-floating-back-button {
-  position: fixed;
-  top: calc(76px + env(safe-area-inset-top, 0px));
-  left: max(14px, calc((100vw - 760px) / 2 + 14px));
-  z-index: 69;
-}
+.ordinary-header-back-button { flex: 0 0 36px; }
 .ordinary-floating-edit-button {
   position: fixed;
   top: calc(76px + env(safe-area-inset-top, 0px));
@@ -508,10 +503,6 @@ body:has(.lulu-app-root)::-webkit-scrollbar,
 
 @media (max-width: 799px) {
   .ordinary-desktop-links { display: none; }
-  .ordinary-navigation-header[data-view="home"] .ordinary-mobile-menu,
-  .ordinary-navigation-header[data-view="leaves"] .ordinary-mobile-menu,
-  .ordinary-navigation-header[data-view="stories"] .ordinary-mobile-menu,
-  .ordinary-navigation-header[data-view="library"] .ordinary-mobile-menu { display: none; }
   .ordinary-navigation-header .topbar-container { padding-inline: 12px; }
   .ordinary-navigation-header .owner-account-activity .owner-notification-panel {
     position: absolute;

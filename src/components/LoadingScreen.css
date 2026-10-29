@@ -1,6 +1,6 @@
 .lulu-loading-screen { position:relative; isolation:isolate; box-sizing:border-box; min-height:100dvh; display:grid; place-items:center; overflow:hidden; padding:max(28px,env(safe-area-inset-top)) 24px max(36px,env(safe-area-inset-bottom)); color:#fff; background:#252720; font:500 14px/1.45 var(--font-heading,'DM Sans',sans-serif); }
 .lulu-loading-landscape,.lulu-loading-tone { position:absolute; z-index:-1; inset:-18px; }
-.lulu-loading-landscape { background-position:center; background-size:cover; transform:scale(1.04); }
+.lulu-loading-landscape { background-position:center; background-size:cover; transform:scale(1.04); filter:none !important; }
 .lulu-loading-tone { inset:0; }
 .lulu-loading-content { display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center; text-shadow:0 2px 6px #0009; }
 .lulu-loading-wordmark { width:92px; height:auto; filter:drop-shadow(0 2px 5px #0006); }

@@ -208,7 +208,7 @@ export function OnboardingAuth({
       {isLoginScene && <div
         key={loginModeScene.landscape.src}
         className="oa-login-landscape"
-        style={{ backgroundImage: `url("${loginModeScene.landscape.src}")`, filter: `blur(${loginModeScene.blurLevel * 1.5}px)` }}
+        style={{ backgroundImage: `url("${loginModeScene.landscape.src}")`, filter: 'none' }}
         aria-hidden="true"
       />}
       {isLoginScene && <div

@@ -32,14 +32,21 @@ function orbViewportBounds(root: HTMLElement) {
   const width = viewport?.width ?? window.innerWidth;
   const height = viewport?.height ?? window.innerHeight;
   const rect = root.getBoundingClientRect();
+  const readerTools = document.querySelector<HTMLElement>('.circular-reader-dock');
+  const readerToolsRect = readerTools?.getBoundingClientRect();
   const edge = 12;
   const minLeft = left + inset('left') + edge;
   const minTop = top + inset('top') + edge;
+  const maxViewportTop = Math.max(minTop, top + height - rect.height - edge);
+  const defaultMaxTop = Math.max(minTop, top + height - inset('bottom') - rect.height - edge);
+  const readerAlignedTop = readerToolsRect
+    ? readerToolsRect.top + (readerToolsRect.height - rect.height) / 2
+    : defaultMaxTop;
   return {
     minLeft,
     maxLeft: Math.max(minLeft, left + width - inset('right') - rect.width - edge),
     minTop,
-    maxTop: Math.max(minTop, top + height - inset('bottom') - rect.height - edge),
+    maxTop: Math.min(maxViewportTop, Math.max(defaultMaxTop, readerAlignedTop)),
     width: rect.width,
     height: rect.height,
   };
@@ -61,6 +68,10 @@ function findClearOrbPosition(position: FloatingOrbPosition, root: HTMLElement):
   for (let y = start.top + stepY; y <= bounds.maxTop; y += stepY) ys.push(y);
   const blockers = Array.from(document.querySelectorAll<HTMLElement>('body *')).flatMap(element => {
     if (element === root || root.contains(element) || element.contains(root)) return [];
+    // The reader controls are the intended alignment row for Lu's saved
+    // position. Let the orb sit alongside those icons instead of jumping
+    // above the whole dock after a resize or route change.
+    if (element.closest('.circular-reader-dock')) return [];
     const computed = window.getComputedStyle(element);
     if (computed.position !== 'fixed' && computed.position !== 'sticky') return [];
     if (computed.display === 'none' || computed.visibility === 'hidden' || Number.parseFloat(computed.opacity) < .05) return [];
