@@ -158,7 +158,7 @@ export async function respondAsLuWithTools(
   apiKey:string,
   scrubbed:string,
   language:string,
-  options:{fetcher?:Fetcher;history?:readonly LuAgentHistoryMessage[];execute:LuToolExecutor},
+  options:{fetcher?:Fetcher;history?:readonly LuAgentHistoryMessage[];images?:readonly string[];execute:LuToolExecutor},
 ):Promise<LuAgentResult> {
   if(!LU_LANGUAGES.includes(language as typeof LU_LANGUAGES[number]))throw new Error('Invalid language.');
   if(!apiKey||scrubbed.trim().length===0||scrubbed.length>12000)throw new Error('Invalid Lu message.');
@@ -168,7 +168,9 @@ export async function respondAsLuWithTools(
   const input:unknown[]=[
     {role:'developer',content:`${LU_AGENT_INSTRUCTIONS}\n\nSelected reply language: ${language}.`},
     ...history.map(item=>({role:item.role,content:item.text})),
-    {role:'user',content:scrubbed},
+    {role:'user',content:options.images?.length
+      ? [{type:'input_text',text:scrubbed},...options.images.map(image=>({type:'input_image',image_url:image,detail:'auto'}))]
+      : scrubbed},
   ];
   const actions:LuAgentAction[]=[];
   const references:LuSurfaceReference[]=[];

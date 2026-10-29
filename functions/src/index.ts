@@ -570,7 +570,9 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
     }
     if (route === '/lu/chat') {
       await requireLuAiAccess(current.uid);
-      if (Object.keys(body).sort().join(',') !== 'history,language,sourceText,text,ticket' || typeof body.text !== 'string' || body.text.length > 12000 || typeof body.sourceText !== 'string' || !body.sourceText.trim() || body.sourceText.length > 4000 || typeof body.ticket !== 'string' || !/^[0-9a-f-]{36}$/.test(body.ticket) || (body.language !== 'auto' && !LU_LANGUAGES.includes(body.language)) || !Array.isArray(body.history) || body.history.length>6 || body.history.some((item:unknown)=>!item||typeof item!=='object'||!['user','assistant'].includes((item as {role?:unknown}).role as string)||typeof (item as {text?:unknown}).text!=='string'||!(item as {text:string}).text.trim()||(item as {text:string}).text.length>1200) || body.history.reduce((sum:number,item:{text:string})=>sum+item.text.length,0)>7200) throw new ApiError(400, 'Invalid reviewed chat request.');
+      const chatKeySignature = Object.keys(body).sort().join(',');
+      const images = body.images ?? [];
+      if ((chatKeySignature !== 'history,language,sourceText,text,ticket' && chatKeySignature !== 'history,images,language,sourceText,text,ticket') || typeof body.text !== 'string' || body.text.length > 12000 || typeof body.sourceText !== 'string' || !body.sourceText.trim() || body.sourceText.length > 4000 || typeof body.ticket !== 'string' || !/^[0-9a-f-]{36}$/.test(body.ticket) || (body.language !== 'auto' && !LU_LANGUAGES.includes(body.language)) || !Array.isArray(images) || images.length>2 || images.some((image:unknown)=>typeof image!=='string'||image.length>1_400_000||!/^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/u.test(image)) || !Array.isArray(body.history) || body.history.length>6 || body.history.some((item:unknown)=>!item||typeof item!=='object'||!['user','assistant'].includes((item as {role?:unknown}).role as string)||typeof (item as {text?:unknown}).text!=='string'||!(item as {text:string}).text.trim()||(item as {text:string}).text.length>1200) || body.history.reduce((sum:number,item:{text:string})=>sum+item.text.length,0)>7200) throw new ApiError(400, 'Invalid reviewed chat request.');
       const responseLanguage = body.language === 'auto' ? inferLuLanguage(body.text) : body.language;
       const ref=db.collection('_luReviews').doc(hash(body.ticket));
       await db.runTransaction(async transaction => {
@@ -605,6 +607,7 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
       const entryIds=new Map<string,string>();
       const result=await respondAsLuWithTools(apiKey,body.text,responseLanguage,{
         history,
+        images:images as string[],
         execute:call=>executeLuTool(current.uid,body.text,call,apiKey,entryIds),
       });
       // Only open entries returned by the server's current ordinary-entry search.

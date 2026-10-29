@@ -54,6 +54,20 @@ test('Lu tool loop executes a server function and returns its result to the mode
  assert.ok(bodies[1].input.some((item:any)=>item.type==='function_call_output'&&item.call_id==='call_settings'));
 });
 
+test('image attachments reach Lu as image inputs alongside scrubbed text',async()=>{
+ const bodies:any[]=[];
+ const image='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2Q==';
+ const fake=async (_url:string,init:RequestInit)=>{
+  bodies.push(JSON.parse(String(init.body)));
+  return new Response(JSON.stringify({status:'completed',output:[{type:'message',content:[{type:'output_text',text:'I can help with this LuLu screen.'}]}]}),{status:200});
+ };
+ await respondAsLuWithTools('test-key','Please explain this LuLu screen.','English',{fetcher:fake,images:[image],execute:async()=>({output:{}})});
+ const userInput=bodies[0].input.at(-1);
+ assert.equal(userInput.role,'user');
+ assert.deepEqual(userInput.content.at(-1),{type:'input_image',image_url:image,detail:'auto'});
+ assert.equal(userInput.content[0].text,'Please explain this LuLu screen.');
+});
+
 test('confirmed chained actions return within the bounded tool loop',async()=>{
  const bodies:any[]=[];
  const fake=async (_url:string,init:RequestInit)=>{
