@@ -625,6 +625,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
 
         {currentView === 'cloud-privacy-demo' && <CloudPrivacyDemo
           onBack={() => { if (protectedMode) { handleExitProtected(); setCurrentView('model-settings'); } else setCurrentView('model-settings'); }}
+          entries={ordinaryEntries}
           accountActive={accountSessionActive}
           privateSession={privacySession}
           onUnlockPrivate={handleProtectedSuccess}

@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ArrowLeft, Check, ChevronDown, CircleAlert, Fingerprint, LoaderCircle, LockKeyhole, MessageCircle, RotateCcw, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowLeft, BookOpen, Check, ChevronDown, CircleAlert, Fingerprint, LoaderCircle, LockKeyhole, MessageCircle, RotateCcw, Search, ShieldCheck, Sparkles } from 'lucide-react';
+import type { Entry } from '../domain/journal';
 import { scrubLuMessage } from '../services/luChat';
 import type { LuScrubbedEntity } from '../services/luChatContracts';
 import { assessReviewedPatterns, getCloudProcessingCapability, type CloudProcessingCapability } from '../services/privacy/cloudProcessingClient';
 import type { PatternAssessment, PatternBand } from '../services/privacy/patternIntelligenceContracts';
+import { MAX_CLOUD_REVIEW_ENTRIES, prepareCloudEntrySelection } from '../services/privacy/cloudEntrySelection';
 import { createSessionEntityLibrary, type EntityLibrary, type EntityIdentity } from '../services/privacy/entityLibrary';
 import type { LocalVaultSession } from '../services/vault/localVault';
 
@@ -19,6 +21,7 @@ const bandLabel: Record<PatternBand, string> = {
 
 type Props = {
   onBack: () => void;
+  entries?: Entry[];
   accountActive: () => boolean;
   privateSession?: LocalVaultSession;
   onUnlockPrivate?: () => Promise<void>;
@@ -55,8 +58,11 @@ function newRevision() {
   return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-export function CloudPrivacyDemo({ onBack, accountActive, privateSession, onUnlockPrivate, onOpenSupport, onAskLu }: Props) {
+export function CloudPrivacyDemo({ onBack, entries = [], accountActive, privateSession, onUnlockPrivate, onOpenSupport, onAskLu }: Props) {
   const [sourceText, setSourceText] = useState(EXAMPLE);
+  const [sourceEntryCount, setSourceEntryCount] = useState(0);
+  const [entryQuery, setEntryQuery] = useState('');
+  const [selectedEntryIds, setSelectedEntryIds] = useState<string[]>([]);
   const [entities, setEntities] = useState<LuScrubbedEntity[]>([]);
   const [scrubbedText, setScrubbedText] = useState('');
   const [manualReview, setManualReview] = useState<string | null>(null);
@@ -76,6 +82,11 @@ export function CloudPrivacyDemo({ onBack, accountActive, privateSession, onUnlo
   const abort = useRef<AbortController | null>(null);
 
   const hasAccount = accountActive();
+  const ordinaryEntries = useMemo(() => entries.filter(entry => !entry.protected), [entries]);
+  const matchingEntries = useMemo(() => {
+    const query = entryQuery.trim().toLocaleLowerCase();
+    return ordinaryEntries.filter(entry => !query || `${entry.title} ${entry.kind}`.toLocaleLowerCase().includes(query));
+  }, [ordinaryEntries, entryQuery]);
   const privateUnlocked = privateSession?.isUnlocked() === true;
   const outputText = useMemo(() => manualReview ?? (scrubbedText ? transformedText(sourceText, entities) : ''), [sourceText, scrubbedText, entities, manualReview]);
   const highlighted = useMemo(() => <HighlightedSource text={sourceText} entities={entities} />, [sourceText, entities]);
@@ -145,7 +156,28 @@ export function CloudPrivacyDemo({ onBack, accountActive, privateSession, onUnlo
 
   function updateSource(value: string) {
     setSourceText(value);
+    setSourceEntryCount(0);
+    setSelectedEntryIds([]);
     resetResults();
+  }
+
+  function toggleEntry(entryId: string, checked: boolean) {
+    setSelectedEntryIds(current => {
+      if (!checked) return current.filter(id => id !== entryId);
+      if (current.includes(entryId) || current.length >= MAX_CLOUD_REVIEW_ENTRIES) return current;
+      return [...current, entryId];
+    });
+  }
+
+  function loadSelectedEntries() {
+    const selected = ordinaryEntries.filter(entry => selectedEntryIds.includes(entry.id));
+    const prepared = prepareCloudEntrySelection(selected);
+    if (!prepared.ok) { setStatus('error'); setMessage(prepared.message); return; }
+    setSourceText(prepared.text);
+    setSourceEntryCount(prepared.entryCount);
+    setSelectedEntryIds([]);
+    resetResults();
+    setMessage(`${prepared.entryCount} ordinary ${prepared.entryCount === 1 ? 'entry is' : 'entries are'} loaded on this device. Nothing is sent until you run detection and confirm the cloud disclosure.`);
   }
 
   async function runScrub() {
@@ -225,7 +257,7 @@ export function CloudPrivacyDemo({ onBack, accountActive, privateSession, onUnlo
       <button type="button" className="privacy-back" onClick={onBack}><ArrowLeft size={18}/> Back</button>
       <span className="privacy-settings-kicker">CLOUD DEMO · LIVE SERVICES</span>
       <h1>See what the models do</h1>
-      <p>Follow one passage through LuLu’s privacy step, review the exact replacements, then send only that reviewed version to the pattern model.</p>
+      <p>Follow your own writing through LuLu’s privacy step, review the exact replacements, then send only that reviewed version to look for described patterns across up to three entries.</p>
       <div className={`cloud-connection ${capability?.enabled ? 'is-ready' : ''}`} role="status"><span className="live-dot"/>{capabilityMessage}</div>
     </header>
 
@@ -242,6 +274,20 @@ export function CloudPrivacyDemo({ onBack, accountActive, privateSession, onUnlo
     <section className="cloud-privacy-workspace" aria-label="Review and assess text">
       <article className="cloud-privacy-pane">
         <div className="cloud-privacy-pane-heading"><div><span className="privacy-pane-eyebrow">STEP 1 · INPUT</span><h2>Your original text</h2></div><span className="privacy-word-count">{sourceText.length.toLocaleString()} / 4,000</span></div>
+        {ordinaryEntries.length > 0 && <fieldset className="cloud-entry-picker">
+          <legend><BookOpen size={15} aria-hidden="true"/> Use your Journal or Stories</legend>
+          <p>Choose up to {MAX_CLOUD_REVIEW_ENTRIES} ordinary entries to review together. They are ordered from older to newer; exact saved dates stay on this device.</p>
+          <label className="cloud-entry-search"><Search size={15} aria-hidden="true"/><span className="cloud-sr-only">Search ordinary entries</span><input type="search" value={entryQuery} onChange={event => setEntryQuery(event.target.value)} placeholder="Find an entry by title" /></label>
+          <div className="cloud-entry-options" aria-label="Ordinary entries">
+            {matchingEntries.length ? matchingEntries.map(entry => <label className="cloud-entry-option" key={entry.id}>
+              <input type="checkbox" checked={selectedEntryIds.includes(entry.id)} disabled={!selectedEntryIds.includes(entry.id) && selectedEntryIds.length >= MAX_CLOUD_REVIEW_ENTRIES} onChange={event => toggleEntry(entry.id, event.target.checked)} />
+              <span><strong>{entry.title || 'Untitled entry'}</strong><small>{entry.kind} · {new Date(entry.date).toLocaleDateString()}</small></span>
+            </label>) : <p className="cloud-entry-empty">No ordinary entry matches that title.</p>}
+          </div>
+          <button type="button" className="privacy-button secondary cloud-entry-load" disabled={!selectedEntryIds.length} onClick={loadSelectedEntries}>Use {selectedEntryIds.length || ''} selected {selectedEntryIds.length === 1 ? 'entry' : 'entries'}</button>
+          <small className="cloud-entry-note">Selecting entries only fills the editor. Protected private writing is excluded; the original is sent only after you check the cloud disclosure and run detection.</small>
+        </fieldset>}
+        {sourceEntryCount > 0 && <p className="cloud-entry-load-status" role="status">{sourceEntryCount} ordinary {sourceEntryCount === 1 ? 'entry is' : 'entries are'} loaded in older-to-newer order. Exact saved dates were not added to the text.</p>}
         <textarea aria-label="Original text" value={sourceText} maxLength={4000} onChange={event => updateSource(event.target.value)} placeholder="Paste a passage or use the synthetic example…" />
         <label className="cloud-consent"><input type="checkbox" checked={scrubConsent} onChange={event => setScrubConsent(event.target.checked)}/><span>I understand this original text will be sent to LuLu’s cloud privacy service for PII detection. It may contain personal details.</span></label>
         <button type="button" className="privacy-button primary cloud-run" disabled={!capability?.enabled || status === 'scrubbing' || !sourceText.trim()} onClick={() => void runScrub()}>
@@ -289,7 +335,7 @@ export function CloudPrivacyDemo({ onBack, accountActive, privateSession, onUnlo
 
     {assessment && <section className="cloud-pattern-results" aria-labelledby="cloud-results-title">
       <header><div><span className="privacy-pane-eyebrow">STEP 3 · OPENAI DECISIONS · GPT-6-LUNA</span><h2 id="cloud-results-title">Signals in this passage</h2></div><span className="cloud-result-badge">Advisory · {assessment.patterns.length} categories</span></header>
-      <p className="cloud-result-disclaimer">A model score describes how strongly the wording matches a pattern. It is not a probability that an event happened, a diagnosis, or a finding about a person. Read the passage and make your own judgement.</p>
+      <p className="cloud-result-disclaimer">A model score describes how strongly the selected wording matches a pattern. It is not proof that an event happened, a diagnosis, or a forecast of what someone will do. Read the writing and make your own judgement.</p>
       {urgent && <aside className="cloud-urgent-signal"><CircleAlert size={18}/><div><strong>The wording may describe immediate danger.</strong><span>This signal can be wrong. If you want to, review the South African support directory.</span></div><button type="button" onClick={onOpenSupport}>Review support options</button></aside>}
       {sortedAssessment.length > 0 ? <div className="cloud-pattern-list">{sortedAssessment.map(item => <article className={`cloud-pattern-card is-${item.band}`} key={item.id}>
         <div><strong>{item.title}</strong><p>{item.explanation}</p></div><div className="cloud-pattern-score"><span className={`cloud-pattern-band band-${item.band}`}>{bandLabel[item.band]}</span><strong>{Math.round((item.probability ?? 0) * 100)}%</strong><small>model signal</small></div>
