@@ -7,6 +7,7 @@ import { SupportDirectory } from './SupportDirectory';
 type Props = {
   uid: string;
   onQuickExit: () => void;
+  initialSection?: 'Private'|'Safety'|'Resources';
 };
 
 type SanctuarySection = 'Private' | 'Safety' | 'Resources';
@@ -18,9 +19,9 @@ const safetyPrompts = [
   'Review how to leave LuLu quickly.',
 ];
 
-export const PrivateSanctuaryView: React.FC<Props> = ({ uid, onQuickExit }) => {
+export const PrivateSanctuaryView: React.FC<Props> = ({ uid, onQuickExit, initialSection='Private' }) => {
   const [showContacts, setShowContacts] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<SanctuarySection>('Private');
+  const [activeCategory, setActiveCategory] = useState<SanctuarySection>(initialSection);
   const [checkedPrompts, setCheckedPrompts] = useState<Set<number>>(() => new Set());
 
   const titles: Record<SanctuarySection, string> = {
