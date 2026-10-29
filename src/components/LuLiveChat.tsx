@@ -3,7 +3,7 @@ import { ExternalLink, Mic, MicOff, Phone, Radio, ShieldCheck } from 'lucide-rea
 import { request } from '../services/backend/request';
 import { waitForLocalIceSdp } from '../services/liveWebrtc';
 import type { LuAgentAction, LuSurfaceReference } from '../services/luChatContracts';
-import { LuActivity } from './LuActivity';
+import { LuEyes } from './LuEyes';
 import './LuLiveChat.css';
 
 type Bubble = { speaker: 'You'|'Lu'; text: string };
@@ -11,7 +11,7 @@ type LiveAnswer = { sessionId: string; answer: string; expiresAt: number; voiceS
 type LiveToolResult = { output: unknown; action: LuAgentAction|null; references: LuSurfaceReference[] };
 type LiveEvent = { type?: string; delta?: unknown; transcript?: unknown; item?: unknown; event?: unknown; response?: unknown };
 
-export function LuLiveChat({ onAgentAction, onVoiceAccessRefresh }: { onAgentAction?: (action: LuAgentAction) => void; onVoiceAccessRefresh?: () => void }) {
+export function LuLiveChat({ onAgentAction, onVoiceAccessRefresh, autoStart = false, initialMediaStream = null, startError = '' }: { onAgentAction?: (action: LuAgentAction) => void; onVoiceAccessRefresh?: () => void; autoStart?: boolean; initialMediaStream?: MediaStream | null; startError?: string }) {
   const [status, setStatus] = useState('Ready when you are');
   const [connected, setConnected] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -97,6 +97,14 @@ export function LuLiveChat({ onAgentAction, onVoiceAccessRefresh }: { onAgentAct
     finalizeClose();
   }
   useEffect(() => { alive.current = true; return () => { alive.current = false; close(); }; }, []);
+  useEffect(() => {
+    if (!autoStart) return;
+    if (!initialMediaStream) { setStatus(startError || 'Waiting for microphone permission…'); return; }
+    void start(initialMediaStream);
+  }, [autoStart, initialMediaStream, startError]);
+  useEffect(() => {
+    if (startError) { setBusy(false); setStatus(startError); }
+  }, [startError]);
 
   async function runFunction(itemValue: unknown, attempt: number) {
     if (!itemValue || typeof itemValue !== 'object') return;
@@ -154,11 +162,11 @@ export function LuLiveChat({ onAgentAction, onVoiceAccessRefresh }: { onAgentAct
     if (nested.type === 'response.output_item.done' && nested.item) void runFunction(nested.item, attempt);
   }
 
-  async function start() {
+  async function start(preparedStream?: MediaStream) {
     if (busy || connected) return;
     setBusy(true); setReferences([]); setStatus('Connecting to Lu…'); const attempt = ++generation.current;
     try {
-      const media = await navigator.mediaDevices.getUserMedia({ audio:true });
+      const media = preparedStream ?? await navigator.mediaDevices.getUserMedia({ audio:true });
       if (attempt !== generation.current) { media.getTracks().forEach(track=>track.stop()); return; }
       stream.current = media;
       const peer = new RTCPeerConnection(); connection.current = peer;
@@ -196,7 +204,7 @@ export function LuLiveChat({ onAgentAction, onVoiceAccessRefresh }: { onAgentAct
 
   return <section className="lu-live-chat" aria-label="Live conversation with Lu">
     <aside className="lu-live-disclosure"><ShieldCheck size={18}/><span><strong>Cloud voice demo · GPT-Live + GPT-6 Luna</strong><small>GPT-Live receives your audio directly and may hear personal details. Lu’s GPT-6 Luna backend can search scrubbed excerpts from ordinary Journal and Story entries and carry out app actions you request. Protected private writing is never available to its tools. After one minute without speech the microphone session pauses; recent chat text is sent again if you choose to continue.</small></span></aside>
-    <div className="lu-live-stage"><div className={`lu-live-orb${connected?' is-listening':''}${busy?' is-connecting':''}`} aria-hidden="true"><span>Lu</span></div><strong className="lu-live-status" role="status">{busy||connected?<LuActivity state={busy?'connecting':'listening'} label={status}/>:status}</strong><span className="lu-live-hint">{connected?'Speak naturally. Lu can use the app tools while you talk.':'Start a conversation with Lu about using the app.'}</span>{voiceSecondsRemaining!==null&&<small className="lu-live-allowance">Judge voice allowance: {Math.floor(voiceSecondsRemaining/60)}m {String(voiceSecondsRemaining%60).padStart(2,'0')}s remaining</small>}</div>
+    <div className="lu-live-stage"><div className="lu-live-character">{(busy || connected || status !== 'Ready when you are') && <span className={`lu-live-character-status${status.toLowerCase().includes('error')||status.toLowerCase().includes('could not')?' is-error':''}`} role="status"><span className="lu-orb-status-dot" aria-hidden="true"/>{status}</span>}<div className={`lu-live-orb${connected?' is-listening':''}${busy?' is-connecting':''}`} aria-hidden="true"><span className="lu-orb-sphere"/><LuEyes/></div></div><span className="lu-live-hint">{connected?'Speak naturally. Lu can use the app tools while you talk.':'Start a conversation with Lu about using the app.'}</span>{voiceSecondsRemaining!==null&&<small className="lu-live-allowance">Judge voice allowance: {Math.floor(voiceSecondsRemaining/60)}m {String(voiceSecondsRemaining%60).padStart(2,'0')}s remaining</small>}</div>
     <div className="lu-live-thread" aria-label="Conversation" aria-live="polite">{bubbles.map((bubble,index)=><article className={`lu-live-bubble is-${bubble.speaker==='You'?'you':'lu'}`} key={index}><small>{bubble.speaker}</small><p>{bubble.text}</p></article>)}
       {references.map(reference=><article className="lu-live-reference" key={reference.reference}><small>{reference.kind} · {reference.reference.replace('_',' ')}</small><strong>{reference.title||'Untitled entry'}</strong><p>{reference.content}</p><button type="button" onClick={()=>onAgentAction?.({kind:'open-entry',entryId:reference.entryId})}><ExternalLink size={14}/>Open entry</button></article>)}
     </div>

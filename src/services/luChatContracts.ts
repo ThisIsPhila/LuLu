@@ -1,6 +1,7 @@
 export const LU_CHAT_MAX_INPUT_CHARACTERS = 4_000;
 export const LU_CHAT_LANGUAGES = ['English', 'Afrikaans', 'isiZulu'] as const;
 export type LuChatLanguage = (typeof LU_CHAT_LANGUAGES)[number];
+export type LuChatReplyLanguage = LuChatLanguage | 'auto';
 
 export type LuScrubbedEntity = { start:number; end:number; label:'Person'|'Place'|'Organisation'|'Date'|'Time'|'Email'|'Phone'|'Relationship'|'Identifier'|'Detail'; replacement:string };
 export type LuScrubResult = { scrubbed: string; entities:LuScrubbedEntity[]; ticket: string };
@@ -63,7 +64,8 @@ export function validateLuChatInput(text: string): string {
   return value;
 }
 
-export function validateLuChatLanguage(value: string): LuChatLanguage {
+export function validateLuChatLanguage(value: string): LuChatReplyLanguage {
+  if (value === 'auto') return 'auto';
   if ((LU_CHAT_LANGUAGES as readonly string[]).includes(value)) return value as LuChatLanguage;
-  throw new Error('Choose English, Afrikaans, or isiZulu.');
+  throw new Error('Lu can automatically reply in English, Afrikaans, or isiZulu.');
 }

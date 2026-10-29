@@ -1,12 +1,39 @@
-.lu-live-chat { flex:1; min-height:0; width:min(100%,860px); margin:0 auto; padding:clamp(18px,4vh,42px) clamp(20px,5vw,64px) max(20px,env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:20px; overflow:auto; }
-.lu-live-disclosure { display:flex; align-items:flex-start; gap:12px; padding:14px 16px; border:1px solid #e2d6c4; border-radius:16px; background:#f5efe4; color:#59624e; }
-.lu-live-disclosure span {display:grid;gap:4px}.lu-live-disclosure strong{font-size:13px}.lu-live-disclosure small{color:#625e55;font-size:12px;line-height:1.5}
-.lu-live-stage { flex:none; min-height:300px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:16px; padding:24px; text-align:center; }
-.lu-live-orb { width:clamp(108px,20vh,168px); aspect-ratio:1; display:grid; place-items:center; border:1px solid #d9d2c2; border-radius:50%; background:radial-gradient(circle at 35% 28%,#fffef2,#e9e5d2 58%,#c5c5a5); box-shadow:0 14px 40px #76745a2b,inset 0 2px 12px #fff9; transition:transform .3s,box-shadow .3s; }
-.lu-live-orb span {font:500 clamp(32px,7vw,54px) var(--font-serif,Georgia,serif);color:#fff;text-shadow:0 2px 8px #77735c80}.lu-live-orb.is-listening{animation:lu-live-pulse 2.1s ease-in-out infinite;box-shadow:0 0 0 12px #d9dfd055,0 0 0 28px #d9dfd027,0 14px 40px #76745a2b}.lu-live-orb.is-connecting{animation:lu-live-pulse 1.2s ease-in-out infinite}
-.lu-live-status{font:500 20px var(--font-serif,Georgia,serif);color:#34342d}.lu-live-status [role=status]{display:flex;justify-content:center}.lu-live-hint{max-width:340px;color:#706d63;font-size:13px;line-height:1.5}
-.lu-live-allowance{color:#686b5b;font:11px/1.4 var(--font-mono,monospace);text-align:center}
-.lu-live-thread{flex:1;min-height:60px;display:flex;flex-direction:column;gap:12px;padding:4px 0;overflow-y:auto}.lu-live-bubble{max-width:min(82%,620px);padding:13px 16px;border:1px solid #e1dacd;border-radius:18px;background:#fffdf8}.lu-live-bubble.is-you{align-self:flex-end;background:#eeeadf}.lu-live-bubble small{font-size:11px;color:#777061;font-weight:650}.lu-live-bubble p{margin:5px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px;line-height:1.55}
-.lu-live-reference{max-width:min(88%,680px);padding:14px 16px;border:1px solid #d9d2c6;border-radius:16px;background:#fffdf8}.lu-live-reference small{display:block;margin-bottom:5px;color:#777061;font-size:11px}.lu-live-reference strong{display:block;color:#37352f;font-size:14px}.lu-live-reference p{margin:7px 0 10px;color:#555147;font-size:13px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}.lu-live-reference button{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 12px;border:1px solid #d4ccbd;border-radius:999px;background:#fffdf8;color:#454d40;font:600 12px var(--font-sans,sans-serif);cursor:pointer}
-.lu-live-controls{flex:none;display:flex;justify-content:center;align-items:center;gap:14px;padding-top:8px}.lu-live-controls button{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:0 24px;border-radius:999px;font:650 14px var(--font-sans,sans-serif);cursor:pointer}.lu-live-start,.lu-live-end{border:1px solid #454d40;background:#454d40;color:#fffaf0}.lu-live-end{background:#8c463d;border-color:#8c463d}.lu-live-secondary{border:1px solid #d6d0c3;background:#fffdf8;color:#44463e}.lu-live-controls button:disabled{opacity:.6}.lu-live-audio{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-@keyframes lu-live-pulse{50%{transform:scale(1.045)}}@media(prefers-reduced-motion:reduce){.lu-live-orb{animation:none!important;transition:none}}
+.lu-live-chat { display:flex; flex:1 1 auto; min-height:0; flex-direction:column; gap:22px; }
+.lu-live-disclosure { display:flex; flex:none; align-items:flex-start; gap:10px; padding:14px 16px; border:1px solid #ddc5ac; border-radius:16px; background:#fbf1e5; color:#684a32; }
+.lu-live-disclosure > svg { flex:none; margin-top:2px; }
+.lu-live-disclosure span { display:grid; gap:4px; }
+.lu-live-disclosure strong { font-size:13px; }
+.lu-live-disclosure small { color:#625e55; font-size:12px; line-height:1.55; }
+.lu-live-stage { flex:none; min-height:280px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:24px; padding:38px 24px 24px; text-align:center; }
+.lu-live-character { position:relative; display:grid; place-items:center; }
+.lu-live-character-status { position:absolute; z-index:2; left:50%; bottom:calc(100% + 12px); display:flex; align-items:center; justify-content:center; gap:8px; width:max-content; max-width:min(320px,calc(100vw - 56px)); min-height:38px; padding:8px 14px; transform:translateX(-50%); border:1px solid rgba(106,117,91,.26); border-radius:999px; background:rgba(251,248,242,.97); color:#4e5546; box-shadow:0 8px 24px rgba(49,44,34,.12); font:600 12px/1.35 var(--font-sans,sans-serif); }
+.lu-live-character-status.is-error { border-color:#e6c6bd; background:#fbefeb; color:#8a3c34; }
+.lu-live-orb { position:relative; width:clamp(112px,20vh,168px); aspect-ratio:1; display:grid; place-items:center; border:0; border-radius:50%; background:transparent; box-shadow:none; transition:transform .3s; }
+.lu-live-orb .lu-orb-sphere { position:absolute; inset:0; width:100%; height:100%; }
+.lu-live-orb .lu-orb-eyes { z-index:1; gap:16px; }
+.lu-live-orb .lu-orb-eyes > span { width:10px; height:16px; }
+.lu-live-orb.is-listening { animation:lu-live-pulse 2.1s ease-in-out infinite; }
+.lu-live-orb.is-listening .lu-orb-sphere { box-shadow:0 0 0 12px rgba(143,160,118,.16),0 0 0 27px rgba(143,160,118,.09),inset 3px 4px 9px rgba(255,255,255,.78),inset -5px -7px 15px rgba(108,95,60,.24),0 8px 30px rgba(91,78,54,.25); }
+.lu-live-orb.is-connecting { animation:lu-live-pulse 1.2s ease-in-out infinite; }
+.lu-live-hint { max-width:400px; color:#706d63; font-size:14px; line-height:1.6; }
+.lu-live-allowance { color:#686b5b; font:11px/1.4 var(--font-mono,monospace); text-align:center; }
+.lu-live-thread { flex:1 1 auto; min-height:70px; display:flex; flex-direction:column; gap:12px; padding:8px 0 16px; overflow-y:auto; overscroll-behavior:contain; }
+.lu-live-bubble { max-width:min(82%,620px); padding:14px 17px; border:1px solid #e1dacd; border-radius:18px; background:#fffdf8; }
+.lu-live-bubble.is-you { align-self:flex-end; background:#eeeadf; }
+.lu-live-bubble small { font-size:11px; color:#777061; font-weight:650; }
+.lu-live-bubble p { margin:5px 0 0; white-space:pre-wrap; overflow-wrap:anywhere; font-size:15px; line-height:1.6; }
+.lu-live-reference { max-width:min(88%,680px); padding:14px 16px; border:1px solid #d9d2c6; border-radius:16px; background:#fffdf8; }
+.lu-live-reference small { display:block; margin-bottom:5px; color:#777061; font-size:11px; }
+.lu-live-reference strong { display:block; color:#37352f; font-size:14px; }
+.lu-live-reference p { margin:7px 0 10px; color:#555147; font-size:13px; line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
+.lu-live-reference button { display:inline-flex; align-items:center; gap:7px; min-height:36px; padding:0 13px; border:1px solid #d4ccbd; border-radius:999px; background:#fffdf8; color:#454d40; font:600 12px var(--font-sans,sans-serif); cursor:pointer; }
+.lu-live-controls { flex:none; display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:12px; padding:12px 0 max(10px,env(safe-area-inset-bottom)); }
+.lu-live-controls button { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:52px; padding:0 24px; border-radius:999px; font:650 14px var(--font-sans,sans-serif); cursor:pointer; }
+.lu-live-start,.lu-live-end { border:1px solid #454d40; background:#454d40; color:#fffaf0; }
+.lu-live-end { background:#8c463d; border-color:#8c463d; }
+.lu-live-secondary { border:1px solid #d6d0c3; background:#fffdf8; color:#44463e; }
+.lu-live-controls button:disabled { opacity:.6; }
+.lu-live-audio { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
+@keyframes lu-live-pulse { 50% { transform:scale(1.045); } }
+@media(max-width:600px) { .lu-live-chat { gap:14px; } .lu-live-stage { min-height:220px; gap:20px; padding:38px 12px 14px; } .lu-live-disclosure { padding:12px 14px; } .lu-live-controls button { min-height:48px; padding-inline:18px; } }
+@media(prefers-reduced-motion:reduce) { .lu-live-orb { animation:none!important; transition:none; } }

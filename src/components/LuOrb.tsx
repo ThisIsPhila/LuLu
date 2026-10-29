@@ -30,23 +30,38 @@ function actionAt(x: number, y: number, center: { x: number; y: number }): LuQui
   return actions[Math.round(angle / step) % actions.length].id;
 }
 
-type Props = { open: boolean; disabled: boolean; onOpen: () => void; onLive: () => void; onAction: (action: LuQuickAction) => void };
+export type FloatingOrbPosition = { left: number; top: number };
+type Props = {
+  open: boolean;
+  disabled: boolean;
+  onOpen: () => void;
+  onLive: () => void;
+  onAction: (action: LuQuickAction) => void;
+  activity?: string | null;
+  draggable?: boolean;
+  onDragPosition?: (position: FloatingOrbPosition) => void;
+  onDragEnd?: () => void;
+};
 
-export function LuOrb({ open, disabled, onOpen, onLive, onAction }: Props) {
+export function LuOrb({ open, disabled, onOpen, onLive, onAction, activity = null, draggable = false, onDragPosition, onDragEnd }: Props) {
   const [wheel, setWheel] = useState(false);
   const [active, setActive] = useState<LuQuickAction | null>(null);
   const [center, setCenter] = useState({ x: 0, y: 0 });
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const held = useRef(false);
   const moved = useRef(false);
+  const dragging = useRef(false);
+  const suppressClick = useRef(false);
+  const lastTapAt = useRef(0);
   const start = useRef({ x: 0, y: 0 });
+  const dragOrigin = useRef<FloatingOrbPosition>({ left: 0, top: 0 });
   const selected = useRef<LuQuickAction | null>(null);
   const centerRef = useRef(center);
   const actionRef = useRef(onAction);
   actionRef.current = onAction;
 
   function clearTimer() { if (timer.current) clearTimeout(timer.current); timer.current = null; }
-  useEffect(() => () => clearTimer(), []);
+  useEffect(() => () => { clearTimer(); }, []);
   useEffect(() => {
     if (!wheel) return;
     const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') { event.stopPropagation(); setWheel(false); setActive(null); } };
@@ -97,24 +112,60 @@ export function LuOrb({ open, disabled, onOpen, onLive, onAction }: Props) {
   function pointerDown(event: ReactPointerEvent<HTMLButtonElement>) {
     if (event.button !== 0) return;
     clearTimer(); held.current = false; moved.current = false;
+    dragging.current = false; suppressClick.current = false;
     start.current = { x: event.clientX, y: event.clientY };
+    const bounds = event.currentTarget.closest('.lulu-guide-root')?.getBoundingClientRect() ?? event.currentTarget.getBoundingClientRect();
+    dragOrigin.current = { left: bounds.left, top: bounds.top };
     event.currentTarget.setPointerCapture(event.pointerId);
-    timer.current = setTimeout(() => { held.current = true; void nativeHaptic(); openWheel(start.current.x, start.current.y); }, 450);
+    timer.current = setTimeout(() => {
+      if (moved.current) return;
+      held.current = true; void nativeHaptic(); openWheel(start.current.x, start.current.y);
+    }, 450);
   }
   function pointerMove(event: ReactPointerEvent<HTMLButtonElement>) {
     if (Math.hypot(event.clientX - start.current.x, event.clientY - start.current.y) > 12) moved.current = true;
+    if (draggable && moved.current && !held.current) {
+      clearTimer();
+      dragging.current = true;
+      onDragPosition?.({ left: dragOrigin.current.left + event.clientX - start.current.x, top: dragOrigin.current.top + event.clientY - start.current.y });
+      return;
+    }
     if (held.current) updateSelection(event.clientX, event.clientY);
     else if (moved.current) clearTimer();
   }
+  function pointerUp() {
+    clearTimer();
+    if (dragging.current) {
+      dragging.current = false;
+      suppressClick.current = true;
+      window.setTimeout(() => { suppressClick.current = false; }, 300);
+      onDragEnd?.();
+    }
+  }
   return <>
-    <button type="button" className="lu-orb-launcher" aria-label="Open Lu. Press and hold for quick actions" aria-haspopup="dialog" aria-expanded={open || wheel}
-      onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={clearTimer}
-      onPointerCancel={() => { clearTimer(); held.current = false; setWheel(false); }}
+    <span className={`lu-orb-widget${activity ? ' has-activity' : ''}`}>
+    {activity && <span className="lu-orb-floating-status" role="status"><span className="lu-orb-status-dot" aria-hidden="true" />{activity}</span>}
+    <button type="button" className={`lu-orb-launcher${draggable ? ' is-draggable' : ''}${activity ? ' is-active' : ''}`} aria-label={draggable ? 'Open Lu. Press and hold for quick actions; drag to move' : 'Open Lu. Press and hold for quick actions'} aria-haspopup="dialog" aria-expanded={open || wheel}
+      onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp}
+      onPointerCancel={() => { clearTimer(); if (dragging.current) onDragEnd?.(); dragging.current = false; held.current = false; setWheel(false); }}
       onContextMenu={event => event.preventDefault()}
-      onDoubleClick={event => { event.preventDefault(); onLive(); }}
-      onClick={() => { if (held.current) { held.current = false; return; } onOpen(); }}>
+      onClick={event => {
+        if (suppressClick.current) { suppressClick.current = false; event.preventDefault(); return; }
+        if (held.current) { held.current = false; return; }
+        const now = Date.now();
+        if (now - lastTapAt.current <= 340) {
+          lastTapAt.current = 0;
+          event.preventDefault();
+          onLive();
+          return;
+        }
+        lastTapAt.current = now;
+        window.setTimeout(() => { if (Date.now() - lastTapAt.current >= 340) lastTapAt.current = 0; }, 350);
+        onOpen();
+      }}>
       <span className="lu-orb-sphere" aria-hidden="true" /><LuEyes />
     </button>
+    </span>
     <button type="button" className="lu-orb-keyboard-actions" onClick={() => openWheel(window.innerWidth / 2, window.innerHeight / 2)}>Open Lu quick actions</button>
     {wheel && createPortal(<div className="lu-wheel-overlay" onContextMenu={event => event.preventDefault()} onPointerDown={event => { if (event.target === event.currentTarget) setWheel(false); }}>
       <div className="lu-wheel" role="dialog" aria-label="Lu quick actions" style={{ left: center.x, top: center.y }}>

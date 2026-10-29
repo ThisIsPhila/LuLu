@@ -12,6 +12,7 @@ test('accepts bounded scrub and chat contracts', () => {
   assert.deepEqual(parseLuChatResult({ reply: 'Opening Settings.', actions: [{kind:'navigate',destination:'settings'}], references: [] }).actions,[{kind:'navigate',destination:'settings'}]);
   assert.equal(validateLuChatInput('  Help me find Settings.  '), 'Help me find Settings.');
   assert.equal(validateLuChatLanguage('Afrikaans'), 'Afrikaans');
+  assert.equal(validateLuChatLanguage('auto'), 'auto');
 });
 
 test('fails closed for malformed, empty, oversized, or unsupported responses and input', () => {

@@ -1,4 +1,5 @@
-.lulu-guide-root { position: fixed; z-index: 80; right: max(18px, env(safe-area-inset-right)); bottom: calc(82px + env(safe-area-inset-bottom)); font-family: var(--font-sans, inherit); color: #282720; }
+.lulu-guide-root { --lu-safe-top: env(safe-area-inset-top, 0px); --lu-safe-right: env(safe-area-inset-right, 0px); --lu-safe-bottom: env(safe-area-inset-bottom, 0px); --lu-safe-left: env(safe-area-inset-left, 0px); position: fixed; z-index: 80; right: max(18px, env(safe-area-inset-right)); bottom: calc(82px + env(safe-area-inset-bottom)); font-family: var(--font-sans, inherit); color: #282720; }
+.lulu-guide-root:not(.has-lu-dock) { right: max(14px, env(safe-area-inset-right)); bottom: calc(14px + env(safe-area-inset-bottom)); }
 .lulu-guide-launcher { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid rgba(96, 105, 83, .28); border-radius: 999px; background: #30352c; color: #fffaf0; box-shadow: 0 6px 20px rgba(38, 37, 31, .2); font: 600 14px/1 var(--font-sans, sans-serif); cursor: pointer; }
 .lulu-guide-launcher:hover { background: #454b3e; }
 .lulu-guide-launcher:focus-visible, .lulu-guide-panel button:focus-visible, .lulu-guide-panel input:focus-visible, .lulu-guide-panel textarea:focus-visible { outline: 3px solid #9bb389; outline-offset: 2px; }
@@ -43,7 +44,7 @@
 .lulu-guide-suggested-action { align-items: center; justify-content: space-between; color: #49463e; font-size: 12px; font-weight: 600; }
 .lulu-guide-notice { padding: 8px 10px; border-radius: 9px; background: #f2e7d9; color: #6e4c34 !important; }
 .lulu-guide-footer { margin: 13px 2px 0; font-size: 10px; }
-@media (min-width: 700px) { .lulu-guide-root { right: 24px; bottom: 24px; } }
+@media (min-width: 700px) { .lulu-guide-root { right: 24px; bottom: 24px; } .lulu-guide-root:not(.has-lu-dock) { right: 24px; bottom: 24px; } }
 @media (max-width: 420px) { .lulu-guide-panel { right: -8px; width: calc(100vw - 28px); padding: 16px; } }
 
 .lulu-guide-group { margin-top: 8px; border: 1px solid #e1dacd; border-radius: 14px; background: #f6f2e9; }
@@ -107,9 +108,18 @@
 .lulu-guide-help { padding: 10px 8px; }
 .lulu-guide-help strong, .lulu-guide-help small { display:block; }
 .lulu-guide-help small { margin-top:4px; color:#716c60; font-size:12px; line-height:1.45; }
+.lulu-guide-intro { margin: 2px 8px 10px; color: #696457; font-size: 12px; line-height: 1.55; }
 
 /* A conversation is a workspace, not a floating menu. */
-.lu-conversation-page { position:fixed; inset:0; z-index:200; display:flex; flex-direction:column; background:#faf8f3; color:#302e29; font-family:var(--font-sans, sans-serif); padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
-.lu-conversation-header { flex:none; display:flex; align-items:center; gap:16px; padding:18px clamp(20px, 5vw, 64px); border-bottom:1px solid #e8e2d8; }
-.lu-conversation-header h2 { flex:1; margin:0; font:500 26px/1.2 var(--font-serif, Georgia, serif); }
-.lu-conversation-page > .lu-live-chat { width:min(100% - 40px, 800px); margin:24px auto; overflow:auto; }
+.lu-conversation-page { position:fixed; inset:0; z-index:200; display:flex; flex-direction:column; background:#faf8f3; color:#302e29; font-family:var(--font-sans, sans-serif); padding:max(8px,env(safe-area-inset-top)) 0 max(12px,env(safe-area-inset-bottom)); }
+.lu-conversation-header { flex:none; display:flex; align-items:center; gap:16px; width:min(100%, 1040px); margin:0 auto; padding:16px clamp(20px, 5vw, 64px); border-bottom:1px solid #e8e2d8; }
+.lu-conversation-header h2 { margin:0; font:500 26px/1.2 var(--font-serif, Georgia, serif); }
+.lu-conversation-brand { display:flex; min-width:0; flex:1; align-items:center; gap:14px; }
+.lu-conversation-character-wrap { position:relative; display:grid; flex:none; width:44px; height:44px; place-items:center; }
+.lu-conversation-character { position:relative; display:grid; width:40px; height:40px; place-items:center; }
+.lu-conversation-character .lu-orb-sphere { position:absolute; inset:0; width:100%; height:100%; }
+.lu-conversation-character .lu-orb-eyes { z-index:1; gap:7px; }
+.lu-conversation-character .lu-orb-eyes > span { width:5px; height:8px; }
+.lu-conversation-activity { position:absolute; z-index:2; bottom:calc(100% + 8px); left:50%; display:flex; align-items:center; gap:7px; width:max-content; max-width:min(260px,calc(100vw - 48px)); padding:8px 12px; transform:translateX(-50%); border:1px solid rgba(106,117,91,.25); border-radius:999px; background:#fbf8f2; color:#4e5546; box-shadow:0 8px 24px rgba(49,44,34,.14); font:600 11px/1.35 var(--font-sans,sans-serif); white-space:normal; }
+.lu-conversation-activity .lu-orb-status-dot { width:6px; height:6px; }
+.lu-conversation-page > .lu-live-chat { width:min(calc(100% - 32px), 860px); min-height:0; margin:20px auto 0; padding:0 0 8px; overflow:auto; }

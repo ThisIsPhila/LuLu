@@ -13,7 +13,7 @@ import { judgeInviteDigest, isJudgeInviteActive } from './judge-invite.js';
 import { mayReadAccountActivity } from './owner-notifications.js';
 import { processAccountAlerts } from './account-alerts.js';
 import { scrubForLuDetailed, scrubTextsForLu, respondAsLuWithTools, LU_LANGUAGES, type LuAgentAction, type LuAgentHistoryMessage, type LuSurfaceReference } from './lu-chat.js';
-import { explicitlyRequestsDestination, explicitlyRequestsDraft, explicitlyRequestsLuDestination, explicitlyRequestsOpen, explicitlyRequestsSurfaceSearch, isJournalAccessCapabilityQuestion, isLuLuScopeRequest, journalAccessCapabilityReply, luNavigationReply, luSurfaceSearchReply, outOfScopeReply, luSearchTerms } from './lu-agent-policy.js';
+import { explicitlyRequestsDestination, explicitlyRequestsDraft, explicitlyRequestsLuDestination, explicitlyRequestsOpen, explicitlyRequestsSurfaceSearch, inferLuLanguage, isJournalAccessCapabilityQuestion, isLuLuScopeRequest, journalAccessCapabilityReply, luNavigationReply, luSurfaceSearchReply, outOfScopeReply, luSearchTerms } from './lu-agent-policy.js';
 import { createLuLiveSession } from './lu-live.js';
 import { refillJudgeAllowance, reserveJudgeVoice, settleJudgeVoice, type JudgeAllowance } from './judge-allowance.js';
 import { assessBehaviourPatterns } from './pattern-intelligence.js';
@@ -570,7 +570,8 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
     }
     if (route === '/lu/chat') {
       await requireLuAiAccess(current.uid);
-      if (Object.keys(body).sort().join(',') !== 'history,language,sourceText,text,ticket' || typeof body.text !== 'string' || body.text.length > 12000 || typeof body.sourceText !== 'string' || !body.sourceText.trim() || body.sourceText.length > 4000 || typeof body.ticket !== 'string' || !/^[0-9a-f-]{36}$/.test(body.ticket) || !LU_LANGUAGES.includes(body.language) || !Array.isArray(body.history) || body.history.length>6 || body.history.some((item:unknown)=>!item||typeof item!=='object'||!['user','assistant'].includes((item as {role?:unknown}).role as string)||typeof (item as {text?:unknown}).text!=='string'||!(item as {text:string}).text.trim()||(item as {text:string}).text.length>1200) || body.history.reduce((sum:number,item:{text:string})=>sum+item.text.length,0)>7200) throw new ApiError(400, 'Invalid reviewed chat request.');
+      if (Object.keys(body).sort().join(',') !== 'history,language,sourceText,text,ticket' || typeof body.text !== 'string' || body.text.length > 12000 || typeof body.sourceText !== 'string' || !body.sourceText.trim() || body.sourceText.length > 4000 || typeof body.ticket !== 'string' || !/^[0-9a-f-]{36}$/.test(body.ticket) || (body.language !== 'auto' && !LU_LANGUAGES.includes(body.language)) || !Array.isArray(body.history) || body.history.length>6 || body.history.some((item:unknown)=>!item||typeof item!=='object'||!['user','assistant'].includes((item as {role?:unknown}).role as string)||typeof (item as {text?:unknown}).text!=='string'||!(item as {text:string}).text.trim()||(item as {text:string}).text.length>1200) || body.history.reduce((sum:number,item:{text:string})=>sum+item.text.length,0)>7200) throw new ApiError(400, 'Invalid reviewed chat request.');
+      const responseLanguage = body.language === 'auto' ? inferLuLanguage(body.text) : body.language;
       const ref=db.collection('_luReviews').doc(hash(body.ticket));
       await db.runTransaction(async transaction => {
         const review=await transaction.get(ref); const data=review.data();
@@ -582,10 +583,10 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
       const safeHistory=body.history.length ? await scrubTextsForLu(apiKey,body.history.map((item:{text:string})=>item.text)) : [];
       const history:LuAgentHistoryMessage[]=body.history.map((item:{role:'user'|'assistant'},index:number)=>({role:item.role,text:safeHistory[index]}));
       if (!isLuLuScopeRequest(body.text, history)) {
-        response.json({reply:outOfScopeReply(body.language),actions:[],references:[]}); return;
+        response.json({reply:outOfScopeReply(responseLanguage),actions:[],references:[]}); return;
       }
       if (isJournalAccessCapabilityQuestion(body.text)) {
-        response.json({reply:journalAccessCapabilityReply(body.language),actions:[],references:[]}); return;
+        response.json({reply:journalAccessCapabilityReply(responseLanguage),actions:[],references:[]}); return;
       }
       // A clear request to find saved writing must not depend on the model
       // deciding to call a function. Search the account's ordinary entries
@@ -595,14 +596,14 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
       if (explicitlyRequestsSurfaceSearch(body.text)) {
         const query=luSearchTerms(body.text).join(' ').slice(0,300);
         const search=await searchOrdinaryEntries(current.uid,body.text,query,'Any',apiKey);
-        response.json({reply:luSurfaceSearchReply(body.language,search.references.length),actions:[],references:search.references}); return;
+        response.json({reply:luSurfaceSearchReply(responseLanguage,search.references.length),actions:[],references:search.references}); return;
       }
       const destination=explicitlyRequestsLuDestination(body.text);
       if (destination) {
-        response.json({reply:luNavigationReply(body.language),actions:[{kind:'navigate',destination}],references:[]}); return;
+        response.json({reply:luNavigationReply(responseLanguage),actions:[{kind:'navigate',destination}],references:[]}); return;
       }
       const entryIds=new Map<string,string>();
-      const result=await respondAsLuWithTools(apiKey,body.text,body.language,{
+      const result=await respondAsLuWithTools(apiKey,body.text,responseLanguage,{
         history,
         execute:call=>executeLuTool(current.uid,body.text,call,apiKey,entryIds),
       });

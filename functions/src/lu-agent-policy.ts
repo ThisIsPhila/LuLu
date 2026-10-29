@@ -7,6 +7,18 @@ const searchStopWords = new Set([
 ]);
 
 const appTopic = /\b(lulu|journal|journals|story|stories|entry|entries|writing|draft|compose|reflection|settings|preferences|account|sign[ -]?in|passkey|google|privacy|scrub(?:bing|bed)?|model|decisions|chat|voice|support|professional|helpline|resources|safety plan|prediction|predict|notification|language|update|download|library|app|application|joernaal|joernale|dagboek|storie|verhaal|inskrywing|skryf|instellings|rekening|privaatheid|stem|ondersteuning|hulpbron|veiligheidsplan|voorspelling|taal|opdatering|toepassing|ibhuku|ijenali|izindaba|indaba|umbhalo|imibhalo|bhala|ngibhale|ngabhala|ngikubhalile|engikubhalile|thola|sesha|izilungiselelo|i-akhawunti|ubumfihlo|izwi|ukwesekwa|ukuphepha|uhlelo lokusebenza)\b/iu;
+
+/** Guess only the supported reply language from words that remain after PII scrubbing. */
+export function inferLuLanguage(text: string): 'English'|'Afrikaans'|'isiZulu' {
+  const words = text.toLocaleLowerCase('und').match(/[\p{L}’'-]+/gu) ?? [];
+  const afrikaans = new Set(['ek','jy','jou','ons','hulle','wat','hoe','waar','wanneer','asseblief','dankie','baie','nie','het','kan','wil','moet','hierdie','daar','soek','skryf','joernaal','storie','instellings']);
+  const zulu = new Set(['ngicela','ngifuna','ngibhale','ngibhalele','ngithole','ngiyabonga','sawubona','unjani','kanjani','yami','wami','mina','thola','bhala','izindaba','indaba','ijenali','izilungiselelo','ngivula','ngikuyisa','ungakwazi','ngingakwazi']);
+  const afrikaansScore = words.reduce((score, word) => score + (afrikaans.has(word) ? 1 : 0), 0);
+  const zuluScore = words.reduce((score, word) => score + (zulu.has(word) || /^(ngi|uku|umu|ama|iz[ae]|ku)[\p{L}]+$/u.test(word) ? 1 : 0), 0);
+  if (zuluScore > afrikaansScore && zuluScore > 0) return 'isiZulu';
+  if (afrikaansScore > zuluScore && afrikaansScore > 0) return 'Afrikaans';
+  return 'English';
+}
 const unrelatedTopic = /\b(weather|forecast|news|politics|election|recipe|stock price|sports score|math homework|write code|programming|translate this|what is the capital|current events|weather|weer|nuus|politiek|resep|weerberig|izindaba zanamuhla|isimo sezulu)\b/iu;
 const greetingOnly = /^\s*(hi|hello|hey|good morning|good afternoon|good evening|howzit|hallo|môre|goeiemôre|goeiedag|sawubona|sani)\s*[!.?]*\s*$/iu;
 const continuationOnly = /^\s*(yes|yeah|yep|no|nope|okay|ok|please do|please do that|do that|go ahead|tell me more|continue|thanks|thank you|ja|nee|goed|gaan voort|ngiyavuma|yebo|cha|qhubeka|ngicela uqhubeke)\s*[!.?]*\s*$/iu;

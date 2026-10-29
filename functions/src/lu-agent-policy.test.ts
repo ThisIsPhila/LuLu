@@ -1,6 +1,12 @@
 import {test} from 'node:test';
 import {strict as assert} from 'node:assert';
-import {explicitlyRequestsDestination,explicitlyRequestsDraft,explicitlyRequestsLuDestination,explicitlyRequestsOpen,explicitlyRequestsSurfaceSearch,isJournalAccessCapabilityQuestion,isLuLuScopeRequest,journalAccessCapabilityReply,luNavigationReply,luSurfaceSearchReply,outOfScopeReply,luSearchTerms} from './lu-agent-policy.js';
+import {explicitlyRequestsDestination,explicitlyRequestsDraft,explicitlyRequestsLuDestination,explicitlyRequestsOpen,explicitlyRequestsSurfaceSearch,inferLuLanguage,isJournalAccessCapabilityQuestion,isLuLuScopeRequest,journalAccessCapabilityReply,luNavigationReply,luSurfaceSearchReply,outOfScopeReply,luSearchTerms} from './lu-agent-policy.js';
+
+test('reply language follows supported language in the scrubbed message',()=>{
+ assert.equal(inferLuLanguage('Person A, kan jy my help om hierdie joernaal te vind?'),'Afrikaans');
+ assert.equal(inferLuLanguage('Ngicela ungitholele okubhaliwe kwami kujenali.'),'isiZulu');
+ assert.equal(inferLuLanguage('Person A, can you help me find my journal?'),'English');
+});
 
 test('only clear writing requests enable journal search',()=>{
  assert.equal(explicitlyRequestsSurfaceSearch('Find my journal entry about the garden.'),true);

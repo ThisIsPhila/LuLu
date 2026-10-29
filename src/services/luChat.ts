@@ -5,7 +5,7 @@ import {
   validateLuChatInput,
   validateLuChatLanguage,
   type LuHistoryMessage,
-  type LuChatLanguage,
+  type LuChatReplyLanguage,
   type LuChatResult,
   type LuScrubResult,
 } from './luChatContracts';
@@ -24,7 +24,7 @@ export async function sendLuChatMessage(input: {
   ticket: string;
   text: string;
   sourceText: string;
-  language: LuChatLanguage;
+  language: LuChatReplyLanguage;
   history: LuHistoryMessage[];
 }): Promise<LuChatResult> {
   const text = validateLuChatInput(input.text);
