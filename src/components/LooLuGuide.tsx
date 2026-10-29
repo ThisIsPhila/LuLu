@@ -232,20 +232,32 @@ export function LooLuGuide({ accountId, currentView, canLeaveCurrentView, canSta
   }
   useLayoutEffect(()=>{
     if(dockEnabled)return;
+    let observedReaderTools:HTMLElement|null=null;
     const place=()=>{
       const root=floatingOrbRoot.current;if(!root)return;
+      const readerTools=document.querySelector<HTMLElement>('.circular-reader-dock');
       const bounds=orbViewportBounds(root),bottomRight={left:bounds.maxLeft,top:bounds.maxTop};
       const preferred=manualOrbPosition.current&&floatingOrbPositionRef.current?floatingOrbPositionRef.current:bottomRight;
       const next=findClearOrbPosition(preferred,root);
       if(manualOrbPosition.current){
         if(next.left!==floatingOrbPositionRef.current?.left||next.top!==floatingOrbPositionRef.current?.top){floatingOrbPositionRef.current=next;setFloatingOrbPosition(next);try{window.localStorage.setItem(floatingOrbPositionKey,JSON.stringify(next));}catch{/* Keep the current in-memory position. */}}
       }else{
-        const isBottomRight=Math.abs(next.left-bottomRight.left)<1&&Math.abs(next.top-bottomRight.top)<1;
-        floatingOrbPositionRef.current=isBottomRight?null:next;setFloatingOrbPosition(isBottomRight?null:next);
+        const useDefaultCssPosition=!readerTools&&Math.abs(next.left-bottomRight.left)<1&&Math.abs(next.top-bottomRight.top)<1;
+        const nextPosition=useDefaultCssPosition?null:next;
+        floatingOrbPositionRef.current=nextPosition;setFloatingOrbPosition(nextPosition);
       }
     };
-    place();window.addEventListener('resize',place);window.visualViewport?.addEventListener('resize',place);
-    return()=>{window.removeEventListener('resize',place);window.visualViewport?.removeEventListener('resize',place);};
+    const readerResizeObserver=typeof ResizeObserver==='undefined'?null:new ResizeObserver(place);
+    const placeAfterLayout=()=>{
+      const readerTools=document.querySelector<HTMLElement>('.circular-reader-dock');
+      if(readerTools!==observedReaderTools){readerResizeObserver?.disconnect();observedReaderTools=readerTools;if(readerTools)readerResizeObserver?.observe(readerTools);}
+      place();
+    };
+    const mutationObserver=new MutationObserver(placeAfterLayout);
+    mutationObserver.observe(document.body,{childList:true,subtree:true});
+    const frame=window.requestAnimationFrame(placeAfterLayout);
+    window.addEventListener('resize',placeAfterLayout);window.visualViewport?.addEventListener('resize',placeAfterLayout);
+    return()=>{window.cancelAnimationFrame(frame);mutationObserver.disconnect();readerResizeObserver?.disconnect();window.removeEventListener('resize',placeAfterLayout);window.visualViewport?.removeEventListener('resize',placeAfterLayout);};
   },[currentView,dockEnabled]);
 
   const floatingOrbStyle=!dockEnabled&&floatingOrbPosition?{left:`${floatingOrbPosition.left}px`,top:`${floatingOrbPosition.top}px`,right:'auto',bottom:'auto'}:undefined;
