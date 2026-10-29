@@ -14,8 +14,11 @@ test('journal access questions explain the available tool without searching',()=
  assert.equal(isJournalAccessCapabilityQuestion('Can you access my journals?'),true);
  assert.equal(isJournalAccessCapabilityQuestion('Find my journal entry about the garden.'),false);
  assert.match(journalAccessCapabilityReply('English'),/search ordinary Journal and Story entries when you ask/i);
+ assert.match(journalAccessCapabilityReply('English'),/Find my journal entry about the garden/i);
  assert.match(journalAccessCapabilityReply('Afrikaans'),/wanneer jy my vra/);
+ assert.match(journalAccessCapabilityReply('Afrikaans'),/Soek my joernaalinskrywing oor die tuin/i);
  assert.match(journalAccessCapabilityReply('isiZulu'),/uma ungicela/);
+ assert.match(journalAccessCapabilityReply('isiZulu'),/Thola okufakiwe kwami kweJenali mayelana nengadi/i);
 });
 
 test('navigation, opening and drafting require an explicit matching request',()=>{

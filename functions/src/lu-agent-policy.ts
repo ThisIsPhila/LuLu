@@ -20,9 +20,9 @@ export function outOfScopeReply(language: string): string {
 }
 
 export function journalAccessCapabilityReply(language: string): string {
-  if (language === 'Afrikaans') return 'Ek kan gewone Joernaal- en Storie-inskrywings soek wanneer jy my vra. Ek blaai nie outomaties daardeur nie. Beskermde private skryfwerk bly ontoeganklik.';
-  if (language === 'isiZulu') return 'Ngingasesha okufakiwe okujwayelekile kuJenali naseZindabeni uma ungicela. Angikubheki ngokuzenzakalelayo. Okubhaliwe okuyimfihlo okuvikelwe akufinyeleleki.';
-  return 'I can search ordinary Journal and Story entries when you ask me to. I do not browse them automatically. Protected private writing stays unavailable to me.';
+  if (language === 'Afrikaans') return 'Ek kan gewone Joernaal- en Storie-inskrywings soek wanneer jy my vra. Probeer: “Soek my joernaalinskrywing oor die tuin.” Ek blaai nie outomaties daardeur nie, en beskermde private skryfwerk bly ontoeganklik.';
+  if (language === 'isiZulu') return 'Ngingasesha okufakiwe okujwayelekile kuJenali naseZindabeni uma ungicela. Zama ukuthi: “Thola okufakiwe kwami kweJenali mayelana nengadi.” Angikubheki ngokuzenzakalelayo, futhi okubhaliwe okuyimfihlo okuvikelwe akufinyeleleki.';
+  return 'I can search ordinary Journal and Story entries when you ask. Try: “Find my journal entry about the garden.” I do not browse them automatically, and protected private writing stays unavailable.';
 }
 
 export function luSearchTerms(value: string): string[] {
