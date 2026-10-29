@@ -11,7 +11,9 @@ import type { LuAgentAction } from '../services/luChatContracts';
 import './LooLuGuide.css';
 
 export type LooLuDestination = 'home' | 'journal' | 'stories' | 'library' | 'reader' | 'write' | 'settings' | 'privacy-settings' | 'cloud-demo' | 'private-writing' | 'support';
-const floatingOrbPositionKey = 'lulu-guide-orb-position-v1';
+// Reader tool alignment changed, so retire saved coordinates that were
+// clamped above the previous safe-area limit. New drags are saved under v2.
+const floatingOrbPositionKey = 'lulu-guide-orb-position-v2';
 
 function readFloatingOrbPosition(): FloatingOrbPosition | null {
   if (typeof window === 'undefined') return null;
