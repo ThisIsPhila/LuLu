@@ -49,6 +49,8 @@ test('search terms exclude generic entity placeholders',()=>{
 
 test('text assistant has a server-side LuLu scope gate with contextual follow-ups',()=>{
  assert.equal(isLuLuScopeRequest('Can you open my journal?'),true);
+ assert.equal(isLuLuScopeRequest('Soek my joernaal oor die tuin.'),true);
+ assert.equal(isLuLuScopeRequest('Ngibhale ini mayelana nengadi?'),true);
  assert.equal(isLuLuScopeRequest('How do I use privacy processing in LuLu?'),true);
  assert.equal(isLuLuScopeRequest('What is the weather today?'),false);
  assert.equal(isLuLuScopeRequest('What is the weather today?', [{role:'assistant',text:'I can help with your LuLu journal.'}]),false);
