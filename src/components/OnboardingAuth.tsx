@@ -231,17 +231,17 @@ export function OnboardingAuth({
         style={{ backgroundColor: backgroundToneColor, opacity: backgroundToneStrength }}
         aria-hidden="true"
       />}
-      {isLoginScene && <button
-        className="oa-login-mode-toggle"
-        type="button"
-        aria-label={`Switch to ${loginMode === 'light' ? 'dark' : 'light'} mode`}
-        aria-pressed={loginMode === 'dark'}
-        title={`Switch to ${loginMode === 'light' ? 'dark' : 'light'} mode`}
-        onClick={() => setLoginMode(mode => mode === 'light' ? 'dark' : 'light')}
-      >
-        {loginMode === 'light' ? <Moon size={18} aria-hidden="true" /> : <Sun size={18} aria-hidden="true" />}
-      </button>}
       <div className="oa-shell">
+        {isLoginScene && <button
+          className="oa-login-mode-toggle"
+          type="button"
+          aria-label={`Switch to ${loginMode === 'light' ? 'dark' : 'light'} mode`}
+          aria-pressed={loginMode === 'dark'}
+          title={`Switch to ${loginMode === 'light' ? 'dark' : 'light'} mode`}
+          onClick={() => setLoginMode(mode => mode === 'light' ? 'dark' : 'light')}
+        >
+          {loginMode === 'light' ? <Moon size={16} aria-hidden="true" /> : <Sun size={16} aria-hidden="true" />}
+        </button>}
         <section className="oa-cover" aria-label="LuLu journal">
           <div
             key={isLoginScene ? loginModeScene.portrait.src : 'default-cover'}
