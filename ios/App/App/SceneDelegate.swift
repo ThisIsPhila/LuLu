@@ -267,7 +267,11 @@ public final class NativeRefreshPlugin: CAPPlugin, CAPBridgedPlugin {
 
             let control = UIRefreshControl()
             control.tintColor = .clear
-            control.backgroundColor = .clear
+            // Keep UIKit's rubber-band / refresh-control region on the same
+            // paper surface as the app. A transparent control can expose the
+            // WKWebView's black backing while the document is pulled down.
+            control.backgroundColor = paper
+            control.layer.backgroundColor = paper.cgColor
             control.clipsToBounds = false
             control.addTarget(self, action: #selector(self.refreshValueChanged), for: .valueChanged)
             control.isEnabled = self.enabled
