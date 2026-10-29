@@ -1,6 +1,7 @@
 import { auth, authReady } from '../backend/firebase';
 import { backendEndpoint } from '../backend/request';
 import { createReviewedTextRequest, parseCloudProcessingCapability, parseCloudUnderstandingResult, type CloudProcessingCapability, type CloudUnderstandingResult } from './cloudProcessingContracts';
+import { parsePatternAssessment, type PatternAssessment } from './patternIntelligenceContracts';
 export type { CloudProcessingCapability, CloudUnderstandingResult } from './cloudProcessingContracts';
 
 function errorMessage(body: unknown, fallback: string): string {
@@ -88,4 +89,28 @@ export async function understandReviewedText(input: {
     purpose: input.purpose,
   }), input.signal, input.isPrivateSessionActive);
   return parseCloudUnderstandingResult(result, { revision: input.revision, sha256, purpose: input.purpose });
+}
+
+export async function assessReviewedPatterns(input: {
+  text: string;
+  revision: string;
+  purpose: string;
+  isAccountSessionActive: () => boolean;
+  signal?: AbortSignal;
+}): Promise<PatternAssessment> {
+  if (!input.isAccountSessionActive()) throw new Error('Sign in to LuLu before assessing patterns.');
+  if (!input.text.trim() || input.text.length > 4_000 || input.revision.length < 1 || input.revision.length > 128 || !input.purpose.trim() || input.purpose.length > 200) {
+    throw new Error('Reviewed text, revision and purpose do not meet the assessment limits.');
+  }
+  const capability = await getCloudProcessingCapability(input.signal);
+  if (!input.isAccountSessionActive()) throw new Error('Your LuLu account session ended before the request. Sign in again to continue.');
+  if (!capability.enabled || capability.provider !== 'openai_decisions') {
+    throw new Error('Pattern understanding is not configured for OpenAI Decisions.');
+  }
+  if (input.text.length > capability.maxCharacters) throw new Error(`Reviewed text exceeds the ${capability.maxCharacters.toLocaleString()} character limit.`);
+  const sha256 = await sha256Hex(input.text);
+  if (input.signal?.aborted) throw new DOMException('Cloud request was cancelled.', 'AbortError');
+  if (!input.isAccountSessionActive()) throw new Error('Your LuLu account session ended before the request. Sign in again to continue.');
+  const result = await authenticatedRequest<unknown>('/privacy/patterns', createReviewedTextRequest({text:input.text,revision:input.revision,sha256,purpose:input.purpose}), input.signal, input.isAccountSessionActive);
+  return parsePatternAssessment(result,{revision:input.revision,sha256,purpose:input.purpose});
 }

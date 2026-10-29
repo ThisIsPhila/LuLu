@@ -56,14 +56,16 @@ export function validateReviewedPrivacyRequest(value: unknown): ReviewedPrivacyR
   return {text, revision, sha256, purpose: purpose.trim(), reviewed: true};
 }
 
-/** Providers are selected explicitly by the server environment. Unknown or
- * incomplete configuration always stays disabled. */
+/** An explicit provider selection wins. When the server key exists and no
+ * provider has been selected, use Decisions as LuLu's bounded default. An
+ * explicit `disabled` value still keeps the service off. Unknown or incomplete
+ * configuration always stays disabled. */
 export function configuredProvider(
   env: NodeJS.ProcessEnv = process.env,
   apiKey = '',
   fetcher?: ProviderFetch,
 ): PrivacyDecisionProvider {
-  const selected = env.PRIVACY_PROVIDER?.trim().toLowerCase() || 'disabled';
+  const selected = env.PRIVACY_PROVIDER?.trim().toLowerCase() || (apiKey ? 'openai_decisions' : 'disabled');
   if (selected === 'openai_decisions' && apiKey) {
     try { return createOpenAIDecisionsProvider({apiKey, fetcher}); }
     catch { return disabledProvider; }

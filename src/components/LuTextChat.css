@@ -29,6 +29,16 @@
 .lu-text-chat-footnote { margin: 10px 0 0; color: #777061; font-size: 9px; line-height: 1.4; }
 
 .lu-text-chat-message mark { padding: 1px 4px; border-radius: 5px; background: #f6ddad; color: inherit; }
+.lu-text-chat-message.is-you { width: min(100%, 720px); }
+.lu-text-chat-privacy-review { display: grid; gap: 8px; }
+.lu-text-chat-privacy-side { min-width: 0; padding: 10px 12px; border: 1px solid #ded7ca; border-radius: 12px; background: #fbf9f3; }
+.lu-text-chat-privacy-side.is-scrubbed { border-color: #c8d2c0; background: #f0f3eb; }
+.lu-text-chat-privacy-side small { display: block; color: #716b5f; font-size: 10px; font-weight: 650; }
+.lu-text-chat-privacy-side p { margin: 5px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.lu-text-chat-privacy-side mark { padding: 1px 4px; border-radius: 5px; background: #f4d99e; color: inherit; }
+.lu-text-chat-privacy-side mark.is-replacement { background:#dce9d5; }
+.lu-text-chat-privacy-side mark small { display:inline; margin-left:5px; padding:1px 4px; border-radius:999px; background:rgba(255,255,255,.6); font:600 8px/1.4 var(--font-mono,monospace); letter-spacing:.04em; text-transform:uppercase; white-space:nowrap; }
+.lu-text-chat-entity-count { margin-top:6px; font-weight:500 !important; }
 .lu-chat-sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 .lu-conversation-page .lu-text-chat { flex:1; min-height:0; width:min(100%, 820px); margin:0 auto; padding:20px clamp(20px, 4vw, 36px); border:0; background:transparent; display:flex; flex-direction:column; }
 .lu-conversation-page .lu-text-chat-cloud-warning { flex:none; margin:0 0 12px; padding:10px 14px; font-size:12px; }
@@ -36,13 +46,16 @@
 .lu-conversation-page .lu-text-chat-thread { flex:1; min-height:0; max-height:none; display:flex; flex-direction:column; gap:18px; overflow-y:auto; margin:0; padding:24px 2px; border:0; background:transparent; }
 .lu-conversation-page .lu-text-chat-thread:empty { display:none; }
 .lu-conversation-page .lu-text-chat-message { max-width:min(80%, 620px); align-self:flex-start; padding:16px 20px; border-radius:20px; }
-.lu-conversation-page .lu-text-chat-message.is-you { align-self:flex-end; }
+.lu-conversation-page .lu-text-chat-message.is-you { max-width:min(96%, 820px); align-self:flex-end; }
 .lu-conversation-page .lu-text-chat-message small { font-size:11px; }
 .lu-conversation-page .lu-text-chat-message p { font-size:15px; line-height:1.65; }
+.lu-conversation-page .lu-text-chat-privacy-review { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.lu-conversation-page .lu-text-chat-privacy-side { padding:12px 14px; }
+.lu-conversation-page .lu-text-chat-privacy-side small { font-size:11px; }
 .lu-conversation-page .lu-chat-composer { flex:none; margin-top:auto; padding:12px 14px; border:1px solid #d9d2c6; border-radius:22px; background:#fffefa; box-shadow:0 8px 28px #3b34220d; }
 .lu-conversation-page .lu-chat-composer textarea { min-height:52px; max-height:180px; padding:4px; border:0; outline:0; resize:vertical; background:transparent; font-size:16px; line-height:1.5; }
 .lu-conversation-page .lu-chat-composer textarea:focus-visible { outline:0; }
 .lu-conversation-page .lu-text-chat-compose-footer { justify-content:space-between; }
 .lu-conversation-page .lu-text-chat-compose-footer button { min-height:38px; padding:0 16px; font-size:13px; }
 .lu-conversation-page .lu-text-chat-footnote { flex:none; margin-top:8px; font-size:11px; }
-@media(max-width:600px) { .lu-conversation-header { padding:12px 18px; } .lu-conversation-header h2 { font-size:22px; } .lu-conversation-page .lu-text-chat { padding:14px 16px; } .lu-conversation-page .lu-text-chat-message { max-width:90%; } }
+@media(max-width:600px) { .lu-conversation-header { padding:12px 18px; } .lu-conversation-header h2 { font-size:22px; } .lu-conversation-page .lu-text-chat { padding:14px 16px; } .lu-conversation-page .lu-text-chat-message { max-width:94%; } .lu-conversation-page .lu-text-chat-privacy-review { grid-template-columns:1fr; } }

@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import {strict as assert} from 'node:assert';
-import {explicitlyRequestsDestination,explicitlyRequestsDraft,explicitlyRequestsOpen,explicitlyRequestsSurfaceSearch,luSearchTerms} from './lu-agent-policy.js';
+import {explicitlyRequestsDestination,explicitlyRequestsDraft,explicitlyRequestsOpen,explicitlyRequestsSurfaceSearch,isLuLuScopeRequest,outOfScopeReply,luSearchTerms} from './lu-agent-policy.js';
 
 test('only clear writing requests enable journal search',()=>{
  assert.equal(explicitlyRequestsSurfaceSearch('Find my journal entry about the garden.'),true);
@@ -21,4 +21,16 @@ test('navigation, opening and drafting require an explicit matching request',()=
 
 test('search terms exclude generic entity placeholders',()=>{
  assert.deepEqual(luSearchTerms('Find Person A’s journal about the garden at Place A.'),['garden']);
+});
+
+test('text assistant has a server-side LuLu scope gate with contextual follow-ups',()=>{
+ assert.equal(isLuLuScopeRequest('Can you open my journal?'),true);
+ assert.equal(isLuLuScopeRequest('How do I use privacy processing in LuLu?'),true);
+ assert.equal(isLuLuScopeRequest('What is the weather today?'),false);
+ assert.equal(isLuLuScopeRequest('What is the weather today?', [{role:'assistant',text:'I can help with your LuLu journal.'}]),false);
+ assert.equal(isLuLuScopeRequest('Please do that', [{role:'assistant',text:'I can help you open your journal in LuLu.'}]),true);
+ assert.equal(isLuLuScopeRequest('Please do that'),false);
+ assert.equal(isLuLuScopeRequest('Sawubona'),true);
+ assert.match(outOfScopeReply('Afrikaans'),/Ek is Lu/);
+ assert.match(outOfScopeReply('isiZulu'),/NginguLu/);
 });

@@ -4,7 +4,7 @@ export const nativeOrigins = new Set(['capacitor://localhost', 'https://localhos
 // Native shells redeem a hosted authentication result, then use authenticated
 // session routes. WebAuthn ceremonies must still originate in the hosted browser.
 const nativeRoutes = new Set([
-  '/auth/provider/session', '/session', '/auth/lock', '/auth/logout', '/owner/account-activity', '/lu/scrub', '/lu/chat', '/lu/live', '/lu/live/action', '/privacy/capability', '/privacy/understand',
+  '/auth/provider/session', '/session', '/auth/lock', '/auth/logout', '/owner/account-activity', '/owner/ai-access', '/owner/judge-invite', '/lu/scrub', '/lu/chat', '/lu/live', '/lu/live/action', '/lu/live/end', '/privacy/capability', '/privacy/understand', '/privacy/patterns',
   '/native/exchange/create', '/native/exchange/redeem', '/native/exchange/cancel',
 ]);
 

@@ -1,12 +1,12 @@
 import {test} from 'node:test';
 import {strict as assert} from 'node:assert';
-import {scrubForLu,scrubTextsForLu,respondAsLu,respondAsLuWithTools} from './lu-chat.js';
+import {scrubForLu,scrubForLuDetailed,scrubTextsForLu,respondAsLu,respondAsLuWithTools} from './lu-chat.js';
 
 test('privacy and response models are separate, non-stored cloud calls',async()=>{
  const bodies:any[]=[];
  const fake=async (_url:string,init:RequestInit)=>{
   const body=JSON.parse(String(init.body));bodies.push(body);
-  const text=bodies.length===1?'Person A visited Place A':bodies.length===2?JSON.stringify(['Person A visited Place A','Call Person A soon']):'Hello!';
+  const text=bodies.length===1?JSON.stringify({entities:[{value:'David',label:'Person'},{value:'Cape Town',label:'Place'}]}):bodies.length===2?JSON.stringify(['Person A visited Place A','Call Person A soon']):'Hello!';
   return new Response(JSON.stringify({status:'completed',output:[{type:'message',content:[{type:'output_text',text}]}]}),{status:200});
  };
  const scrubbed=await scrubForLu('test-key','David visited Cape Town',fake);
@@ -20,6 +20,18 @@ test('privacy and response models are separate, non-stored cloud calls',async()=
  assert.equal(bodies[2].model,'gpt-6-luna');assert.equal(bodies[2].reasoning.effort,'high');
  assert.match(bodies[2].instructions,/Politely decline unrelated requests/);
  assert.match(bodies[2].instructions,/Selected reply language: isiZulu/);
+});
+
+test('privacy scan returns exact source highlights and stable generic aliases',async()=>{
+ const result=await scrubForLuDetailed('test-key','David met David in Cape Town.',async()=>new Response(JSON.stringify({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify({entities:[{value:'David',label:'Person'},{value:'Cape Town',label:'Place'}]})}]}]}),{status:200}));
+ assert.equal(result.text,'Person A met Person A in Place A.');
+ assert.deepEqual(result.entities.map(item=>({start:item.start,end:item.end,label:item.label,replacement:item.replacement})),[
+  {start:0,end:5,label:'Person',replacement:'Person A'},
+  {start:10,end:15,label:'Person',replacement:'Person A'},
+  {start:19,end:28,label:'Place',replacement:'Place A'},
+ ]);
+ const ignored=await scrubForLuDetailed('test-key','David',async()=>new Response(JSON.stringify({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify({entities:[{value:'Nomsa',label:'Person'}]})}]}]}),{status:200}));
+ assert.deepEqual(ignored,{text:'David',entities:[]});
 });
 
 test('Lu tool loop executes a server function and returns its result to the model',async()=>{

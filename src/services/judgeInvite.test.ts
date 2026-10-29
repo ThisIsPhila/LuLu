@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { captureJudgeInvitation, clearJudgeInvitation, pendingJudgeInvitation } from './judgeInvite.ts';
+import { captureJudgeInvitation, clearJudgeInvitation, forgetReusableJudgeInvitation, pendingJudgeInvitation, reusableJudgeInvitation } from './judgeInvite.ts';
 
 const values = new Map<string, string>();
 Object.defineProperty(globalThis, 'sessionStorage', {value: {
@@ -20,11 +20,16 @@ test('invitation is retained for sign-in while removed from the browser URL', ()
   captureJudgeInvitation();
   assert.equal(replaced, '/');
   assert.equal(pendingJudgeInvitation(), token);
+  assert.equal(reusableJudgeInvitation(), token);
   clearJudgeInvitation();
   assert.equal(pendingJudgeInvitation(), '');
+  assert.equal(reusableJudgeInvitation(), token);
+  forgetReusableJudgeInvitation();
+  assert.equal(reusableJudgeInvitation(), '');
 });
 
 test('invalid invitations are removed from the URL and never retained', () => {
+  forgetReusableJudgeInvitation();
   window.location.hash = '#judge=not-valid';
   captureJudgeInvitation();
   assert.equal(replaced, '/');

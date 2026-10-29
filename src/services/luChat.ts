@@ -14,7 +14,7 @@ import {
 export async function scrubLuMessage(text: string): Promise<LuScrubResult> {
   const input = validateLuChatInput(text);
   const response: unknown = await request('/lu/scrub', { text: input });
-  return parseLuScrubResult(response);
+  return parseLuScrubResult(response,input);
 }
 
 /** Sends scrubbed text plus its matching source for server-side action authorization.

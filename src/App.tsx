@@ -38,11 +38,13 @@ import { readProfilePhoto, writeProfilePhoto } from './services/profilePhoto';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './services/backend/firebase';
 import { request } from './services/backend/request';
-import { pendingJudgeInvitation, clearJudgeInvitation } from './services/judgeInvite';
+import { pendingJudgeInvitation, reusableJudgeInvitation, clearJudgeInvitation } from './services/judgeInvite';
 import { useEdgeSwipeNavigation } from './hooks/useEdgeSwipeNavigation';
 import { usePullToRefresh } from './hooks/usePullToRefresh';
 import { ProfileSettingsView } from './components/ProfileSettingsView';
+import { OwnerAiAccessSettings } from './components/OwnerAiAccessSettings';
 import { PrivacyModelSettings } from './components/PrivacyModelSettings';
+import { CloudPrivacyDemo } from './components/CloudPrivacyDemo';
 import { LooLuGuide, type LooLuDestination } from './components/LooLuGuide';
 import { PrivateQuickCapture } from './components/PrivateQuickCapture';
 import type { LuQuickAction } from './components/LuOrb';
@@ -75,13 +77,14 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
   const [composingKind, setComposingKind] = useState<Entry['kind']>('Journal');
   const [looLuDraft, setLooLuDraft] = useState<{ text: string; title: string; nonce: string } | null>(null);
+  const [luChatRequest, setLuChatRequest] = useState<{ id: number; message: string } | null>(null);
   const [quickCapture, setQuickCapture] = useState<Exclude<LuQuickAction, 'private-content'> | null>(null);
   const signingOut = useRef(false);
   const [entities, setEntities] = useState<Entity[]>([]);
   const ordinaryEntries = filterOrdinaryEntries(entries);
 
   const [currentView, setCurrentView] = useState<
-    'home' | 'leaves' | 'stories' | 'library' | 'compose' | 'enclave-writing' | 'vault' | 'inspector' | 'reader' | 'local-private' | 'settings' | 'model-settings' | 'privacy-demo'
+    'home' | 'leaves' | 'stories' | 'library' | 'compose' | 'enclave-writing' | 'vault' | 'inspector' | 'reader' | 'local-private' | 'settings' | 'ai-access' | 'model-settings' | 'privacy-demo' | 'cloud-privacy-demo'
   >('home');
   const isOrdinaryNavigationView = currentView === 'home' || currentView === 'leaves' || currentView === 'stories' || currentView === 'library';
   const currentViewRef = useRef(currentView);
@@ -120,21 +123,36 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   }, [composeRouteSignature]);
   const currentComposeRouteToken = () => `${composeRouteRef.current.generation}:${composeRouteRef.current.signature}`;
   const accountSessionActive = () => !signingOut.current && Date.now() < session.expiresAt;
+  const isVerifiedOwner = auth.currentUser?.email?.trim().toLowerCase() === 'pmteshani@gmail.com' && auth.currentUser?.emailVerified === true;
   const [isProtectedGateOpen, setIsProtectedGateOpen] = useState<boolean>(false);
   const [notice, setNotice] = useState<string>('');
   const [judgeAccess, setJudgeAccess] = useState(false);
+  const [judgeVoiceSeconds, setJudgeVoiceSeconds] = useState<number|null>(null);
+  const [judgeVoiceDailyLimit, setJudgeVoiceDailyLimit] = useState<number|null>(null);
+  const [judgeDecisionsPerDay, setJudgeDecisionsPerDay] = useState<number|null>(null);
+  const [judgeLuMessagesPerDay, setJudgeLuMessagesPerDay] = useState<number|null>(null);
+  const [judgeDecisionsUsedToday, setJudgeDecisionsUsedToday] = useState<number|null>(null);
+  const [judgeLuMessagesUsedToday, setJudgeLuMessagesUsedToday] = useState<number|null>(null);
+  const [judgeVoiceRefillAt, setJudgeVoiceRefillAt] = useState<number|null>(null);
   const [judgeInviteAttempt, setJudgeInviteAttempt] = useState(0);
   const [showJudgeInvite, setShowJudgeInvite] = useState(() => Boolean(pendingJudgeInvitation()));
   const [judgeInviteAccepted, setJudgeInviteAccepted] = useState(false);
   useEffect(() => {
     if (development) return;
     let active = true;
-    const invitation = judgeInviteAccepted ? pendingJudgeInvitation() : '';
-    const action = invitation ? request<{judgeAccess:boolean}>('/judge/redeem', {invitation}) : request<{judgeAccess:boolean}>('/judge/access');
+    const invitation = judgeInviteAccepted ? reusableJudgeInvitation() || pendingJudgeInvitation() : '';
+    const action = invitation ? request<{judgeAccess:boolean;voiceRefilled?:boolean;voiceSecondsRemaining?:number;voiceDailyLimit?:number;decisionsPerDay?:number|null;luMessagesPerDay?:number|null;decisionsUsedToday?:number;luMessagesUsedToday?:number;refillAvailableAt?:number|null}>('/judge/redeem', {invitation}) : request<{judgeAccess:boolean;voiceRefilled?:boolean;voiceSecondsRemaining?:number;voiceDailyLimit?:number;decisionsPerDay?:number|null;luMessagesPerDay?:number|null;decisionsUsedToday?:number;luMessagesUsedToday?:number;refillAvailableAt?:number|null}>('/judge/access');
     void action.then(result => {
       if (!active || signingOut.current) return;
       setJudgeAccess(result.judgeAccess === true);
-      if (invitation && result.judgeAccess) {clearJudgeInvitation();setJudgeInviteAccepted(false);setShowJudgeInvite(false);setNotice('Judge invitation linked to your account. Voice access is not available yet.');}
+      setJudgeVoiceSeconds(Number.isSafeInteger(result.voiceSecondsRemaining)?Math.max(0,result.voiceSecondsRemaining!):null);
+      setJudgeVoiceDailyLimit(Number.isSafeInteger(result.voiceDailyLimit)?Math.max(0,result.voiceDailyLimit!):null);
+      setJudgeDecisionsPerDay(Number.isSafeInteger(result.decisionsPerDay)?Math.max(0,result.decisionsPerDay!):null);
+      setJudgeLuMessagesPerDay(Number.isSafeInteger(result.luMessagesPerDay)?Math.max(0,result.luMessagesPerDay!):null);
+      setJudgeDecisionsUsedToday(Number.isSafeInteger(result.decisionsUsedToday)?Math.max(0,result.decisionsUsedToday!):0);
+      setJudgeLuMessagesUsedToday(Number.isSafeInteger(result.luMessagesUsedToday)?Math.max(0,result.luMessagesUsedToday!):0);
+      setJudgeVoiceRefillAt(typeof result.refillAvailableAt==='number'?result.refillAvailableAt:null);
+      if (invitation && result.judgeAccess) {clearJudgeInvitation();setJudgeInviteAccepted(false);setShowJudgeInvite(false);setNotice(result.voiceRefilled?'Judge access linked or refilled. Five minutes of live voice are available; reopen your saved invitation after 24 hours for another refill.':`Judge access is already active. Voice refills after ${result.refillAvailableAt?new Date(result.refillAvailableAt).toLocaleString():'24 hours'}.`);}
     }).catch(() => {
       if (active && invitation) setBackendError('Judge access could not be linked yet. Reopen your invitation or try again in Settings.');
     });
@@ -182,6 +200,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   const privateUnlockAttempt=useRef(0);
   const originalReadRequest=useRef(0);
   const [pendingView,setPendingView]=useState<'vault'|'inspector'|'private-capture'|'local-private'|null>(null);
+  const [sanctuaryInitialSection,setSanctuaryInitialSection]=useState<'Private'|'Safety'|'Resources'>('Private');
 
   async function loadRepresentations(vault: LocalRepresentationVault) {
     const request = ++representationLoadRequest.current;
@@ -261,7 +280,8 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     document.addEventListener('keydown',shortcut,true);
     return()=>{stopLifecycle();stopBack();document.removeEventListener('keydown',shortcut,true);};
   },[]);
-  function navigatePrivate(view:'vault'|'inspector', currentText = '') {
+  function navigatePrivate(view:'vault'|'inspector', currentText = '', section:'Private'|'Safety'|'Resources'='Private') {
+    if(view==='vault')setSanctuaryInitialSection(section);
     if(view==='inspector') {
       inspectorReturnView.current = currentView === 'home' || currentView === 'leaves' || currentView === 'stories' || currentView === 'library' || currentView === 'compose'
         || currentView === 'enclave-writing' || currentView === 'vault' || currentView === 'local-private' || currentView === 'reader'
@@ -334,7 +354,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     await deleteLibraryItem(session.uid, id);
   }
 
-  const guideMayLeave = (view: string) => ['home', 'leaves', 'stories', 'library', 'reader', 'settings', 'model-settings'].includes(view);
+  const guideMayLeave = (view: string) => ['home', 'leaves', 'stories', 'library', 'reader', 'settings', 'ai-access', 'model-settings', 'privacy-demo', 'cloud-privacy-demo'].includes(view);
 
   function handleLooLuNavigate(destination: LooLuDestination) {
     if (!guideMayLeave(currentViewRef.current)) return;
@@ -352,8 +372,9 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
       setLooLuDraft(null); setComposingKind('Journal'); setEditingEntry(null); setSelectedEntry(null); setCurrentView('compose');
     } else if (destination === 'settings') openSettings();
     else if (destination === 'privacy-settings') setCurrentView('model-settings');
+    else if (destination === 'cloud-demo') setCurrentView('cloud-privacy-demo');
     else if (destination === 'private-writing' && protectedMode && Date.now() < privateUntil) setCurrentView('local-private');
-    else if (destination === 'support') navigatePrivate('vault');
+    else if (destination === 'support') navigatePrivate('vault','', 'Resources');
   }
 
   function handleLooLuStartDraft(text: string, kind: 'Journal' | 'Story' = 'Journal', title = '') {
@@ -468,13 +489,13 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   });
 
   return (
-    <div className={`lulu-app-root ${currentView === 'vault' ? 'vault-dark-mode' : ''} ${currentView === 'settings' || currentView === 'model-settings' || currentView === 'privacy-demo' ? 'privacy-wide' : ''}`}>
+    <div className={`lulu-app-root ${currentView === 'vault' ? 'vault-dark-mode' : ''} ${currentView === 'settings' || currentView === 'ai-access' || currentView === 'model-settings' || currentView === 'privacy-demo' || currentView === 'cloud-privacy-demo' ? 'privacy-wide' : ''}`}>
       {showJudgeInvite && <section className="judge-invite-overlay" role="dialog" aria-modal="true" aria-labelledby="judge-invite-title">
         <div className="judge-invite-card"><h2 id="judge-invite-title">Judge invitation</h2>
-        <p>This shared link is for judges. Sign in or create your own account to link judge access.</p>
-        <p>Decisions are unlimited. Voice is not available yet; the trial plan is five active minutes, with another refill after 24 hours. An idle pause and usage tracking still need to be implemented.</p>
+        <p>This shared judge link can be used with your own account. It also lets you request another voice refill after the 24-hour waiting period.</p>
+        <p>Decisions have no per-account daily cap. Live voice uses a five-minute allowance that pauses after one minute without speech. Voice time is charged by the second; reuse this invitation to refill after 24 hours.</p>
         <button type="button" onClick={() => setShowJudgeInvite(false)}>Not now</button>{' '}
-        <button type="button" onClick={() => setJudgeInviteAccepted(true)}>Link invitation</button></div>
+        <button type="button" onClick={() => setJudgeInviteAccepted(true)}>{judgeAccess?'Use invitation':'Link invitation'}</button></div>
       </section>}
       {protectedMode && privateSurface && <div className="account-actions"><button type="button" onClick={handleExitProtected}>Quick exit</button></div>}
       {backendError&&<div className="backend-error" role="alert"><CircleAlert size={18} aria-hidden="true" /><span><strong>Something needs attention</strong>{backendError}</span><button type="button" onClick={()=>setBackendError('')} aria-label="Dismiss message"><X size={17} aria-hidden="true" /></button></div>}
@@ -542,14 +563,27 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
         )}
 
         {currentView === 'settings' && (
-          <ProfileSettingsView preferences={preferences} displayName={displayName} onDisplayNameChange={async name => {await writeDisplayName(session.uid, name);displayNameEdited.current=true;setDisplayName(name);}} photoUrl={photoUrl} onPhotoSave={async photo => {await writeProfilePhoto(session.uid, photo);setCustomPhoto(photo);}} uid={session.uid} authMethod={session.authMethod} emailVerificationStatus={session.emailVerificationStatus} isPrivateSessionActive={() => !signingOut.current && Date.now() < privateAuthority.current.until} judgeAccess={judgeAccess} judgeInvitePending={Boolean(pendingJudgeInvitation())} onRetryJudgeInvite={() => {setShowJudgeInvite(true);setJudgeInviteAttempt(value => value + 1);}} onPreferencesChange={setPreferences}
+          <ProfileSettingsView preferences={preferences} displayName={displayName} onDisplayNameChange={async name => {await writeDisplayName(session.uid, name);displayNameEdited.current=true;setDisplayName(name);}} photoUrl={photoUrl} onPhotoSave={async photo => {await writeProfilePhoto(session.uid, photo);setCustomPhoto(photo);}} uid={session.uid} authMethod={session.authMethod} emailVerificationStatus={session.emailVerificationStatus} isPrivateSessionActive={() => !signingOut.current && Date.now() < privateAuthority.current.until} judgeAccess={judgeAccess} judgeVoiceSeconds={judgeVoiceSeconds} judgeVoiceDailyLimit={judgeVoiceDailyLimit} judgeDecisionsPerDay={judgeDecisionsPerDay} judgeLuMessagesPerDay={judgeLuMessagesPerDay} judgeDecisionsUsedToday={judgeDecisionsUsedToday} judgeLuMessagesUsedToday={judgeLuMessagesUsedToday} judgeVoiceRefillAt={judgeVoiceRefillAt} isOwnerAccount={isVerifiedOwner} onOpenAiAccess={() => setCurrentView('ai-access')} judgeInvitePending={Boolean(pendingJudgeInvitation()||reusableJudgeInvitation())} onRetryJudgeInvite={() => {setShowJudgeInvite(true);setJudgeInviteAttempt(value => value + 1);}} onPreferencesChange={setPreferences}
             onBack={() => setCurrentView(settingsReturnView.current)} onOpenModelSettings={() => setCurrentView('model-settings')}
             onSignOut={() => void signOutAccount()} />
         )}
 
-        {currentView === 'model-settings' && (
-          <PrivacyModelSettings onBack={() => setCurrentView('settings')} onOpenDemo={() => {setPrivacySource(null);setCurrentView('privacy-demo');}} />
+        {currentView === 'ai-access' && isVerifiedOwner && (
+          <OwnerAiAccessSettings onBack={() => setCurrentView('settings')} />
         )}
+
+        {currentView === 'model-settings' && (
+          <PrivacyModelSettings onBack={() => setCurrentView('settings')} onOpenLocalDemo={() => {setPrivacySource(null);setCurrentView('privacy-demo');}} onOpenCloudDemo={() => setCurrentView('cloud-privacy-demo')} />
+        )}
+
+        {currentView === 'cloud-privacy-demo' && <CloudPrivacyDemo
+          onBack={() => { if (protectedMode) { handleExitProtected(); setCurrentView('model-settings'); } else setCurrentView('model-settings'); }}
+          accountActive={accountSessionActive}
+          privateSession={privacySession}
+          onUnlockPrivate={handleProtectedSuccess}
+          onOpenSupport={() => navigatePrivate('vault', '', 'Resources')}
+          onAskLu={message => setLuChatRequest(previous => ({id:(previous?.id ?? 0)+1,message}))}
+        />}
 
         {currentView === 'privacy-demo' && (
           <Suspense fallback={<main className="privacy-demo-page"><p role="status">Loading the local model runtime…</p></main>}>
@@ -621,6 +655,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
         {currentView === 'vault' && (
           <PrivateSanctuaryView
             uid={session.uid}
+            initialSection={sanctuaryInitialSection}
             onQuickExit={handleExitProtected}
           />
         )}
@@ -678,6 +713,10 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
         canStartDraft={!protectedMode && guideMayLeave(currentView)}
         captureBlockReason={protectedMode ? 'Finish or leave this screen before starting another draft.' : !guideMayLeave(currentView) ? 'Finish or leave this screen before starting another draft.' : ''}
         hasEntries={ordinaryEntries.length > 0}
+        ownerAiAccess={isVerifiedOwner}
+        judgeAccess={judgeAccess} judgeVoiceSeconds={judgeVoiceSeconds} judgeVoiceDailyLimit={judgeVoiceDailyLimit} judgeDecisionsPerDay={judgeDecisionsPerDay} judgeLuMessagesPerDay={judgeLuMessagesPerDay} judgeDecisionsUsedToday={judgeDecisionsUsedToday} judgeLuMessagesUsedToday={judgeLuMessagesUsedToday} judgeVoiceRefillAt={judgeVoiceRefillAt}
+        chatRequest={luChatRequest}
+        onJudgeUsageRefresh={() => {if(development)return;void request<{judgeAccess:boolean;voiceSecondsRemaining?:number;voiceDailyLimit?:number;decisionsPerDay?:number|null;luMessagesPerDay?:number|null;decisionsUsedToday?:number;luMessagesUsedToday?:number;refillAvailableAt?:number|null}>('/judge/access').then(result=>{setJudgeAccess(result.judgeAccess===true);setJudgeVoiceSeconds(Number.isSafeInteger(result.voiceSecondsRemaining)?Math.max(0,result.voiceSecondsRemaining!):null);setJudgeVoiceDailyLimit(Number.isSafeInteger(result.voiceDailyLimit)?Math.max(0,result.voiceDailyLimit!):null);setJudgeDecisionsPerDay(Number.isSafeInteger(result.decisionsPerDay)?Math.max(0,result.decisionsPerDay!):null);setJudgeLuMessagesPerDay(Number.isSafeInteger(result.luMessagesPerDay)?Math.max(0,result.luMessagesPerDay!):null);setJudgeDecisionsUsedToday(Number.isSafeInteger(result.decisionsUsedToday)?Math.max(0,result.decisionsUsedToday!):0);setJudgeLuMessagesUsedToday(Number.isSafeInteger(result.luMessagesUsedToday)?Math.max(0,result.luMessagesUsedToday!):0);setJudgeVoiceRefillAt(typeof result.refillAvailableAt==='number'?result.refillAvailableAt:null);}).catch(()=>{});}}
         onNavigate={handleLooLuNavigate}
         onStartDraft={handleLooLuStartDraft}
         onQuickAction={action => {

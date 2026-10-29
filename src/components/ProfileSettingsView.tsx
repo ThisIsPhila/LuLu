@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
-import { ArrowLeft, ChevronRight, LogOut, ShieldCheck, Type } from 'lucide-react';
+import { ArrowLeft, ChevronRight, LogOut, ShieldCheck, Sparkles, Type } from 'lucide-react';
 import type { AppPreferences } from '../services/appPreferences';
 import { ProfileAvatar } from './ProfileAvatar';
 import { prepareProfilePhoto } from '../services/profilePhoto';
@@ -20,6 +20,15 @@ type Props = {
   emailVerificationStatus?: 'sent' | 'failed';
   isPrivateSessionActive: () => boolean;
   judgeAccess: boolean;
+  judgeVoiceSeconds: number|null;
+  judgeVoiceDailyLimit: number|null;
+  judgeDecisionsPerDay: number|null;
+  judgeLuMessagesPerDay: number|null;
+  judgeDecisionsUsedToday: number|null;
+  judgeLuMessagesUsedToday: number|null;
+  judgeVoiceRefillAt: number|null;
+  isOwnerAccount: boolean;
+  onOpenAiAccess: () => void;
   judgeInvitePending: boolean;
   onRetryJudgeInvite: () => void;
   onPreferencesChange: (preferences: AppPreferences) => void;
@@ -28,7 +37,7 @@ type Props = {
   onSignOut: () => void;
 };
 
-export function ProfileSettingsView({ preferences, displayName, onDisplayNameChange, photoUrl, onPhotoSave, uid, authMethod, emailVerificationStatus, isPrivateSessionActive, judgeAccess, judgeInvitePending, onRetryJudgeInvite, onPreferencesChange, onBack, onOpenModelSettings, onSignOut }: Props) {
+export function ProfileSettingsView({ preferences, displayName, onDisplayNameChange, photoUrl, onPhotoSave, uid, authMethod, emailVerificationStatus, isPrivateSessionActive, judgeAccess, judgeVoiceSeconds, judgeVoiceDailyLimit, judgeDecisionsPerDay, judgeLuMessagesPerDay, judgeDecisionsUsedToday, judgeLuMessagesUsedToday, judgeVoiceRefillAt, isOwnerAccount, onOpenAiAccess, judgeInvitePending, onRetryJudgeInvite, onPreferencesChange, onBack, onOpenModelSettings, onSignOut }: Props) {
   const [nameDraft, setNameDraft] = useState(displayName);
   const [nameStatus, setNameStatus] = useState('');
   useEffect(() => setNameDraft(displayName), [displayName]);
@@ -87,12 +96,17 @@ export function ProfileSettingsView({ preferences, displayName, onDisplayNameCha
             <div className="profile-settings-row static-row">
               <span className="profile-settings-copy"><strong>Signed in to LuLu</strong><small>Your account is needed to open your journal.</small></span>
             </div>
-            {judgeAccess && <div className="profile-settings-row static-row"><span className="profile-settings-copy"><strong>Judge access</strong><small>Decisions: unlimited. Voice: planned five active minutes, refill after 24 hours. Voice AI and usage tracking are not available yet.</small></span><span className="profile-settings-status">Active</span></div>}
-            {judgeInvitePending && <button className="profile-settings-link" type="button" onClick={onRetryJudgeInvite}><span className="profile-settings-copy"><strong>Apply judge invitation</strong><small>Try linking the invitation to this signed-in account again.</small></span></button>}
+            {judgeAccess && <div className="profile-settings-row static-row"><span className="profile-settings-copy"><strong>AI access</strong><small>Decisions: {judgeDecisionsPerDay===null?`unlimited · ${judgeDecisionsUsedToday ?? 0} used today`:`${judgeDecisionsUsedToday ?? 0} / ${judgeDecisionsPerDay} today`}. Lu text: {judgeLuMessagesPerDay===null?`unlimited · ${judgeLuMessagesUsedToday ?? 0} used today`:`${judgeLuMessagesUsedToday ?? 0} / ${judgeLuMessagesPerDay} today`}. Live voice: {judgeVoiceSeconds===null?'checking allowance…':`${Math.floor(judgeVoiceSeconds/60)}m ${String(judgeVoiceSeconds%60).padStart(2,'0')}s remaining`}{judgeVoiceDailyLimit!==null?` of ${Math.floor(judgeVoiceDailyLimit/60)}m ${String(judgeVoiceDailyLimit%60).padStart(2,'0')}s per 24 hours`:''}{judgeVoiceRefillAt?`. Refill by reopening the invite after ${new Date(judgeVoiceRefillAt).toLocaleString()}.`:'. One refill is available every 24 hours.'} Voice pauses after one minute without speech.</small></span><span className="profile-settings-status">Active</span></div>}
+            {judgeInvitePending && <button className="profile-settings-link" type="button" onClick={onRetryJudgeInvite}><span className="profile-settings-copy"><strong>{judgeAccess?'Request voice refill':'Apply judge invitation'}</strong><small>{judgeAccess?'Use the saved shared invitation to refill voice time when the 24-hour wait is over.':'Link the shared invitation to this signed-in account.'}</small></span></button>}
             <button className="profile-settings-signout" type="button" onClick={onSignOut}>
               <LogOut size={17} aria-hidden="true" />
               Sign out
             </button>
+            {isOwnerAccount && <button className="profile-settings-link" type="button" onClick={onOpenAiAccess}>
+              <span className="profile-settings-icon"><Sparkles size={18} aria-hidden="true" /></span>
+              <span className="profile-settings-copy"><strong>AI access & tester accounts</strong><small>Enable or disable AI by account and set Decisions, Lu text, and live voice limits.</small></span>
+              <ChevronRight size={18} aria-hidden="true" />
+            </button>}
           </div>
         </section>
         <AccountLinkingPanel uid={uid} authMethod={authMethod} emailVerificationStatus={emailVerificationStatus} isPrivateSessionActive={isPrivateSessionActive} />

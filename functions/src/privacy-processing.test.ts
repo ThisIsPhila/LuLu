@@ -23,8 +23,10 @@ test('reviewed request accepts exact hash and bounded explicit contract', () => 
   assert.throws(() => validateReviewedPrivacyRequest({...reviewed('a\u0000b')}), /Invalid/);
 });
 
-test('provider remains disabled by default and requires explicit provider, key, and Responses model when selected', () => {
+test('Decisions is the keyed default, explicit disable is respected, and Responses requires its model', () => {
   assert.equal(configuredProvider({}).enabled, false);
+  assert.equal(configuredProvider({}, 'key').id, 'openai_decisions');
+  assert.equal(configuredProvider({PRIVACY_PROVIDER: 'disabled'}, 'key').enabled, false);
   assert.equal(configuredProvider({PRIVACY_PROVIDER: 'openai_decisions'}).enabled, false);
   assert.equal(configuredProvider({PRIVACY_PROVIDER: 'openai_responses'}).enabled, false);
   assert.equal(configuredProvider({PRIVACY_PROVIDER: 'unknown', OPENAI_RESPONSES_MODEL: 'model'}, 'key').enabled, false);

@@ -26,7 +26,16 @@ test('native apps can reach privacy endpoints without opening them to unrelated 
     assert.equal(isAllowedApiOrigin(origin, '/privacy/capability'), true);
     assert.equal(isAllowedApiOrigin(origin, '/privacy/understand'), true);
     assert.equal(isAllowedApiOrigin(origin, '/lu/live/action'), true);
+    assert.equal(isAllowedApiOrigin(origin, '/lu/live/end'), true);
   }
   assert.equal(isAllowedApiOrigin('https://untrusted.example', '/privacy/capability'), false);
   assert.equal(isAllowedApiOrigin('https://untrusted.example', '/privacy/understand'), false);
+});
+
+test('native owner settings can manage judge invitations without exposing management to unrelated origins', () => {
+  for (const origin of ['capacitor://localhost', 'https://localhost']) {
+    assert.equal(isAllowedApiOrigin(origin, '/owner/judge-invite'), true);
+    assert.equal(isAllowedApiOrigin(origin, '/owner/ai-access'), true);
+  }
+  assert.equal(isAllowedApiOrigin('https://untrusted.example', '/owner/judge-invite'), false);
 });

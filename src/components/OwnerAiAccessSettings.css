@@ -1,0 +1,51 @@
+.owner-ai-access-page { min-height: 100dvh; padding: max(20px,env(safe-area-inset-top)) 20px max(42px,env(safe-area-inset-bottom)); color:#292824; background:radial-gradient(ellipse at 84% 0%,rgba(217,202,188,.32),transparent 34%),#f7f2e9; }
+.owner-ai-access-header,.owner-ai-account-list { width:min(100%,880px); margin-inline:auto; }
+.owner-ai-access-header .profile-settings-kicker { display:block; margin-top:28px; color:#737362; font:600 10px var(--font-mono); letter-spacing:.13em; }
+.owner-ai-access-header h1 { margin:6px 0 0; color:#292824; font:400 clamp(29px,7vw,39px)/1.14 var(--font-serif); letter-spacing:-.035em; }
+.owner-ai-access-header > p { max-width:650px; margin:8px 0 0; color:#6c665d; font:15px/1.6 var(--font-serif); }
+.owner-ai-default { display:flex; align-items:flex-start; gap:11px; margin-top:18px; padding:15px; border:1px solid #d5ddce; border-radius:15px; color:#4c6249; background:#eef2e9; }
+.owner-ai-default > svg { flex:0 0 auto; margin-top:2px; }
+.owner-ai-default span { display:grid; gap:4px; }
+.owner-ai-default strong { color:#39473a; font:600 13px var(--font-heading); }
+.owner-ai-default small { color:#64705e; font:12px/1.5 var(--font-heading); }
+.owner-ai-refresh { display:inline-flex; width:auto; min-height:40px; justify-content:flex-start; gap:8px; margin-top:12px; padding-inline:14px; border:1px solid #d4ccbd; border-radius:999px; background:#fbf8f2; font:600 12px var(--font-heading); }
+.owner-ai-refresh:disabled { opacity:.65; }
+.owner-ai-account-list { display:grid; gap:14px; margin-top:16px; }
+.owner-ai-invitation { width:min(100%,880px); margin:14px auto 0; padding:clamp(15px,3vw,22px); border:1px solid rgba(217,202,188,.8); border-radius:19px; background:rgba(251,248,242,.94); box-shadow:0 5px 18px rgba(98,79,55,.05); }
+.owner-ai-invitation>header { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+.owner-ai-invitation h2 { margin:6px 0 0; color:#302f2a; font:600 17px var(--font-heading); }
+.owner-ai-invitation header p { max-width:570px; margin:6px 0 0; color:#777166; font:12px/1.5 var(--font-heading); }
+.owner-ai-invite-status { display:inline-flex; flex:0 0 auto; align-items:center; gap:6px; padding:6px 9px; border-radius:999px; color:#777166; background:#eeece6; font:600 10px var(--font-mono); text-transform:uppercase; }
+.owner-ai-invite-status i { width:7px; height:7px; border-radius:50%; background:#aaa69c; }
+.owner-ai-invite-status.is-active { color:#49664d; background:#e9f0e6; }
+.owner-ai-invite-status.is-active i { background:#3f9c64; }
+.owner-ai-invite-created { display:block; margin-top:11px; color:#777166; font:10px var(--font-mono); }
+.owner-ai-invite-actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:13px; }
+.owner-ai-invite-actions .profile-save-button { display:inline-flex; align-items:center; gap:7px; }
+.owner-ai-disable-invite { display:inline-flex; align-items:center; justify-content:center; min-height:38px; padding:8px 14px; border:1px solid #dfc7bf; border-radius:999px; color:#874c41; background:#fbf3f0; font:600 12px var(--font-heading); cursor:pointer; }
+.owner-ai-generated-invite { display:grid; gap:7px; margin-top:14px; padding:12px; border:1px solid #d5ddce; border-radius:12px; background:#f3f5ef; }
+.owner-ai-generated-invite label { color:#485347; font:600 11px var(--font-heading); }
+.owner-ai-generated-invite>div { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; }
+.owner-ai-generated-invite input { min-width:0; width:100%; height:38px; padding:0 10px; border:1px solid #d1d6ca; border-radius:9px; color:#44483e; background:#fffefa; font:10px var(--font-mono); }
+.owner-ai-generated-invite>div button { display:inline-flex; align-items:center; justify-content:center; }
+.owner-ai-generated-invite>small { color:#73796f; font:10px/1.5 var(--font-heading); }
+.owner-ai-account-card { padding:clamp(15px,3vw,22px); border:1px solid rgba(217,202,188,.8); border-radius:19px; background:rgba(251,248,242,.94); box-shadow:0 5px 18px rgba(98,79,55,.05); }
+.owner-ai-account-card > header { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+.owner-ai-account-card > header > div { min-width:0; }
+.owner-ai-account-card h2 { margin:0; overflow-wrap:anywhere; color:#302f2a; font:600 16px var(--font-heading); }
+.owner-ai-account-card header small { display:block; margin-top:5px; color:#777166; font:11px/1.5 var(--font-heading); }
+.owner-ai-enabled { display:flex; flex:0 0 auto; align-items:center; gap:7px; color:#56634f; font:600 11px var(--font-heading); cursor:pointer; }
+.owner-ai-enabled input { width:18px; height:18px; accent-color:#59694f; }
+.owner-ai-no-email { margin:12px 0 0; padding:10px 12px; border-radius:10px; color:#815d42; background:#f7efe1; font:12px/1.5 var(--font-heading); }
+.owner-ai-rates { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:17px; }
+.owner-ai-rates label { display:grid; align-content:start; gap:7px; color:#514f47; font:600 11px var(--font-heading); }
+.owner-ai-rates input { min-width:0; width:100%; height:40px; padding:0 10px; border:1px solid #d8d0c2; border-radius:10px; color:#302f2a; background:#fffdf8; font:13px var(--font-mono); }
+.owner-ai-rates input:disabled { opacity:.55; }
+.owner-ai-rates small { min-height:28px; color:#777166; font:10px/1.45 var(--font-heading); }
+.owner-ai-save { display:inline-flex; align-items:center; gap:7px; margin-top:13px; }
+.owner-ai-save:disabled { opacity:.55; }
+.owner-ai-status,.owner-ai-loading,.owner-ai-error { display:flex; align-items:center; gap:8px; width:min(100%,880px); margin:12px auto 0; padding:11px 13px; border-radius:11px; color:#53644e; background:#eef2e9; font:12px/1.5 var(--font-heading); }
+.owner-ai-error { color:#8e4438; background:#f9ece8; }
+.owner-ai-loading { background:transparent; }
+.owner-ai-access-page button:focus-visible,.owner-ai-access-page input:focus-visible { outline:3px solid #68745f; outline-offset:3px; }
+@media(max-width:680px) { .owner-ai-access-page { padding-inline:15px; } .owner-ai-account-card>header { flex-direction:column; } .owner-ai-invitation>header { flex-direction:column; } .owner-ai-rates { grid-template-columns:1fr; gap:7px; } .owner-ai-rates small { min-height:0; } }

@@ -1,4 +1,4 @@
-import { randomUUID, createHash } from 'node:crypto';
+import { randomUUID, randomBytes, createHash } from 'node:crypto';
 import { initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
@@ -12,17 +12,19 @@ import { configuredProvider, privacyCapability, validateReviewedPrivacyRequest }
 import { judgeInviteDigest, isJudgeInviteActive } from './judge-invite.js';
 import { mayReadAccountActivity } from './owner-notifications.js';
 import { processAccountAlerts } from './account-alerts.js';
-import { scrubForLu, scrubTextsForLu, respondAsLuWithTools, LU_LANGUAGES, type LuAgentAction, type LuAgentHistoryMessage, type LuSurfaceReference } from './lu-chat.js';
-import { explicitlyRequestsDestination, explicitlyRequestsDraft, explicitlyRequestsOpen, explicitlyRequestsSurfaceSearch, luSearchTerms } from './lu-agent-policy.js';
+import { scrubForLuDetailed, scrubTextsForLu, respondAsLuWithTools, LU_LANGUAGES, type LuAgentAction, type LuAgentHistoryMessage, type LuSurfaceReference } from './lu-chat.js';
+import { explicitlyRequestsDestination, explicitlyRequestsDraft, explicitlyRequestsOpen, explicitlyRequestsSurfaceSearch, isLuLuScopeRequest, outOfScopeReply, luSearchTerms } from './lu-agent-policy.js';
 import { createLuLiveSession } from './lu-live.js';
-import { refillJudgeAllowance, type JudgeAllowance } from './judge-allowance.js';
+import { refillJudgeAllowance, reserveJudgeVoice, settleJudgeVoice, type JudgeAllowance } from './judge-allowance.js';
+import { assessBehaviourPatterns } from './pattern-intelligence.js';
+import { quotaUsage, readAiAccountLimits, type AiRequestKind } from './ai-access-policy.js';
 
 const judgeVoicePolicy = {refillCredits: 300, maxCredits: 300, refillCooldownMs: 24 * 60 * 60_000, accessDurationMs: 24 * 60 * 60_000};
 
 initializeApp();
 const db = getFirestore();
 const identity = getAuth();
-const knownRoutes = new Set(['/auth/register/options', '/auth/register/verify', '/auth/login/options', '/auth/login/verify', '/auth/stepup/options', '/auth/stepup/verify', '/auth/provider/session', '/auth/lock', '/auth/logout', '/session', '/judge/redeem', '/judge/access', '/owner/account-activity', '/lu/scrub', '/lu/chat', '/lu/live', '/lu/live/action', '/privacy/capability', '/privacy/understand', '/native/exchange/create', '/native/exchange/options', '/native/exchange/complete', '/native/exchange/provider-complete', '/native/exchange/redeem', '/native/exchange/cancel']);
+const knownRoutes = new Set(['/auth/register/options', '/auth/register/verify', '/auth/login/options', '/auth/login/verify', '/auth/stepup/options', '/auth/stepup/verify', '/auth/provider/session', '/auth/lock', '/auth/logout', '/session', '/judge/redeem', '/judge/access', '/owner/account-activity', '/owner/ai-access', '/owner/judge-invite', '/lu/scrub', '/lu/chat', '/lu/live', '/lu/live/action', '/lu/live/end', '/privacy/capability', '/privacy/understand', '/privacy/patterns', '/native/exchange/create', '/native/exchange/options', '/native/exchange/complete', '/native/exchange/provider-complete', '/native/exchange/redeem', '/native/exchange/cancel']);
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
 const sessions = db.collection('_sessions');
 const challenges = db.collection('_challenges');
@@ -50,9 +52,69 @@ async function requireLuAiAccess(uid: string) {
   const user = await identity.getUser(uid);
   if (mayReadAccountActivity(user)) return;
   const access = (await db.collection('_judgeAccess').doc(uid).get()).data();
-  if (!access || access.enabled !== true || typeof access.inviteDigest !== 'string') throw new ApiError(403, 'Full Lu AI access requires a judge invitation.');
+  if (!access || access.enabled !== true) throw new ApiError(403, 'Full Lu AI access requires a judge invitation or account grant.');
+  if (access.ownerManaged === true) return;
+  if (typeof access.inviteDigest !== 'string') throw new ApiError(403, 'Full Lu AI access requires a judge invitation or account grant.');
   const invitation = (await db.collection('_judgeInvites').doc(access.inviteDigest).get()).data();
   if (!isJudgeInviteActive(invitation)) throw new ApiError(403, 'This judge invitation is no longer active.');
+}
+async function consumeAiQuota(uid:string,kind:AiRequestKind) {
+  const user=await identity.getUser(uid);
+  if(mayReadAccountActivity(user))return;
+  const accessRef=db.collection('_judgeAccess').doc(uid);
+  const dayKey=new Date().toISOString().slice(0,10);
+  await db.runTransaction(async transaction=>{
+    const snapshot=await transaction.get(accessRef);
+    const data=snapshot.data();
+    if(!data||data.enabled!==true)throw new ApiError(403,'AI access is disabled for this account.');
+    const limits=readAiAccountLimits(data);
+    const limit=kind==='decisions'?limits.decisionsPerDay:limits.luMessagesPerDay;
+    if(limit===null)return;
+    const usage=data.usage&&typeof data.usage==='object'?data.usage as Record<string,unknown>:{};
+    const used=usage.dayKey===dayKey&&Number.isSafeInteger(usage[kind])?usage[kind] as number:0;
+    const next=quotaUsage(limit,used);
+    if(!next.allowed)throw new ApiError(429,kind==='decisions'?'This account has reached its daily Decisions allowance.':'This account has reached its daily Lu message allowance.');
+    transaction.set(accessRef,{usage:{dayKey,[kind]:next.nextUsed,[kind==='decisions'?'luMessages':'decisions']:usage.dayKey===dayKey&&Number.isSafeInteger(usage[kind==='decisions'?'luMessages':'decisions'])?usage[kind==='decisions'?'luMessages':'decisions']:0}},{merge:true});
+  });
+}
+async function reserveLiveVoiceAccess(uid: string, now: number): Promise<{owner:boolean;reservedSeconds:number;durationSeconds:number;voiceDailyLimit:number}> {
+  const user = await identity.getUser(uid);
+  if (mayReadAccountActivity(user)) return {owner:true,reservedSeconds:0,durationSeconds:300,voiceDailyLimit:0};
+  const accessRef = db.collection('_judgeAccess').doc(uid);
+  const reservation = await db.runTransaction(async transaction => {
+    const accessSnapshot = await transaction.get(accessRef);
+    const access = accessSnapshot.data();
+    if (!access || access.enabled !== true) throw new ApiError(403,'AI access is disabled for this account.');
+    if (access.ownerManaged !== true) {
+      if(typeof access.inviteDigest!=='string')throw new ApiError(403,'Full Lu AI access requires an active judge invitation.');
+      const inviteRef = db.collection('_judgeInvites').doc(access.inviteDigest);
+      const inviteSnapshot = await transaction.get(inviteRef);
+      if (!isJudgeInviteActive(inviteSnapshot.data())) throw new ApiError(403,'This judge invitation is no longer active.');
+    }
+    const voiceDailyLimit=readAiAccountLimits(access).voiceSecondsPerDay;
+    if(voiceDailyLimit===0)throw new ApiError(403,'Live voice is disabled for this account.');
+    const allowance = access.voiceAllowance as JudgeAllowance | undefined;
+    const result = reserveJudgeVoice(allowance ?? null,voiceDailyLimit,now);
+    if (!result.ok) {
+      if (result.reason === 'revoked') throw new ApiError(403,'This account no longer has judge voice access.');
+      throw new ApiError(429,result.reason === 'expired' ? 'Judge voice time has expired. Reopen the invitation when its refill is available.' : 'Your judge voice time is used. Reopen the invitation when its refill is available.');
+    }
+    transaction.update(accessRef,{voiceAllowance:result.allowance});
+    return {reservedSeconds:result.reservedSeconds,voiceDailyLimit};
+  });
+  return {owner:false,reservedSeconds:reservation.reservedSeconds,durationSeconds:reservation.reservedSeconds,voiceDailyLimit:reservation.voiceDailyLimit};
+}
+async function refundUnopenedVoiceReservation(uid:string,reservedSeconds:number) {
+  if(reservedSeconds<=0)return;
+  const accessRef=db.collection('_judgeAccess').doc(uid);
+  await db.runTransaction(async transaction=>{
+    const accessSnapshot=await transaction.get(accessRef);
+    const data=accessSnapshot.data();
+    const allowance=data?.voiceAllowance as JudgeAllowance|undefined;
+    if(!allowance||allowance.revoked)return;
+    const maximum=readAiAccountLimits(data).voiceSecondsPerDay;
+    transaction.update(accessRef,{voiceAllowance:{...allowance,credits:Math.min(maximum,allowance.credits+reservedSeconds)}});
+  });
 }
 async function limitRequest(ip: string) {
   const bucket = Math.floor(Date.now() / 900_000);
@@ -174,7 +236,7 @@ async function loadNativeExchange(id: unknown, state: unknown) {
 }
 
 /** Lu demo privacy processing accepts user-submitted text; private mappings and biometrics are never accepted. */
-export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInstances: 2, minInstances: 0, concurrency: 10, timeoutSeconds: 30, invoker: 'public', secrets: ['OPENAI_API_KEY', 'RESEND_API_KEY']}, async (request, response) => {
+export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInstances: 2, minInstances: 0, concurrency: 10, timeoutSeconds: 90, invoker: 'public', secrets: ['OPENAI_API_KEY', 'RESEND_API_KEY']}, async (request, response) => {
   response.set('Cache-Control', 'no-store');
   response.set('X-Content-Type-Options', 'nosniff');
   const origin = request.get('origin') || '';
@@ -435,23 +497,27 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
     stage = 'session-lookup';
     const current = await sessionFor(request.get('authorization'));
     if (route === '/lu/live') {
-      // Owner-only until server-side judge voice allowance is enforced.
-      const user = await identity.getUser(current.uid);
-      if (!mayReadAccountActivity(user)) throw new ApiError(403, 'Live voice is currently available to the owner for testing.');
-      if (Object.keys(body).join(',') !== 'offer' || typeof body.offer !== 'string' || !body.offer.trim() || body.offer.length > 20000) throw new ApiError(400, 'Invalid voice connection.');
+      if (!['offer','history'].every(key=>Object.hasOwn(body,key)) || Object.keys(body).some(key=>!['offer','history'].includes(key)) || typeof body.offer !== 'string' || !body.offer.trim() || body.offer.length > 20000 || !Array.isArray(body.history) || body.history.length>12 || body.history.some((item:unknown)=>!item||typeof item!=='object'||!['You','Lu'].includes((item as {speaker?:unknown}).speaker as string)||typeof (item as {text?:unknown}).text!=='string'||!(item as {text:string}).text.trim()||(item as {text:string}).text.length>2000) || body.history.reduce((sum:number,item:{text:string})=>sum+item.text.length,0)>8000) throw new ApiError(400, 'Invalid voice connection.');
       if (!process.env.OPENAI_API_KEY) throw new ApiError(503, 'Live voice is not configured.');
+      const now=Date.now();
+      const reservation=await reserveLiveVoiceAccess(current.uid,now);
+      let createdLive:{sessionId:string;answer:string};
       try {
-        const live=await createLuLiveSession(process.env.OPENAI_API_KEY, body.offer);
+        createdLive=await createLuLiveSession(process.env.OPENAI_API_KEY, body.offer,body.history as Array<{speaker:'You'|'Lu';text:string}>);
         const createdAt=Date.now();
-        await db.collection('_luLiveSessions').doc(hash(live.sessionId)).create({uid:current.uid,sessionId:live.sessionId,createdAt,expiresAt:createdAt+5*60_000,status:'active',references:{},purgeAfter:Timestamp.fromMillis(createdAt+60*60_000)});
-        response.json({...live,expiresAt:createdAt+5*60_000});
+        const expiresAt=createdAt+reservation.durationSeconds*1000;
+        await db.collection('_luLiveSessions').doc(hash(createdLive.sessionId)).create({uid:current.uid,sessionId:createdLive.sessionId,createdAt,expiresAt,status:'active',owner:reservation.owner,reservedSeconds:reservation.reservedSeconds,voiceMaximum:reservation.voiceDailyLimit,references:{},purgeAfter:Timestamp.fromMillis(expiresAt+60*60_000)});
+        const access=(await db.collection('_judgeAccess').doc(current.uid).get()).data();
+        const allowance=access?.voiceAllowance as JudgeAllowance|undefined;
+        response.json({...createdLive,expiresAt,voiceSecondsRemaining:reservation.owner?null:allowance?.credits??0,voiceDailyLimit:reservation.owner?null:reservation.voiceDailyLimit});
+      } catch {
+        await refundUnopenedVoiceReservation(current.uid,reservation.reservedSeconds).catch(()=>{});
+        throw new ApiError(502, 'Could not connect live voice. Reserved judge time was returned; please try again.');
       }
-      catch { throw new ApiError(502, 'Could not connect live voice. Please try again.'); }
       return;
     }
     if(route==='/lu/live/action'){
-      const user=await identity.getUser(current.uid);
-      if(!mayReadAccountActivity(user))throw new ApiError(403,'Live voice actions are currently available to the owner for testing.');
+      await requireLuAiAccess(current.uid);
       if(Object.keys(body).sort().join(',')!=='arguments,name,sessionId,transcript'||typeof body.sessionId!=='string'||!/^live_[A-Za-z0-9_-]{1,120}$/.test(body.sessionId)||typeof body.name!=='string'||typeof body.transcript!=='string'||!body.transcript.trim()||body.transcript.length>4000||!body.arguments||typeof body.arguments!=='object'||Array.isArray(body.arguments))throw new ApiError(400,'Invalid Lu voice action.');
       if(!process.env.OPENAI_API_KEY)throw new ApiError(503,'Lu voice actions are not configured.');
       const sessionRef=db.collection('_luLiveSessions').doc(hash(body.sessionId));
@@ -465,15 +531,42 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
       if(result.references?.length){await sessionRef.update({references:Object.fromEntries(entryIds)});}
       response.json({output:result.output,action:result.action??null,references:result.references??[]});return;
     }
+    if(route==='/lu/live/end'){
+      if(Object.keys(body).join(',')!=='sessionId'||typeof body.sessionId!=='string'||!/^live_[A-Za-z0-9_-]{1,120}$/.test(body.sessionId))throw new ApiError(400,'Invalid live session.');
+      const sessionRef=db.collection('_luLiveSessions').doc(hash(body.sessionId));
+      const ended=await db.runTransaction(async transaction=>{
+        const sessionSnapshot=await transaction.get(sessionRef);
+        const session=sessionSnapshot.data();
+        if(!session||session.uid!==current.uid)throw new ApiError(404,'Live session not found.');
+        if(session.status!=='active')return {ended:false,chargedSeconds:session.chargedSeconds??0,refundedSeconds:session.refundedSeconds??0};
+        const endedAt=Date.now();
+        const startedAt=typeof session.createdAt==='number'?session.createdAt:endedAt;
+        let chargedSeconds=0,refundedSeconds=0;
+        if(session.owner!==true&&Number.isSafeInteger(session.reservedSeconds)&&session.reservedSeconds>0){
+          const accessRef=db.collection('_judgeAccess').doc(current.uid);
+          const accessSnapshot=await transaction.get(accessRef);
+          const allowance=accessSnapshot.data()?.voiceAllowance as JudgeAllowance|undefined;
+          if(allowance&&!allowance.revoked){
+            const voiceMaximum=Number.isSafeInteger(session.voiceMaximum)?session.voiceMaximum:judgeVoicePolicy.maxCredits;
+            const settled=settleJudgeVoice(allowance,session.reservedSeconds,startedAt,endedAt,voiceMaximum);
+            chargedSeconds=settled.chargedSeconds;refundedSeconds=settled.refundedSeconds;
+            transaction.update(accessRef,{voiceAllowance:settled.allowance});
+          }else chargedSeconds=Math.min(session.reservedSeconds,Math.ceil(Math.max(0,endedAt-startedAt)/1000));
+        }
+        transaction.update(sessionRef,{status:'ended',endedAt,chargedSeconds,refundedSeconds});
+        return {ended:true,chargedSeconds,refundedSeconds};
+      });
+      response.json(ended);return;
+    }
     if (route === '/lu/scrub') {
       await requireLuAiAccess(current.uid);
       if (Object.keys(body).length !== 1 || typeof body.text !== 'string' || !body.text.trim() || body.text.length > 4000) throw new ApiError(400, 'Enter text of up to 4,000 characters.');
+      await consumeAiQuota(current.uid,'luMessages');
       if (!process.env.OPENAI_API_KEY) throw new ApiError(503, 'Cloud privacy processing is not configured.');
-      const scrubbed = (await scrubForLu(process.env.OPENAI_API_KEY, body.text)).trim();
-      if (scrubbed === '[unable to safely scrub]') throw new ApiError(422, 'The text could not be prepared safely. Please edit it and try again.');
+      const scrubbed = await scrubForLuDetailed(process.env.OPENAI_API_KEY, body.text);
       const ticket = randomUUID();
-      await db.collection('_luReviews').doc(hash(ticket)).create({uid:current.uid, sourceHash:hash(body.text), textHash:hash(scrubbed), expiresAt:Date.now()+10*60_000});
-      response.json({scrubbed, ticket}); return;
+      await db.collection('_luReviews').doc(hash(ticket)).create({uid:current.uid, sourceHash:hash(body.text), textHash:hash(scrubbed.text), expiresAt:Date.now()+10*60_000});
+      response.json({scrubbed:scrubbed.text, entities:scrubbed.entities, ticket}); return;
     }
     if (route === '/lu/chat') {
       await requireLuAiAccess(current.uid);
@@ -488,10 +581,13 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
       const apiKey=process.env.OPENAI_API_KEY;
       const safeHistory=body.history.length ? await scrubTextsForLu(apiKey,body.history.map((item:{text:string})=>item.text)) : [];
       const history:LuAgentHistoryMessage[]=body.history.map((item:{role:'user'|'assistant'},index:number)=>({role:item.role,text:safeHistory[index]}));
+      if (!isLuLuScopeRequest(body.text, history)) {
+        response.json({reply:outOfScopeReply(body.language),actions:[],references:[]}); return;
+      }
       const entryIds=new Map<string,string>();
       const result=await respondAsLuWithTools(apiKey,body.text,body.language,{
         history,
-        execute:call=>executeLuTool(current.uid,body.sourceText,call,apiKey,entryIds),
+        execute:call=>executeLuTool(current.uid,body.text,call,apiKey,entryIds),
       });
       // Only open entries returned by the server's current ordinary-entry search.
       response.json({reply:result.reply,actions:result.actions,references:result.references}); return;
@@ -516,6 +612,85 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
       accounts.sort((a,b) => Date.parse(b.createdAt)-Date.parse(a.createdAt));
       response.json({owner:true, accounts:accounts.slice(0,50), truncated: Boolean(pageToken)}); return;
     }
+    if(route==='/owner/judge-invite'){
+      const owner=await identity.getUser(current.uid);
+      if(!mayReadAccountActivity(owner))throw new ApiError(403,'Only the verified LuLu owner can manage the shared judge invitation.');
+      const inviteCollection=db.collection('_judgeInvites');
+      if(body.action==='status'&&Object.keys(body).length===1){
+        const active=await inviteCollection.where('enabled','==',true).limit(1).get();
+        const invite=active.docs[0]?.data();
+        const createdAt=invite?.createdAt&&typeof invite.createdAt.toDate==='function'?invite.createdAt.toDate().toISOString():null;
+        response.json({enabled:Boolean(invite),createdAt});return;
+      }
+      if(body.action==='disable'&&Object.keys(body).length===1){
+        const active=await inviteCollection.where('enabled','==',true).get();
+        const batch=db.batch();const now=Timestamp.now();
+        for(const invite of active.docs)batch.update(invite.ref,{enabled:false,disabledAt:now,disabledByUid:current.uid});
+        if(active.size)await batch.commit();
+        response.json({enabled:false,disabledCount:active.size});return;
+      }
+      if(body.action==='create'&&Object.keys(body).length===1){
+        const token=randomBytes(32).toString('base64url');
+        const digest=judgeInviteDigest(token);
+        const newInvite=inviteCollection.doc(digest);
+        const activeQuery=inviteCollection.where('enabled','==',true);
+        await db.runTransaction(async transaction=>{
+          const active=await transaction.get(activeQuery);
+          if(active.size>499)throw new ApiError(409,'Too many active invitation records to rotate safely.');
+          const now=Timestamp.now();
+          for(const invite of active.docs)transaction.update(invite.ref,{enabled:false,disabledAt:now,disabledByUid:current.uid});
+          transaction.create(newInvite,{enabled:true,createdAt:now,createdByUid:current.uid});
+        });
+        response.json({enabled:true,token,createdAt:new Date().toISOString()});return;
+      }
+      throw new ApiError(400,'Invalid judge invitation action.');
+    }
+    if(route==='/owner/ai-access'){
+      const owner=await identity.getUser(current.uid);
+      if(!mayReadAccountActivity(owner))throw new ApiError(403,'Only the verified LuLu owner can manage account AI access.');
+      if(body.action==='list'&&Object.keys(body).length===1){
+        const invites=db.collection('_judgeInvites');
+        const users:Awaited<ReturnType<typeof identity.listUsers>>['users']=[];
+        let pageToken:string|undefined;let pages=0;let truncated=false;
+        do{
+          const page=await identity.listUsers(100,pageToken);
+          users.push(...page.users.filter(user=>user.uid!==current.uid));
+          pageToken=page.pageToken;
+          if(users.length>=100){truncated=Boolean(pageToken)||users.length>100;break;}
+        }while(pageToken&&++pages<10);
+        truncated=truncated||Boolean(pageToken);
+        const accounts=await Promise.all(users.slice(0,100).map(async user=>{
+          const access=(await db.collection('_judgeAccess').doc(user.uid).get()).data();
+          const limits=readAiAccountLimits(access);
+          const invitation=access?.ownerManaged===true||typeof access?.inviteDigest!=='string'?null:(await invites.doc(access.inviteDigest).get()).data();
+          const effectiveEnabled=access?.enabled===true&&(access.ownerManaged===true||isJudgeInviteActive(invitation));
+          const usage=access?.usage&&typeof access.usage==='object'?access.usage as Record<string,unknown>:{};
+          const today=new Date().toISOString().slice(0,10);
+          return {uid:user.uid,email:user.email??null,createdAt:user.metadata.creationTime,signInMethods:user.providerData.map(provider=>provider.providerId),enabled:effectiveEnabled,accessSource:access?.ownerManaged===true?'account grant':access?.inviteDigest?'judge invitation':'none',decisionsPerDay:limits.decisionsPerDay,luMessagesPerDay:limits.luMessagesPerDay,voiceSecondsPerDay:limits.voiceSecondsPerDay,decisionsUsed:usage.dayKey===today&&Number.isSafeInteger(usage.decisions)?usage.decisions as number:0,luMessagesUsed:usage.dayKey===today&&Number.isSafeInteger(usage.luMessages)?usage.luMessages as number:0};
+        }));
+        accounts.sort((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt));
+        response.json({owner:true,accounts,truncated});return;
+      }
+      const expected=['action','email','enabled','decisionsPerDay','luMessagesPerDay','voiceSecondsPerDay'].sort().join(',');
+      if(body.action!=='update'||Object.keys(body).sort().join(',')!==expected||typeof body.email!=='string'||body.email.length>320||body.email.trim()!==body.email||typeof body.enabled!=='boolean')throw new ApiError(400,'Invalid account AI settings.');
+      const validRequestLimit=(value:unknown)=>value===null||(Number.isSafeInteger(value)&&(value as number)>=0&&(value as number)<=100_000);
+      if(!validRequestLimit(body.decisionsPerDay)||!validRequestLimit(body.luMessagesPerDay)||!Number.isSafeInteger(body.voiceSecondsPerDay)||(body.voiceSecondsPerDay as number)<0||(body.voiceSecondsPerDay as number)>3_600)throw new ApiError(400,'AI limits must be whole numbers, unlimited, or within the supported range.');
+      let target;
+      try{target=await identity.getUserByEmail(body.email.toLocaleLowerCase('und'));}catch{throw new ApiError(404,'No LuLu account uses that email address.');}
+      if(mayReadAccountActivity(target))throw new ApiError(400,'The owner account always retains full AI access.');
+      const accessRef=db.collection('_judgeAccess').doc(target.uid);
+      await db.runTransaction(async transaction=>{
+        const snapshot=await transaction.get(accessRef);const previous=snapshot.data();const now=Date.now();
+        const oldAllowance=previous?.voiceAllowance as JudgeAllowance|undefined;
+        const voiceMaximum=body.voiceSecondsPerDay as number;
+        let voiceAllowance:JudgeAllowance|undefined=oldAllowance;
+        if(!body.enabled||voiceMaximum===0){if(oldAllowance)voiceAllowance={...oldAllowance,credits:0,revoked:true};}
+        else if(!oldAllowance||oldAllowance.expiresAt<=now||oldAllowance.revoked){voiceAllowance={credits:voiceMaximum,lastRefillAt:now,expiresAt:now+judgeVoicePolicy.accessDurationMs,revoked:false};}
+        else voiceAllowance={...oldAllowance,credits:Math.min(oldAllowance.credits,voiceMaximum),revoked:false};
+        transaction.set(accessRef,{enabled:body.enabled,ownerManaged:true,role:'account',decisionsPerDay:body.decisionsPerDay,luMessagesPerDay:body.luMessagesPerDay,voiceSecondsPerDay:voiceMaximum,...(voiceAllowance?{voiceAllowance}:{}),updatedAt:Timestamp.now(),...(snapshot.exists?{}:{createdAt:Timestamp.now()})},{merge:true});
+      });
+      response.json({updated:true});return;
+    }
     if (route === '/judge/redeem') {
       if (Object.keys(body).length !== 1 || !Object.hasOwn(body, 'invitation')) throw new ApiError(400, 'Invalid invitation.');
       let digest: string;
@@ -529,13 +704,23 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
         const data = access.data();
         if (data?.enabled === false) throw new ApiError(403, 'This account no longer has judge access.');
         const previous = data?.voiceAllowance as JudgeAllowance | undefined;
-        const refill = refillJudgeAllowance(previous ?? null, judgeVoicePolicy, Date.now());
+        const accountLimits=readAiAccountLimits(data);
+        const usage=data?.usage&&typeof data.usage==='object'?data.usage as Record<string,unknown>:{};
+        const today=new Date().toISOString().slice(0,10);
+        const decisionsUsedToday=usage.dayKey===today&&Number.isSafeInteger(usage.decisions)?usage.decisions as number:0;
+        const luMessagesUsedToday=usage.dayKey===today&&Number.isSafeInteger(usage.luMessages)?usage.luMessages as number:0;
+        const voiceDailyLimit=accountLimits.voiceSecondsPerDay;
+        if(voiceDailyLimit===0){
+          transaction.set(accessRef,{enabled:true,ownerManaged:false,role:'judge',inviteDigest:digest,...(access.exists?{}:{createdAt:Timestamp.now()})},{merge:true});
+          return {judgeAccess:true,voiceRefilled:false,voiceAllowance:previous??null,voiceSecondsRemaining:0,voiceDailyLimit:0,decisionsPerDay:accountLimits.decisionsPerDay,luMessagesPerDay:accountLimits.luMessagesPerDay,decisionsUsedToday,luMessagesUsedToday,refillAvailableAt:null};
+        }
+        const refill = refillJudgeAllowance(previous ?? null, {...judgeVoicePolicy,refillCredits:voiceDailyLimit,maxCredits:voiceDailyLimit}, Date.now());
         if (!refill.ok) {
           if (refill.reason === 'revoked') throw new ApiError(403, 'This account no longer has judge access.');
-          return {judgeAccess: true, voiceAllowance: previous ?? null, refillAvailableAt: refill.retryAt};
+          return {judgeAccess: true, voiceRefilled:false, voiceAllowance: previous ?? null, voiceSecondsRemaining:previous&&previous.expiresAt>Date.now()?previous.credits:0, voiceDailyLimit, decisionsPerDay:accountLimits.decisionsPerDay, luMessagesPerDay:accountLimits.luMessagesPerDay, decisionsUsedToday, luMessagesUsedToday, refillAvailableAt: refill.retryAt};
         }
-        transaction.set(accessRef, {enabled:true, role:'judge', inviteDigest:digest, voiceAllowance:refill.allowance, ...(access.exists ? {} : {createdAt:Timestamp.now()})}, {merge:true});
-        return {judgeAccess:true, voiceAllowance:refill.allowance, refillAvailableAt:refill.allowance.lastRefillAt! + judgeVoicePolicy.refillCooldownMs};
+        transaction.set(accessRef, {enabled:true, ownerManaged:false, role:'judge', inviteDigest:digest, voiceAllowance:refill.allowance, ...(access.exists ? {} : {createdAt:Timestamp.now()})}, {merge:true});
+        return {judgeAccess:true, voiceRefilled:true, voiceAllowance:refill.allowance, voiceSecondsRemaining:refill.allowance.credits, voiceDailyLimit, decisionsPerDay:accountLimits.decisionsPerDay, luMessagesPerDay:accountLimits.luMessagesPerDay, decisionsUsedToday, luMessagesUsedToday, refillAvailableAt:refill.allowance.lastRefillAt! + judgeVoicePolicy.refillCooldownMs};
       });
       response.json(result); return;
     }
@@ -544,31 +729,61 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
       const access = await db.collection('_judgeAccess').doc(current.uid).get();
       const data = access.data();
       const allowance = data?.voiceAllowance as JudgeAllowance | undefined;
-      response.json({judgeAccess:access.exists && data?.enabled === true, voiceAllowance:allowance ?? null, refillAvailableAt:allowance?.lastRefillAt == null ? null : allowance.lastRefillAt + judgeVoicePolicy.refillCooldownMs}); return;
+      const limits=readAiAccountLimits(data);
+      const usage=data?.usage&&typeof data.usage==='object'?data.usage as Record<string,unknown>:{};
+      const today=new Date().toISOString().slice(0,10);
+      response.json({judgeAccess:access.exists && data?.enabled === true, voiceAllowance:allowance ?? null, voiceSecondsRemaining:allowance&&allowance.expiresAt>Date.now()?allowance.credits:0, voiceDailyLimit:limits.voiceSecondsPerDay, decisionsPerDay:limits.decisionsPerDay, luMessagesPerDay:limits.luMessagesPerDay, decisionsUsedToday:usage.dayKey===today&&Number.isSafeInteger(usage.decisions)?usage.decisions:0, luMessagesUsedToday:usage.dayKey===today&&Number.isSafeInteger(usage.luMessages)?usage.luMessages:0, refillAvailableAt:allowance?.lastRefillAt == null ? null : allowance.lastRefillAt + judgeVoicePolicy.refillCooldownMs}); return;
     }
     if (route === '/privacy/capability') {
       if (Object.keys(body).length !== 0) throw new ApiError(400, 'Invalid request.');
+      await requireLuAiAccess(current.uid);
       const provider = configuredProvider(process.env, process.env.OPENAI_API_KEY);
       response.json(privacyCapability(provider)); return;
     }
     if (route === '/privacy/understand') {
       stage = 'privacy-processing';
       const privateSession = await sessionFor(request.get('authorization'), true, true);
+      await requireLuAiAccess(privateSession.uid);
       let reviewed;
       try { reviewed = validateReviewedPrivacyRequest(body); }
       catch (error) { throw new ApiError(400, error instanceof Error ? error.message : 'Invalid privacy request.'); }
       const provider = configuredProvider(process.env, process.env.OPENAI_API_KEY);
       if (!provider.enabled) throw new ApiError(503, 'Privacy understanding is not configured.');
       try {
-        const result = await provider.understand(reviewed, AbortSignal.timeout(8_000));
+        await consumeAiQuota(privateSession.uid,provider.id==='openai_decisions'?'decisions':'luMessages');
+        const result = await provider.understand(reviewed, AbortSignal.timeout(25_000));
         const stillPrivate = await sessionFor(request.get('authorization'), true, true);
         if (stillPrivate.sid !== privateSession.sid || stillPrivate.uid !== privateSession.uid) throw new ApiError(403, 'Please verify your passkey again.');
         response.json(result); return;
-      } catch {
+      } catch (error) {
         // Do not convert an authority change into a provider failure.
         try { await sessionFor(request.get('authorization'), true, true); }
         catch { throw new ApiError(403, 'Please verify your passkey again.'); }
+        if (error instanceof ApiError) throw error;
         throw new ApiError(502, 'Privacy understanding could not be completed.');
+      }
+    }
+    if (route === '/privacy/patterns') {
+      stage = 'privacy-processing';
+      const accountSession = await sessionFor(request.get('authorization'));
+      await requireLuAiAccess(accountSession.uid);
+      let reviewed;
+      try { reviewed = validateReviewedPrivacyRequest(body); }
+      catch (error) { throw new ApiError(400, error instanceof Error ? error.message : 'Invalid privacy request.'); }
+      if (!process.env.OPENAI_API_KEY || configuredProvider(process.env, process.env.OPENAI_API_KEY).id !== 'openai_decisions') {
+        throw new ApiError(503, 'Pattern understanding is not configured for OpenAI Decisions.');
+      }
+      try {
+        await consumeAiQuota(accountSession.uid,'decisions');
+        const result = await assessBehaviourPatterns({apiKey:process.env.OPENAI_API_KEY,request:reviewed,signal:AbortSignal.timeout(25_000)});
+        const stillSignedIn = await sessionFor(request.get('authorization'));
+        if (stillSignedIn.sid !== accountSession.sid || stillSignedIn.uid !== accountSession.uid) throw new ApiError(403, 'Please sign in again.');
+        response.json(result); return;
+      } catch (error) {
+        try { await sessionFor(request.get('authorization')); }
+        catch { throw new ApiError(403, 'Please sign in again.'); }
+        if (error instanceof ApiError) throw error;
+        throw new ApiError(502, 'Pattern understanding could not be completed.');
       }
     }
     if (route === '/session') { response.json({uid:current.uid,expiresAt:current.expiresAt,privateUntil:current.privateUntil,authMethod:current.authMethod}); return; }
