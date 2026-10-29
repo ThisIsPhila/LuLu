@@ -96,6 +96,24 @@
   background: linear-gradient(155deg, var(--app-card-raised), var(--app-card));
 }
 
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .collection-leaf-meta {
+  color: #c5c7bb;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .collection-leaf-excerpt {
+  color: #dedbd1;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .collection-leaf-action {
+  color: #d7dfca;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .collection-spread-empty {
+  color: var(--app-muted);
+  background: var(--app-card);
+  border-color: var(--app-border);
+}
+
 :root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) :is(.stack-card-footer, .card-bottom-shelf, .journal-tabs, .reading-story-sequence, .profile-settings-row + .profile-settings-row, .profile-settings-link, .profile-settings-signout) {
   border-color: rgba(171, 176, 154, .18);
 }
@@ -111,7 +129,7 @@
   color: #939489;
 }
 
-:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) :is(.tab-pill, .filter-pill-stitch, .filter-pill, .library-item-secondary, .library-item-delete-confirm button, .ordinary-mobile-menu-panel button, .ordinary-desktop-links button, .reading-sequence-step, .icon-btn-round, .profile-settings-back) {
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) :is(.tab-pill, .filter-pill-stitch, .filter-pill, .library-item-secondary, .library-item-delete-confirm button, .ordinary-mobile-menu-panel button, .reading-sequence-step, .icon-btn-round, .profile-settings-back) {
   color: var(--app-muted);
   background: #2b2e27;
   border-color: var(--app-border);
@@ -125,10 +143,58 @@
   box-shadow: inset 0 1px rgba(255,255,255,.06);
 }
 
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-desktop-links button {
+  color: var(--app-muted);
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-desktop-links button:hover {
+  color: var(--app-text);
+  background: transparent;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-desktop-links button[aria-current="page"] {
+  color: var(--app-text);
+  background: transparent;
+  border-color: transparent;
+  border-bottom-color: var(--app-sage);
+  box-shadow: none;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-navigation-header.is-floating {
+  color: var(--app-text);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-navigation-header.is-floating::before {
+  background: #262822;
+  border-color: rgba(160, 164, 143, .24);
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-navigation-header {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
 :root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) :is(.count-pill-stitch, .lock-indicator, .profile-settings-icon, .appearance-grid button[aria-pressed="true"], .card-tag, .deck-tag, .leaf-tags-group .leaf-tag-pill, .entity-chip-pill, .identified-entities-card, .author-unmasked-banner) {
   color: #d9e0d1;
   background: #343a31;
   border-color: rgba(173, 184, 157, .32);
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .reflection-tag {
+  color: #d9e0d1;
+  background: #343a31;
+  border-color: #58634f;
 }
 
 :root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) :is(.dock-compose-btn, .sidebar-new-btn, .save-protected-btn, .done-pill-btn, .dock-lock-action, .btn-pill-action.primary, .confirm-apply-btn, .library-item-add, .library-item-primary, .oj-primary) {
@@ -150,6 +216,36 @@
 :root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .profile-settings-signout {
   color: #d5a89b;
   background: transparent;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) :is(.profile-photo-picker, .profile-save-button, .profile-use-system) {
+  color: #e6e5dc;
+  background: #34372f;
+  border-color: #505449;
+}
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) :is(.profile-photo-picker:hover, .profile-save-button:hover:not(:disabled), .profile-use-system:hover:not(:disabled)) {
+  color: #f3f0e7;
+  background: #3d4237;
+  border-color: #68735d;
+}
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .profile-settings-toggle {
+  border-color: #5d6255;
+  background: #3d4038;
+}
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .profile-settings-toggle::after {
+  background: #eeece2;
+}
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .profile-settings-toggle:checked {
+  border-color: #9eab8f;
+  background: #9eab8f;
+}
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .profile-settings-toggle:checked::after {
+  background: #24261f;
+}
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .profile-photo-preview {
+  color: #d8ddcf;
+  background: #34372f;
+  border-color: #505449;
 }
 
 :root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .profile-settings-name input,
@@ -194,7 +290,7 @@
   color: #f2eee4;
 }
 
-:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) :is(.account-linking-heading p, .account-linking-note, .account-linking-method span, .account-linking-form label, .protected-gate-body > p, .protected-gate-note, .private-quick-card p, .private-capture-live time, .lu-dock-expanded small, .lulu-guide-kicker, .lulu-guide-destination-copy small, .lulu-guide-page-detail > p, .lulu-guide-capture p, .lulu-guide-footer, .lulu-guide-info-list p) {
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) :is(.account-linking-heading p, .account-linking-note, .account-linking-method span, .account-linking-form label, .protected-gate-body > p, .protected-gate-note, .private-quick-card p, .private-capture-live time, .lu-dock-expanded small, .lulu-guide-kicker, .lulu-guide-destination-copy small, .lulu-guide-page-detail > p, .lulu-guide-capture p, .lulu-guide-footer, .lulu-guide-info-list p, .lulu-guide-intro) {
   color: #c1beb2;
 }
 
@@ -285,6 +381,24 @@
   color: #f2eee4;
   background: rgba(39, 42, 35, .94);
   border-color: #41443b;
+}
+
+:root[data-lulu-theme="dark"] .story-reading-screen .circular-reader-dock {
+  color: #f2eee4;
+  background: rgba(39, 42, 35, .94);
+  border-color: #41443b;
+}
+
+:root[data-lulu-theme="dark"] .story-reading-screen .circle-tool-btn {
+  color: #e8e4d9;
+  background: #30332b;
+  border-color: #484b40;
+}
+
+:root[data-lulu-theme="dark"] .story-reading-screen .circle-tool-btn.active {
+  color: #24271f;
+  background: #c4cdb7;
+  border-color: #87937b;
 }
 
 :root[data-lulu-theme="dark"] .story-reading-screen:not(.theme-dark) .circle-tool-btn,
@@ -397,8 +511,25 @@
   --vault-text-muted: #c1beb2;
 }
 
-:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-header-brand .lulu-wordmark {
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .lulu-wordmark[src*="lulu-wordmark-black"] {
   filter: brightness(0) invert(.9);
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .topbar-circle-btn {
+  color: #e8e4d9;
+  background: #30332b;
+  border-color: #484b40;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .topbar-circle-btn:hover {
+  background: #3a4235;
+  border-color: #66715d;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .owner-notification-button {
+  color: #e8e4d9;
+  background: #30332b;
+  border-color: #484b40;
 }
 
 :root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .appearance-grid button {
@@ -528,8 +659,48 @@
 
 :root[data-lulu-theme="dark"] .lu-wheel-action.is-active,
 :root[data-lulu-theme="dark"] .lu-wheel-action:hover {
-  color: #20221d;
-  background: #c4cdb7;
+  color: #f4f2e8;
+  background: #526047;
+  border-color: #9eab8f;
+}
+
+:root[data-lulu-theme="dark"] .lu-conversation-page :is(.lu-orb-sphere) {
+  background:
+    radial-gradient(circle at 71% 20%, rgba(214,222,197,.42) 0 5%, rgba(205,215,186,.22) 14%, transparent 32%),
+    radial-gradient(ellipse at 46% 64%, rgba(103,122,87,.56), rgba(91,105,76,.34) 32%, transparent 62%),
+    radial-gradient(circle at 30% 29%, #68735a, #414938 55%, #56604a 79%, #30372c);
+  border-color: rgba(190,200,169,.52);
+  box-shadow: inset 3px 4px 9px rgba(225,232,211,.19), inset -5px -7px 15px rgba(0,0,0,.34), 0 6px 18px rgba(0,0,0,.32), 0 0 14px rgba(141,158,116,.2);
+}
+
+:root[data-lulu-theme="dark"] .lu-conversation-page .lu-orb-eyes > span {
+  background: linear-gradient(135deg, #e3e8d5, #bdc7a8);
+  box-shadow: 0 1px 3px rgba(12,15,10,.7);
+}
+
+:root[data-lulu-theme="dark"] .lu-conversation-page :is(.lu-conversation-activity, .lu-live-character-status) {
+  color: #e4e8dc;
+  background: #30352c;
+  border-color: #525b49;
+  box-shadow: 0 8px 24px rgba(0,0,0,.34);
+}
+
+:root[data-lulu-theme="dark"] .lu-conversation-page .lu-live-character-status.is-error {
+  color: #f0c2b6;
+  background: #382b27;
+  border-color: #65473f;
+}
+
+:root[data-lulu-theme="dark"] .lu-conversation-page .lu-orb-status-dot {
+  background: #b8c6a6;
+  box-shadow: 0 0 0 4px rgba(184,198,166,.15);
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .lu-orb-floating-status {
+  color: #e4e8dc;
+  background: rgba(43,47,39,.97);
+  border-color: #525b49;
+  box-shadow: 0 8px 24px rgba(0,0,0,.34);
 }
 
 :root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) :is(.owner-ai-invitation, .owner-ai-generated-invite) {
@@ -594,6 +765,20 @@
   background: #292b25;
   border-color: #41443b;
   box-shadow: 0 8px 24px rgba(0,0,0,.12);
+}
+
+:root[data-lulu-theme="dark"] .privacy-settings-page .privacy-model-inventory {
+  color: #f2eee4;
+  background: #292b25;
+  border-color: #41443b;
+}
+
+:root[data-lulu-theme="dark"] .privacy-settings-page .privacy-model-inventory :is(h3, li strong) {
+  color: #f2eee4;
+}
+
+:root[data-lulu-theme="dark"] .privacy-settings-page .privacy-model-inventory :is(li span, p) {
+  color: #c1beb2;
 }
 
 :root[data-lulu-theme="dark"] .privacy-demo-page :is(.privacy-demo-explainer, .privacy-pane-eyebrow, .privacy-word-count, .privacy-model-facts, .privacy-model-origin, .privacy-storage-note, .privacy-storage-footnote, .privacy-demo-footer, .privacy-review-note, .privacy-cloud-copy, .privacy-cloud-consent, .privacy-cloud-field, .privacy-cloud-result-message, .privacy-cloud-review-help, .privacy-library-original, .privacy-entity-value, .privacy-entity-type, .privacy-entity-source) {
@@ -691,6 +876,192 @@
 
 :root[data-lulu-theme="dark"] .cloud-privacy-page .cloud-disabled-note {
   color: #e5bda7;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-workspace-intro {
+  color: var(--app-muted);
+  background: #292b25;
+  border-color: var(--app-border);
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-workspace-intro :is(strong, .ordinary-writing-consent) {
+  color: var(--app-text);
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-kicker,
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) :is(.ordinary-writing-empty, .ordinary-writing-segment > header > div > small, .ordinary-writing-copy > small, .ordinary-writing-copy > em, .ordinary-writing-entity-legend, .ordinary-writing-pattern-status, .ordinary-writing-pattern-results > header > small, .ordinary-writing-pattern-results > ul > li small) {
+  color: var(--app-muted);
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-edit-status {
+  color: #d9e0d1;
+  background: #343a31;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-segment {
+  color: var(--app-text);
+  background: linear-gradient(155deg, var(--app-card-raised), var(--app-card));
+  border-color: var(--app-border);
+  box-shadow: 0 5px 14px rgba(0,0,0,.18);
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-segment > header strong,
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-copy > p,
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-pattern-results > header strong {
+  color: var(--app-text);
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) :is(.ordinary-writing-segment > header button, .ordinary-writing-error button, .ordinary-writing-pattern-actions button) {
+  color: var(--app-text);
+  background: #30332b;
+  border-color: var(--app-border);
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-copy {
+  color: var(--app-text);
+  background: #30332b;
+  border-color: var(--app-border);
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-copy.is-safe {
+  background: #30372d;
+  border-color: #4b5944;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-pii.is-source {
+  color: #f4dfb7;
+  background: #4b3d28;
+  box-shadow: inset 0 -1px #80653c;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-pii.is-scrubbed {
+  color: #e0eadb;
+  background: #34433a;
+  box-shadow: inset 0 -1px #536e5e;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-pattern-action,
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-pattern-results {
+  color: var(--app-muted);
+  background: #292b25;
+  border-color: var(--app-border);
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-pattern-results > ul > li {
+  background: #30332b;
+  border-color: var(--app-border);
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-pattern-results > ul > li strong {
+  color: var(--app-text);
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-pattern-results > ul > li b {
+  color: #d9e0d1;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-pattern-results > aside {
+  color: #f0c2b6;
+  background: #382b27;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-error p,
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-pattern-error {
+  color: #f0b5a8;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-segment.is-error {
+  background: #382b27;
+  border-color: #65473f;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .ordinary-writing-ask-lu {
+  color: #24271f;
+  background: #c4cdb7;
+  border-color: #87937b;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) :is(.ordinary-writing-consent input, .ordinary-writing-pattern-action input) {
+  accent-color: #aab89a;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) :is(.ordinary-writing-consent input, .ordinary-writing-segment button, .ordinary-writing-pattern-action input, .ordinary-writing-pattern-actions button):focus-visible {
+  outline-color: #bdc7ad;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .lu-dock {
+  color: #f2eee4;
+  background: rgba(38, 40, 34, .97);
+  border-color: #4b4f44;
+  box-shadow: 0 14px 32px rgba(0,0,0,.42), inset 0 1px rgba(255,255,255,.045);
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .lu-dock > button {
+  color: #d3d2c7;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .lu-dock > button:is(:hover, .active) {
+  color: #f3f0e6;
+  background: #3a4235;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .lu-dock-separator {
+  background: #55584d;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) :is(.lu-dock-inline-icon, .lu-dock-inline button) {
+  color: #e8e4d9;
+  background: #3a4235;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .lu-dock-inline input {
+  color: #f2eee4;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .lu-orb-sphere {
+  background:
+    radial-gradient(circle at 71% 20%, rgba(214,222,197,.42) 0 5%, rgba(205,215,186,.22) 14%, transparent 32%),
+    radial-gradient(ellipse at 46% 64%, rgba(103,122,87,.56), rgba(91,105,76,.34) 32%, transparent 62%),
+    radial-gradient(circle at 30% 29%, #68735a, #414938 55%, #56604a 79%, #30372c);
+  border-color: rgba(190,200,169,.52);
+  box-shadow: inset 3px 4px 9px rgba(225,232,211,.19), inset -5px -7px 15px rgba(0,0,0,.34), 0 6px 18px rgba(0,0,0,.32), 0 0 14px rgba(141,158,116,.2);
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .lu-orb-eyes > span {
+  background: linear-gradient(135deg, #e3e8d5, #bdc7a8);
+  box-shadow: 0 1px 3px rgba(12,15,10,.7);
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) :is(.leaf-meta-time, .composer-date-sub, .reading-date-timestamp, .reading-tag-capsule) {
+  color: #c5c7bb;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) :is(.leaf-excerpt, .deck-snippet) {
+  color: #d9d6cc;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .story-leaves-screen .leaf-card .leaf-excerpt,
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .story-leaves-screen .curated-deck-card .deck-snippet {
+  color: #e2dfd5;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .story-reading-screen .reading-prose {
+  color: #e5e1d7;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .story-reading-screen .reading-date-timestamp,
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .story-reading-screen .reading-tag-capsule {
+  color: #cfd0c4;
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .transform-header .lulu-wordmark[src*="lulu-wordmark-black"] {
+  filter: brightness(0) invert(.9);
+}
+
+:root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .header-avatar-circle {
+  color: #e8e4d9;
+  background: #30332b;
+  border: 1px solid #484b40;
 }
 
 @media (prefers-reduced-motion: reduce) {

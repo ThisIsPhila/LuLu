@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { ArrowLeft, ChevronDown, CircleAlert, Cpu, Eye, Fingerprint, LoaderCircle, ShieldCheck, Sparkles } from 'lucide-react';
 import type { DetectedEntity } from '../services/privacy/contracts';
 import { detectFormattedPii, mergeDetectedEntities } from '../services/privacy/formattedIdentifiers';
@@ -14,7 +15,7 @@ const entityKey = (entity: DetectedEntity) => `${entity.start}:${entity.end}:${e
 const identityKey = (entity: DetectedEntity, text: string) => `${entity.label}:${text.slice(entity.start, entity.end).trim().toLocaleLowerCase()}`;
 const labelName = (label: string) => label.replace(/\b\w/g, char => char.toUpperCase());
 
-type Props = { onBack: () => void; entries?: Entry[]; privateSession?: LocalVaultSession; onUnlockPrivate?: () => Promise<void>; initialText?: string; initialRevision?: string };
+type Props = { onBack: () => void; showBackButton?: boolean; entries?: Entry[]; privateSession?: LocalVaultSession; onUnlockPrivate?: () => Promise<void>; initialText?: string; initialRevision?: string };
 
 function HighlightedText({ text, entities, onSelect }: { text: string; entities: DetectedEntity[]; onSelect?: (entity: DetectedEntity) => void }) {
   const ordered = [...entities].sort((a, b) => a.start - b.start);
@@ -31,7 +32,8 @@ function HighlightedText({ text, entities, onSelect }: { text: string; entities:
   return <>{chunks}</>;
 }
 
-export function PrivacyModelDemo({ onBack, entries = [], privateSession, onUnlockPrivate, initialText, initialRevision }: Props) {
+export function PrivacyModelDemo({ onBack, showBackButton = true, entries = [], privateSession, onUnlockPrivate, initialText, initialRevision }: Props) {
+  const inferenceSurface = Capacitor.isNativePlatform() ? 'on-device WebAssembly' : 'browser WebAssembly';
   const [text, setText] = useState(initialText === undefined ? SAMPLE : initialText);
   const [entities, setEntities] = useState<DetectedEntity[]>([]);
   const [replacements, setReplacements] = useState<Record<string, string>>({});
@@ -249,12 +251,12 @@ export function PrivacyModelDemo({ onBack, entries = [], privateSession, onUnloc
 
   return <main className="privacy-demo-page">
     <header className="privacy-demo-header">
-      <button type="button" className="privacy-back" onClick={() => { if (initialText !== undefined) { localRunId.current++; cloudGeneration.current++; setText(''); setEntities([]); setReplacements({}); setReviewText(''); setCloudResult(null); cloudController.current?.abort(); } onBack(); }}><ArrowLeft size={18} /> {initialText !== undefined ? 'Private writing' : 'Settings'}</button>
+      {showBackButton && <button type="button" className="privacy-back" onClick={() => { if (initialText !== undefined) { localRunId.current++; cloudGeneration.current++; setText(''); setEntities([]); setReplacements({}); setReviewText(''); setCloudResult(null); cloudController.current?.abort(); } onBack(); }}><ArrowLeft size={18} /> {initialText !== undefined ? 'Private writing' : 'Settings'}</button>}
       <div className="privacy-demo-title"><span className="privacy-demo-emblem"><Fingerprint size={22} /></span><div><span className="privacy-settings-kicker">LOCAL MODEL DEMO</span><h1>Find and replace private details</h1></div></div>
-      <div className="privacy-demo-proof"><span className={`live-dot ${runtimeReady ? '' : 'is-off'}`} /><span>{!modelInstalled ? 'Model not downloaded yet' : runtimeReady ? `Loaded model: ${modelVersion === 'Not run in this tab' ? `GLiNER Small v2.1 · ${PRIVACY_MODEL.version.slice(0, 12)} · ONNX WASM` : modelVersion}` : 'Model installed; load it to this session'}</span><span className="privacy-proof-separator">•</span><span>Inference: {inferenceDurationMs === null ? 'browser WASM · not run' : `browser WASM · ${inferenceDurationMs} ms`}</span><ShieldCheck size={17} /><span>Local scan sends no text</span></div>
+      <div className="privacy-demo-proof"><span className={`live-dot ${runtimeReady ? '' : 'is-off'}`} /><span>{!modelInstalled ? 'Model not downloaded yet' : runtimeReady ? `Loaded model: ${modelVersion === 'Not run in this tab' ? `GLiNER Small v2.1 · ${PRIVACY_MODEL.version.slice(0, 12)} · ONNX WASM` : modelVersion}` : 'Model installed; load it to this session'}</span><span className="privacy-proof-separator">•</span><span>Inference: {inferenceDurationMs === null ? `${inferenceSurface} · not run` : `${inferenceSurface} · ${inferenceDurationMs} ms`}</span><ShieldCheck size={17} /><span>Local scan sends no text</span></div>
     </header>
 
-    <section className="privacy-demo-explainer"><Sparkles size={18} /><p>Choose a journal entry or paste text, run the downloaded model on this device, then review each highlighted candidate. Detection can miss details; this is not a guarantee of complete anonymisation. The local preview never changes the saved entry.</p></section>
+    <section className="privacy-demo-explainer"><Sparkles size={18} /><p>Choose a journal entry or paste text, run the downloaded model on this device, then review each highlighted candidate. This local scan stays on this device and is separate from Lu chat and the cloud Decisions demo. Detection can miss details; this is not a guarantee of complete anonymisation. The local preview never changes the saved entry.</p></section>
 
     <div className="privacy-demo-columns">
       <section className="privacy-demo-pane source-pane">
