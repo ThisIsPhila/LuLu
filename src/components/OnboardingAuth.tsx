@@ -217,16 +217,6 @@ export function OnboardingAuth({
         aria-hidden="true"
       />}
       <div className="oa-shell">
-        {isAuthScreen && <button
-          className="oa-login-mode-toggle"
-          type="button"
-          aria-label={`Switch to ${loginMode === 'light' ? 'dark' : 'light'} mode`}
-          aria-pressed={loginMode === 'dark'}
-          title={`Switch to ${loginMode === 'light' ? 'dark' : 'light'} mode`}
-          onClick={toggleTheme}
-        >
-          {loginMode === 'light' ? <Moon size={16} aria-hidden="true" /> : <Sun size={16} aria-hidden="true" />}
-        </button>}
         <section className="oa-cover" aria-label="LuLu journal">
           <div
             key={isLoginScene ? loginModeScene.portrait.src : 'default-cover'}
@@ -253,6 +243,16 @@ export function OnboardingAuth({
         </section>
 
         <section className="oa-panel" aria-live="polite">
+          {isAuthScreen && <button
+            className="oa-login-mode-toggle"
+            type="button"
+            aria-label={`Switch to ${loginMode === 'light' ? 'dark' : 'light'} mode`}
+            aria-pressed={loginMode === 'dark'}
+            title={`Switch to ${loginMode === 'light' ? 'dark' : 'light'} mode`}
+            onClick={toggleTheme}
+          >
+            {loginMode === 'light' ? <Moon size={16} aria-hidden="true" /> : <Sun size={16} aria-hidden="true" />}
+          </button>}
           {screen === 'welcome' && <>
             <span className="oa-kicker">A place to begin</span>
             <h1>Your story,<br />held gently.</h1>
@@ -293,19 +293,21 @@ export function OnboardingAuth({
               <span className="oa-kicker">Welcome back</span>
               <h1>Pick up where<br />you left off.</h1>
               <p className="oa-intro">Your journal is waiting. Continue securely with your passkey.</p>
+            </div>
+            <div className="oa-auth-bottom">
               <PasskeyAction
                 action="signin" busy={busy} message={message} failureReason={failureReason} wasCancelled={wasCancelled}
                 canUsePasskeys={canUsePasskeys} onTry={() => void runAuth('signin')} onHelp={onHelpSigningIn}
               />
-            </div>
-            <div className="oa-auth-bottom">
               <div className="oa-footnote"><ShieldCheck size={15} aria-hidden="true" /><span>Your device handles passkey verification. LuLu does not receive your face or fingerprint.</span></div>
               {onDevelopmentEnter && <div className="oa-local-preview-actions">
                 <p>Local preview · your journal stays on this browser.</p>
                 <button className="oa-secondary" type="button" onClick={onDevelopmentEnter}>Continue without signing in</button>
               </div>}
-              <button className="oa-secondary" type="button" onClick={goAlternateSignin}>Use email or Google instead</button>
-              <button className="oa-help" type="button" onClick={goCreate}>Create an account</button>
+              <div className="oa-auth-secondary-links">
+                <button className="oa-secondary" type="button" onClick={goAlternateSignin}>Use email or Google instead</button>
+                <button className="oa-help" type="button" onClick={goCreate}>Create an account</button>
+              </div>
             </div>
           </>}
 
