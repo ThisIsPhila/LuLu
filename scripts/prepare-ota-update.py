@@ -9,6 +9,18 @@ def version_parts(value):
     return tuple(map(int, (value.split('.') + ['0', '0'])[:3]))
 if version_parts(version) <= version_parts(native):
     raise SystemExit('Update version must be greater than the native app version so a fresh install can receive it.')
+manifest_path=root/'public/updates/latest.json'
+try:
+    published=json.loads(manifest_path.read_text())
+except (OSError, json.JSONDecodeError) as error:
+    raise SystemExit('The currently published update manifest could not be read.') from error
+current_version=published.get('version') if isinstance(published,dict) else None
+if not isinstance(current_version,str) or version_parts(version)<=version_parts(current_version):
+    raise SystemExit(f'Update version must be newer than the currently published version ({current_version or "unknown"}).')
+project=(root/'ios/App/App.xcodeproj/project.pbxproj').read_text()
+native_versions=set(re.findall(r'MARKETING_VERSION = ([^;]+);',project))
+if native_versions!={native}:
+    raise SystemExit(f'Native version must match the iOS app version ({", ".join(sorted(native_versions)) or "unknown"}).')
 key=pathlib.Path.home()/'.config/lulu-updates/private.pem'
 if not key.is_file(): raise SystemExit('The LuLu update signing key is missing.')
 key_info=subprocess.run(['openssl','rsa','-in',str(key),'-noout','-text'],check=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True).stdout
@@ -24,7 +36,9 @@ with tempfile.TemporaryDirectory(prefix='lulu-ota-') as tmp:
     def cli(*args):
         result=subprocess.run(['npx','--yes','@capgo/cli@8.98.3',*args],cwd=root,check=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
         return json.loads(result.stdout)
-    zipped=cli('bundle','zip','org.khora.lulu','--path',str(staged),'--name',archive,'--no-code-check','--json')
+    # Capgo uses --bundle as the installed bundle version. Keep it identical
+    # to the manifest version or the app will offer the same update again.
+    zipped=cli('bundle','zip','org.khora.lulu','--path',str(staged),'--bundle',version,'--name',archive,'--no-code-check','--json')
     encrypted=cli('bundle','encrypt',archive,zipped['checksum'],'--key',str(key),'--json')
     dest=root/'public/updates';dest.mkdir(parents=True,exist_ok=True)
     target=dest/f'lulu-{version}.zip'
