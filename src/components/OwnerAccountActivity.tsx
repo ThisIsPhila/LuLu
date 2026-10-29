@@ -10,11 +10,17 @@ type Account = {createdAt:string; email:string|null; signInMethods:string[]};
 type Result = {owner:boolean; accounts?:Account[]; truncated?:boolean};
 
 /** Account metadata is returned only by the server to the verified owner. */
-export function OwnerAccountActivity({uid, enabled = true, onOpenSettings}: {uid:string; enabled?:boolean; onOpenSettings:()=>void}) {
+export function OwnerAccountActivity({uid, enabled = true, onOpenSettings, open: controlledOpen, onOpenChange}: {uid:string; enabled?:boolean; onOpenSettings:()=>void; open?:boolean; onOpenChange?:(open:boolean)=>void}) {
   const [updateVersion,setUpdateVersion]=useState('');
   const [seenUpdate,setSeenUpdate]=useState(() => { try { return localStorage.getItem('lulu.update-notification.seen') || ''; } catch { return ''; } });
   const [accounts,setAccounts]=useState<Account[]|null>(null);
-  const [open,setOpen]=useState(false);
+  const [internalOpen,setInternalOpen]=useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = (value: boolean | ((prev: boolean) => boolean)) => {
+    const next = typeof value === 'function' ? value(open) : value;
+    setInternalOpen(next);
+    onOpenChange?.(next);
+  };
   const [announcement,setAnnouncement]=useState('');
   const latest=useRef<number | null>(null);
   const [seen,setSeen]=useState(()=>{
