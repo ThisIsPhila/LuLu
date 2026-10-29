@@ -383,32 +383,37 @@
 .oa-login-mode-toggle {
   position: absolute;
   z-index: 4;
-  top: clamp(14px, 2vw, 24px);
-  right: clamp(14px, 2vw, 24px);
-  width: 42px;
-  height: 42px;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
   padding: 0;
-  border: 1px solid #fffaf2c9;
+  border: 1px solid #34383018;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  color: #343830;
-  background: #fbf8f0e8;
-  box-shadow: 0 8px 22px #1c1a1424, inset 0 1px #ffffffb0;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  color: #65665e;
+  background: #fbf8f074;
   cursor: pointer;
-  transition: color .18s ease, background .18s ease, transform .18s ease;
+  transition: color .18s ease, background .18s ease, border-color .18s ease, transform .18s ease;
 }
-.oa-login-mode-toggle:hover { transform: translateY(-1px); background: #fffdf7f2; }
+.oa-login-mode-toggle:hover {
+  transform: translateY(-1px);
+  color: #41443c;
+  background: #fbf8f0b8;
+  border-color: #3438302b;
+}
 .oa-login-mode-toggle:focus-visible { outline: 3px solid #75836f; outline-offset: 3px; }
 .oa-dark-mode .oa-login-mode-toggle {
-  color: #f0dfb7;
-  background: #292b24e8;
-  border-color: #ffffff45;
-  box-shadow: 0 8px 22px #10110f45, inset 0 1px #ffffff18;
+  color: #c5bea8;
+  background: #20211c70;
+  border-color: #ffffff1f;
 }
-.oa-dark-mode .oa-login-mode-toggle:hover { background: #363930f2; }
+.oa-dark-mode .oa-login-mode-toggle:hover {
+  color: #e0d8c0;
+  background: #20211cb8;
+  border-color: #ffffff36;
+}
 .oa-dark-mode .oa-shell {
   background: #20211c;
   box-shadow: 0 34px 85px #10110ed9, 0 3px 8px #10110e80, inset 0 1px #ffffff12;
@@ -475,7 +480,7 @@
 
 @media (max-width: 760px) {
   .oa-login-landscape, .oa-login-tone-overlay { display: none; }
-  .oa-login-mode-toggle { top: max(14px, calc(env(safe-area-inset-top) + 12px)); right: 18px; }
+  .oa-login-mode-toggle { top: max(12px, calc(env(safe-area-inset-top) + 8px)); right: 14px; }
 }
 @media (min-width: 761px) {
   .oa-login-entry { overflow: hidden; }
