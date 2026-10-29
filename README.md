@@ -50,20 +50,20 @@ This is the recommended way for judges and reviewers to try LuLu. It opens in a 
 | **3. Explore Stories** | Navigate to **Stories** in the ordinary experience. | A familiar, everyday writing surface. |
 | **4. Explore protected writing** | Select **Private** or **Write privately**. | Protected access is separate from signing in and uses a passkey check. |
 
-**Release update — 26 October:** The web app is hosted at the custom domain. Login opens directly and **Onboarding** is optional. Live synthetic email/password and passkey registration, returning sign-in and application-session tests passed, including private passkey step-up; both temporary accounts and seven test documents were removed. Product Implementation corrected the missing Google OAuth callback; interactive Google/native acceptance remains open. Broader private/mobile work is still local and needs owner-device acceptance. See the [release verification](docs/implementation/2026-10-26-auth-domain-release.md).
+Lu can guide people around the app, answer LuLu-related questions and help with ordinary journal or story writing. AI tools require the private judge invitation unless the account is the owner account.
 
-Lu is available in the app to help you find your way around and open common actions.
+**Cloud demo:** Open **Settings → Privacy processing → Cloud processing demo** to compare original text with the PII replacements and review an advisory Decisions result. In a journal or story draft, two line breaks move a finished paragraph into the same review workspace. The original goes to LuLu's cloud privacy service; only the scrubbed version is available to Lu. Voice is a separate cloud feature and sends audio directly to GPT-Live after the user starts it.
 
 ### The experience we're building
 
 | | The interaction | Why it matters |
 | --- | --- | --- |
-| **Everyday writing** | Write, edit and organise familiar journal entries. | LuLu is useful as an ordinary writing app, not just as an emergency tool. |
+| **Everyday writing** | Write, edit and organise journal entries and stories. | LuLu is useful as an ordinary writing app, not just as an emergency tool. |
 | **Private writing** | Enter a separate protected space for sensitive records. | A person can document something without committing to report it. |
 | **Capture and preserve** | Keep text and supporting image/audio material with an entry. | Their original account and supporting information can be preserved. |
 | **Conceal and return** | Use privacy controls and quick exit where implemented. | Private material is not left visibly open during ordinary use. |
-| **Understand options** | Future privacy-aware interpretation and contextual information. | Help the user explore possible concerns and appropriate options without diagnosing. |
-| **Choose support** | Future selective sharing with companions and verified services. | Move forward only when and how the user chooses. |
+| **Understand options** | Review scrubbed text for advisory behavior signals with Decisions. | This is not a diagnosis, a verdict, or a prediction of future events. |
+| **Choose support** | Browse a source-linked support directory. | LuLu does not yet send referrals or share records with professionals. |
 
 ## What works today
 
@@ -71,25 +71,21 @@ Rather than treating a design concept, a local implementation and a deployed rel
 
 | Capability | Live hosted web app | Current repository source |
 | --- | --- | --- |
-| Passkey registration and sign-in | **Available · live synthetic check passed** | Available |
-| Email/password registration and sign-in | **Available · live synthetic check passed** | Available |
-| Google sign-in | Callback corrected; interactive acceptance pending | Implemented |
-| Optional onboarding | **Available from login** | Fourteen-screen flow |
-| Account-owned ordinary journal (Firestore) | **Available** | Available |
-| Three editable fictional starter entries | **Available** | Available |
-| Encrypted browser-local private text and media | Not in the current deployed web release | Implemented locally; device acceptance pending |
-| Private drafts, revisions and autosave | Not in the current deployed web release | Implemented locally; device acceptance pending |
-| Image/audio private attachments; export and deletion | Not in the current deployed web release | Implemented locally; device acceptance pending |
-| Password-encrypted per-record backup/restore | Not in the current deployed web release | Implemented locally; device acceptance pending |
-| Configured substitutions and narrative distancing | Not in the current deployed web release | Limited implementation; broader detection remains planned |
-| General contextual PII screening / OpenAI Decisions API integration | Not available | Planned |
-| Companion permissions and evidence sharing | Not available | Planned |
-| Safety Trails / live location sharing | Not available | Planned |
-| Verified professional portal and referrals | Not available | Planned |
+| Passkey, Google and email sign-in | Available; account acceptance depends on the chosen provider | Available |
+| Journal and story writing | Available | Available |
+| Cloud PII review | Deployed; signed-in end-to-end acceptance is still pending | Original text is reviewed in the cloud; source highlights and generic replacements are shown |
+| Decisions pattern review | Deployed; a synthetic request to `gpt-6-luna` returned successfully; app-level acceptance is pending | Advisory behavior signals from reviewed, scrubbed text |
+| Lu text chat and app actions | Deployed; signed-in conversation acceptance is pending | `gpt-6-luna` with bounded search, navigation, entry opening and draft tools |
+| Lu live voice | Deployed; a real voice conversation has not yet been verified | GPT-Live receives audio directly for the cloud demo and can use Lu's app tools |
+| Judge access and account controls | Deployed; verify through the owner account | Shared invitation, per-account access, request counts and configurable limits |
+| New-account alerts | In-app and email alerts go to `lulu@thisisphila.co.za` | Email delivery uses Resend; there is no cost or billing digest yet |
+| Lu reply languages | English, Afrikaans and isiZulu | These choices affect Lu's replies; the whole app is not translated |
+| On-device AI | On hold; not used by the cloud demo | Experimental local model remains separate and is not the active processing path |
+| Future-event prediction and professional referrals | Not available | No future-event prediction or referral system is implemented |
 
 **Privacy implementation note.** In the newer source, private originals and media are encrypted using AES-GCM in browser IndexedDB. The vault's key resides in browser storage and is **not cryptographically bound to the passkey**. Clearing browser data may destroy access unless an appropriate backup exists. Full offline unlock, cross-device recovery and native-device security acceptance are not yet established. Older cloud-backed protected records use a separate legacy read path.
 
-For detailed and dated engineering evidence, see the [implementation tracker](docs/product/2026-10-25-task-status.md) and [Capacitor mobile report](docs/implementation/2026-10-26-capacitor-mobile.md).
+For detailed engineering notes, see the [implementation tracker](docs/product/2026-10-25-task-status.md) and [mobile report](docs/implementation/2026-10-26-capacitor-mobile.md).
 
 ## Availability and platforms
 
@@ -102,21 +98,10 @@ For detailed and dated engineering evidence, see the [implementation tracker](do
 
 ### Download and install a mobile preview
 
-The [mobile preview release](https://github.com/ThisIsPhila/LuLu/releases/tag/android-ios-preview-2026-10-27) contains the Android APK and its [SHA-256 checksum](https://github.com/ThisIsPhila/LuLu/releases/download/android-ios-preview-2026-10-27/SHA256SUMS.txt). The preview was built from the local development working tree on 27 October 2026, including changes not yet committed to GitHub main; the release tag identifies the main-branch baseline, not an exact source snapshot of the APK.
+- **Android:** [Download the preview APK](https://github.com/ThisIsPhila/LuLu/releases/download/android-ios-preview-2026-10-27/LuLu-Android-preview.apk). This is a debug-signed test build, not the latest source or a Play Store release.
+- **iPhone:** The current development app is installed privately from a Mac onto the registered iPhone. There is no public IPA, TestFlight or App Store link.
 
-**Android:** Download the APK on the phone, open it from Downloads, allow your browser or file manager to install apps when Android asks, and tap **Install**. The APK is version 1.0, build 1, signed with the development debug certificate. If Android reports an incompatible signature with an existing LuLu installation, preserve any local records before changing or removing that installation. This is a development preview; the full journal edit and restart journey has not yet been accepted on a device.
-
-**iPhone:** The privately held ZIP contains `App.app` signed for the existing registered development iPhone; it is not an IPA or a TestFlight link and cannot be installed on an arbitrary iPhone. After obtaining the ZIP from the project owner, use a Mac with Xcode, connect and trust that registered phone, enable Developer Mode, then run:
-
-```bash
-unzip LuLu-iOS-registered-device.zip -d lulu-ios
-xcrun devicectl list devices
-xcrun devicectl device install app --device "<device-identifier>" lulu-ios/App.app
-```
-
-Replace `<device-identifier>` with the identifier shown for the registered iPhone. The included development provisioning profile expires **2 November 2026 at 05:22 UTC**; installation and launch after that require a renewed profile and rebuilt package. For a wider iPhone beta, [Apple TestFlight](https://developer.apple.com/testflight/) requires an App Store Connect build and tester setup. iPhone passkey sign-in was confirmed on the owner's device; full journal edit and restart persistence remains to be verified.
-
-The optional privacy model can be downloaded separately in the app under **Settings → On-device privacy model**. It requires roughly 192 MB and is stored in the app's WebView storage. It is an experimental English entity detector, and its download and inference have not yet been verified on these mobile builds.
+See the [mobile installation guide](docs/mobile-installation.md) for the detailed steps. On-device AI is on hold and is not part of the live cloud demo.
 
 ### Build a mobile version from source
 
@@ -144,9 +129,9 @@ For the full interactive reader, run `npm run dev` and visit **[localhost:5173/d
 
 ## How it's built
 
-LuLu uses **React, TypeScript and Vite** for the app; **WebAuthn/passkeys**, a custom verification backend and **Firebase Authentication** for account access; **Firestore** for account-owned ordinary journal entries; and a separate **AES-GCM encrypted IndexedDB vault** for newer browser-local private records. **Capacitor 8** packages the web application into Android and iOS projects.
+LuLu uses **React, TypeScript and Vite**, Firebase Authentication and Firestore, and a **Firebase Cloud Functions** API in Johannesburg. Server-only OpenAI and Resend secrets power cloud PII review, Decisions, Lu text and live voice, and account alerts. The phone builds use **Capacitor 8**; on-device AI remains separate and is on hold.
 
-LuLu separates ordinary journal entries from protected records. Lu’s navigation guide is available in the app. Cloud-assisted text chat, voice conversations and multilingual support are in development; they are not yet available in the live release.
+Lu keeps ordinary journal entries separate from protected writing. Lu can help with LuLu, search ordinary entries when asked, and open a draft for review. It does not browse protected writing or save a draft without the user's action.
 
 ## Run from source
 

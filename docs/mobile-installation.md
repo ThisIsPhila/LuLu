@@ -1,10 +1,10 @@
 # Try LuLu on your phone
 
-The easiest way to try LuLu is to [open the web app](https://lulu.thisisphila.co.za/) in your phone's browser. The mobile builds below are development previews.
+The easiest way to try the current LuLu demo is to [open the web app](https://lulu.thisisphila.co.za/) in your phone's browser. The mobile builds below are development previews and may lag behind the live site.
 
 ## Android
 
-You can install the Android preview on a phone running Android 7.0 or later.
+The Android APK is an older development preview for phones running Android 7.0 or later. Use the live web app for the current cloud features.
 
 1. On your phone, [download the Android APK](https://github.com/ThisIsPhila/LuLu/releases/download/android-ios-preview-2026-10-27/LuLu-Android-preview.apk).
 2. Open the downloaded file from your browser or Downloads app.
@@ -28,4 +28,4 @@ Apple signing and device registration determine whether a development build can 
 
 ## Privacy model
 
-The optional privacy model is downloaded separately in LuLu's privacy settings. It needs about 192 MB of device storage. Model download and processing in the mobile previews still need device testing.
+On-device AI is on hold and is not used by the live cloud demo. Any optional model package is experimental; its download and processing still need device testing.
