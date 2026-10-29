@@ -36,7 +36,9 @@ export const ReaderView: React.FC<Props> = ({
 }) => {
   const [showOriginal, setShowOriginal] = useState(false);
   const [fontSize, setFontSize] = useState<'regular' | 'large'>('regular');
-  const [colorTheme, setColorTheme] = useState<'paper' | 'stone' | 'dark'>('paper');
+  const [colorTheme, setColorTheme] = useState<'paper' | 'stone' | 'dark'>(() =>
+    document.documentElement.dataset.luluTheme === 'dark' ? 'dark' : 'paper',
+  );
   const storySequenceIndex = storySequence.findIndex(item => item.id === entry.id);
   const hasStorySequence = entry.kind === 'Story' && storySequence.length > 1 && storySequenceIndex >= 0 && Boolean(onSelectStorySequenceEntry);
 

@@ -1,26 +1,33 @@
+export type AppTheme = 'light' | 'dark';
+
 export type AppPreferences = {
+  theme: AppTheme;
   reduceMotion: boolean;
 };
 
 const STORAGE_KEY = 'lulu.app-preferences.v1';
-const DEFAULT_PREFERENCES: AppPreferences = { reduceMotion: false };
+const DEFAULT_PREFERENCES: AppPreferences = { theme: 'light', reduceMotion: false };
+let sessionPreferences: AppPreferences = DEFAULT_PREFERENCES;
 
 export function readAppPreferences(): AppPreferences {
   try {
     const value: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null');
-    if (!value || typeof value !== 'object') return DEFAULT_PREFERENCES;
+    if (!value || typeof value !== 'object') return sessionPreferences;
     const stored = value as Record<string, unknown>;
-    return {
+    sessionPreferences = {
+      theme: stored.theme === 'dark' ? 'dark' : 'light',
       reduceMotion: stored.reduceMotion === true,
     };
+    return sessionPreferences;
   } catch {
-    return DEFAULT_PREFERENCES;
+    return sessionPreferences;
   }
 }
 
 export function writeAppPreferences(preferences: AppPreferences): void {
+  sessionPreferences = { ...preferences };
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessionPreferences));
   } catch {
     // Preferences remain usable for this app session if local storage is unavailable.
   }

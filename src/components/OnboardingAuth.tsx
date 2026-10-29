@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowRight, ChevronLeft, CircleAlert, Info, LoaderCircle, Moon, ScanFace, ShieldCheck, Sun } from 'lucide-react';
 import { isNativePlatform } from '../platform/runtime';
+import type { AppTheme } from '../services/appPreferences';
 import './OnboardingAuth.css';
 
 export type OnboardingAuthScreen = 'welcome' | 'signin' | 'create';
@@ -23,6 +24,8 @@ export type AuthActionResult =
 
 export type OnboardingAuthProps = {
   initialScreen?: OnboardingAuthScreen;
+  initialTheme?: AppTheme;
+  onThemeChange?: (theme: AppTheme) => void;
   /** Set when the host has checked whether passkeys can be used in this browser context. */
   passkeySupport?: 'supported' | 'unsupported';
   onRegister: () => Promise<AuthActionResult>;
@@ -40,7 +43,7 @@ export type OnboardingAuthProps = {
 type Screen = OnboardingAuthScreen | 'orientation-one' | 'orientation-two' | 'alternate-signin' | 'alternate-create';
 type Action = 'register' | 'signin';
 type BusyAction = Action | 'email' | 'google' | 'password-reset';
-type LoginMode = 'light' | 'dark';
+type LoginMode = AppTheme;
 
 const loginLandscapeScenes = [
   { label: 'Riverside meadow', src: '/media/appearance/login-landscapes/riverside-meadow.jpg' },
@@ -93,6 +96,8 @@ function detectPasskeySupport() {
 
 export function OnboardingAuth({
   initialScreen = 'welcome',
+  initialTheme = 'light',
+  onThemeChange,
   passkeySupport,
   onRegister,
   onSignIn,
@@ -105,7 +110,7 @@ export function OnboardingAuth({
   onAuthenticated,
 }: OnboardingAuthProps) {
   const [screen, setScreen] = useState<Screen>(initialScreen);
-  const [loginMode, setLoginMode] = useState<LoginMode>('light');
+  const [loginMode, setLoginMode] = useState<LoginMode>(initialTheme);
   const [busy, setBusy] = useState<BusyAction | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -117,7 +122,14 @@ export function OnboardingAuth({
   const [recoveryAction, setRecoveryAction] = useState<'sign-in' | null>(null);
   const canUsePasskeys = passkeySupport ? passkeySupport === 'supported' : detectPasskeySupport();
   const isLoginScene = screen === 'signin' || screen === 'alternate-signin';
+  const isAuthScreen = screen === 'signin' || screen === 'create' || screen === 'alternate-signin' || screen === 'alternate-create';
   const loginModeScene = loginModeScenes[loginMode];
+
+  function toggleTheme() {
+    const next = loginMode === 'light' ? 'dark' : 'light';
+    setLoginMode(next);
+    onThemeChange?.(next);
+  }
   const backgroundToneStrength = (loginModeScene.toneOpacity / 100) * (Math.abs(loginModeScene.toneLevel - 5) / 5);
   const backgroundToneColor = loginModeScene.toneLevel < 5 ? '#171914' : '#fff9ed';
 
@@ -216,10 +228,8 @@ export function OnboardingAuth({
     else setScreen('welcome');
   };
 
-  const isAuthScreen = screen === 'signin' || screen === 'create' || screen === 'alternate-signin' || screen === 'alternate-create';
-
   return (
-    <main className={`onboarding-auth oa-screen-${screen}${screen === 'signin' ? ' oa-public-signin' : ''}${isAuthScreen ? ' oa-auth-flow' : ''}${isLoginScene ? ' oa-login-entry' : ''}${isLoginScene && loginMode === 'dark' ? ' oa-dark-mode' : ''}`}>
+    <main className={`onboarding-auth oa-screen-${screen}${screen === 'signin' ? ' oa-public-signin' : ''}${isAuthScreen ? ' oa-auth-flow' : ''}${isLoginScene ? ' oa-login-entry' : ''}${isAuthScreen && loginMode === 'dark' ? ' oa-dark-mode' : ''}`}>
       {isLoginScene && <div
         key={loginModeScene.landscape.src}
         className="oa-login-landscape"
@@ -232,13 +242,13 @@ export function OnboardingAuth({
         aria-hidden="true"
       />}
       <div className="oa-shell">
-        {isLoginScene && <button
+        {isAuthScreen && <button
           className="oa-login-mode-toggle"
           type="button"
           aria-label={`Switch to ${loginMode === 'light' ? 'dark' : 'light'} mode`}
           aria-pressed={loginMode === 'dark'}
           title={`Switch to ${loginMode === 'light' ? 'dark' : 'light'} mode`}
-          onClick={() => setLoginMode(mode => mode === 'light' ? 'dark' : 'light')}
+          onClick={toggleTheme}
         >
           {loginMode === 'light' ? <Moon size={16} aria-hidden="true" /> : <Sun size={16} aria-hidden="true" />}
         </button>}

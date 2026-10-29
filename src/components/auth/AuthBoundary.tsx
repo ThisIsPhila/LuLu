@@ -6,6 +6,7 @@ import { bindOnboardingDraft, discardUnreadableOnboardingDraft, loadOnboardingDr
 import { isNativePlatform } from '../../platform/runtime';
 import { localDevelopmentAvailable, localDevelopmentSession } from '../../services/localDevelopment';
 import { pendingJudgeInvitation } from '../../services/judgeInvite';
+import { readAppPreferences, writeAppPreferences } from '../../services/appPreferences';
 import './auth.css';
 import { LoadingScreen } from '../LoadingScreen';
 const localPreviewSessionKey = 'lulu.local-preview.active';
@@ -154,6 +155,11 @@ export function AuthBoundary({children}: {children:(session:AppSession,onSignedO
   </>;
   return <OnboardingAuth
     initialScreen={pendingJudgeInvitation() ? 'create' : 'signin'}
+    initialTheme={readAppPreferences().theme}
+    onThemeChange={theme=>{
+      writeAppPreferences({...readAppPreferences(),theme});
+      document.documentElement.dataset.luluTheme=theme;
+    }}
     onRegister={()=>beginPasskey(true)}
     onSignIn={()=>beginPasskey(false)}
     onEmailAuth={(email,password,create)=>runAuthentication(()=>authenticateWithEmail(email,password,create))}

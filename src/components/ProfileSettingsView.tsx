@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
-import { ArrowLeft, ChevronRight, LogOut, ShieldCheck, Sparkles, Type } from 'lucide-react';
+import { ArrowLeft, ChevronRight, LogOut, Moon, ShieldCheck, Sparkles, Type } from 'lucide-react';
 import type { AppPreferences } from '../services/appPreferences';
 import { ProfileAvatar } from './ProfileAvatar';
 import { prepareProfilePhoto } from '../services/profilePhoto';
@@ -129,9 +129,17 @@ export function ProfileSettingsView({ preferences, displayName, onDisplayNameCha
         <section className="profile-settings-section" aria-labelledby="appearance-heading">
           <h2 id="appearance-heading">Appearance</h2>
           <div className="profile-settings-card">
-            <div className="profile-settings-row static-row">
-              <span className="profile-settings-copy"><strong>Warm paper</strong><small>LuLu’s current reading and writing theme.</small></span>
-              <span className="profile-settings-value">Current</span>
+            <div className="profile-settings-row">
+              <span className="profile-settings-icon"><Moon size={18} aria-hidden="true" /></span>
+              <span className="profile-settings-copy"><strong>Dark mode</strong><small>Carry LuLu’s charcoal and sage palette across the app and website.</small></span>
+              <input
+                className="profile-settings-toggle"
+                type="checkbox"
+                role="switch"
+                aria-label="Dark mode"
+                checked={preferences.theme === 'dark'}
+                onChange={event => onPreferencesChange({ ...preferences, theme: event.target.checked ? 'dark' : 'light' })}
+              />
             </div>
             <div className="profile-settings-row static-row">
               <span className="profile-settings-copy"><strong>Language</strong><small>English is currently available.</small></span>

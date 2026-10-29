@@ -21,6 +21,7 @@
 .onboarding-auth button { font: inherit; }
 .onboarding-auth button:focus-visible { outline: 3px solid #75836f; outline-offset: 3px; }
 .oa-shell {
+  position: relative;
   width: min(100%, 1020px);
   min-height: min(740px, calc(100dvh - 2 * clamp(16px, 4vw, 52px)));
   display: grid;
