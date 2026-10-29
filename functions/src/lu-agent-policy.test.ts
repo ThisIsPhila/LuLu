@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import {strict as assert} from 'node:assert';
-import {explicitlyRequestsDestination,explicitlyRequestsDraft,explicitlyRequestsOpen,explicitlyRequestsSurfaceSearch,isJournalAccessCapabilityQuestion,isLuLuScopeRequest,journalAccessCapabilityReply,luSurfaceSearchReply,outOfScopeReply,luSearchTerms} from './lu-agent-policy.js';
+import {explicitlyRequestsDestination,explicitlyRequestsDraft,explicitlyRequestsLuDestination,explicitlyRequestsOpen,explicitlyRequestsSurfaceSearch,isJournalAccessCapabilityQuestion,isLuLuScopeRequest,journalAccessCapabilityReply,luNavigationReply,luSurfaceSearchReply,outOfScopeReply,luSearchTerms} from './lu-agent-policy.js';
 
 test('only clear writing requests enable journal search',()=>{
  assert.equal(explicitlyRequestsSurfaceSearch('Find my journal entry about the garden.'),true);
@@ -41,6 +41,17 @@ test('navigation, opening and drafting require an explicit matching request',()=
  assert.equal(explicitlyRequestsDraft('Skryf ’n storie oor ’n stil oggend.'),true);
  assert.equal(explicitlyRequestsDraft('Bhala indaba emayelana nokusa okunokuthula.'),true);
  assert.equal(explicitlyRequestsDraft('Write me a weather forecast.'),false);
+});
+
+test('explicit text navigation and requests to find professional support map to app destinations',()=>{
+ assert.equal(explicitlyRequestsLuDestination('Please take me to Settings.'),'settings');
+ assert.equal(explicitlyRequestsLuDestination('Help me find professional support.'),'support');
+ assert.equal(explicitlyRequestsLuDestination('Kontak ’n berader.'),'support');
+ assert.equal(explicitlyRequestsLuDestination('Ngitholele umeluleki.'),'support');
+ assert.equal(explicitlyRequestsLuDestination('I need professional support.'),null);
+ assert.equal(explicitlyRequestsLuDestination('What is in Settings?'),null);
+ assert.match(luNavigationReply('Afrikaans'),/maak daardie afdeling/);
+ assert.match(luNavigationReply('isiZulu'),/Ngivula leyo ngxenye/);
 });
 
 test('search terms exclude generic entity placeholders',()=>{

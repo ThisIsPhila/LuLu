@@ -49,6 +49,12 @@ export function luSurfaceSearchReply(language: string, matchCount: number): stri
     : 'I couldn’t find a safe, matching excerpt in your ordinary Journal or Story entries. Please try another topic.';
 }
 
+export function luNavigationReply(language: string): string {
+  if (language === 'Afrikaans') return 'Ek maak daardie afdeling in LuLu nou oop.';
+  if (language === 'isiZulu') return 'Ngivula leyo ngxenye ye-LuLu manje.';
+  return 'Opening that LuLu section now.';
+}
+
 export function luSearchTerms(value: string): string[] {
   return [...new Set((value.normalize('NFKC').toLocaleLowerCase('und').match(/[\p{L}\p{N}]{3,}/gu) ?? [])
     .filter(word => !searchStopWords.has(word)))].slice(0,24);
@@ -80,6 +86,7 @@ export function explicitlyRequestsDraft(value: string): boolean {
 }
 
 export function explicitlyRequestsDestination(value: string, destination: string): boolean {
+  if (destination === 'support' && /\b(find|show\s+me|contact|call|reach|help\s+me\s+(?:find|contact)|connect\s+me\s+with|soek|wys\s+my|kontak|skakel|help\s+my\s+om\s+te\s+(?:vind|kontak)|verbind\s+my\s+met|thola|ngitholele|ngikhombise|ngixhumanise|xhumana|shayela|ngisize\s+ngithole)\b[^.!?]{0,100}\b(professional|therapist|counsell?or|social\s+worker|support|help|helpline|crisis|berader|maatskaplike\s+werker|ondersteuning|hulplyn|krisis|umeluleki|usizo|ukwesekwa|umugqa\s+wosizo)\b/iu.test(value)) return true;
   if (!/\b(open|go\s+to|take\s+me\s+to|navigate\s+to|maak\s+oop|neem\s+my\s+na|gaan\s+na|vula|ngiyise|ngiyisa)\b/iu.test(value)) return false;
   const terms: Record<string,RegExp> = {
     home:/\b(home|dashboard|tuis|ikhaya|ekuqaleni)\b/iu,
@@ -92,4 +99,12 @@ export function explicitlyRequestsDestination(value: string, destination: string
     support:/\b(support|resources|helplines|help services|professional support|contact a service|ondersteuning|hulpbronne|hulplyne|usizo|izinsiza|ukwesekwa)\b/iu,
   };
   return terms[destination]?.test(value) ?? false;
+}
+
+// Check destinations whose words overlap command verbs (for example “take”
+// in “take me to Settings”) before the broader Library vocabulary.
+const luDestinations = ['home','journal','stories','settings','library','reader','write','support'] as const;
+export type LuDestination = (typeof luDestinations)[number];
+export function explicitlyRequestsLuDestination(value: string): LuDestination | null {
+  return luDestinations.find(destination => explicitlyRequestsDestination(value,destination)) ?? null;
 }
