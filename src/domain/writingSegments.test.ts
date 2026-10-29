@@ -1,11 +1,25 @@
-import {test} from 'node:test';
-import {strict as assert} from 'node:assert';
-import {splitCompletedSegments} from './writingSegments.ts';
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { extractCompletedWritingInput } from './writingSegments.ts';
 
-test('a single line break stays in the editable draft', () => {
-  assert.deepEqual(splitCompletedSegments('first\nsecond'), {completed: [], draft: 'first\nsecond'});
+test('one newline keeps the writing in the editor', () => {
+  assert.equal(extractCompletedWritingInput('A thought', 'A thought\n', 10), null);
 });
-test('two line breaks move the preceding segment into the workspace', () => {
-  assert.deepEqual(splitCompletedSegments('first\n\nsecond\n\nthird'), {completed: ['first', 'second'], draft: 'third'});
-  assert.deepEqual(splitCompletedSegments('first\r\n\r\n'), {completed: ['first'], draft: ''});
+
+test('two newlines move the completed paragraph and leave following text in the editor', () => {
+  assert.deepEqual(
+    extractCompletedWritingInput('A thought', 'A thought\n\nContinue here', 11),
+    { paragraphs: ['A thought'], remainingText: 'Continue here' },
+  );
+});
+
+test('a blank line already present in the previous value does not trigger twice', () => {
+  assert.equal(extractCompletedWritingInput('A thought\n\n', 'A thought\n\nmore', 11), null);
+});
+
+test('a new separator can release earlier complete paragraphs in order', () => {
+  assert.deepEqual(
+    extractCompletedWritingInput('First\n\nSecond', 'First\n\nSecond\n\n', 15),
+    { paragraphs: ['First', 'Second'], remainingText: '' },
+  );
 });

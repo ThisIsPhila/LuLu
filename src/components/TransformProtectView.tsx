@@ -24,6 +24,9 @@ import { captureNativeImage } from '../platform/nativeCapture';
 import { isNativePlatform } from '../platform/runtime';
 import { deleteOrdinaryMedia, listOrdinaryMedia, saveOrdinaryMedia } from '../services/ordinaryMedia';
 import type { OrdinaryMediaRef } from '../domain/journal';
+import { extractCompletedWritingInput } from '../domain/writingSegments';
+import { scrubLuMessage } from '../services/luChat';
+import { LU_CHAT_MAX_INPUT_CHARACTERS, type LuScrubbedEntity } from '../services/luChatContracts';
 
 type Props = {
   entities: Entity[];
@@ -47,10 +50,54 @@ type Props = {
   onDeleteOrdinary: (entryId: string) => Promise<void>;
   isOrdinarySessionActive: () => boolean;
   onOpenEntityInspector: (currentText?: string) => void;
+  onAskLu?: (message: string) => void;
   privateVault?: LocalVault;
   privateMediaVault?: LocalMediaVault;
   onPrivateSaved: (revision: LocalVaultRevision) => void;
 };
+
+type WritingSegment = {
+  id: string;
+  originalText: string;
+  status: 'waiting' | 'processing' | 'ready' | 'error';
+  scrubbedText?: string;
+  entities: LuScrubbedEntity[];
+  message?: string;
+};
+
+function makeWritingSegment(originalText: string, status: WritingSegment['status']): WritingSegment {
+  return { id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`, originalText, status, entities: [] };
+}
+
+function renderSourceHighlights(text: string, entities: LuScrubbedEntity[]): React.ReactNode[] {
+  const parts: React.ReactNode[] = [];
+  let cursor = 0;
+  for (const [index, entity] of entities.entries()) {
+    if (entity.start < cursor || entity.end > text.length) continue;
+    parts.push(text.slice(cursor, entity.start));
+    parts.push(<mark className="ordinary-writing-pii is-source" key={`source-${index}`}>{text.slice(entity.start, entity.end)}<small>{entity.label}</small></mark>);
+    cursor = entity.end;
+  }
+  parts.push(text.slice(cursor));
+  return parts;
+}
+
+function renderScrubbedHighlights(text: string, scrubbed: string, entities: LuScrubbedEntity[]): React.ReactNode[] {
+  const parts: React.ReactNode[] = [];
+  let sourceCursor = 0;
+  let scrubbedCursor = 0;
+  for (const [index, entity] of entities.entries()) {
+    if (entity.start < sourceCursor || entity.end > text.length) continue;
+    const unchanged = text.slice(sourceCursor, entity.start);
+    parts.push(scrubbed.slice(scrubbedCursor, scrubbedCursor + unchanged.length));
+    scrubbedCursor += unchanged.length;
+    parts.push(<mark className="ordinary-writing-pii is-scrubbed" key={`scrubbed-${index}`}>{entity.replacement}<small>{entity.label}</small></mark>);
+    scrubbedCursor += entity.replacement.length;
+    sourceCursor = entity.end;
+  }
+  parts.push(scrubbed.slice(scrubbedCursor));
+  return parts;
+}
 
 export const TransformProtectView: React.FC<Props> = ({
   entities,
@@ -65,6 +112,7 @@ export const TransformProtectView: React.FC<Props> = ({
   onDeleteOrdinary,
   isOrdinarySessionActive,
   onOpenEntityInspector,
+  onAskLu,
   privateVault,
   privateMediaVault,
   onPrivateSaved,
@@ -84,6 +132,9 @@ export const TransformProtectView: React.FC<Props> = ({
   const [deleteAcknowledged,setDeleteAcknowledged]=useState(false);
   const [deleteBusy,setDeleteBusy]=useState(false);
   const [attachments,setAttachments]=useState<Array<{ref:OrdinaryMediaRef;url:string}>>([]);
+  const [writingSegments,setWritingSegments]=useState<WritingSegment[]>([]);
+  const [cloudScrubConsent,setCloudScrubConsent]=useState(false);
+  const [editingSegmentId,setEditingSegmentId]=useState<string|null>(null);
   const [initialAttachmentIds,setInitialAttachmentIds]=useState<string[]>([]);
   const [mediaMessage,setMediaMessage]=useState('');
   const [audioState,setAudioState]=useState<AudioCaptureState>('idle');
@@ -101,6 +152,8 @@ export const TransformProtectView: React.FC<Props> = ({
   const mounted=useRef(false);
   const exportUrls=useRef(new Set<string>());
   const exportTimers=useRef(new Set<ReturnType<typeof setTimeout>>());
+  const editingSegmentPosition=useRef<number|null>(null);
+  const segmentRequests=useRef(new Set<string>());
 
   useEffect(()=>{
     mounted.current=true;
@@ -112,6 +165,91 @@ export const TransformProtectView: React.FC<Props> = ({
       exportUrls.current.clear();
     };
   },[]);
+
+  async function processWritingSegment(segment: WritingSegment) {
+    if (segmentRequests.current.has(segment.id)) return;
+    if (!isOrdinarySessionActive()) {
+      setWritingSegments(current => current.map(item => item.id === segment.id ? { ...item, status: 'error', message: 'Your LuLu session expired. Sign in again before cloud processing.' } : item));
+      return;
+    }
+    if (segment.originalText.length > LU_CHAT_MAX_INPUT_CHARACTERS) {
+      setWritingSegments(current => current.map(item => item.id === segment.id ? { ...item, status: 'error', message: `This paragraph is over ${LU_CHAT_MAX_INPUT_CHARACTERS.toLocaleString()} characters. Split it into shorter paragraphs to run the cloud review.` } : item));
+      return;
+    }
+    segmentRequests.current.add(segment.id);
+    setWritingSegments(current => current.map(item => item.id === segment.id ? { ...item, status: 'processing', message: undefined } : item));
+    try {
+      const result = await scrubLuMessage(segment.originalText);
+      if (!isOrdinarySessionActive()) throw new Error('Your LuLu session expired. Sign in again before cloud processing.');
+      if (mounted.current) setWritingSegments(current => current.map(item => item.id === segment.id ? { ...item, status: 'ready', scrubbedText: result.scrubbed, entities: result.entities, message: undefined } : item));
+    } catch (cause) {
+      if (mounted.current) setWritingSegments(current => current.map(item => item.id === segment.id ? { ...item, status: 'error', message: cause instanceof Error ? cause.message : 'Cloud review failed. Your original writing is still here.' } : item));
+    } finally {
+      segmentRequests.current.delete(segment.id);
+    }
+  }
+
+  function handleWritingInput(event: React.ChangeEvent<HTMLTextAreaElement>) {
+    const input = event.currentTarget;
+    const nextText = input.value;
+    const completed = extractCompletedWritingInput(naturalText, nextText, input.selectionStart);
+    if (!completed) {
+      setNaturalText(nextText);
+      return;
+    }
+
+    const shouldProcess = cloudScrubConsent;
+    const newSegments = completed.paragraphs.map(paragraph => makeWritingSegment(paragraph, shouldProcess ? 'processing' : 'waiting'));
+    const insertAt = editingSegmentPosition.current;
+    editingSegmentPosition.current = null;
+    setEditingSegmentId(null);
+    setNaturalText(completed.remainingText);
+    setWritingSegments(current => {
+      const next = [...current];
+      if (insertAt === null) next.push(...newSegments);
+      else next.splice(Math.min(insertAt, next.length), 0, ...newSegments);
+      return next;
+    });
+    if (shouldProcess) for (const segment of newSegments) void processWritingSegment(segment);
+    requestAnimationFrame(() => {
+      const field = textarea.current;
+      if (!field) return;
+      field.focus();
+      field.setSelectionRange(0, 0);
+    });
+  }
+
+  function setCloudConsent(allowed: boolean) {
+    setCloudScrubConsent(allowed);
+    if (allowed) {
+      for (const segment of writingSegments) if (segment.status === 'waiting') void processWritingSegment(segment);
+    }
+  }
+
+  function editWritingSegment(segment: WritingSegment) {
+    if (deleteBusy || editingSegmentId) return;
+    const position = writingSegments.findIndex(item => item.id === segment.id);
+    if (position < 0) return;
+    const unsentDraft = naturalText.trim();
+    const draftSegment = unsentDraft ? makeWritingSegment(naturalText, 'waiting') : null;
+    setWritingSegments(current => {
+      const next = [...current];
+      next.splice(position, 1);
+      if (draftSegment) next.push(draftSegment);
+      return next;
+    });
+    editingSegmentPosition.current = position;
+    setEditingSegmentId(segment.id);
+    setNaturalText(segment.originalText);
+    requestAnimationFrame(() => textarea.current?.focus());
+  }
+
+  function originalBodyForSave() {
+    const paragraphs = writingSegments.map(segment => segment.originalText);
+    if (editingSegmentId && editingSegmentPosition.current !== null) paragraphs.splice(editingSegmentPosition.current, 0, naturalText);
+    else if (naturalText.trim()) paragraphs.push(naturalText);
+    return paragraphs.join('\n\n');
+  }
 
   useEffect(()=>{
     let active=true;
@@ -149,9 +287,9 @@ export const TransformProtectView: React.FC<Props> = ({
     setTextareaHeight(height);
   },[naturalText,viewport.height]);
 
-  const transformedText = naturalText;
+  const transformedText = originalBodyForSave();
 
-  const wordsCount = naturalText.trim().split(/\s+/).filter(Boolean).length;
+  const wordsCount = transformedText.trim().split(/\s+/).filter(Boolean).length;
   const initialTitle = editingEntry?.title ?? '';
   const initialBody = editingEntry?.body ?? '';
   const initialKindValue = editingEntry?.kind ?? initialKind;
@@ -159,7 +297,7 @@ export const TransformProtectView: React.FC<Props> = ({
   const initialFavorite = editingEntry?.favorite ?? false;
   const initialTags = (editingEntry?.tags ?? []).join(', ');
   const attachmentIds=attachments.map(item=>item.ref.id).sort();
-  const isDirty = title !== initialTitle || naturalText !== initialBody || kind !== initialKindValue || curatedDeck !== initialDeck || favorite !== initialFavorite || tagsDraft !== initialTags || attachmentIds.join('|') !== initialAttachmentIds.join('|');
+  const isDirty = title !== initialTitle || transformedText !== initialBody || kind !== initialKindValue || curatedDeck !== initialDeck || favorite !== initialFavorite || tagsDraft !== initialTags || attachmentIds.join('|') !== initialAttachmentIds.join('|');
 
   useEffect(()=>{
     const dialog=discardDialog.current;
@@ -324,6 +462,26 @@ export const TransformProtectView: React.FC<Props> = ({
           </details>
         </div>
 
+        <section className="composer-processing-panel ordinary-writing-workspace" aria-label="Privacy-reviewed writing workspace">
+          <div className="ordinary-writing-workspace-intro">
+            <span className="ordinary-writing-kicker">CLOUD DEMO · WRITING WORKSPACE</span>
+            <p>Finish a paragraph with <strong>two line breaks</strong> to move it here. LuLu’s cloud privacy service receives the original to find personal details; only the scrubbed version below is ready to share with Lu. A scan can miss details.</p>
+            <label className="ordinary-writing-consent"><input type="checkbox" checked={cloudScrubConsent} onChange={event => setCloudConsent(event.target.checked)} /><span>Allow completed paragraphs to be sent to the cloud privacy service for PII review.</span></label>
+          </div>
+          {editingSegmentId && <p className="ordinary-writing-edit-status" role="status">Editing the original paragraph below. Complete it with two line breaks to review it again.</p>}
+          {writingSegments.length === 0 && <p className="ordinary-writing-empty">Your completed paragraphs will appear here. Nothing is sent until you allow cloud review.</p>}
+          {writingSegments.map(segment => <article className={`ordinary-writing-segment is-${segment.status}`} key={segment.id}>
+            <header><div><strong>{segment.status === 'ready' ? 'Paragraph reviewed' : segment.status === 'processing' ? 'Reviewing paragraph' : segment.status === 'error' ? 'Review needs attention' : 'Waiting for cloud review'}</strong><small>{segment.status === 'ready' ? `${segment.entities.length} identifying mention${segment.entities.length === 1 ? '' : 's'} replaced` : segment.status === 'processing' ? 'Searching for personal details…' : segment.status === 'error' ? segment.message : 'This paragraph has not left this device.'}</small></div><button type="button" onClick={() => editWritingSegment(segment)} disabled={deleteBusy || Boolean(editingSegmentId)} aria-label="Edit this original paragraph">Edit original</button></header>
+            {segment.status === 'waiting' && cloudScrubConsent && <button type="button" className="ordinary-writing-ask-lu" onClick={() => void processWritingSegment(segment)}>Review this paragraph with LuLu</button>}
+            {segment.status === 'ready' && segment.scrubbedText !== undefined ? <div className="ordinary-writing-comparison">
+              <div className="ordinary-writing-copy"><small>Before · original sent to privacy service</small><p>{renderSourceHighlights(segment.originalText, segment.entities)}</p></div>
+              <div className="ordinary-writing-copy is-safe"><small>After · scrubbed text available to Lu</small><p>{renderScrubbedHighlights(segment.originalText, segment.scrubbedText, segment.entities)}</p>{segment.entities.length === 0 && <em>No identifying details were detected. A cloud scan can miss details.</em>}</div>
+              {segment.entities.length > 0 && <p className="ordinary-writing-entity-legend">Highlighted labels show what was replaced with generic names such as Person A or Place A.</p>}
+              {onAskLu && <button type="button" className="ordinary-writing-ask-lu" onClick={() => onAskLu(segment.scrubbedText!)}>Ask Lu about this scrubbed paragraph</button>}
+            </div> : segment.status === 'error' ? <div className="ordinary-writing-error"><p>{segment.message}</p><button type="button" disabled={!cloudScrubConsent} onClick={() => void processWritingSegment(segment)}>Try cloud review again</button></div> : null}
+          </article>)}
+        </section>
+
 <div className="composer-input-dock">        {/* 1. Original Entry Card (Warm Paper) */}
         <div className="original-entry-card">
           <div className="card-top-meta">
@@ -342,7 +500,7 @@ export const TransformProtectView: React.FC<Props> = ({
             className="original-natural-textarea"
             aria-label="Write your entry"
             value={naturalText}
-            onChange={(e) => setNaturalText(e.target.value)}
+            onChange={handleWritingInput}
             disabled={deleteBusy}
             rows={1}
             style={textareaHeight?{height:textareaHeight}:undefined}
@@ -370,7 +528,7 @@ export const TransformProtectView: React.FC<Props> = ({
                 <MoreHorizontal size={15} />
               </button>
             </div>
-            <button className="save-protected-btn composer-save" onClick={handleSave} disabled={busy || deleteBusy || !naturalText.trim()}><ShieldCheck size={15} /><span>{busy?'Saving…':editingEntry?'Save changes':'Save entry'}</span></button>
+          <button className="save-protected-btn composer-save" onClick={handleSave} disabled={busy || deleteBusy || !transformedText.trim()}><ShieldCheck size={15} /><span>{busy?'Saving…':editingEntry?'Save changes':'Save entry'}</span></button>
           </div>
           {mediaMessage && <p className="ordinary-media-status" role={mediaMessage.includes('denied')||mediaMessage.includes('could not')?'alert':'status'}>{audioState==='recording'?'Recording voice note… ':''}{mediaMessage}</p>}
         </div>

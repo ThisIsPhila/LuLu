@@ -624,6 +624,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
             onDeleteOrdinary={handleDeleteOrdinaryEntry}
             isOrdinarySessionActive={()=>!signingOut.current && Date.now()<session.expiresAt}
             onOpenEntityInspector={(text) => navigatePrivate('inspector', text ?? '')}
+            onAskLu={message => setLuChatRequest(previous => ({id:(previous?.id ?? 0)+1,message}))}
             privateVault={localVault.current ?? undefined}
             privateMediaVault={localMediaVault.current ?? undefined}
             onPrivateSaved={() => {
