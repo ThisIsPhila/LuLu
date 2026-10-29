@@ -437,7 +437,12 @@ body:has(.lulu-app-root)::-webkit-scrollbar,
 .ordinary-header-logo:focus-visible { outline: 2px solid var(--sage-dark); outline-offset: 2px; }
 .ordinary-header-action { flex: 0 0 36px; }
 .ordinary-navigation-header .topbar-actions { flex: 0 0 auto; }
-.ordinary-header-back-button { flex: 0 0 36px; }
+.ordinary-floating-back-button {
+  position: fixed;
+  top: calc(76px + env(safe-area-inset-top, 0px));
+  left: max(14px, calc((100vw - 760px) / 2 + 14px));
+  z-index: 69;
+}
 .ordinary-floating-edit-button {
   position: fixed;
   top: calc(76px + env(safe-area-inset-top, 0px));
@@ -456,7 +461,14 @@ body:has(.lulu-app-root)::-webkit-scrollbar,
   overflow-y: auto;
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
+  padding-top: 68px;
   padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+}
+.ordinary-navigation-shell.has-floating-back-control .story-leaves-screen {
+  padding-top: 64px;
+}
+.has-floating-back-control .keyboard-writing-screen.uses-app-navigation-header .transform-flow-body {
+  padding-top: calc(68px + env(safe-area-inset-top, 0px));
 }
 .ordinary-navigation-shell .stitch-journal-home,
 .ordinary-navigation-shell .story-leaves-screen {

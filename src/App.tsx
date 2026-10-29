@@ -2,7 +2,7 @@ import { Capacitor } from '@capacitor/core';
 import { prepareRefreshFeedback, playRefreshFeedback } from './services/refreshFeedback';
 import { useNativePullToRefresh } from './hooks/useNativePullToRefresh';
 import React, { useState, useEffect, useRef, useMemo, useLayoutEffect, useCallback, Suspense } from 'react';
-import { CircleAlert, Pencil, X } from 'lucide-react';
+import { ArrowLeft, CircleAlert, Pencil, X } from 'lucide-react';
 import type { Entry } from './domain/journal';
 import type { LibraryItem, LibraryItemDraft, LibraryItemKind } from './domain/libraryItems';
 import { filterOrdinaryEntries } from './domain/ordinaryBrowse';
@@ -656,18 +656,21 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
       )}
 
       {/* Main Responsive Application Shell (Edge-to-Edge with clean Max-Width) */}
-      <div ref={pullRefresh.containerRef} className={`lulu-viewport-shell ${isOrdinaryNavigationView ? 'ordinary-navigation-shell' : ''} ${currentView === 'reader' && showSharedNavigationHeader ? 'reader-navigation-shell' : ''}`} data-ordinary-route={isOrdinaryNavigationView ? currentView : undefined}>
+      <div ref={pullRefresh.containerRef} className={`lulu-viewport-shell ${isOrdinaryNavigationView ? 'ordinary-navigation-shell' : ''} ${showSharedNavigationHeader && currentView !== 'home' ? 'has-floating-back-control' : ''} ${currentView === 'reader' && showSharedNavigationHeader ? 'reader-navigation-shell' : ''}`} data-ordinary-route={isOrdinaryNavigationView ? currentView : undefined}>
         {showSharedNavigationHeader && <OrdinaryNavigationHeader
           notificationUid={development ? undefined : session.uid}
           photoUrl={photoUrl}
           currentView={currentView}
           showMobileMenu={!isOrdinaryNavigationView}
-          showBackButton={!isOrdinaryNavigationView}
           onNavigate={view => handleHeaderRequest({ type: 'navigate', view })}
           onHome={() => handleHeaderRequest({ type: 'navigate', view: 'home' })}
-          onBack={() => handleHeaderRequest({ type: 'back' })}
           onOpenSettings={() => handleHeaderRequest({ type: 'settings' })}
         />}
+        {showSharedNavigationHeader && currentView !== 'home' && (
+          <button type="button" className="topbar-circle-btn ordinary-floating-back-button" aria-label="Go back" title="Go back" onClick={() => handleHeaderRequest({ type: 'back' })}>
+            <ArrowLeft size={20} aria-hidden="true" />
+          </button>
+        )}
         {showSharedNavigationHeader && currentView === 'reader' && selectedEntry && !selectedEntry.protected && (
           <button type="button" className="topbar-circle-btn ordinary-floating-edit-button" aria-label="Edit entry" title="Edit entry" onClick={handleEditSelectedEntry}>
             <Pencil size={16} aria-hidden="true" />

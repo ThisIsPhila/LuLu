@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Menu, BookOpen, Layers, LibraryBig, PenLine } from 'lucide-react';
+import { Menu, BookOpen, Layers, LibraryBig, PenLine } from 'lucide-react';
 import { LuLuLogo } from './Logo';
 import { OwnerAccountActivity } from './OwnerAccountActivity';
 import { ProfileAvatar } from './ProfileAvatar';
@@ -12,10 +12,8 @@ type Props = {
   photoUrl?: string;
   onOpenSettings: () => void;
   onHome: () => void;
-  onBack: () => void;
   currentView: string;
   showMobileMenu: boolean;
-  showBackButton: boolean;
   onNavigate: (view: HeaderNavigationView) => void;
 };
 
@@ -39,10 +37,8 @@ export const OrdinaryNavigationHeader: React.FC<Props> = ({
   photoUrl,
   onOpenSettings,
   onHome,
-  onBack,
   currentView,
   showMobileMenu,
-  showBackButton,
   onNavigate,
 }) => {
   const [isFloating, setIsFloating] = useState(false);
@@ -97,9 +93,6 @@ export const OrdinaryNavigationHeader: React.FC<Props> = ({
       >
         <div className="topbar-container">
           <div className="ordinary-header-brand">
-            {showBackButton && <button type="button" className="topbar-circle-btn ordinary-header-back-button" aria-label="Go back" title="Go back" onClick={onBack}>
-              <ArrowLeft size={18} aria-hidden="true" />
-            </button>}
             {showMobileMenu && <button
               type="button"
               className="topbar-circle-btn ordinary-mobile-menu-button"
