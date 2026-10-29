@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { OnboardingAuth, type AuthActionResult } from '../OnboardingAuth';
 import { OnboardingJourney, type OnboardingJourneyScreen, type OnboardingJourneyState, type JourneyActionResult } from '../OnboardingJourney';
 import { authenticate, authenticateWithEmail, authenticateWithGoogle, authError, BackendRequestError, logout, requestEmailPasswordReset, restoreNativeAppSession, restorePendingNativeAuth, restoreWebAppSession, type AppSession } from '../../services/backend/passkeys';
@@ -6,7 +6,7 @@ import { bindOnboardingDraft, discardUnreadableOnboardingDraft, loadOnboardingDr
 import { isNativePlatform } from '../../platform/runtime';
 import { localDevelopmentAvailable, localDevelopmentSession } from '../../services/localDevelopment';
 import { pendingJudgeInvitation } from '../../services/judgeInvite';
-import { readAppPreferences, writeAppPreferences } from '../../services/appPreferences';
+import { getSystemTheme, readAppPreferences, resolveAppTheme, writeAppPreferences, type AppTheme } from '../../services/appPreferences';
 import './auth.css';
 import { LoadingScreen } from '../LoadingScreen';
 const localPreviewSessionKey = 'lulu.local-preview.active';
@@ -22,9 +22,20 @@ export function AuthBoundary({children}: {children:(session:AppSession,onSignedO
   const [journeyScreen,setJourneyScreen]=useState<OnboardingJourneyScreen>(1);
   const [journeyInitialState,setJourneyInitialState]=useState<Partial<OnboardingJourneyState>>({});
   const [route,setRoute]=useState<'journey'|'signin'>('signin');
+  const [authPreferences,setAuthPreferences]=useState(readAppPreferences);
+  const [systemTheme,setSystemTheme]=useState<AppTheme>(getSystemTheme);
   const journeyScreenRef=useRef<OnboardingJourneyScreen>(1);
   const journeyStateRef=useRef<OnboardingJourneyState>({name:'',intentions:[],prompt:null,firstEntryText:'',supportChoice:null});
   const verified=useRef<AppSession|null>(null);
+  const authTheme=resolveAppTheme(authPreferences, null, systemTheme);
+  useEffect(()=>{
+    const media=window.matchMedia('(prefers-color-scheme: dark)');
+    const update=()=>setSystemTheme(media.matches?'dark':'light');
+    update();
+    media.addEventListener?.('change',update);
+    return()=>media.removeEventListener?.('change',update);
+  },[]);
+  useLayoutEffect(()=>{document.documentElement.dataset.luluTheme=authTheme;},[authTheme]);
   useEffect(()=>{
     if(route!=='journey')return;
     let active=true;
@@ -134,7 +145,7 @@ export function AuthBoundary({children}: {children:(session:AppSession,onSignedO
     }
   }
   if(session) return children(session,()=>{if(localDevelopmentAvailable())sessionStorage.removeItem(localPreviewSessionKey);verified.current=null;setSession(null);});
-  if(restoring || (route==='journey' && !journeyReady))return <LoadingScreen />;
+  if(restoring || (route==='journey' && !journeyReady))return <LoadingScreen theme={authTheme} />;
   if(sessionRestoreError)return <main className="auth-session-recovery" role="alert"><h1>We couldn’t confirm your session.</h1><p>{sessionRestoreError}</p><button type="button" onClick={()=>void retrySessionRestore()}>Retry connection</button><button type="button" onClick={()=>void signOutDuringRestore()}>Sign out on this device</button></main>;
   if(draftReadFailed && route==='journey')return <div className="auth-draft-recovery" role="alert">
     <h1>Your local draft could not be opened.</h1><p>{journeyError} The text stays on this device until you choose what to do.</p>
@@ -155,10 +166,12 @@ export function AuthBoundary({children}: {children:(session:AppSession,onSignedO
   </>;
   return <OnboardingAuth
     initialScreen={pendingJudgeInvitation() ? 'create' : 'signin'}
-    initialTheme={readAppPreferences().theme}
+    initialTheme={authTheme}
+    followSystem={authPreferences.theme === 'system'}
     onThemeChange={theme=>{
-      writeAppPreferences({...readAppPreferences(),theme});
-      document.documentElement.dataset.luluTheme=theme;
+      const next={...authPreferences,theme,themeSet:true};
+      writeAppPreferences(next);
+      setAuthPreferences(next);
     }}
     onRegister={()=>beginPasskey(true)}
     onSignIn={()=>beginPasskey(false)}

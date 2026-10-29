@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowRight, ChevronLeft, CircleAlert, Info, LoaderCircle, Moon, ScanFace, ShieldCheck, Sun } from 'lucide-react';
 import { isNativePlatform } from '../platform/runtime';
 import type { AppTheme } from '../services/appPreferences';
+import { loginModeScenes } from '../services/loginScenes';
 import './OnboardingAuth.css';
 
 export type OnboardingAuthScreen = 'welcome' | 'signin' | 'create';
@@ -25,6 +26,7 @@ export type AuthActionResult =
 export type OnboardingAuthProps = {
   initialScreen?: OnboardingAuthScreen;
   initialTheme?: AppTheme;
+  followSystem?: boolean;
   onThemeChange?: (theme: AppTheme) => void;
   /** Set when the host has checked whether passkeys can be used in this browser context. */
   passkeySupport?: 'supported' | 'unsupported';
@@ -44,38 +46,6 @@ type Screen = OnboardingAuthScreen | 'orientation-one' | 'orientation-two' | 'al
 type Action = 'register' | 'signin';
 type BusyAction = Action | 'email' | 'google' | 'password-reset';
 type LoginMode = AppTheme;
-
-const loginLandscapeScenes = [
-  { label: 'Riverside meadow', src: '/media/appearance/login-landscapes/riverside-meadow.jpg' },
-  { label: 'Coastal headland', src: '/media/appearance/login-landscapes/coastal-headland.jpg' },
-  { label: 'Olive terraces', src: '/media/appearance/login-landscapes/olive-terraces.jpg' },
-  { label: 'Twilight lake', src: '/media/appearance/login-landscapes/twilight-lake.jpg' },
-] as const;
-
-const loginCoverScenes = [
-  { label: 'Journal still life', src: '/media/brand/journal-still-life.jpg' },
-  { label: 'Sand and stone', src: '/media/appearance/login-portraits/sand-stone.jpg' },
-  { label: 'Sage hills', src: '/media/appearance/login-portraits/sage-hills.jpg' },
-  { label: 'Light paper', src: '/media/appearance/login-portraits/light-paper.jpg' },
-  { label: 'Dark paper', src: '/media/appearance/login-portraits/dark-paper.jpg' },
-] as const;
-
-const loginModeScenes = {
-  light: {
-    landscape: loginLandscapeScenes[1],
-    portrait: loginCoverScenes[3],
-    blurLevel: 4,
-    toneLevel: 1,
-    toneOpacity: 55,
-  },
-  dark: {
-    landscape: loginLandscapeScenes[3],
-    portrait: loginCoverScenes[4],
-    blurLevel: 2,
-    toneLevel: 0,
-    toneOpacity: 70,
-  },
-} as const;
 
 const reasonCopy: Record<AuthFailureReason, string> = {
   'credential-missing': 'We couldn’t find a passkey for this account on this device. Try another device or get help signing in.',
@@ -97,6 +67,7 @@ function detectPasskeySupport() {
 export function OnboardingAuth({
   initialScreen = 'welcome',
   initialTheme = 'light',
+  followSystem = false,
   onThemeChange,
   passkeySupport,
   onRegister,
@@ -124,6 +95,10 @@ export function OnboardingAuth({
   const isLoginScene = screen === 'signin' || screen === 'alternate-signin';
   const isAuthScreen = screen === 'signin' || screen === 'create' || screen === 'alternate-signin' || screen === 'alternate-create';
   const loginModeScene = loginModeScenes[loginMode];
+
+  useEffect(() => {
+    if (followSystem) setLoginMode(initialTheme);
+  }, [followSystem, initialTheme]);
 
   function toggleTheme() {
     const next = loginMode === 'light' ? 'dark' : 'light';

@@ -105,3 +105,17 @@ test('starter marker is owner-only, strict and immutable after creation',async()
  await assertFails(getDoc(doc(db('bob'),'users/alice/starterCatalogues/johannesburg-v1')));
  await assertFails(updateDoc(ref,{version:2}));await assertFails(deleteDoc(ref));
 });
+
+test('account appearance is owner-only and accepts only system, light or dark',async()=>{
+ const ref=doc(db(),'users/alice/preferences/appearance');
+ await assertSucceeds(setDoc(ref,{theme:'dark',updatedAt:serverTimestamp()}));
+ await assertSucceeds(getDoc(ref));
+ await assertSucceeds(updateDoc(ref,{theme:'system',updatedAt:serverTimestamp()}));
+ await assertFails(setDoc(ref,{theme:'sepia',updatedAt:serverTimestamp()}));
+ await assertFails(setDoc(ref,{theme:'light',updatedAt:Timestamp.fromMillis(1)}));
+ await assertFails(setDoc(ref,{theme:'light',updatedAt:serverTimestamp(),extra:'not allowed'}));
+ await assertFails(getDoc(doc(db('bob'),'users/alice/preferences/appearance')));
+ await assertFails(setDoc(doc(db('bob'),'users/alice/preferences/appearance'),{theme:'light',updatedAt:serverTimestamp()}));
+ await assertFails(getDoc(doc(db(),'users/alice/preferences/profile')));
+ await assertFails(getDocs(collection(db(),'users/alice/preferences')));
+});

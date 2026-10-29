@@ -144,6 +144,19 @@ service cloud.firestore {
       allow create, update: if privateSession(uid) && isValidPrivate(request.resource.data);
       allow delete: if privateSession(uid);
     }
+    function isValidAppearancePreference(d) {
+      return d.keys().hasAll(['theme','updatedAt'])
+        && d.keys().hasOnly(['theme','updatedAt'])
+        && d.theme in ['system','light','dark']
+        && d.updatedAt == request.time;
+    }
+    match /users/{uid}/preferences/{preferenceId} {
+      allow get: if activeSession(uid) && preferenceId == 'appearance';
+      allow list: if false;
+      allow create, update: if activeSession(uid) && preferenceId == 'appearance'
+        && isValidAppearancePreference(request.resource.data);
+      allow delete: if false;
+    }
     // Shared fictional catalogue; owner-authenticated sessions can read its manifest
     // and individually validated samples. Client queries and all client writes are denied.
     match /demoCatalogues/{catalogueId} {

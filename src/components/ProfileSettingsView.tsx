@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { ArrowLeft, ChevronRight, LogOut, Moon, ShieldCheck, Sparkles, Type } from 'lucide-react';
-import type { AppPreferences } from '../services/appPreferences';
+import type { AppPreferences, AppTheme } from '../services/appPreferences';
 import { ProfileAvatar } from './ProfileAvatar';
 import { prepareProfilePhoto } from '../services/profilePhoto';
 import { AccountLinkingPanel } from './AccountLinkingPanel';
@@ -11,6 +11,9 @@ import './ProfileSettingsView.css';
 
 type Props = {
   preferences: AppPreferences;
+  effectiveTheme: AppTheme;
+  appearanceStatus: string;
+  onUseSystemAppearance: () => void;
   displayName: string;
   onDisplayNameChange: (name: string) => Promise<void>;
   photoUrl: string;
@@ -37,7 +40,7 @@ type Props = {
   onSignOut: () => void;
 };
 
-export function ProfileSettingsView({ preferences, displayName, onDisplayNameChange, photoUrl, onPhotoSave, uid, authMethod, emailVerificationStatus, isPrivateSessionActive, judgeAccess, judgeVoiceSeconds, judgeVoiceDailyLimit, judgeDecisionsPerDay, judgeLuMessagesPerDay, judgeDecisionsUsedToday, judgeLuMessagesUsedToday, judgeVoiceRefillAt, isOwnerAccount, onOpenAiAccess, judgeInvitePending, onRetryJudgeInvite, onPreferencesChange, onBack, onOpenModelSettings, onSignOut }: Props) {
+export function ProfileSettingsView({ preferences, effectiveTheme, appearanceStatus, onUseSystemAppearance, displayName, onDisplayNameChange, photoUrl, onPhotoSave, uid, authMethod, emailVerificationStatus, isPrivateSessionActive, judgeAccess, judgeVoiceSeconds, judgeVoiceDailyLimit, judgeDecisionsPerDay, judgeLuMessagesPerDay, judgeDecisionsUsedToday, judgeLuMessagesUsedToday, judgeVoiceRefillAt, isOwnerAccount, onOpenAiAccess, judgeInvitePending, onRetryJudgeInvite, onPreferencesChange, onBack, onOpenModelSettings, onSignOut }: Props) {
   const [nameDraft, setNameDraft] = useState(displayName);
   const [nameStatus, setNameStatus] = useState('');
   useEffect(() => setNameDraft(displayName), [displayName]);
@@ -131,16 +134,21 @@ export function ProfileSettingsView({ preferences, displayName, onDisplayNameCha
           <div className="profile-settings-card">
             <div className="profile-settings-row">
               <span className="profile-settings-icon"><Moon size={18} aria-hidden="true" /></span>
-              <span className="profile-settings-copy"><strong>Dark mode</strong><small>Carry LuLu’s charcoal and sage palette across the app and website.</small></span>
+              <span className="profile-settings-copy"><strong>Dark mode</strong><small>Use LuLu’s charcoal and sage palette across the app and website.</small></span>
               <input
                 className="profile-settings-toggle"
                 type="checkbox"
                 role="switch"
                 aria-label="Dark mode"
-                checked={preferences.theme === 'dark'}
-                onChange={event => onPreferencesChange({ ...preferences, theme: event.target.checked ? 'dark' : 'light' })}
+                checked={effectiveTheme === 'dark'}
+                onChange={event => onPreferencesChange({ ...preferences, theme: event.target.checked ? 'dark' : 'light', themeSet: true })}
               />
             </div>
+            <div className="profile-settings-row appearance-system-row">
+              <span className="profile-settings-copy"><strong>System and account preference</strong><small>This device takes priority, followed by your account setting, then your system setting. A mode change is saved here and synced to your account.</small></span>
+              <button type="button" className="profile-use-system" onClick={onUseSystemAppearance} disabled={preferences.themeSet && preferences.theme === 'system'} aria-pressed={preferences.themeSet && preferences.theme === 'system'}>Use system appearance</button>
+            </div>
+            {appearanceStatus && <p className="profile-settings-appearance-status" role="status">{appearanceStatus}</p>}
             <div className="profile-settings-row static-row">
               <span className="profile-settings-copy"><strong>Language</strong><small>English is currently available.</small></span>
               <span className="profile-settings-value">English</span>

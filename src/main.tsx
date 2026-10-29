@@ -4,15 +4,16 @@ import { registerOfflineShell } from './offline/registerOfflineShell';
 import { captureJudgeInvitation } from './services/judgeInvite';
 import { Capacitor } from '@capacitor/core';
 import { CapacitorUpdater } from '@capgo/capacitor-updater';
-import { readAppPreferences } from './services/appPreferences';
+import { getSystemTheme, readAppPreferences, resolveAppTheme } from './services/appPreferences';
 import './fonts.css';
 import './styles.css';
 import './app-layout.css';
 import './privacy-demo.css';
+import './theme.css';
 import { LoadingScreen } from './components/LoadingScreen';
 
 document.documentElement.dataset.luluPlatform = Capacitor.getPlatform();
-document.documentElement.dataset.luluTheme = readAppPreferences().theme;
+document.documentElement.dataset.luluTheme = resolveAppTheme(readAppPreferences(), null, getSystemTheme());
 if (Capacitor.isNativePlatform()) void CapacitorUpdater.notifyAppReady();
 registerOfflineShell();
 captureJudgeInvitation();

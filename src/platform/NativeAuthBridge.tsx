@@ -162,18 +162,18 @@ export function NativeAuthBridge() {
     }
   }
 
-  return <main style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center', padding: 28, background: '#f4f0e6', color: '#282820', fontFamily: 'system-ui, sans-serif', textAlign: 'center' }}>
-    <section aria-live="polite" style={{ maxWidth: 420, width: '100%' }}>
-      <div aria-hidden="true" style={{ width: 44, height: 44, borderRadius: '50%', margin: '0 auto 20px', background: '#dce4d8', display: 'grid', placeItems: 'center', fontWeight: 700 }}>L</div>
-      <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, fontWeight: 500, margin: '0 0 12px' }}>LuLu sign-in</h1>
+  return <main className="native-auth-bridge">
+    <section aria-live="polite">
+      <div className="native-auth-bridge-mark" aria-hidden="true">L</div>
+      <h1>LuLu sign-in</h1>
       <p>{message}</p>
-      {request?.operation === 'google-login' && stage === 'choose' && <button type="button" onClick={() => void startGoogleSignIn()} style={{ minHeight: 48, padding: '0 22px', border: '1px solid #d9d1c3', borderRadius: 999, color: '#343830', background: '#fffefa', fontWeight: 700 }}>Continue with Google</button>}
-      {stage === 'error' && request && <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-        {request.operation !== 'google-login' && <button type="button" onClick={() => setAttempt(value => value + 1)}>Try passkey again</button>}
-        <button type="button" onClick={() => returnToApp({ requestId: request.requestId, state: request.state, operation: request.operation, status: failedStatus })}>Return to LuLu</button>
+      {request?.operation === 'google-login' && stage === 'choose' && <button className="native-auth-bridge-button" type="button" onClick={() => void startGoogleSignIn()}>Continue with Google</button>}
+      {stage === 'error' && request && <div className="native-auth-bridge-actions">
+        {request.operation !== 'google-login' && <button className="native-auth-bridge-button" type="button" onClick={() => setAttempt(value => value + 1)}>Try passkey again</button>}
+        <button className="native-auth-bridge-button" type="button" onClick={() => returnToApp({ requestId: request.requestId, state: request.state, operation: request.operation, status: failedStatus })}>Return to LuLu</button>
       </div>}
-      {stage === 'error' && otherAddress && <p><a href={otherAddress.toString()} rel="noreferrer" style={{ color: '#405b45' }}>Use a passkey saved on {otherAddress.hostname}</a></p>}
-      {stage === 'error' && !request && <a href="https://khora-lulu-2026.web.app" style={{ color: '#405b45' }}>Open LuLu</a>}
+      {stage === 'error' && otherAddress && <p><a href={otherAddress.toString()} rel="noreferrer">Use a passkey saved on {otherAddress.hostname}</a></p>}
+      {stage === 'error' && !request && <a href="https://khora-lulu-2026.web.app">Open LuLu</a>}
     </section>
   </main>;
 }

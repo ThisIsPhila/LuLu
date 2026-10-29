@@ -6,7 +6,7 @@
 }
 .profile-settings-header, .profile-settings-sections { width: min(100%, 720px); margin-inline: auto; }
 .profile-settings-back { display: inline-flex; min-height: 40px; align-items: center; gap: 8px; padding: 0 13px; border: 1px solid rgba(182, 174, 161, .55); border-radius: 999px; color: #45443e; background: rgba(251, 248, 242, .84); font: 600 13px var(--font-heading); cursor: pointer; }
-.profile-settings-back:focus-visible, .profile-settings-toggle:focus-visible, .profile-settings-link:focus-visible, .profile-settings-signout:focus-visible { outline: 3px solid #68745f; outline-offset: 3px; }
+.profile-settings-back:focus-visible, .profile-settings-toggle:focus-visible, .profile-settings-link:focus-visible, .profile-settings-signout:focus-visible, .profile-use-system:focus-visible { outline: 3px solid #68745f; outline-offset: 3px; }
 .profile-settings-kicker { display: block; margin-top: 30px; color: #737362; font: 600 10px var(--font-mono); letter-spacing: .13em; }
 .profile-settings-header h1 { margin-top: 6px; color: #292824; font: 400 clamp(29px, 7vw, 39px)/1.14 var(--font-serif); letter-spacing: -.035em; }
 .profile-settings-header > p { max-width: 530px; margin-top: 8px; color: #6c665d; font: 15px/1.6 var(--font-serif); }
@@ -20,6 +20,11 @@
 .profile-settings-copy strong { color: #302f2a; font: 600 14px/1.35 var(--font-heading); }
 .profile-settings-copy small { color: #777166; font: 12px/1.45 var(--font-heading); }
 .profile-settings-toggle { flex: 0 0 42px; width: 42px; height: 24px; margin-left: auto; accent-color: #59694f; cursor: pointer; }
+.appearance-system-row { align-items: center; }
+.appearance-system-row .profile-settings-copy { flex: 1; }
+.profile-use-system { flex: 0 0 auto; min-height: 38px; padding: 0 12px; border: 1px solid #d4ccbd; border-radius: 999px; color: #394338; background: #f5f5ee; font: 600 11px/1.3 var(--font-heading); cursor: pointer; }
+.profile-use-system:disabled { color: #77766d; background: #efede6; cursor: default; }
+.profile-settings-appearance-status { margin: 0; padding: 0 16px 14px 62px; color: #59624e; font: 11px/1.5 var(--font-heading); }
 .profile-settings-row.static-row { justify-content: space-between; }
 .profile-settings-row.static-row .profile-settings-copy { flex: 1; }
 .profile-settings-value, .profile-settings-status { flex: 0 0 auto; color: #67685b; font: 11px var(--font-mono); }
@@ -35,6 +40,9 @@
   .profile-settings-copy small { max-width: 250px; }
   .profile-settings-status { font-size: 9px; }
   .profile-settings-note { padding-left: 13px; }
+  .appearance-system-row { flex-wrap: wrap; }
+  .profile-use-system { margin-left: 46px; }
+  .profile-settings-appearance-status { padding-left: 13px; }
 }
 .profile-settings-name { display: grid; gap: 8px; padding: 14px 16px; }
 .profile-settings-name input { width: 100%; padding: 10px 12px; border: 1px solid #d8d0c2; border-radius: 10px; color: #302f2a; background: #fffdf8; font: 14px var(--font-heading); }

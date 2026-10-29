@@ -32,7 +32,8 @@ import { LocalMediaVault } from './services/vault/localMediaVault';
 import { onAndroidBack, onAppActiveChange, exitNativeApp } from './platform/appLifecycle';
 import { isLocalDevelopment } from './services/localDevelopment';
 import { deleteOrdinaryMedia } from './services/ordinaryMedia';
-import { readAppPreferences, writeAppPreferences, type AppPreferences } from './services/appPreferences';
+import { getSystemTheme, readAppPreferences, resolveAppTheme, writeAppPreferences, type AppPreferences, type AppTheme, type ThemePreference } from './services/appPreferences';
+import { readAccountTheme, readCachedAccountTheme, writeAccountTheme } from './services/backend/appThemePreference';
 import { readDisplayName, writeDisplayName } from './services/displayName';
 import { readProfilePhoto, writeProfilePhoto } from './services/profilePhoto';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -50,7 +51,6 @@ import { LooLuGuide, type LooLuDestination } from './components/LooLuGuide';
 import { PrivateQuickCapture } from './components/PrivateQuickCapture';
 import type { LuQuickAction } from './components/LuOrb';
 import './privacy-demo.css';
-import './theme.css';
 
 const PrivacyModelDemo = React.lazy(() => import('./components/PrivacyModelDemo').then(module => ({ default: module.PrivacyModelDemo })));
 
@@ -65,6 +65,10 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   const [libraryItemsState, setLibraryItemsState] = useState<{ status: 'loading' | 'ready' | 'error'; message?: string }>({ status: 'loading' });
   const [libraryItemsAttempt, setLibraryItemsAttempt] = useState(0);
   const [preferences, setPreferences] = useState<AppPreferences>(readAppPreferences);
+  const [systemTheme, setSystemTheme] = useState<AppTheme>(getSystemTheme);
+  const [accountTheme, setAccountTheme] = useState<ThemePreference | null>(() => readCachedAccountTheme(session.uid));
+  const [appearanceStatus, setAppearanceStatus] = useState('');
+  const effectiveTheme = resolveAppTheme(preferences, accountTheme, systemTheme);
   const [displayName, setDisplayName] = useState(() => auth.currentUser?.uid === session.uid ? auth.currentUser.displayName || '' : '');
   const [googlePhoto, setGooglePhoto] = useState('');
   const [customPhoto, setCustomPhoto] = useState('');
@@ -166,10 +170,50 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   }, [session.emailVerificationStatus]);
 
   useEffect(() => {
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const update = () => setSystemTheme(media.matches ? 'dark' : 'light');
+    update();
+    media.addEventListener?.('change', update);
+    return () => media.removeEventListener?.('change', update);
+  }, []);
+
+  useEffect(() => {
+    if (preferences.themeSet) return;
+    let active = true;
+    void readAccountTheme(session.uid).then(result => {
+      if (!active) return;
+      setAccountTheme(result.theme);
+      if (result.source === 'unavailable') setAppearanceStatus('Account appearance could not be refreshed. This device is following its saved choice or system setting.');
+    });
+    return () => { active = false; };
+  }, [session.uid, preferences.themeSet]);
+
+  useEffect(() => {
     writeAppPreferences(preferences);
     document.documentElement.dataset.luluReduceMotion = String(preferences.reduceMotion);
-    document.documentElement.dataset.luluTheme = preferences.theme;
   }, [preferences]);
+  useLayoutEffect(() => {
+    document.documentElement.dataset.luluTheme = effectiveTheme;
+  }, [effectiveTheme]);
+
+  useEffect(() => {
+    if (!preferences.themeSet) return;
+    let active = true;
+    if (development) {
+      setAppearanceStatus('Saved on this device. Account sync is unavailable in local preview.');
+      return () => { active = false; };
+    }
+    setAppearanceStatus('Saved on this device. Syncing to your account…');
+    void writeAccountTheme(session.uid, preferences.theme).then(result => {
+      if (!active) return;
+      setAccountTheme(preferences.theme);
+      setAppearanceStatus(result === 'saved' ? 'Saved on this device and your account.' : 'Saved on this device. Account sync is unavailable in local preview.');
+    }).catch(() => {
+      if (active) setAppearanceStatus('Saved on this device. Account sync is unavailable right now; LuLu will try again next time.');
+    });
+    return () => { active = false; };
+  }, [session.uid, preferences.theme, preferences.themeSet, development]);
+
   useEffect(() => {
     let active = true;
     void readDisplayName(session.uid).then(name => { if (active && name && !displayNameEdited.current) setDisplayName(name); });
@@ -492,7 +536,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
   });
 
   return (
-    <div className={`lulu-app-root ${currentView === 'vault' ? 'vault-dark-mode' : ''} ${currentView === 'settings' || currentView === 'ai-access' || currentView === 'model-settings' || currentView === 'privacy-demo' || currentView === 'cloud-privacy-demo' || currentView === 'support' ? 'privacy-wide' : ''}`} data-lulu-theme={preferences.theme}>
+    <div className={`lulu-app-root ${currentView === 'vault' ? 'vault-dark-mode' : ''} ${currentView === 'settings' || currentView === 'ai-access' || currentView === 'model-settings' || currentView === 'privacy-demo' || currentView === 'cloud-privacy-demo' || currentView === 'support' ? 'privacy-wide' : ''}`} data-lulu-theme={effectiveTheme}>
       {showJudgeInvite && <section className="judge-invite-overlay" role="dialog" aria-modal="true" aria-labelledby="judge-invite-title">
         <div className="judge-invite-card"><h2 id="judge-invite-title">Judge invitation</h2>
         <p>This shared judge link can be used with your own account. It also lets you request another voice refill after the 24-hour waiting period.</p>
@@ -566,7 +610,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
         )}
 
         {currentView === 'settings' && (
-          <ProfileSettingsView preferences={preferences} displayName={displayName} onDisplayNameChange={async name => {await writeDisplayName(session.uid, name);displayNameEdited.current=true;setDisplayName(name);}} photoUrl={photoUrl} onPhotoSave={async photo => {await writeProfilePhoto(session.uid, photo);setCustomPhoto(photo);}} uid={session.uid} authMethod={session.authMethod} emailVerificationStatus={session.emailVerificationStatus} isPrivateSessionActive={() => !signingOut.current && Date.now() < privateAuthority.current.until} judgeAccess={judgeAccess} judgeVoiceSeconds={judgeVoiceSeconds} judgeVoiceDailyLimit={judgeVoiceDailyLimit} judgeDecisionsPerDay={judgeDecisionsPerDay} judgeLuMessagesPerDay={judgeLuMessagesPerDay} judgeDecisionsUsedToday={judgeDecisionsUsedToday} judgeLuMessagesUsedToday={judgeLuMessagesUsedToday} judgeVoiceRefillAt={judgeVoiceRefillAt} isOwnerAccount={isVerifiedOwner} onOpenAiAccess={() => setCurrentView('ai-access')} judgeInvitePending={Boolean(pendingJudgeInvitation()||reusableJudgeInvitation())} onRetryJudgeInvite={() => {setShowJudgeInvite(true);setJudgeInviteAttempt(value => value + 1);}} onPreferencesChange={setPreferences}
+          <ProfileSettingsView preferences={preferences} effectiveTheme={effectiveTheme} appearanceStatus={appearanceStatus} onUseSystemAppearance={() => setPreferences(current => ({...current,theme:'system',themeSet:true}))} onPreferencesChange={next => {writeAppPreferences(next);setPreferences(next);}} displayName={displayName} onDisplayNameChange={async name => {await writeDisplayName(session.uid, name);displayNameEdited.current=true;setDisplayName(name);}} photoUrl={photoUrl} onPhotoSave={async photo => {await writeProfilePhoto(session.uid, photo);setCustomPhoto(photo);}} uid={session.uid} authMethod={session.authMethod} emailVerificationStatus={session.emailVerificationStatus} isPrivateSessionActive={() => !signingOut.current && Date.now() < privateAuthority.current.until} judgeAccess={judgeAccess} judgeVoiceSeconds={judgeVoiceSeconds} judgeVoiceDailyLimit={judgeVoiceDailyLimit} judgeDecisionsPerDay={judgeDecisionsPerDay} judgeLuMessagesPerDay={judgeLuMessagesPerDay} judgeDecisionsUsedToday={judgeDecisionsUsedToday} judgeLuMessagesUsedToday={judgeLuMessagesUsedToday} judgeVoiceRefillAt={judgeVoiceRefillAt} isOwnerAccount={isVerifiedOwner} onOpenAiAccess={() => setCurrentView('ai-access')} judgeInvitePending={Boolean(pendingJudgeInvitation()||reusableJudgeInvitation())} onRetryJudgeInvite={() => {setShowJudgeInvite(true);setJudgeInviteAttempt(value => value + 1);}}
             onBack={() => setCurrentView(settingsReturnView.current)} onOpenModelSettings={() => setCurrentView('model-settings')}
             onSignOut={() => void signOutAccount()} />
         )}
