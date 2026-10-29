@@ -31,6 +31,24 @@ export function journalAccessCapabilityReply(language: string): string {
   return 'I can search ordinary Journal and Story entries when you ask. Try: “Find my journal entry about the garden.” I do not browse them automatically, and protected private writing stays unavailable.';
 }
 
+/** Stable user-facing response for explicit searches that the server executes directly. */
+export function luSurfaceSearchReply(language: string, matchCount: number): string {
+  const found = matchCount > 0;
+  if (language === 'Afrikaans') {
+    return found
+      ? 'Ek het moontlike gewone joernaal- of storie-inskrywings gevind. Die gesuiwerde uittreksels verskyn hieronder. Kies ’n resultaat hieronder om die inskrywing oop te maak.'
+      : 'Ek kon nie ’n veilige, ooreenstemmende gewone joernaal- of storie-uittreksel vind nie. Probeer asseblief ’n ander onderwerp.';
+  }
+  if (language === 'isiZulu') {
+    return found
+      ? 'Ngithole okufakiwe okujwayelekile okungase kuhambisane nalokho. Izingcaphuno ezisusiwe imininingwane ziboniswe ngezansi. Khetha umphumela ongezansi ukuze uvule okubhaliwe.'
+      : 'Angitholanga amazwibela aphephile, afanayo okufakiwe okujwayelekile kuJenali noma endabeni. Zama esinye isihloko.';
+  }
+  return found
+    ? 'I found possible matches in your ordinary Journal or Story entries. Scrubbed excerpts appear below. Select a result to open its entry.'
+    : 'I couldn’t find a safe, matching excerpt in your ordinary Journal or Story entries. Please try another topic.';
+}
+
 export function luSearchTerms(value: string): string[] {
   return [...new Set((value.normalize('NFKC').toLocaleLowerCase('und').match(/[\p{L}\p{N}]{3,}/gu) ?? [])
     .filter(word => !searchStopWords.has(word)))].slice(0,24);

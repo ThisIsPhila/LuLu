@@ -13,7 +13,7 @@ import { judgeInviteDigest, isJudgeInviteActive } from './judge-invite.js';
 import { mayReadAccountActivity } from './owner-notifications.js';
 import { processAccountAlerts } from './account-alerts.js';
 import { scrubForLuDetailed, scrubTextsForLu, respondAsLuWithTools, LU_LANGUAGES, type LuAgentAction, type LuAgentHistoryMessage, type LuSurfaceReference } from './lu-chat.js';
-import { explicitlyRequestsDestination, explicitlyRequestsDraft, explicitlyRequestsOpen, explicitlyRequestsSurfaceSearch, isJournalAccessCapabilityQuestion, isLuLuScopeRequest, journalAccessCapabilityReply, outOfScopeReply, luSearchTerms } from './lu-agent-policy.js';
+import { explicitlyRequestsDestination, explicitlyRequestsDraft, explicitlyRequestsOpen, explicitlyRequestsSurfaceSearch, isJournalAccessCapabilityQuestion, isLuLuScopeRequest, journalAccessCapabilityReply, luSurfaceSearchReply, outOfScopeReply, luSearchTerms } from './lu-agent-policy.js';
 import { createLuLiveSession } from './lu-live.js';
 import { refillJudgeAllowance, reserveJudgeVoice, settleJudgeVoice, type JudgeAllowance } from './judge-allowance.js';
 import { assessBehaviourPatterns } from './pattern-intelligence.js';
@@ -586,6 +586,16 @@ export const api = onRequest({region: 'africa-south1', memory: '256MiB', maxInst
       }
       if (isJournalAccessCapabilityQuestion(body.text)) {
         response.json({reply:journalAccessCapabilityReply(body.language),actions:[],references:[]}); return;
+      }
+      // A clear request to find saved writing must not depend on the model
+      // deciding to call a function. Search the account's ordinary entries
+      // directly, scrub every returned excerpt, and show those results in the
+      // chat. The assistant response model receives only the scrubbed request
+      // and scrubbed excerpts; the separate cloud privacy pass handles raw excerpts.
+      if (explicitlyRequestsSurfaceSearch(body.text)) {
+        const query=luSearchTerms(body.text).join(' ').slice(0,300);
+        const search=await searchOrdinaryEntries(current.uid,body.text,query,'Any',apiKey);
+        response.json({reply:luSurfaceSearchReply(body.language,search.references.length),actions:[],references:search.references}); return;
       }
       const entryIds=new Map<string,string>();
       const result=await respondAsLuWithTools(apiKey,body.text,body.language,{

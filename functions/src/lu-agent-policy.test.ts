@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import {strict as assert} from 'node:assert';
-import {explicitlyRequestsDestination,explicitlyRequestsDraft,explicitlyRequestsOpen,explicitlyRequestsSurfaceSearch,isJournalAccessCapabilityQuestion,isLuLuScopeRequest,journalAccessCapabilityReply,outOfScopeReply,luSearchTerms} from './lu-agent-policy.js';
+import {explicitlyRequestsDestination,explicitlyRequestsDraft,explicitlyRequestsOpen,explicitlyRequestsSurfaceSearch,isJournalAccessCapabilityQuestion,isLuLuScopeRequest,journalAccessCapabilityReply,luSurfaceSearchReply,outOfScopeReply,luSearchTerms} from './lu-agent-policy.js';
 
 test('only clear writing requests enable journal search',()=>{
  assert.equal(explicitlyRequestsSurfaceSearch('Find my journal entry about the garden.'),true);
@@ -45,6 +45,15 @@ test('navigation, opening and drafting require an explicit matching request',()=
 
 test('search terms exclude generic entity placeholders',()=>{
  assert.deepEqual(luSearchTerms('Find Person A’s journal about the garden at Place A.'),['garden']);
+});
+
+test('direct journal searches return clear localized results without a model-generated claim',()=>{
+ assert.match(luSurfaceSearchReply('English',2),/possible matches.*scrubbed excerpts.*Select a result/is);
+ assert.match(luSurfaceSearchReply('English',0),/couldn’t find a safe, matching excerpt/i);
+ assert.match(luSurfaceSearchReply('Afrikaans',1),/moontlike gewone joernaal- of storie-inskrywings/);
+ assert.match(luSurfaceSearchReply('Afrikaans',0),/veilige, ooreenstemmende gewone joernaal/);
+ assert.match(luSurfaceSearchReply('isiZulu',1),/Ngithole okufakiwe okujwayelekile/);
+ assert.match(luSurfaceSearchReply('isiZulu',0),/Angitholanga amazwibela aphephile/);
 });
 
 test('text assistant has a server-side LuLu scope gate with contextual follow-ups',()=>{
