@@ -1,39 +1,47 @@
-.lu-live-chat { display:flex; flex:1 1 auto; min-height:0; flex-direction:column; gap:22px; }
-.lu-live-disclosure { display:flex; flex:none; align-items:flex-start; gap:10px; padding:14px 16px; border:1px solid #ddc5ac; border-radius:16px; background:#fbf1e5; color:#684a32; }
+.lu-live-chat { display:flex; flex:1 1 auto; min-height:0; width:min(calc(100% - 40px),1040px); flex-direction:column; gap:18px; margin:8px auto 0; padding:8px clamp(16px,4vw,44px) 14px; }
+.lu-live-bootstrap { display:flex; align-items:center; justify-content:center; gap:10px; min-height:120px; margin:auto; padding:20px; color:#686b5b; font-size:14px; }
+.lu-live-disclosure { display:flex; flex:none; align-items:flex-start; gap:10px; padding:12px 16px; border-radius:16px; background:#f7f0e6; color:#684a32; }
 .lu-live-disclosure > svg { flex:none; margin-top:2px; }
-.lu-live-disclosure span { display:grid; gap:4px; }
+.lu-live-disclosure span { display:grid; gap:3px; }
 .lu-live-disclosure strong { font-size:13px; }
-.lu-live-disclosure small { color:#625e55; font-size:12px; line-height:1.55; }
-.lu-live-stage { flex:none; min-height:280px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:24px; padding:38px 24px 24px; text-align:center; }
-.lu-live-character { position:relative; display:grid; place-items:center; }
-.lu-live-character-status { position:absolute; z-index:2; left:50%; bottom:calc(100% + 12px); display:flex; align-items:center; justify-content:center; gap:8px; width:max-content; max-width:min(320px,calc(100vw - 56px)); min-height:38px; padding:8px 14px; transform:translateX(-50%); border:1px solid rgba(106,117,91,.26); border-radius:999px; background:rgba(251,248,242,.97); color:#4e5546; box-shadow:0 8px 24px rgba(49,44,34,.12); font:600 12px/1.35 var(--font-sans,sans-serif); }
-.lu-live-character-status.is-error { border-color:#e6c6bd; background:#fbefeb; color:#8a3c34; }
-.lu-live-orb { position:relative; width:clamp(112px,20vh,168px); aspect-ratio:1; display:grid; place-items:center; border:0; border-radius:50%; background:transparent; box-shadow:none; transition:transform .3s; }
-.lu-live-orb .lu-orb-sphere { position:absolute; inset:0; width:100%; height:100%; }
-.lu-live-orb .lu-orb-eyes { z-index:1; gap:16px; }
-.lu-live-orb .lu-orb-eyes > span { width:10px; height:16px; }
-.lu-live-orb.is-listening { animation:lu-live-pulse 2.1s ease-in-out infinite; }
-.lu-live-orb.is-listening .lu-orb-sphere { box-shadow:0 0 0 12px rgba(143,160,118,.16),0 0 0 27px rgba(143,160,118,.09),inset 3px 4px 9px rgba(255,255,255,.78),inset -5px -7px 15px rgba(108,95,60,.24),0 8px 30px rgba(91,78,54,.25); }
-.lu-live-orb.is-connecting { animation:lu-live-pulse 1.2s ease-in-out infinite; }
-.lu-live-hint { max-width:400px; color:#706d63; font-size:14px; line-height:1.6; }
+.lu-live-disclosure small { color:#625e55; font-size:12px; line-height:1.5; }
+.lu-live-stage { flex:none; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:12px; padding:6px 16px 2px; text-align:center; }
+.lu-live-character-status { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:32px; max-width:min(360px,calc(100vw - 48px)); padding:6px 12px; border-radius:999px; background:#f1f1e8; color:#4e5546; font:600 12px/1.35 var(--font-sans,sans-serif); }
+.lu-live-character-status.is-error { background:#fbefeb; color:#8a3c34; }
+.lu-live-visualizer { display:flex; align-items:center; justify-content:center; gap:5px; width:110px; height:48px; border-radius:999px; background:#f2efe6; color:#7e896d; }
+.lu-live-visualizer i { display:block; width:4px; height:8px; border-radius:99px; background:currentColor; opacity:.56; transform:scaleY(.6); }
+.lu-live-visualizer.is-listening i { animation:lu-live-wave 850ms ease-in-out infinite alternate; animation-delay:calc(var(--bar) * -90ms); }
+.lu-live-visualizer.is-working i { animation:lu-live-wave 520ms ease-in-out infinite alternate; animation-delay:calc(var(--bar) * -55ms); }
+.lu-live-hint { max-width:500px; color:#706d63; font-size:13px; line-height:1.5; }
 .lu-live-allowance { color:#686b5b; font:11px/1.4 var(--font-mono,monospace); text-align:center; }
-.lu-live-thread { flex:1 1 auto; min-height:70px; display:flex; flex-direction:column; gap:12px; padding:8px 0 16px; overflow-y:auto; overscroll-behavior:contain; }
-.lu-live-bubble { max-width:min(82%,620px); padding:14px 17px; border:1px solid #e1dacd; border-radius:18px; background:#fffdf8; }
+.lu-live-thread { flex:1 1 auto; min-height:90px; display:flex; flex-direction:column; gap:12px; padding:12px 4px 16px; overflow-y:auto; overscroll-behavior:contain; }
+.lu-live-bubble { max-width:min(82%,720px); padding:14px 17px; border-radius:18px; background:#fffdf8; box-shadow:0 1px 0 rgba(75,66,49,.06); }
 .lu-live-bubble.is-you { align-self:flex-end; background:#eeeadf; }
 .lu-live-bubble small { font-size:11px; color:#777061; font-weight:650; }
 .lu-live-bubble p { margin:5px 0 0; white-space:pre-wrap; overflow-wrap:anywhere; font-size:15px; line-height:1.6; }
-.lu-live-reference { max-width:min(88%,680px); padding:14px 16px; border:1px solid #d9d2c6; border-radius:16px; background:#fffdf8; }
+.lu-live-tool-event { display:flex; align-items:flex-start; gap:11px; max-width:min(92%,760px); margin:2px 0 4px 22px; padding:12px 15px; border-radius:14px; background:#f1f1e9; color:#43483e; }
+.lu-live-tool-event > span:nth-child(2) { display:grid; gap:3px; flex:1; min-width:0; }
+.lu-live-tool-event strong { font-size:13px; }
+.lu-live-tool-event small { color:#696b60; font-size:12px; line-height:1.45; }
+.lu-live-tool-event.is-failed { background:#fbefeb; color:#8a3c34; }
+.lu-chat-tool-indicator { display:grid; flex:none; width:22px; height:22px; place-items:center; color:#718065; }
+.lu-chat-tool-indicator svg { animation:lu-chat-spin 1.1s linear infinite; }
+.lu-live-tool-event button { flex:none; min-height:34px; padding:0 12px; border:0; border-radius:999px; background:#e4e8dc; color:#414a3b; font:600 12px var(--font-sans,sans-serif); cursor:pointer; }
+.lu-live-reference { max-width:min(88%,760px); padding:14px 16px; border-radius:16px; background:#fffdf8; }
 .lu-live-reference small { display:block; margin-bottom:5px; color:#777061; font-size:11px; }
 .lu-live-reference strong { display:block; color:#37352f; font-size:14px; }
 .lu-live-reference p { margin:7px 0 10px; color:#555147; font-size:13px; line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
 .lu-live-reference button { display:inline-flex; align-items:center; gap:7px; min-height:36px; padding:0 13px; border:1px solid #d4ccbd; border-radius:999px; background:#fffdf8; color:#454d40; font:600 12px var(--font-sans,sans-serif); cursor:pointer; }
-.lu-live-controls { flex:none; display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:12px; padding:12px 0 max(10px,env(safe-area-inset-bottom)); }
-.lu-live-controls button { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:52px; padding:0 24px; border-radius:999px; font:650 14px var(--font-sans,sans-serif); cursor:pointer; }
-.lu-live-start,.lu-live-end { border:1px solid #454d40; background:#454d40; color:#fffaf0; }
-.lu-live-end { background:#8c463d; border-color:#8c463d; }
+.lu-live-controls { flex:none; display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:10px; padding:10px 0 max(10px,env(safe-area-inset-bottom)); }
+.lu-live-controls button { display:inline-flex; align-items:center; justify-content:center; gap:9px; min-height:48px; padding:0 22px; border-radius:999px; font:650 14px var(--font-sans,sans-serif); cursor:pointer; }
+.lu-live-start,.lu-live-end { border:0; background:#454d40; color:#fffaf0; }
+.lu-live-end { background:#8c463d; }
 .lu-live-secondary { border:1px solid #d6d0c3; background:#fffdf8; color:#44463e; }
 .lu-live-controls button:disabled { opacity:.6; }
 .lu-live-audio { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
-@keyframes lu-live-pulse { 50% { transform:scale(1.045); } }
-@media(max-width:600px) { .lu-live-chat { gap:14px; } .lu-live-stage { min-height:220px; gap:20px; padding:38px 12px 14px; } .lu-live-disclosure { padding:12px 14px; } .lu-live-controls button { min-height:48px; padding-inline:18px; } }
-@media(prefers-reduced-motion:reduce) { .lu-live-orb { animation:none!important; transition:none; } }
+.lu-live-hidden-controller { position:fixed!important; left:-10000px!important; top:0!important; width:1px!important; height:1px!important; overflow:hidden!important; clip-path:inset(50%)!important; pointer-events:none!important; }
+@keyframes lu-live-wave { 0% { transform:scaleY(.45); opacity:.45; } 100% { transform:scaleY(2.6); opacity:1; } }
+@keyframes lu-chat-spin { to { transform:rotate(360deg); } }
+@media(max-width:600px) { .lu-live-chat { width:100%; gap:12px; margin-top:4px; padding:6px 16px max(14px,env(safe-area-inset-bottom)); } .lu-live-stage { gap:10px; padding:4px 8px; } .lu-live-disclosure { padding:11px 13px; } .lu-live-disclosure small { font-size:11px; } .lu-live-bubble { max-width:94%; padding:12px 14px; } .lu-live-tool-event { max-width:98%; margin-left:2px; flex-wrap:wrap; } .lu-live-controls button { min-height:46px; padding-inline:17px; } }
+@media(prefers-reduced-motion:reduce) { .lu-live-visualizer i,.lu-chat-tool-indicator svg { animation:none!important; } }
+:root[data-lulu-reduce-motion="true"] .lu-live-visualizer i { animation:none!important; }

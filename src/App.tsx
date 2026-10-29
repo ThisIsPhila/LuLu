@@ -852,6 +852,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
       </div>
 
       <LooLuGuide
+        accountId={session.uid}
         dockEnabled={isOrdinaryNavigationView}
         entries={ordinaryEntries}
         onSelectEntry={handleSelectEntry}

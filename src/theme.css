@@ -1018,6 +1018,28 @@
   color: #f2eee4;
 }
 
+:root[data-lulu-theme="dark"] .lu-conversation-page :is(.lu-conversation-history-button, .lu-history-row, .lu-history-message, .lu-history-privacy > div, .lu-chat-processing, .lu-chat-tool-event, .lu-live-tool-event, .lu-live-visualizer) {
+  color: #e7e4da;
+  background: #292b25;
+}
+
+:root[data-lulu-theme="dark"] .lu-conversation-page :is(.lu-history-row-icon, .lu-live-tool-event button, .lu-chat-tool-event button) {
+  color: #e7e4da;
+  background: #3a4235;
+}
+
+:root[data-lulu-theme="dark"] .lu-conversation-page :is(.lu-history-intro, .lu-history-row-copy small, .lu-history-row time, .lu-history-privacy > div > small, .lu-chat-tool-event small, .lu-live-tool-event small, .lu-chat-image figcaption, .lu-chat-image-omitted) {
+  color: #c1beb2;
+}
+
+:root[data-lulu-theme="dark"] .lu-conversation-page .lu-live-visualizer { color: #bac7a8; }
+
+:root[data-lulu-theme="dark"] .lu-conversation-page .lu-chat-tool-event.is-failed,
+:root[data-lulu-theme="dark"] .lu-conversation-page .lu-live-tool-event.is-failed {
+  color: #f0c2b6;
+  background: #382b27;
+}
+
 :root[data-lulu-theme="dark"] .lulu-app-root:not(.vault-dark-mode) .lu-orb-sphere {
   background:
     radial-gradient(circle at 71% 20%, rgba(214,222,197,.42) 0 5%, rgba(205,215,186,.22) 14%, transparent 32%),

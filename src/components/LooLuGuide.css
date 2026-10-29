@@ -111,10 +111,11 @@
 .lulu-guide-intro { margin: 2px 8px 10px; color: #696457; font-size: 12px; line-height: 1.55; }
 
 /* A conversation is a workspace, not a floating menu. */
-.lu-conversation-page { position:fixed; inset:0; z-index:200; display:flex; flex-direction:column; background:#faf8f3; color:#302e29; font-family:var(--font-sans, sans-serif); padding:max(8px,env(safe-area-inset-top)) 0 max(12px,env(safe-area-inset-bottom)); }
-.lu-conversation-header { flex:none; display:flex; align-items:center; gap:16px; width:min(100%, 1040px); margin:0 auto; padding:16px clamp(20px, 5vw, 64px); border-bottom:1px solid #e8e2d8; }
-.lu-conversation-header h2 { margin:0; font:500 26px/1.2 var(--font-serif, Georgia, serif); }
-.lu-conversation-brand { display:flex; min-width:0; flex:1; align-items:center; gap:14px; }
+.lu-conversation-page { position:fixed; inset:0; z-index:200; display:flex; flex-direction:column; overflow:hidden; background:#faf8f3; color:#302e29; font-family:var(--font-sans, sans-serif); padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
+.lu-conversation-page.is-hidden { display:none; }
+.lu-conversation-header { box-sizing:border-box; flex:none; display:flex; align-items:center; gap:14px; width:100%; margin:0; padding:16px clamp(18px, 5vw, 64px); border-bottom:1px solid #e8e2d8; }
+.lu-conversation-header h2 { margin:0; font:500 clamp(22px,2.2vw,28px)/1.2 var(--font-serif, Georgia, serif); }
+.lu-conversation-brand { display:flex; min-width:0; flex:1; align-items:center; gap:12px; }
 .lu-conversation-character-wrap { position:relative; display:grid; flex:none; width:44px; height:44px; place-items:center; }
 .lu-conversation-character { position:relative; display:grid; width:40px; height:40px; place-items:center; }
 .lu-conversation-character .lu-orb-sphere { position:absolute; inset:0; width:100%; height:100%; }
@@ -122,4 +123,30 @@
 .lu-conversation-character .lu-orb-eyes > span { width:5px; height:8px; }
 .lu-conversation-activity { position:absolute; z-index:2; bottom:calc(100% + 8px); left:50%; display:flex; align-items:center; gap:7px; width:max-content; max-width:min(260px,calc(100vw - 48px)); padding:8px 12px; transform:translateX(-50%); border:1px solid rgba(106,117,91,.25); border-radius:999px; background:#fbf8f2; color:#4e5546; box-shadow:0 8px 24px rgba(49,44,34,.14); font:600 11px/1.35 var(--font-sans,sans-serif); white-space:normal; }
 .lu-conversation-activity .lu-orb-status-dot { width:6px; height:6px; }
-.lu-conversation-page > .lu-live-chat { width:min(calc(100% - 32px), 860px); min-height:0; margin:20px auto 0; padding:0 0 8px; overflow:auto; }
+.lu-conversation-child { display:flex; flex:1 1 auto; min-height:0; width:100%; }
+.lu-live-controller { display:flex; flex:1 1 auto; min-height:0; width:100%; }
+.lu-conversation-history-button { display:inline-flex; align-items:center; justify-content:center; gap:7px; flex:none; min-height:40px; padding:0 12px; border:0; border-radius:999px; background:#f0eee7; color:#48483f; font:600 12px var(--font-sans,sans-serif); cursor:pointer; }
+.lu-conversation-live-label { display:inline-flex; align-items:center; gap:6px; padding:5px 9px; border-radius:999px; background:#e8ede2; color:#536247; font:600 11px var(--font-sans,sans-serif); }
+.lu-conversation-live-label i { width:7px; height:7px; border-radius:50%; background:#718065; animation:lu-orb-status-pulse 1.5s ease-in-out infinite; }
+.lu-conversation-history-list,.lu-history-transcript { box-sizing:border-box; display:flex; flex:1 1 auto; min-height:0; width:min(100%,1040px); flex-direction:column; gap:12px; margin:0 auto; padding:24px clamp(18px,5vw,64px) max(24px,env(safe-area-inset-bottom)); overflow-y:auto; overscroll-behavior:contain; }
+.lu-history-intro { margin:0 0 8px; color:#706d63; font-size:13px; line-height:1.5; }
+.lu-history-empty { display:grid; justify-items:center; gap:10px; margin:auto; padding:48px 20px; color:#747267; text-align:center; }
+.lu-history-empty strong { color:#37352f; font:500 22px var(--font-serif,Georgia,serif); }
+.lu-history-empty span { font-size:13px; }
+.lu-history-row { display:flex; align-items:center; gap:14px; width:100%; min-height:74px; padding:13px 15px; border:0; border-radius:18px; background:#f2f0e9; color:#37352f; text-align:left; cursor:pointer; }
+.lu-history-row:hover { background:#eae8df; }
+.lu-history-row-icon { display:grid; flex:none; width:40px; height:40px; place-items:center; border-radius:50%; background:#e5e9dd; color:#58644e; }
+.lu-history-row-copy { display:grid; flex:1; min-width:0; gap:4px; }
+.lu-history-row-copy strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; }
+.lu-history-row-copy small,.lu-history-row time { color:#777467; font-size:11px; }
+.lu-history-row time { display:flex; flex:none; align-items:center; gap:5px; }
+.lu-history-transcript { gap:18px; }
+.lu-history-message { width:min(100%,840px); align-self:flex-start; padding:16px 18px; border-radius:18px; background:#fffdf8; }
+.lu-history-message.is-you { align-self:flex-end; background:#efede4; }
+.lu-history-message > small { color:#777061; font-size:11px; font-weight:650; }
+.lu-history-message > p,.lu-history-privacy p { margin:6px 0 0; color:#37352f; font-size:14px; line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere; }
+.lu-history-privacy { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:8px; }
+.lu-history-privacy > div { min-width:0; padding:12px; border-radius:12px; background:#fbf9f3; }
+.lu-history-privacy > div + div { background:#f0f3eb; }
+.lu-history-privacy > div > small { color:#716b5f; font-size:10px; font-weight:650; }
+@media(max-width:600px) { .lu-conversation-header { gap:10px; padding:13px 14px; } .lu-conversation-history-button { width:40px; padding:0; } .lu-conversation-history-button span { display:none; } .lu-history-row { gap:10px; padding:11px; } .lu-history-row time { max-width:78px; overflow:hidden; } .lu-history-privacy { grid-template-columns:1fr; } }

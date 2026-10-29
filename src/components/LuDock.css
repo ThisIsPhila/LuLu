@@ -2,7 +2,8 @@
 .lu-dock { display:flex; align-items:center; justify-content:center; gap:2px; width:100%; padding:6px 8px; border:1px solid var(--stone-300); border-radius:999px; background:rgba(250,249,246,.97); box-shadow:var(--shadow-dock); }
 .lu-dock > button { flex:0 1 42px; width:42px; min-width:0; aspect-ratio:1; height:auto; padding:0; display:grid; place-items:center; border:0; border-radius:50%; background:transparent; color:#625d54; cursor:pointer; }
 .lu-dock > button.active, .lu-dock > button:hover { background:#e8eee5; color:#344136; }
-.lu-dock-anchor { flex:0 0 42px; width:42px; height:42px; }
+.lu-dock-anchor { display:grid; flex:0 0 42px; width:42px; height:42px; place-items:center; overflow:visible; }
+.lu-dock-anchor .lu-orb-widget { display:grid; width:42px; height:42px; place-items:center; }
 .lu-dock-anchor .lu-orb-launcher { width:42px; height:42px; }
 .lu-dock .lu-orb-launcher .lu-orb-sphere { width:40px; height:40px; }
 .lu-dock .lu-orb-mark { width:20px; height:20px; }

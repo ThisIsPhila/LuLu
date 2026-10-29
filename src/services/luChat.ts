@@ -26,12 +26,17 @@ export async function sendLuChatMessage(input: {
   sourceText: string;
   language: LuChatReplyLanguage;
   history: LuHistoryMessage[];
+  images?: string[];
 }): Promise<LuChatResult> {
   const text = validateLuChatInput(input.text);
   const sourceText = validateLuChatInput(input.sourceText);
   if(input.history.length>6||input.history.some(item=>!['user','assistant'].includes(item.role)||!item.text.trim()||item.text.length>1200))throw new Error('This conversation is too long. Start a new chat turn.');
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu.test(input.ticket)) throw new Error('The scrub review has expired. Scrub and review your message again.');
   const language = validateLuChatLanguage(input.language);
-  const response: unknown = await request('/lu/chat', { ticket: input.ticket, text, sourceText, language, history: input.history });
+  const images = input.images ?? [];
+  if (images.length > 2 || images.some(image => !/^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/u.test(image) || image.length > 1_400_000)) {
+    throw new Error('Attach up to two JPEG images, each under 1 MB.');
+  }
+  const response: unknown = await request('/lu/chat', { ticket: input.ticket, text, sourceText, language, history: input.history, images });
   return parseLuChatResult(response);
 }

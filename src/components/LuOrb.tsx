@@ -83,8 +83,9 @@ export function LuOrb({ open, disabled, onOpen, onLive, onAction, activity = nul
       if (!held.current) return;
       const action = moved.current ? actionAt(event.clientX, event.clientY, centerRef.current) : null;
       setWheel(false); setActive(null); selected.current = null;
+      // A long press opens the quick-action wheel; releasing it without
+      // sliding to an action must not also start a live voice session.
       if (action && !disabled) actionRef.current(action);
-      else if (!moved.current && !disabled) onLive();
     };
     const onCancel = () => { setWheel(false); setActive(null); selected.current = null; };
     window.addEventListener('pointermove', onMove, { passive: false });
