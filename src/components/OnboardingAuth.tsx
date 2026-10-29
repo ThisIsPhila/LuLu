@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, ChevronLeft, CircleAlert, Info, LoaderCircle, ScanFace, ShieldCheck } from 'lucide-react';
+import { ArrowRight, ChevronLeft, CircleAlert, Info, LoaderCircle, Moon, ScanFace, ShieldCheck, Sun } from 'lucide-react';
 import { isNativePlatform } from '../platform/runtime';
 import './OnboardingAuth.css';
 
@@ -40,6 +40,39 @@ export type OnboardingAuthProps = {
 type Screen = OnboardingAuthScreen | 'orientation-one' | 'orientation-two' | 'alternate-signin' | 'alternate-create';
 type Action = 'register' | 'signin';
 type BusyAction = Action | 'email' | 'google' | 'password-reset';
+type LoginMode = 'light' | 'dark';
+
+const loginLandscapeScenes = [
+  { label: 'Riverside meadow', src: '/media/appearance/login-landscapes/riverside-meadow.jpg' },
+  { label: 'Coastal headland', src: '/media/appearance/login-landscapes/coastal-headland.jpg' },
+  { label: 'Olive terraces', src: '/media/appearance/login-landscapes/olive-terraces.jpg' },
+  { label: 'Twilight lake', src: '/media/appearance/login-landscapes/twilight-lake.jpg' },
+] as const;
+
+const loginCoverScenes = [
+  { label: 'Journal still life', src: '/media/brand/journal-still-life.jpg' },
+  { label: 'Sand and stone', src: '/media/appearance/login-portraits/sand-stone.jpg' },
+  { label: 'Sage hills', src: '/media/appearance/login-portraits/sage-hills.jpg' },
+  { label: 'Light paper', src: '/media/appearance/login-portraits/light-paper.jpg' },
+  { label: 'Dark paper', src: '/media/appearance/login-portraits/dark-paper.jpg' },
+] as const;
+
+const loginModeScenes = {
+  light: {
+    landscape: loginLandscapeScenes[1],
+    portrait: loginCoverScenes[3],
+    blurLevel: 4,
+    toneLevel: 1,
+    toneOpacity: 55,
+  },
+  dark: {
+    landscape: loginLandscapeScenes[3],
+    portrait: loginCoverScenes[4],
+    blurLevel: 2,
+    toneLevel: 0,
+    toneOpacity: 70,
+  },
+} as const;
 
 const reasonCopy: Record<AuthFailureReason, string> = {
   'credential-missing': 'We couldn’t find a passkey for this account on this device. Try another device or get help signing in.',
@@ -72,6 +105,7 @@ export function OnboardingAuth({
   onAuthenticated,
 }: OnboardingAuthProps) {
   const [screen, setScreen] = useState<Screen>(initialScreen);
+  const [loginMode, setLoginMode] = useState<LoginMode>('light');
   const [busy, setBusy] = useState<BusyAction | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -82,6 +116,10 @@ export function OnboardingAuth({
   const [wasCancelled, setWasCancelled] = useState(false);
   const [recoveryAction, setRecoveryAction] = useState<'sign-in' | null>(null);
   const canUsePasskeys = passkeySupport ? passkeySupport === 'supported' : detectPasskeySupport();
+  const isLoginScene = screen === 'signin' || screen === 'alternate-signin';
+  const loginModeScene = loginModeScenes[loginMode];
+  const backgroundToneStrength = (loginModeScene.toneOpacity / 100) * (Math.abs(loginModeScene.toneLevel - 5) / 5);
+  const backgroundToneColor = loginModeScene.toneLevel < 5 ? '#171914' : '#fff9ed';
 
   async function runAuth(action: Action) {
     if (!canUsePasskeys || busy) return;
@@ -181,10 +219,36 @@ export function OnboardingAuth({
   const isAuthScreen = screen === 'signin' || screen === 'create' || screen === 'alternate-signin' || screen === 'alternate-create';
 
   return (
-    <main className={`onboarding-auth oa-screen-${screen}${screen === 'signin' ? ' oa-public-signin' : ''}${isAuthScreen ? ' oa-auth-flow' : ''}`}>
+    <main className={`onboarding-auth oa-screen-${screen}${screen === 'signin' ? ' oa-public-signin' : ''}${isAuthScreen ? ' oa-auth-flow' : ''}${isLoginScene ? ' oa-login-entry' : ''}${isLoginScene && loginMode === 'dark' ? ' oa-dark-mode' : ''}`}>
+      {isLoginScene && <div
+        key={loginModeScene.landscape.src}
+        className="oa-login-landscape"
+        style={{ backgroundImage: `url("${loginModeScene.landscape.src}")`, filter: `blur(${loginModeScene.blurLevel * 1.5}px)` }}
+        aria-hidden="true"
+      />}
+      {isLoginScene && <div
+        className="oa-login-tone-overlay"
+        style={{ backgroundColor: backgroundToneColor, opacity: backgroundToneStrength }}
+        aria-hidden="true"
+      />}
+      {isLoginScene && <button
+        className="oa-login-mode-toggle"
+        type="button"
+        aria-label={`Switch to ${loginMode === 'light' ? 'dark' : 'light'} mode`}
+        aria-pressed={loginMode === 'dark'}
+        title={`Switch to ${loginMode === 'light' ? 'dark' : 'light'} mode`}
+        onClick={() => setLoginMode(mode => mode === 'light' ? 'dark' : 'light')}
+      >
+        {loginMode === 'light' ? <Moon size={18} aria-hidden="true" /> : <Sun size={18} aria-hidden="true" />}
+      </button>}
       <div className="oa-shell">
         <section className="oa-cover" aria-label="LuLu journal">
-          <div className="oa-cover-image" aria-hidden="true" />
+          <div
+            key={isLoginScene ? loginModeScene.portrait.src : 'default-cover'}
+            className="oa-cover-image"
+            style={isLoginScene ? { backgroundImage: `linear-gradient(180deg, #3b302219 0%, transparent 29%, #26241caa 100%), url("${loginModeScene.portrait.src}")` } : undefined}
+            aria-hidden="true"
+          />
           <header className="oa-header">
             {screen !== 'welcome' && screen !== 'signin' ? (
               <button className="oa-back" type="button" onClick={headerBack} aria-label="Go back">
