@@ -1,6 +1,12 @@
-const searchStopWords = new Set(['the','and','for','with','about','from','that','this','what','when','where','which','who','why','how','did','does','do','can','could','would','should','you','your','my','me','i','we','our','please','tell','show','find','search','look','open','read','journal','journals','story','stories','entry','entries','write','wrote','saved','recent','latest','access','there','their','was','were','are','is','a','an','to','in','on','of','it','person','people','place','location','organisation','organization','date','time','contact','email','phone','relationship','detail','details']);
+const searchStopWords = new Set([
+  'the','and','for','with','about','from','that','this','what','when','where','which','who','why','how','did','does','do','can','could','would','should','you','your','my','me','i','we','our','please','tell','show','find','search','look','open','read','journal','journals','story','stories','entry','entries','write','wrote','saved','recent','latest','access','there','their','was','were','are','is','a','an','to','in','on','of','it',
+  'person','people','place','location','organisation','organization','date','time','contact','email','phone','relationship','detail','details',
+  // Common Afrikaans and isiZulu request words and names for writing surfaces.
+  'die','en','vir','met','oor','van','wat','wanneer','waar','wie','hoekom','hoe','het','kan','kon','wil','moet','jy','jou','my','ek','ons','asseblief','vertel','wys','soek','vind','lees','open','maak','dagboek','joernaal','joernale','storie','verhaal','inskrywing','inskrywings','geskryf','gesê','gestoor','onlangse','jongste',
+  'ngicela','ngitshele','ngibonise','thola','sesha','funda','ibhuku','ijenali','izindaba','indaba','umbhalo','imibhalo','okubhaliwe','engikubhalile','yami','wami','yakho','ngibhale','ngabhala','ngathi','mayelana','kanye','futhi','ku','ka','no','na','uma','ingabe','ungakwazi','uyakwazi','ngingakwazi','ngicela'
+]);
 
-const appTopic = /\b(lulu|journal|journals|story|stories|entry|entries|writing|draft|compose|reflection|settings|preferences|account|sign[ -]?in|passkey|google|privacy|scrub(?:bing|bed)?|model|decisions|chat|voice|support|professional|helpline|resources|safety plan|prediction|predict|notification|language|update|download|library|app|application|joernaal|joernale|storie|stories|inskrywing|skryf|instellings|rekening|privaatheid|stem|ondersteuning|hulpbron|veiligheidsplan|voorspelling|taal|opdatering|toepassing|ibhuku|izindaba|bhala|izilungiselelo|i-akhawunti|ubumfihlo|izwi|ukwesekwa|ukuphepha|uhlelo lokusebenza)\b/iu;
+const appTopic = /\b(lulu|journal|journals|story|stories|entry|entries|writing|draft|compose|reflection|settings|preferences|account|sign[ -]?in|passkey|google|privacy|scrub(?:bing|bed)?|model|decisions|chat|voice|support|professional|helpline|resources|safety plan|prediction|predict|notification|language|update|download|library|app|application|joernaal|joernale|dagboek|storie|verhaal|inskrywing|skryf|instellings|rekening|privaatheid|stem|ondersteuning|hulpbron|veiligheidsplan|voorspelling|taal|opdatering|toepassing|ibhuku|ijenali|izindaba|indaba|umbhalo|imibhalo|bhala|thola|sesha|izilungiselelo|i-akhawunti|ubumfihlo|izwi|ukwesekwa|ukuphepha|uhlelo lokusebenza)\b/iu;
 const unrelatedTopic = /\b(weather|forecast|news|politics|election|recipe|stock price|sports score|math homework|write code|programming|translate this|what is the capital|current events|weather|weer|nuus|politiek|resep|weerberig|izindaba zanamuhla|isimo sezulu)\b/iu;
 const greetingOnly = /^\s*(hi|hello|hey|good morning|good afternoon|good evening|howzit|hallo|môre|goeiemôre|goeiedag|sawubona|sani)\s*[!.?]*\s*$/iu;
 const continuationOnly = /^\s*(yes|yeah|yep|no|nope|okay|ok|please do|please do that|do that|go ahead|tell me more|continue|thanks|thank you|ja|nee|goed|gaan voort|ngiyavuma|yebo|cha|qhubeka|ngicela uqhubeke)\s*[!.?]*\s*$/iu;
@@ -31,38 +37,41 @@ export function luSearchTerms(value: string): string[] {
 }
 
 export function explicitlyRequestsSurfaceSearch(value: string): boolean {
-  const asksToFind = /\b(find|search|look\s+for|read|show\s+me|summari[sz]e|what\s+did\s+i\s+(?:write|say|save)|where\s+did\s+i\s+(?:write|mention)|what\s+does\s+my\s+(?:journal|story|entry)\s+say)\b/iu.test(value);
-  const namesWriting = /\b(journal|journals|story|stories|entry|entries|saved\s+writing|what\s+i\s+wrote)\b/iu.test(value);
+  const asksToFind = /\b(find|search|look\s+for|read|show\s+me|summari[sz]e|what\s+did\s+i\s+(?:write|say|save)|where\s+did\s+i\s+(?:write|mention)|what\s+does\s+my\s+(?:journal|story|entry)\s+say|tell\s+me\s+what\s+i\s+(?:wrote|saved)|soek|vind|wys\s+(?:vir\s+)?my|lees|som\s+op|wat\s+het\s+ek\s+(?:geskryf|gesê|gestoor)|waar\s+het\s+ek\s+(?:geskryf|genoem)|wat\s+staan\s+in\s+my|thola|sesha|ngitholele|ngibonise|funda|ngibhale\s+ini|ngabhala\s+ini|ngikubhalile|uphi\s+engibhale|yini\s+engibhale)\b/iu.test(value);
+  const namesWriting = /\b(journal|journals|story|stories|entry|entries|saved\s+writing|what\s+i\s+wrote|what\s+did\s+i\s+(?:write|say|save)|joernaal(?:inskrywings?)?|joernale|dagboek|storie|verhaal|inskrywing|inskrywings|geskrifte|wat\s+ek\s+geskryf\s+het|wat\s+het\s+ek\s+geskryf|ijenali|ibhuku|izindaba|indaba|umbhalo|imibhalo|okubhaliwe|engikubhalile|ngibhale\s+ini|ngabhala\s+ini)\b/iu.test(value);
   return asksToFind && namesWriting;
 }
 
 /** Answer access questions accurately without making Lu search the journal. */
 export function isJournalAccessCapabilityQuestion(value: string): boolean {
-  const asksAboutCapability = /\b(can|could|do|does|are|is|am)\b[^.!?]{0,80}\b(access|browse|see|read|search|look through|look at)\b/iu.test(value);
-  const namesJournal = /\b(my|our|the|your)?\s*(journal|journals|story|stories|entry|entries|saved writing)\b/iu.test(value);
-  const asksForAnAction = explicitlyRequestsSurfaceSearch(value) || explicitlyRequestsOpen(value);
+  const asksAboutCapability = /\b(can|could|do|does|are|is|am|kan|kon|mag|kan\s+j(y|ulle)|kan\s+ek|ungakwazi|uyakwazi|ngingakwazi|ingabe)\b[^.!?]{0,100}\b(access|browse|see|read|search|look\s+through|look\s+at|toegang|blaai|sien|lees|soek|toegang\s+kry|finyelela|bheka|funda|ukufunda|thola|ukusesha)\b/iu.test(value);
+  const namesJournal = /\b(?:my|our|the|your|ons|die|jou|yami|wami|yakho|i)?\s*(?:journal|journals|story|stories|entry|entries|saved writing|joernaal(?:inskrywings?)?|joernale|dagboek|storie|verhaal|inskrywing|inskrywings|ijenali|ibhuku|izindaba|indaba|umbhalo|imibhalo|okubhaliwe)\b/iu.test(value);
+  // A capability question such as “Can you read my journal?” is not itself
+  // authorization to search. A clear “find/search/show me” request is.
+  const asksForAnAction = explicitlyRequestsSurfaceSearch(value) && !asksAboutCapability;
   return asksAboutCapability && namesJournal && !asksForAnAction;
 }
 
 export function explicitlyRequestsOpen(value: string): boolean {
-  return /\b(open|read|show\s+me|display)\b/iu.test(value) && /\b(entry|entries|journal|story|stories|result|one)\b/iu.test(value);
+  const asksToOpen = /\b(open|read|show\s+me|display|maak\s+oop|wys\s+my|lees|vula|ngivulele|ngibonise)\b/iu.test(value) || /\bmaak\b[^.!?]{0,80}\boop\b/iu.test(value);
+  return asksToOpen && /\b(entry|entries|journal|story|stories|result|one|inskrywing|inskrywings|dagboek|joernaal(?:inskrywing)?|storie|verhaal|ijenali|ibhuku|indaba|izindaba|umbhalo|imibhalo|okubhaliwe|lokuqala|eyokuqala)\b/iu.test(value);
 }
 
 export function explicitlyRequestsDraft(value: string): boolean {
-  return /\b(create|write|start|make|draft)\b/iu.test(value) && /\b(entry|journal|story|note)\b/iu.test(value);
+  return /\b(create|write|start|make|draft|skep|skryf|begin|maak|opstel|dala|bhala|qala)\b/iu.test(value) && /\b(entry|journal|story|note|inskrywing|joernaal|dagboek|storie|verhaal|nota|ijenali|ibhuku|indaba|umbhalo|imibhalo)\b/iu.test(value);
 }
 
 export function explicitlyRequestsDestination(value: string, destination: string): boolean {
-  if (!/\b(open|go\s+to|take\s+me\s+to|navigate\s+to)\b/iu.test(value)) return false;
+  if (!/\b(open|go\s+to|take\s+me\s+to|navigate\s+to|maak\s+oop|neem\s+my\s+na|gaan\s+na|vula|ngiyise|ngiyisa)\b/iu.test(value)) return false;
   const terms: Record<string,RegExp> = {
-    home:/\b(home|dashboard)\b/iu,
-    journal:/\b(journal|journals)\b/iu,
-    stories:/\b(stories|story collection)\b/iu,
-    library:/\b(library|tasks|notes)\b/iu,
-    reader:/\b(reader|latest entry)\b/iu,
-    write:/\b(write|writing|compose|new entry|new journal|new story)\b/iu,
-    settings:/\b(settings|preferences)\b/iu,
-    support:/\b(support|resources|helplines|help services|professional support|contact a service)\b/iu,
+    home:/\b(home|dashboard|tuis|ikhaya|ekuqaleni)\b/iu,
+    journal:/\b(journal|journals|joernaal|joernale|dagboek|ijenali|ibhuku)\b/iu,
+    stories:/\b(stories|story collection|storie|verhaal|izindaba|indaba)\b/iu,
+    library:/\b(library|tasks|notes|biblioteek|take|notas|umsebenzi|imisebenzi|amanothi)\b/iu,
+    reader:/\b(reader|latest entry|leser|jongste inskrywing|umbhali|okubhaliwe kokugcina)\b/iu,
+    write:/\b(write|writing|compose|new entry|new journal|new story|skryf|nuwe inskrywing|nuwe joernaal|nuwe storie|bhala|umbhalo omusha|qala ukubhala)\b/iu,
+    settings:/\b(settings|preferences|instellings|voorkeure|izilungiselelo|kuzilungiselelo)\b/iu,
+    support:/\b(support|resources|helplines|help services|professional support|contact a service|ondersteuning|hulpbronne|hulplyne|usizo|izinsiza|ukwesekwa)\b/iu,
   };
   return terms[destination]?.test(value) ?? false;
 }

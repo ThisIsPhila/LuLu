@@ -4,6 +4,9 @@ import {explicitlyRequestsDestination,explicitlyRequestsDraft,explicitlyRequests
 
 test('only clear writing requests enable journal search',()=>{
  assert.equal(explicitlyRequestsSurfaceSearch('Find my journal entry about the garden.'),true);
+ assert.equal(explicitlyRequestsSurfaceSearch('Soek my joernaal oor die tuin.'),true);
+ assert.equal(explicitlyRequestsSurfaceSearch('Thola engikubhalile kujenali mayelana nengadi.'),true);
+ assert.equal(explicitlyRequestsSurfaceSearch('Ngibhale ini mayelana nengadi?'),true);
  assert.equal(explicitlyRequestsSurfaceSearch('Can you access my journals?'),false);
  assert.equal(explicitlyRequestsSurfaceSearch('Open Settings.'),false);
  assert.equal(explicitlyRequestsSurfaceSearch('Tell me how Lu works.'),false);
@@ -12,7 +15,10 @@ test('only clear writing requests enable journal search',()=>{
 test('journal access questions explain the available tool without searching',()=>{
  assert.equal(isJournalAccessCapabilityQuestion('Can you not access my journals?'),true);
  assert.equal(isJournalAccessCapabilityQuestion('Can you access my journals?'),true);
+ assert.equal(isJournalAccessCapabilityQuestion('Can you read my journal?'),true);
  assert.equal(isJournalAccessCapabilityQuestion('Find my journal entry about the garden.'),false);
+ assert.equal(isJournalAccessCapabilityQuestion('Kan jy my joernaal lees?'),true);
+ assert.equal(isJournalAccessCapabilityQuestion('Ungakwazi ukufunda ijenali yami?'),true);
  assert.match(journalAccessCapabilityReply('English'),/search ordinary Journal and Story entries when you ask/i);
  assert.match(journalAccessCapabilityReply('English'),/Find my journal entry about the garden/i);
  assert.match(journalAccessCapabilityReply('Afrikaans'),/wanneer jy my vra/);
@@ -25,9 +31,15 @@ test('navigation, opening and drafting require an explicit matching request',()=
  assert.equal(explicitlyRequestsDestination('Please take me to Settings.','settings'),true);
  assert.equal(explicitlyRequestsDestination('What is in Settings?','settings'),false);
  assert.equal(explicitlyRequestsDestination('Open Settings.','journal'),false);
+ assert.equal(explicitlyRequestsDestination('Neem my na Instellings.','settings'),true);
+ assert.equal(explicitlyRequestsDestination('Ngiyise kuzilungiselelo.','settings'),true);
  assert.equal(explicitlyRequestsOpen('Open the first entry.'),true);
  assert.equal(explicitlyRequestsOpen('Can you access my journal?'),false);
+ assert.equal(explicitlyRequestsOpen('Maak die eerste joernaalinskrywing oop.'),true);
+ assert.equal(explicitlyRequestsOpen('Vula indaba yokuqala.'),true);
  assert.equal(explicitlyRequestsDraft('Write a story about a quiet morning.'),true);
+ assert.equal(explicitlyRequestsDraft('Skryf ’n storie oor ’n stil oggend.'),true);
+ assert.equal(explicitlyRequestsDraft('Bhala indaba emayelana nokusa okunokuthula.'),true);
  assert.equal(explicitlyRequestsDraft('Write me a weather forecast.'),false);
 });
 
