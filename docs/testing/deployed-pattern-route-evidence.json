@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "evaluatedAt": "2026-10-29T13:28:26.041Z",
+  "projectId": "khora-lulu-2026",
+  "endpoint": "https://africa-south1-khora-lulu-2026.cloudfunctions.net/api/privacy/patterns",
+  "functionRegion": "africa-south1",
+  "functionUpdateTime": "2026-10-29T10:33:45.624064061Z",
+  "deployedProvider": "openai_decisions",
+  "deployedSecretsBoundByName": [
+    "OPENAI_API_KEY",
+    "RESEND_API_KEY"
+  ],
+  "fixtureId": "partner-money-phone-and-friends",
+  "fixtureSha256": "12788f7e79779b05150b0b8765737029aa958a5b406c82a58456033b5f9995a1",
+  "provider": "openai_decisions",
+  "model": "gpt-6-luna",
+  "responseStatus": 200,
+  "assessmentHashMatched": true,
+  "patternCount": 12,
+  "predictedPatterns": [
+    "coercive_control",
+    "digital_abuse",
+    "emotional_abuse",
+    "financial_abuse",
+    "social_isolation"
+  ],
+  "evaluation": {
+    "predictedPatterns": [
+      "coercive_control",
+      "digital_abuse",
+      "emotional_abuse",
+      "financial_abuse",
+      "social_isolation"
+    ],
+    "positive": {
+      "expected": [
+        "coercive_control",
+        "digital_abuse",
+        "emotional_abuse",
+        "financial_abuse",
+        "social_isolation"
+      ],
+      "matched": [
+        "coercive_control",
+        "digital_abuse",
+        "emotional_abuse",
+        "financial_abuse",
+        "social_isolation"
+      ],
+      "missed": []
+    },
+    "negative": {
+      "expected": [
+        "neglect_deprivation",
+        "physical_abuse",
+        "reproductive_coercion",
+        "sexual_coercion",
+        "stalking_harassment",
+        "workplace_abuse"
+      ],
+      "matched": [
+        "neglect_deprivation",
+        "physical_abuse",
+        "reproductive_coercion",
+        "sexual_coercion",
+        "stalking_harassment",
+        "workplace_abuse"
+      ],
+      "falsePositives": []
+    },
+    "unavailable": {
+      "positive": [],
+      "negative": []
+    },
+    "unreviewedSignals": [],
+    "immediateSafety": {
+      "expected": false,
+      "observed": false,
+      "matched": true
+    },
+    "matchesAnnotatedExpectations": true
+  },
+  "decisionsQuotaLimit": 1,
+  "decisionsQuotaUsed": 1,
+  "authProvisioning": "random Firebase Auth UID with example.invalid email; Admin SDK account and temporary custom claims; random password held only in process memory",
+  "appSessionRoutesUsed": false,
+  "accountAlertQueueInvoked": false,
+  "ownerAccountAccessed": false,
+  "requestTextIncludedInReport": false,
+  "credentialIncludedInReport": false,
+  "cleanup": {
+    "authUserRemoved": true,
+    "sessionRemoved": true,
+    "accessGrantRemoved": true,
+    "inviteRemoved": true,
+    "verified": true
+  },
+  "failureStage": null,
+  "failureStatus": null
+}

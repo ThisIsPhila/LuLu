@@ -1,0 +1,9 @@
+# Decisions pattern evaluation
+
+`pattern-classification-fixtures.json` is a set of fictional, generic journal drafts with qualitative positive and clear-negative labels. These annotations are review guidance, not verified ground truth.
+
+From `functions/`, `npm run evaluate:patterns` validates the fixture set locally and sends no requests. `npm run evaluate:patterns:live` requires `OPENAI_API_KEY` in the command environment and sends at most eight cases serially through the existing `assessBehaviourPatterns` adapter to OpenAI Decisions (`gpt-6-luna`). It never runs the downloaded local model. The report contains fixture IDs and model scores but does not include draft text or credentials. Re-running an individual case overwrites the default report, so pass `--case <id> --output <path>` to preserve an earlier run.
+
+This local harness calls the existing Decisions adapter directly. It verifies the provider request/response path with synthetic inputs, but does not exercise browser authentication, the deployed `/privacy/patterns` route, Firebase account access, or that route's per-account quota. The direct provider calls also bypass the LuLu account quota. Never put the API key in the repository or report file.
+
+The report compares explicitly positive and clear-negative annotations with the current display threshold (`>= 0.40`); the immediate-safety cue uses the current `>= 0.65` threshold. Null/refusal answers for annotated categories are reported as unavailable; they count as neither matches nor misses. Categories omitted from annotations are not judged, and any above-threshold result in an omitted category is surfaced as an unreviewed signal. “Matches annotations” is not a quality, accuracy, safety, or clinical claim. Use `npm run evaluate:patterns:reconcile` after annotation changes to re-score the saved report locally without sending another request.

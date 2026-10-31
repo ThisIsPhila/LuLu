@@ -1,0 +1,786 @@
+{
+  "schemaVersion": 1,
+  "source": "fictional_synthetic",
+  "evaluatedAt": "2026-10-29T13:18:56.007Z",
+  "provider": "openai_decisions",
+  "model": "gpt-6-luna",
+  "requestPath": "local harness using the existing Decisions adapter; no browser/app route or local inference",
+  "quotaBoundary": "Direct provider calls do not consume or enforce LuLu account quota.",
+  "fixturePath": "docs/testing/pattern-classification-fixtures.json",
+  "fixtureLastModifiedAt": "2026-10-29T13:13:50.215Z",
+  "cases": [
+    {
+      "id": "partner-money-phone-and-friends",
+      "title": "A smaller life than I expected",
+      "model": "gpt-6-luna",
+      "inputSha256": "12788f7e79779b05150b0b8765737029aa958a5b406c82a58456033b5f9995a1",
+      "requestPreparedAt": "2026-10-29T13:18:51.635Z",
+      "requestBinding": "Validated request digest recorded before call and matched the adapter result.",
+      "signals": [
+        {
+          "id": "emotional_abuse",
+          "probability": 0.95,
+          "band": "strong_indication"
+        },
+        {
+          "id": "coercive_control",
+          "probability": 0.96,
+          "band": "strong_indication"
+        },
+        {
+          "id": "financial_abuse",
+          "probability": 1,
+          "band": "strong_indication"
+        },
+        {
+          "id": "social_isolation",
+          "probability": 1,
+          "band": "strong_indication"
+        },
+        {
+          "id": "physical_abuse",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "sexual_coercion",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "digital_abuse",
+          "probability": 0.98,
+          "band": "strong_indication"
+        },
+        {
+          "id": "stalking_harassment",
+          "probability": 0.04,
+          "band": "not_indicated"
+        },
+        {
+          "id": "reproductive_coercion",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "workplace_abuse",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "neglect_deprivation",
+          "probability": 0.13,
+          "band": "not_indicated"
+        },
+        {
+          "id": "threats_intimidation",
+          "probability": 0.18,
+          "band": "not_indicated"
+        }
+      ],
+      "immediateSafety": {
+        "probability": 0,
+        "band": "not_indicated"
+      },
+      "evaluation": {
+        "predictedPatterns": [
+          "coercive_control",
+          "digital_abuse",
+          "emotional_abuse",
+          "financial_abuse",
+          "social_isolation"
+        ],
+        "positive": {
+          "expected": [
+            "coercive_control",
+            "digital_abuse",
+            "emotional_abuse",
+            "financial_abuse",
+            "social_isolation"
+          ],
+          "matched": [
+            "coercive_control",
+            "digital_abuse",
+            "emotional_abuse",
+            "financial_abuse",
+            "social_isolation"
+          ],
+          "missed": []
+        },
+        "negative": {
+          "expected": [
+            "neglect_deprivation",
+            "physical_abuse",
+            "reproductive_coercion",
+            "sexual_coercion",
+            "stalking_harassment",
+            "workplace_abuse"
+          ],
+          "matched": [
+            "neglect_deprivation",
+            "physical_abuse",
+            "reproductive_coercion",
+            "sexual_coercion",
+            "stalking_harassment",
+            "workplace_abuse"
+          ],
+          "falsePositives": []
+        },
+        "unavailable": {
+          "positive": [],
+          "negative": []
+        },
+        "unreviewedSignals": [],
+        "immediateSafety": {
+          "expected": false,
+          "observed": false,
+          "matched": true
+        },
+        "matchesAnnotatedExpectations": true
+      }
+    },
+    {
+      "id": "separated-partner-threat-and-safety-request",
+      "title": "I need somewhere to go tonight",
+      "model": "gpt-6-luna",
+      "inputSha256": "67b9eefafc1ac813d8ce669e52c92ffc2c2af7a7611d7b9fdfc25c75f3d21179",
+      "requestPreparedAt": "2026-10-29T13:18:52.388Z",
+      "requestBinding": "Validated request digest recorded before call and matched the adapter result.",
+      "signals": [
+        {
+          "id": "emotional_abuse",
+          "probability": 0.98,
+          "band": "strong_indication"
+        },
+        {
+          "id": "coercive_control",
+          "probability": 1,
+          "band": "strong_indication"
+        },
+        {
+          "id": "financial_abuse",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "social_isolation",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "physical_abuse",
+          "probability": 1,
+          "band": "strong_indication"
+        },
+        {
+          "id": "sexual_coercion",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "digital_abuse",
+          "probability": 0.59,
+          "band": "uncertain"
+        },
+        {
+          "id": "stalking_harassment",
+          "probability": 0.99,
+          "band": "strong_indication"
+        },
+        {
+          "id": "reproductive_coercion",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "workplace_abuse",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "neglect_deprivation",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "threats_intimidation",
+          "probability": 1,
+          "band": "strong_indication"
+        }
+      ],
+      "immediateSafety": {
+        "probability": 1,
+        "band": "strong_indication"
+      },
+      "evaluation": {
+        "predictedPatterns": [
+          "coercive_control",
+          "digital_abuse",
+          "emotional_abuse",
+          "physical_abuse",
+          "stalking_harassment",
+          "threats_intimidation"
+        ],
+        "positive": {
+          "expected": [
+            "coercive_control",
+            "physical_abuse",
+            "threats_intimidation"
+          ],
+          "matched": [
+            "coercive_control",
+            "physical_abuse",
+            "threats_intimidation"
+          ],
+          "missed": []
+        },
+        "negative": {
+          "expected": [
+            "financial_abuse",
+            "neglect_deprivation",
+            "reproductive_coercion",
+            "sexual_coercion",
+            "workplace_abuse"
+          ],
+          "matched": [
+            "financial_abuse",
+            "neglect_deprivation",
+            "reproductive_coercion",
+            "sexual_coercion",
+            "workplace_abuse"
+          ],
+          "falsePositives": []
+        },
+        "unavailable": {
+          "positive": [],
+          "negative": []
+        },
+        "unreviewedSignals": [
+          "digital_abuse",
+          "emotional_abuse",
+          "stalking_harassment"
+        ],
+        "immediateSafety": {
+          "expected": true,
+          "observed": true,
+          "matched": true
+        },
+        "matchesAnnotatedExpectations": false
+      }
+    },
+    {
+      "id": "sexual-pressure-and-contraception-interference",
+      "title": "I said no, and I meant it",
+      "model": "gpt-6-luna",
+      "inputSha256": "e65ec6f5779adc02049a3f19b1073903d8a09ed54c1a0ea947328b1a07e3c09e",
+      "requestPreparedAt": "2026-10-29T13:18:53.009Z",
+      "requestBinding": "Validated request digest recorded before call and matched the adapter result.",
+      "signals": [
+        {
+          "id": "emotional_abuse",
+          "probability": 0.91,
+          "band": "strong_indication"
+        },
+        {
+          "id": "coercive_control",
+          "probability": 0.85,
+          "band": "strong_indication"
+        },
+        {
+          "id": "financial_abuse",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "social_isolation",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "physical_abuse",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "sexual_coercion",
+          "probability": 1,
+          "band": "strong_indication"
+        },
+        {
+          "id": "digital_abuse",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "stalking_harassment",
+          "probability": 0.01,
+          "band": "not_indicated"
+        },
+        {
+          "id": "reproductive_coercion",
+          "probability": 1,
+          "band": "strong_indication"
+        },
+        {
+          "id": "workplace_abuse",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "neglect_deprivation",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "threats_intimidation",
+          "probability": 0.25,
+          "band": "not_indicated"
+        }
+      ],
+      "immediateSafety": {
+        "probability": 0,
+        "band": "not_indicated"
+      },
+      "evaluation": {
+        "predictedPatterns": [
+          "coercive_control",
+          "emotional_abuse",
+          "reproductive_coercion",
+          "sexual_coercion"
+        ],
+        "positive": {
+          "expected": [
+            "reproductive_coercion",
+            "sexual_coercion"
+          ],
+          "matched": [
+            "reproductive_coercion",
+            "sexual_coercion"
+          ],
+          "missed": []
+        },
+        "negative": {
+          "expected": [
+            "neglect_deprivation",
+            "physical_abuse",
+            "stalking_harassment",
+            "workplace_abuse"
+          ],
+          "matched": [
+            "neglect_deprivation",
+            "physical_abuse",
+            "stalking_harassment",
+            "workplace_abuse"
+          ],
+          "falsePositives": []
+        },
+        "unavailable": {
+          "positive": [],
+          "negative": []
+        },
+        "unreviewedSignals": [
+          "coercive_control",
+          "emotional_abuse"
+        ],
+        "immediateSafety": {
+          "expected": false,
+          "observed": false,
+          "matched": true
+        },
+        "matchesAnnotatedExpectations": false
+      }
+    },
+    {
+      "id": "workplace-retaliation-and-repeated-following",
+      "title": "After I raised the concern at work",
+      "model": "gpt-6-luna",
+      "inputSha256": "4a3a0e55f9441b8cc700555a8f1d121af75834d95a941a78e10162c56058ebd6",
+      "requestPreparedAt": "2026-10-29T13:18:54.277Z",
+      "requestBinding": "Validated request digest recorded before call and matched the adapter result.",
+      "signals": [
+        {
+          "id": "emotional_abuse",
+          "probability": 0.91,
+          "band": "strong_indication"
+        },
+        {
+          "id": "coercive_control",
+          "probability": 0.9,
+          "band": "strong_indication"
+        },
+        {
+          "id": "financial_abuse",
+          "probability": 0.01,
+          "band": "not_indicated"
+        },
+        {
+          "id": "social_isolation",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "physical_abuse",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "sexual_coercion",
+          "probability": 0.01,
+          "band": "not_indicated"
+        },
+        {
+          "id": "digital_abuse",
+          "probability": 0.66,
+          "band": "possible_indication"
+        },
+        {
+          "id": "stalking_harassment",
+          "probability": 1,
+          "band": "strong_indication"
+        },
+        {
+          "id": "reproductive_coercion",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "workplace_abuse",
+          "probability": 0.99,
+          "band": "strong_indication"
+        },
+        {
+          "id": "neglect_deprivation",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "threats_intimidation",
+          "probability": 0.52,
+          "band": "uncertain"
+        }
+      ],
+      "immediateSafety": {
+        "probability": 0,
+        "band": "not_indicated"
+      },
+      "evaluation": {
+        "predictedPatterns": [
+          "coercive_control",
+          "digital_abuse",
+          "emotional_abuse",
+          "stalking_harassment",
+          "threats_intimidation",
+          "workplace_abuse"
+        ],
+        "positive": {
+          "expected": [
+            "stalking_harassment",
+            "threats_intimidation",
+            "workplace_abuse"
+          ],
+          "matched": [
+            "stalking_harassment",
+            "threats_intimidation",
+            "workplace_abuse"
+          ],
+          "missed": []
+        },
+        "negative": {
+          "expected": [
+            "financial_abuse",
+            "neglect_deprivation",
+            "physical_abuse",
+            "reproductive_coercion",
+            "sexual_coercion"
+          ],
+          "matched": [
+            "financial_abuse",
+            "neglect_deprivation",
+            "physical_abuse",
+            "reproductive_coercion",
+            "sexual_coercion"
+          ],
+          "falsePositives": []
+        },
+        "unavailable": {
+          "positive": [],
+          "negative": []
+        },
+        "unreviewedSignals": [
+          "coercive_control",
+          "digital_abuse",
+          "emotional_abuse"
+        ],
+        "immediateSafety": {
+          "expected": false,
+          "observed": false,
+          "matched": true
+        },
+        "matchesAnnotatedExpectations": false
+      }
+    },
+    {
+      "id": "essential-medication-withheld",
+      "title": "I could not get to my refill",
+      "model": "gpt-6-luna",
+      "inputSha256": "9ebe112194fab8f2387dedbb288ee28c8ecbc9956b4f627746a5920da0191da7",
+      "requestPreparedAt": "2026-10-29T13:18:54.825Z",
+      "requestBinding": "Validated request digest recorded before call and matched the adapter result.",
+      "signals": [
+        {
+          "id": "emotional_abuse",
+          "probability": 0.6,
+          "band": "uncertain"
+        },
+        {
+          "id": "coercive_control",
+          "probability": 0.78,
+          "band": "possible_indication"
+        },
+        {
+          "id": "financial_abuse",
+          "probability": 0.83,
+          "band": "possible_indication"
+        },
+        {
+          "id": "social_isolation",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "physical_abuse",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "sexual_coercion",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "digital_abuse",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "stalking_harassment",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "reproductive_coercion",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "workplace_abuse",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "neglect_deprivation",
+          "probability": 1,
+          "band": "strong_indication"
+        },
+        {
+          "id": "threats_intimidation",
+          "probability": 0.12,
+          "band": "not_indicated"
+        }
+      ],
+      "immediateSafety": {
+        "probability": 0,
+        "band": "not_indicated"
+      },
+      "evaluation": {
+        "predictedPatterns": [
+          "coercive_control",
+          "emotional_abuse",
+          "financial_abuse",
+          "neglect_deprivation"
+        ],
+        "positive": {
+          "expected": [
+            "coercive_control",
+            "neglect_deprivation"
+          ],
+          "matched": [
+            "coercive_control",
+            "neglect_deprivation"
+          ],
+          "missed": []
+        },
+        "negative": {
+          "expected": [
+            "physical_abuse",
+            "sexual_coercion",
+            "stalking_harassment",
+            "threats_intimidation",
+            "workplace_abuse"
+          ],
+          "matched": [
+            "physical_abuse",
+            "sexual_coercion",
+            "stalking_harassment",
+            "threats_intimidation",
+            "workplace_abuse"
+          ],
+          "falsePositives": []
+        },
+        "unavailable": {
+          "positive": [],
+          "negative": []
+        },
+        "unreviewedSignals": [
+          "emotional_abuse",
+          "financial_abuse"
+        ],
+        "immediateSafety": {
+          "expected": false,
+          "observed": false,
+          "matched": true
+        },
+        "matchesAnnotatedExpectations": false
+      }
+    },
+    {
+      "id": "supportive-disagreement-and-repair-control",
+      "title": "We handled the disagreement differently this time",
+      "model": "gpt-6-luna",
+      "inputSha256": "d362fd285108fb9535fd917d0f541532ce1f03bab3564f476ba76443f2587692",
+      "requestPreparedAt": "2026-10-29T13:18:55.663Z",
+      "requestBinding": "Validated request digest recorded before call and matched the adapter result.",
+      "signals": [
+        {
+          "id": "emotional_abuse",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "coercive_control",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "financial_abuse",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "social_isolation",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "physical_abuse",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "sexual_coercion",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "digital_abuse",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "stalking_harassment",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "reproductive_coercion",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "workplace_abuse",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "neglect_deprivation",
+          "probability": 0,
+          "band": "not_indicated"
+        },
+        {
+          "id": "threats_intimidation",
+          "probability": 0,
+          "band": "not_indicated"
+        }
+      ],
+      "immediateSafety": {
+        "probability": 0,
+        "band": "not_indicated"
+      },
+      "evaluation": {
+        "predictedPatterns": [],
+        "positive": {
+          "expected": [],
+          "matched": [],
+          "missed": []
+        },
+        "negative": {
+          "expected": [
+            "coercive_control",
+            "digital_abuse",
+            "emotional_abuse",
+            "financial_abuse",
+            "neglect_deprivation",
+            "physical_abuse",
+            "reproductive_coercion",
+            "sexual_coercion",
+            "social_isolation",
+            "stalking_harassment",
+            "threats_intimidation",
+            "workplace_abuse"
+          ],
+          "matched": [
+            "coercive_control",
+            "digital_abuse",
+            "emotional_abuse",
+            "financial_abuse",
+            "neglect_deprivation",
+            "physical_abuse",
+            "reproductive_coercion",
+            "sexual_coercion",
+            "social_isolation",
+            "stalking_harassment",
+            "threats_intimidation",
+            "workplace_abuse"
+          ],
+          "falsePositives": []
+        },
+        "unavailable": {
+          "positive": [],
+          "negative": []
+        },
+        "unreviewedSignals": [],
+        "immediateSafety": {
+          "expected": false,
+          "observed": false,
+          "matched": true
+        },
+        "matchesAnnotatedExpectations": true
+      }
+    }
+  ],
+  "summary": {
+    "caseCount": 6,
+    "casesMatchingAnnotations": 2,
+    "casesNeedingHumanReview": [
+      "separated-partner-threat-and-safety-request",
+      "sexual-pressure-and-contraception-interference",
+      "workplace-retaliation-and-repeated-following",
+      "essential-medication-withheld"
+    ],
+    "scoring": "Positive and clear-negative qualitative labels compare against probability >= 0.40; immediate safety compares against >= 0.65; unknown safety is unmatched. Null/refusal results for annotated categories are listed as unavailable and count as neither matches nor misses. Categories omitted from an annotation are unscored; any such model signal is listed for human review. This is annotation agreement, not a calibrated benchmark or accuracy claim."
+  },
+  "hashReconciliation": {
+    "verifiedAt": "2026-10-29T13:20:26.895Z",
+    "basis": "Each inputSha256 was recorded from the validated request before its cloud call, checked against the adapter-returned review digest, and recomputed from the current fixture body."
+  }
+}
