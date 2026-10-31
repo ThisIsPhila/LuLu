@@ -1,14 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Capacitor, registerPlugin, type PluginListenerHandle } from '@capacitor/core';
-
-interface NativeRefreshPlugin {
-  setEnabled(options: {enabled: boolean}): Promise<void>;
-  end(): Promise<void>;
-  haptic(): Promise<void>;
-  addListener(event: 'refresh', listener: () => void): Promise<PluginListenerHandle>;
-  addListener(event: 'progress', listener: (value: {distance:number;refreshing:boolean}) => void): Promise<PluginListenerHandle>;
-}
-const NativeRefresh = registerPlugin<NativeRefreshPlugin>('NativeRefresh');
+import { Capacitor, type PluginListenerHandle } from '@capacitor/core';
+import { NativeRefresh } from '../platform/nativeRefresh';
 
 export function useNativePullToRefresh(enabled: boolean, onRefresh: () => Promise<void>) {
   const [progress,setProgress] = useState({distance:0,refreshing:false});
