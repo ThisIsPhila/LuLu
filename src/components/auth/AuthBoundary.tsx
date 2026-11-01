@@ -1,5 +1,6 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { OnboardingAuth, type AuthActionResult } from '../OnboardingAuth';
+const LandingPage = lazy(() => import('../LandingPage'));
 import { OnboardingJourney, type OnboardingJourneyScreen, type OnboardingJourneyState, type JourneyActionResult } from '../OnboardingJourney';
 import { authenticate, authenticateWithEmail, authenticateWithGoogle, authError, BackendRequestError, logout, requestEmailPasswordReset, restoreNativeAppSession, restorePendingNativeAuth, restoreWebAppSession, type AppSession } from '../../services/backend/passkeys';
 import { bindOnboardingDraft, discardUnreadableOnboardingDraft, loadOnboardingDraft, saveFirstOnboardingEntry, saveOnboardingProgress } from '../../services/onboardingDraft';
@@ -10,8 +11,23 @@ import { getSystemTheme, readAppPreferences, resolveAppTheme, writeAppPreference
 import './auth.css';
 import { LoadingScreen } from '../LoadingScreen';
 const localPreviewSessionKey = 'lulu.local-preview.active';
+const landingSeenKey = 'lulu.landing.seen';
 // Temporarily disabled at the owner's request; keep the journey and its drafts.
 const ONBOARDING_ENABLED = false;
+function shouldStartAtLanding(): boolean {
+  try {
+    if (new URLSearchParams(window.location.search).get('auth') === 'signin') return false;
+    if (!isNativePlatform()) return true;
+    return localStorage.getItem(landingSeenKey) !== 'yes';
+  } catch {
+    return true;
+  }
+}
+function markLandingSeen(): void {
+  try {
+    if (isNativePlatform()) localStorage.setItem(landingSeenKey, 'yes');
+  } catch { /* Landing remains available when storage is unavailable. */ }
+}
 export function AuthBoundary({children}: {children:(session:AppSession,onSignedOut:()=>void)=>ReactNode}) {
   const [session,setSession]=useState<AppSession|null>(null);
   const [restoring,setRestoring]=useState(true);
@@ -21,7 +37,13 @@ export function AuthBoundary({children}: {children:(session:AppSession,onSignedO
   const [draftReadFailed,setDraftReadFailed]=useState(false);
   const [journeyScreen,setJourneyScreen]=useState<OnboardingJourneyScreen>(1);
   const [journeyInitialState,setJourneyInitialState]=useState<Partial<OnboardingJourneyState>>({});
-  const [route,setRoute]=useState<'journey'|'signin'>('signin');
+  const [route,setRoute]=useState<'landing'|'journey'|'signin'>(shouldStartAtLanding() ? 'landing' : 'signin');
+  const [authScreen,setAuthScreen]=useState<'signin'|'create'>(()=>pendingJudgeInvitation() ? 'create' : 'signin');
+  function enterAuth(screen:'signin'|'create'):void {
+    markLandingSeen();
+    setAuthScreen(screen);
+    setRoute('signin');
+  }
   const [authPreferences,setAuthPreferences]=useState(readAppPreferences);
   const [systemTheme,setSystemTheme]=useState<AppTheme>(getSystemTheme);
   const journeyScreenRef=useRef<OnboardingJourneyScreen>(1);
@@ -146,6 +168,9 @@ export function AuthBoundary({children}: {children:(session:AppSession,onSignedO
   }
   if(session) return children(session,()=>{if(localDevelopmentAvailable())sessionStorage.removeItem(localPreviewSessionKey);verified.current=null;setSession(null);});
   if(restoring || (route==='journey' && !journeyReady))return <LoadingScreen theme={authTheme} />;
+  if(route==='landing')return <Suspense fallback={<LoadingScreen theme={authTheme} />}>
+    <LandingPage onSignIn={()=>enterAuth('signin')} onCreateAccount={()=>enterAuth('create')} />
+  </Suspense>;
   if(sessionRestoreError)return <main className="auth-session-recovery" role="alert"><h1>We couldn’t confirm your session.</h1><p>{sessionRestoreError}</p><button type="button" onClick={()=>void retrySessionRestore()}>Retry connection</button><button type="button" onClick={()=>void signOutDuringRestore()}>Sign out on this device</button></main>;
   if(draftReadFailed && route==='journey')return <div className="auth-draft-recovery" role="alert">
     <h1>Your local draft could not be opened.</h1><p>{journeyError} The text stays on this device until you choose what to do.</p>
@@ -165,7 +190,7 @@ export function AuthBoundary({children}: {children:(session:AppSession,onSignedO
       onSaveFirstEntry={saveFirstEntry} onCreatePrivateSpace={enroll} onSignIn={()=>setRoute('signin')} />
   </>;
   return <OnboardingAuth
-    initialScreen={pendingJudgeInvitation() ? 'create' : 'signin'}
+    initialScreen={authScreen}
     initialTheme={authTheme}
     followSystem={authPreferences.theme === 'system'}
     onThemeChange={theme=>{

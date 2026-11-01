@@ -20,10 +20,12 @@ captureJudgeInvitation();
 const route = window.location.pathname.replace(/\/$/, '');
 const localPrivacyDemo = import.meta.env.DEV || ['localhost', '127.0.0.1'].includes(window.location.hostname);
 const App = React.lazy(() => import('./App'));
+const LandingPage = React.lazy(() => import('./components/LandingPage'));
 const PrivacyDemoEntry = React.lazy(() => import('./components/PrivacyDemoEntry').then(module => ({ default: module.PrivacyDemoEntry })));
 const NativeAuthBridge = React.lazy(() => import('./platform/NativeAuthBridge').then(module => ({ default: module.NativeAuthBridge })));
+if (route === '/landing') document.title = 'LuLu — Your story. Your safety. Your choice.';
 createRoot(document.getElementById('root')!).render(
   <StrictMode><Suspense fallback={<LoadingScreen />}>
-    {route === '/native-auth-bridge' ? <NativeAuthBridge /> : route === '/privacy-demo' && localPrivacyDemo ? <PrivacyDemoEntry /> : <App />}
+    {route === '/landing' ? <LandingPage /> : route === '/native-auth-bridge' ? <NativeAuthBridge /> : route === '/privacy-demo' && localPrivacyDemo ? <PrivacyDemoEntry /> : <App />}
   </Suspense></StrictMode>,
 );
