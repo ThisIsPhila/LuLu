@@ -203,31 +203,35 @@ export default function LandingPage({ onSignIn, onCreateAccount }: LandingPagePr
       <Header onSignIn={onSignIn} />
       <main>
         <section className="lp-hero">
+          <div className="lp-hero-backdrop" />
           <div className="lp-hero-inner">
-          <div className="lp-hero-copy">
-            <img className="lp-hero-logo" src="/media/brand/lulu-wordmark-black.png" alt="LuLu" />
-            <h1>Your story.<br />Your safety.<br />Your choice.</h1>
-            <p className="lp-hero-lead">An ordinary journal with an extraordinary purpose.</p>
-            <p>Write for the everyday. When something matters more, LuLu quietly gives you a protected place to preserve it, understand it and decide what happens next.</p>
-            <div className="lp-actions">
-              <EntryAction action={onSignIn} href={signInUrl} className="lp-button lp-button-dark">Open LuLu <ArrowRight size={18} /></EntryAction>
-              <a className="lp-button lp-button-light" href="#private">Discover the private space</a>
+            <div className="lp-hero-copy">
+              <img className="lp-hero-logo" src="/media/brand/lulu-wordmark-black.png" alt="LuLu" />
+              <h1>Your story. Your safety. Your choice.</h1>
+              <p className="lp-hero-lead">An everyday journal with an extraordinary purpose.</p>
+              <div className="lp-hero-divider" />
+              <p className="lp-hero-description">LuLu provides a personal space to write, preserve important experiences and decide what happens next.</p>
+              <div className="lp-actions">
+                <EntryAction action={onSignIn} href={signInUrl} className="lp-button lp-button-primary">Open LuLu <ArrowRight size={18} /></EntryAction>
+                <a className="lp-button lp-button-secondary" href="#experience">Discover how it works</a>
+              </div>
             </div>
-            <div className="lp-hero-proof"><span><ShieldCheck size={17} /> Passkey protected</span><span><Moon size={17} /> Quick exit</span><span><Sparkles size={17} /> Meet Lu</span></div>
-          </div>
-          <div className="lp-hero-phone"><PhonePreview /></div>
           </div>
         </section>
 
         <section className="lp-intro lp-section" id="experience">
-          <div className="lp-section-heading lp-heading-split">
-            <div><p className="lp-label">The LuLu experience</p><h2>One place to begin.<br />Your choice of what comes next.</h2></div>
-            <p>LuLu does not begin as a safety app. It begins as a journal people can return to every day—then offers protection only when they deliberately ask for it.</p>
+          <div className="lp-section-heading">
+            <p className="lp-label">The LuLu experience</p>
+            <h2>One place to begin.<br />Your choice of what comes next.</h2>
+            <p>LuLu brings continuity, privacy and choice to the moments between experience and action.</p>
           </div>
           <div className="lp-journey">
             {journey.map(item => (
               <article key={item.number}>
-                <span>{item.number}</span><h3>{item.title}</h3><strong>{item.lead}</strong><p>{item.copy}</p>
+                <span className="lp-journey-number">{item.number}</span>
+                <h3>{item.title}</h3>
+                <strong>{item.lead}</strong>
+                <p>{item.copy}</p>
               </article>
             ))}
           </div>
