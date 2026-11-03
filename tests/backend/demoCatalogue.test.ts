@@ -38,6 +38,35 @@ test('catalogue mapping retains an ordinary Story collection label', () => {
   assert.deepEqual(entry.tags, ['Fiction', 'Part 2']);
 });
 
+test('catalogue mapping carries demo aliases and explainer, and drops malformed ones', () => {
+  const entry = mapDemoRecord('demo-two', {
+    title: 'Demo Journal — scrubbed',
+    body: 'Person A came to the Nest.',
+    kind: 'Journal',
+    protected: false,
+    perspective: 'third',
+    tags: ['Demo'],
+    entitiesRecognized: ['Person A', ' the Nest '],
+    demoGuide: '  This demo shows replaced details. ',
+    createdAt: { toDate: () => new Date('2026-10-24T12:30:00.000Z') },
+  });
+  assert.deepEqual(entry.entitiesRecognized, ['Person A', 'the Nest']);
+  assert.equal(entry.demoGuide, 'This demo shows replaced details.');
+
+  const malformed = mapDemoRecord('demo-three', {
+    title: 'Demo Journal — scrubbed',
+    body: 'Person A came to the Nest.',
+    kind: 'Journal',
+    protected: false,
+    tags: ['Demo'],
+    entitiesRecognized: ['Person A', 42],
+    demoGuide: 42,
+    createdAt: { toDate: () => new Date('2026-10-24T12:30:00.000Z') },
+  });
+  assert.equal('entitiesRecognized' in malformed, false);
+  assert.equal('demoGuide' in malformed, false);
+});
+
 test('catalogue mapping refuses protected or malformed records', () => {
   const base = {
     title: 'A fictional sample',

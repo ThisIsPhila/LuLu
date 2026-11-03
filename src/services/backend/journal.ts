@@ -19,10 +19,15 @@ export function watchEntries(uid: string, receive: (entries: Entry[]) => void, f
       } catch { /* Ignore malformed collection metadata without hiding the saved entry. */ }
       let tags: string[] = [];
       try { tags = normalizeOrdinaryTags(d.tags ?? []); } catch { /* Malformed optional metadata must not hide the saved entry. */ }
+      const aliases = d.protected === false && Array.isArray(d.entitiesRecognized)
+        ? d.entitiesRecognized.filter((item: unknown): item is string => typeof item === 'string' && item.trim().length > 0 && item.length <= 200).slice(0, 50)
+        : [];
       return {id:record.id,title:d.title,body:d.body,kind:d.kind,protected:d.protected,perspective:d.perspective,
         date:date.toISOString(),timeStr:date.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
         wordsCount:d.body.trim().split(/\s+/).length,groupDate:date.toDateString()===today?'Today':date.toDateString()===yesterday?'Yesterday':'Earlier',
-        favorite:d.protected === false && d.favorite === true,tags:d.protected === false ? tags : [],...(curatedDeck ? {curatedDeck} : {})};
+        favorite:d.protected === false && d.favorite === true,tags:d.protected === false ? tags : [],...(curatedDeck ? {curatedDeck} : {}),
+        ...(aliases.length ? {entitiesRecognized: aliases} : {}),
+        ...(d.protected === false && typeof d.demoGuide === 'string' && d.demoGuide.trim() && d.demoGuide.length <= 1000 ? {demoGuide: d.demoGuide.trim()} : {})};
     }));
   },fail);
 }

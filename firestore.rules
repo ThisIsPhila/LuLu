@@ -36,7 +36,9 @@ service cloud.firestore {
     }
     function isValidEntry(d) {
       return d.keys().hasAll(['ownerId','title','body','kind','protected','perspective','createdAt','updatedAt'])
-        && d.keys().hasOnly(['ownerId','title','body','kind','protected','perspective','createdAt','updatedAt','curatedDeck','favorite','tags'])
+        && d.keys().hasOnly(['ownerId','title','body','kind','protected','perspective','createdAt','updatedAt','curatedDeck','favorite','tags','entitiesRecognized','demoGuide'])
+        && (!d.keys().hasAny(['entitiesRecognized']) || (!d.protected && d.entitiesRecognized is list && d.entitiesRecognized.size() <= 50))
+        && (!d.keys().hasAny(['demoGuide']) || (!d.protected && d.demoGuide is string && d.demoGuide.size() > 0 && d.demoGuide.size() <= 1000))
         && d.ownerId is string && d.ownerId.size() <=128
         && d.title is string && d.title.size() <=200
         && (!d.protected || d.title == 'Journal entry')
@@ -59,7 +61,9 @@ service cloud.firestore {
     }
     function isValidDemoEntry(d) {
       return d.keys().hasAll(['title','body','kind','protected','perspective','tags','createdAt'])
-        && d.keys().hasOnly(['title','body','kind','protected','perspective','tags','createdAt','curatedDeck'])
+        && d.keys().hasOnly(['title','body','kind','protected','perspective','tags','createdAt','curatedDeck','entitiesRecognized','demoGuide'])
+        && (!d.keys().hasAny(['entitiesRecognized']) || (d.entitiesRecognized is list && d.entitiesRecognized.size() <= 50))
+        && (!d.keys().hasAny(['demoGuide']) || (d.demoGuide is string && d.demoGuide.size() > 0 && d.demoGuide.size() <= 1000))
         && d.title is string && d.title.size() > 0 && d.title.size() <= 200
         && d.body is string && d.body.size() > 0 && d.body.size() <= 50000
         && d.kind in ['Journal','Story'] && d.protected == false

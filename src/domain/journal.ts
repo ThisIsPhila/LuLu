@@ -15,6 +15,8 @@ export type Entry = {
   perspective?: 'first' | 'third';
   entitiesRecognized?: string[];
   curatedDeck?: string;
+  /** Demo-only explainer shown in the Reader. Never set on real entries. */
+  demoGuide?: string;
 };
 
 /** Metadata for ordinary attachments stored in this browser. */

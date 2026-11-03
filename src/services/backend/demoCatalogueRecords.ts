@@ -9,8 +9,15 @@ export type DemoRecord = {
   perspective?: unknown;
   tags?: unknown;
   curatedDeck?: unknown;
+  entitiesRecognized?: unknown;
+  demoGuide?: unknown;
   createdAt?: { toDate?: () => Date };
 };
+
+function validAliases(value: unknown): string[] {
+  if (!Array.isArray(value) || value.length > 50 || value.some(item => typeof item !== 'string' || !item.trim() || item.length > 200)) return [];
+  return value.map(item => (item as string).trim());
+}
 
 export function mapDemoRecord(id: string, record: DemoRecord): Entry {
   if (typeof record.title !== 'string' || typeof record.body !== 'string' ||
@@ -43,5 +50,7 @@ export function mapDemoRecord(id: string, record: DemoRecord): Entry {
     protected: false,
     perspective: record.perspective === 'third' ? 'third' : 'first',
     ...(curatedDeck ? { curatedDeck } : {}),
+    ...(validAliases(record.entitiesRecognized).length ? { entitiesRecognized: validAliases(record.entitiesRecognized) } : {}),
+    ...(typeof record.demoGuide === 'string' && record.demoGuide.trim() && record.demoGuide.length <= 1000 ? { demoGuide: record.demoGuide.trim() } : {}),
   };
 }
