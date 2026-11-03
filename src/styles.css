@@ -2122,6 +2122,66 @@ body {
   color: #FFFFFF;
 }
 
+.reader-scrub-mark {
+  background: #e8eee5;
+  color: inherit;
+  border-bottom: 2px solid #8fa583;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+.theme-dark .reader-scrub-mark {
+  background: #3d4a3a;
+  border-bottom-color: #9db392;
+}
+
+.reader-scrub-legend {
+  margin: 18px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-muted, #716c60);
+}
+
+.reader-demo-guide {
+  margin: 20px 0 8px;
+  padding: 16px;
+  border: 1px solid var(--stone-300);
+  border-radius: 16px;
+  background: var(--stone-100);
+  text-align: left;
+}
+
+.reader-demo-badge {
+  display: inline-block;
+  font: 600 11px var(--font-heading, sans-serif);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  background: #e8eee5;
+  color: #344136;
+  border-radius: 999px;
+  padding: 3px 9px;
+  margin-bottom: 8px;
+}
+
+.reader-demo-guide p {
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.reader-demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.reader-demo-guide .reader-demo-note {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink-muted, #716c60);
+}
+
 /* ==========================================================================
    Private Support Sanctuary Screen (Dark Mode)
    ========================================================================== */

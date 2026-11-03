@@ -841,6 +841,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
               onEdit={handleEditSelectedEntry}
               showNavigationHeader={!showSharedNavigationHeader}
               onEnterProtected={() => setIsProtectedGateOpen(true)}
+              onReviewReplacements={() => { if (selectedEntry) navigatePrivate('inspector', selectedEntry.body); }}
               storySequence={readerStorySequence}
               onSelectStorySequenceEntry={entry => {
                 originalReadRequest.current++;

@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Unlock,
   Eye,
+  KeyRound,
   Palette,
   Type,
   Pencil,
@@ -20,6 +21,7 @@ type Props = {
   onBack: () => void;
   onEdit: () => void;
   onEnterProtected: () => void;
+  onReviewReplacements?: () => void;
   showNavigationHeader?: boolean;
   storySequence?: readonly Entry[];
   onSelectStorySequenceEntry?: (entry: Entry) => void;
@@ -32,11 +34,13 @@ export const ReaderView: React.FC<Props> = ({
   onBack,
   onEdit,
   onEnterProtected,
+  onReviewReplacements,
   showNavigationHeader = true,
   storySequence = [],
   onSelectStorySequenceEntry,
 }) => {
   const [showOriginal, setShowOriginal] = useState(false);
+  const [revealScrubbed, setRevealScrubbed] = useState(false);
   const [fontSize, setFontSize] = useState<'regular' | 'large'>('regular');
   const [colorTheme, setColorTheme] = useState<'paper' | 'stone' | 'dark'>(() =>
     document.documentElement.dataset.luluTheme === 'dark' ? 'dark' : 'paper',
@@ -46,15 +50,39 @@ export const ReaderView: React.FC<Props> = ({
 
   useEffect(() => {
     setShowOriginal(false);
+    setRevealScrubbed(false);
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, [entry.id]);
 
+  // The reveal session ends with the private session: highlights conceal again.
+  useEffect(() => {
+    if (!protectedMode) setRevealScrubbed(false);
+  }, [protectedMode]);
+
   const hasReadAccess = !entry.protected || protectedMode;
   const hasOriginal = Boolean(entry.originalBody && protectedMode);
+  const isDemo = entry.tags.includes('Demo');
+  const scrubAliases = [...(entry.entitiesRecognized ?? [])].sort((a, b) => b.length - a.length);
+  const showingScrubLocations = revealScrubbed && protectedMode && !showOriginal && scrubAliases.length > 0;
 
   let displayText = entry.body;
   if (showOriginal && hasOriginal) {
     displayText = entry.originalBody!;
+  }
+
+  function handleRevealToggle() {
+    if (!protectedMode) { onEnterProtected(); return; }
+    setRevealScrubbed(value => !value);
+  }
+
+  function renderParagraph(paragraph: string) {
+    if (!showingScrubLocations) return paragraph;
+    const pattern = new RegExp(`(${scrubAliases.map(alias => alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
+    return paragraph.split(pattern).map((part, index) =>
+      scrubAliases.some(alias => alias.toLocaleLowerCase() === part.toLocaleLowerCase())
+        ? <mark key={index} className="reader-scrub-mark">{part}</mark>
+        : part,
+    );
   }
 
   return (
@@ -112,6 +140,20 @@ export const ReaderView: React.FC<Props> = ({
         {/* Title */}
         <h1 className="reading-main-title">{entry.title}</h1>
 
+        {isDemo && entry.demoGuide && (
+          <section className="reader-demo-guide" aria-label="About this demo entry">
+            <span className="reader-demo-badge">Demo entry</span>
+            <p>{entry.demoGuide}</p>
+            <div className="reader-demo-actions">
+              <button type="button" className="btn-pill-action primary" onClick={handleRevealToggle}>
+                {protectedMode ? (revealScrubbed ? 'Conceal replacements' : 'Reveal replacements') : 'Unlock to reveal replacements'}
+              </button>
+              {onReviewReplacements && <button type="button" className="btn-pill-action secondary" onClick={onReviewReplacements}>Review or add details</button>}
+            </div>
+            <p className="reader-demo-note">In a real entry, the original is stored encrypted on this device, separately from the scrubbed copy — the two are never kept together. The key button highlights where details were replaced; it does not show the hidden originals. A professional only ever sees this scrubbed version, unless you choose otherwise.</p>
+          </section>
+        )}
+
         {showOriginal && (
           <div className="author-unmasked-banner">
             <Unlock size={14} />
@@ -122,9 +164,13 @@ export const ReaderView: React.FC<Props> = ({
         {/* Prose */}
         <article className={`reading-prose font-size-${fontSize}`}>
           {displayText.split('\n\n').map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
+            <p key={index}>{renderParagraph(paragraph)}</p>
           ))}
         </article>
+
+        {showingScrubLocations && (
+          <p className="reader-scrub-legend" role="status">Highlighted words are replacements. The original details stay hidden — this view only shows where scrubbing happened.</p>
+        )}
 
         {!entry.protected && <OrdinaryMediaAttachments ownerId={mediaOwnerId} entryId={entry.id} />}
 
@@ -146,7 +192,7 @@ export const ReaderView: React.FC<Props> = ({
         </div>}
 
         {/* Identified Entities Card (Screen Reading Mode) */}
-        {entry.protected && protectedMode && Boolean(entry.entitiesRecognized?.length) && (
+        {(entry.protected ? protectedMode : showingScrubLocations) && Boolean(entry.entitiesRecognized?.length) && (
           <div className="identified-entities-card">
             <div className="entities-card-header">
               <div className="entities-title-row">
@@ -186,6 +232,17 @@ export const ReaderView: React.FC<Props> = ({
           aria-label="Change reading text size"
         >
           <Type size={17} />
+        </button>
+
+        <button
+          className={`circle-tool-btn ${showingScrubLocations ? 'active' : ''}`}
+          type="button"
+          onClick={handleRevealToggle}
+          title={protectedMode ? 'Reveal replaced details' : 'Unlock with passkey to reveal replaced details'}
+          aria-label={protectedMode ? (revealScrubbed ? 'Conceal replaced details' : 'Reveal replaced details') : 'Unlock with passkey to reveal replaced details'}
+          aria-pressed={showingScrubLocations}
+        >
+          {protectedMode ? <Eye size={17} /> : <KeyRound size={17} />}
         </button>
 
       </footer>

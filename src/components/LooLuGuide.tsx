@@ -237,7 +237,10 @@ export function LooLuGuide({ accountId, currentView, canLeaveCurrentView, canSta
       const root=floatingOrbRoot.current;if(!root)return;
       const readerTools=document.querySelector<HTMLElement>('.circular-reader-dock');
       const bounds=orbViewportBounds(root),bottomRight={left:bounds.maxLeft,top:bounds.maxTop};
-      const preferred=manualOrbPosition.current&&floatingOrbPositionRef.current?floatingOrbPositionRef.current:bottomRight;
+      const readerDock=document.querySelector<HTMLElement>('.circular-reader-dock');
+      const readerDockRect=readerDock?.getBoundingClientRect();
+      const readerAligned=readerDockRect?{left:bounds.maxLeft,top:readerDockRect.top+(readerDockRect.height-root.offsetHeight)/2}:bottomRight;
+      const preferred=manualOrbPosition.current&&floatingOrbPositionRef.current?floatingOrbPositionRef.current:readerAligned;
       const next=findClearOrbPosition(preferred,root);
       if(manualOrbPosition.current){
         if(next.left!==floatingOrbPositionRef.current?.left||next.top!==floatingOrbPositionRef.current?.top){floatingOrbPositionRef.current=next;setFloatingOrbPosition(next);try{window.localStorage.setItem(floatingOrbPositionKey,JSON.stringify(next));}catch{/* Keep the current in-memory position. */}}
