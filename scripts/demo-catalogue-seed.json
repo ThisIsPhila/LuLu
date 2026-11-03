@@ -4,213 +4,217 @@
   "createdAtEncoding": "Convert each ISO 8601 createdAt value to a Firestore Timestamp when seeding.",
   "manifest": {
     "version": 1,
-    "label": "Fictional starter journal",
+    "label": "Fictional demo journal",
     "entryIds": [
-      "demo-journal-quiet-start",
-      "demo-journal-small-win",
-      "demo-journal-saturday-market",
-      "demo-journal-room-to-think",
-      "demo-journal-end-of-week",
-      "demo-story-juniper-01",
-      "demo-story-juniper-02",
-      "demo-story-juniper-03",
-      "demo-story-lantern-01",
-      "demo-story-lantern-02",
-      "demo-story-river-01",
-      "demo-story-river-02",
-      "demo-story-river-03"
+      "demo-journal-long-week",
+      "demo-journal-photo-voice",
+      "demo-journal-small-details",
+      "demo-story-coercive-01",
+      "demo-story-coercive-02",
+      "demo-story-coercive-03",
+      "demo-story-financial-01",
+      "demo-story-financial-02",
+      "demo-story-financial-03",
+      "demo-story-threats-01",
+      "demo-story-threats-02",
+      "demo-story-threats-03",
+      "demo-story-digital-01",
+      "demo-story-digital-02",
+      "demo-story-digital-03"
     ]
   },
   "entries": [
     {
-      "id": "demo-journal-quiet-start",
-      "title": "A little room in the morning",
-      "body": "I left my phone on the table while the kettle warmed and opened the window to the cool air. The basil had leaned toward the light again, so I turned the pot and pinched off one dry leaf. Nothing dramatic happened; that was the good part. I ate toast slowly, wrote down the three things I wanted to carry into the day, and let the rest wait. By the time I picked up my messages, I felt more like I had arrived in the morning instead of being pulled into it.\n\nThe bus arrived late enough for me to notice the jacaranda tree across the road. I usually rush straight past it, but this morning the pavement was scattered with purple flowers, and someone had placed a small chair outside the corner shop. A woman was peeling an orange there while she waited for her granddaughter. She offered me a piece, and we talked about the weather without either of us checking the time.\n\nAt work I felt the familiar pull to answer everything immediately. Thandi asked whether I could take on another task before lunch, and for a moment I nearly said yes without looking at my diary. Instead I asked what could move if this was urgent. We rearranged two meetings and made a plan that left enough room to finish what I had already started. I was surprised by how ordinary the conversation felt once I had said what I needed.\n\nIn the evening I walked home with a bag of spinach, bread and a lemon. I called my sister, Zanele, while I cooked, and she reminded me about the family lunch on Sunday. We laughed about the time we tried to make pudding without reading the recipe. I wrote the date on the calendar, then left my phone charging in the kitchen while I ate.\n\nI want to keep this morning in mind. A quiet start did not make the rest of the day perfect, but it gave me a moment to decide what I could carry. Tomorrow I will water the basil again and take the earlier bus if I can. If I miss it, perhaps I will sit on the little chair and wait.",
+      "id": "demo-journal-long-week",
+      "title": "Demo Journal — A long week, scrubbed and distanced",
+      "body": "She left her phone on the table while the kettle warmed and opened the window to the cool air. The basil on the sill had leaned toward the light again, so she turned the pot and pinched off one dry leaf. Nothing dramatic happened; that was the good part. She ate toast slowly, wrote down the three things she wanted to carry into the day, and let the rest wait. By the time she picked up her messages, she felt more like she had arrived in the morning instead of being pulled into it.\n\nThe bus arrived late enough for her to notice the jacaranda tree across the road. She usually rushed straight past it, but this morning the pavement was scattered with purple flowers and someone had placed a small chair outside the corner shop in Place A. A woman was peeling an orange there while she waited for her granddaughter. She offered her a piece, and they talked about the weather without either of them checking the time.\n\nAt Organisation A she felt the familiar pull to answer everything immediately. Person B asked whether she could take on another task before lunch, and for a moment she nearly said yes without looking at her diary. Instead she asked what could move if this was urgent. They rearranged two meetings and made a plan that left enough room to finish what she had already started. She was surprised by how ordinary the conversation felt once she had said what she needed. Person B sent the revised schedule to the team inbox before noon, and the shared calendar was updated so that the Thursday deadline no longer collided with the monthly report.\n\nOn Tuesday the taxi was full by the time it reached her stop, so she walked the long way past the library in Place A. She stopped to return a book about garden design and renewed the novel she had been reading slowly for a month. The librarian stamped the card and told her about a Saturday reading group that met under the trees. She wrote the time on the back of a receipt: ten o'clock, bring a chair. On the walk back she passed the bakery as the first trays came out, and the smell of warm bread followed her for a whole block. She decided that the reading group could be the one plan in the week that was not about being useful to anybody else.\n\nWednesday was harder. A meeting ran late and she agreed to take responsibility for a report she did not have time to finish. She was irritated with herself all evening. Person A called while she was cooking, and they spoke for a long time about ordinary things: a leaking tap at the Nest, a cousin's new baby, the price of maize meal. She almost did not mention the report. When she finally did, Person A asked a simple question: what would happen if she asked for another day? The next morning she told Person B that she needed another day and asked for help with the figures. He agreed, and a colleague offered to check the spreadsheet. She had spent more time fearing the conversation than it took to have it.\n\nOn Thursday she took a sandwich outside with Person C, and they sat beneath the trees for half an hour. They spoke about books and the rain rather than deadlines. Person C described the sewing lessons she had started at the community hall in Place A, two evenings a week, and the cushion she was making for her mother's chair. She came back to her desk with more energy, although the work waiting for her had not changed. In the afternoon she finished the figures for the report, checked them twice, and sent the draft to Person B with a short note about the one number she was still unsure of. Asking early had turned a frightening task into an ordinary one.\n\nOn Friday she visited the Saturday market early, before the crowds. She bought oranges from a woman who remembered that she liked the small, tart ones, then walked the long way around the square with the paper bag tucked under her arm. A child was trying to teach a patient dog to sit beside the flower buckets. She wrote the scene down before it faded: orange peel on her fingers, the dog looking solemn, somebody laughing behind her. At a fabric stall she found a piece of yellow cloth that reminded her of the curtains in her grandmother's kitchen. The seller showed her a photograph of a dress her daughter had made, and she bought two metres, unsure what she would do with it.\n\nIn the evening she walked home with a bag of spinach, bread and a lemon. She called her sister while she cooked, and they laughed about the time they tried to make pudding without reading the recipe. Her sister reminded her about the family lunch on Sunday at the Nest, and about the cousin who always arrived early and pretended he had not. She wrote the date on the calendar, then left her phone charging in the kitchen while she ate. After supper she sat with the novel for an hour, and the house was quiet except for the fridge humming and a dog barking two streets away.\n\nOn Saturday she woke without an alarm and made tea while the light was still grey. She watered the basil, swept the step, and put the yellow cloth over the back of a chair where the sun could reach it. Person C sent a message about the reading group, and she replied that she would come the following week, with a chair and no other plans attached. She spent an hour copying her favourite passages from the novel into a notebook, an old habit she had let go of during the busiest months. The handwriting slowed her down in a way she had forgotten she enjoyed.\n\nShe wants to keep this week in mind. A quiet start did not make the rest of the days perfect, and asking for help did not always come easily, but she noticed the difference on the days she remembered. For next week she is keeping the sketchbook by the door and leaving one evening open. She is not making a grand promise to become more organised; she is making the next useful step easier to find. Tomorrow she will water the basil again and take the earlier bus if she can. If she misses it, perhaps she will sit on the little chair outside the shop in Place A, and wait.",
       "kind": "Journal",
       "protected": false,
-      "perspective": "first",
-      "tags": [
-        "Morning",
-        "Routine",
-        "Reflection"
-      ],
-      "createdAt": "2026-10-23T06:35:00.000Z"
-    },
-    {
-      "id": "demo-journal-small-win",
-      "title": "One thing finished",
-      "body": "I kept avoiding the first page of the community garden notes because I wanted the whole plan to sound clever straight away. Today I made a rough list instead: shade, water, somewhere to sit, and a way for neighbours to borrow tools. It took twenty minutes. The list is ordinary and incomplete, but now there is something to improve. I sent Rowan a photo of it and asked which question we should answer first. Starting badly turned out to be much easier than waiting to start perfectly.\n\nI opened the notebook at the kitchen table, put the kettle on, and wrote the date at the top of a fresh page. The garden meeting was scheduled for Thursday at the community hall, and I wanted to arrive with something useful instead of an apology for being unprepared. I had imagined a polished proposal, but the page stayed empty whenever I tried to begin that way.\n\nRowan replied to my photograph after lunch. He liked the idea of a shared tool shelf and suggested asking the people who already use the pavement what they would want. His message was encouraging, although I noticed myself worrying that the list was too simple. I read it again later and realised that simplicity might make it easier for someone else to add an idea.\n\nAfter work I walked past the empty lot on Juniper Street. Mrs Dlamini was closing the gate next door, so I asked whether she had ever seen the tap behind the wall working. She said it had been repaired last summer and offered to show us where the valve was. We talked about the afternoon shade and the children who pass on their way home from school.\n\nI came home and added her notes to the page. The whole plan is still uncertain: we do not have permission, money or a schedule. But we have better questions and a person to speak to on Thursday. I am learning that finishing one small thing can create a path to the next, even when it does not look impressive on its own.",
-      "kind": "Journal",
-      "protected": false,
-      "perspective": "first",
-      "tags": [
-        "Writing",
-        "Small wins",
-        "Garden"
-      ],
-      "createdAt": "2026-10-24T14:10:00.000Z"
-    },
-    {
-      "id": "demo-journal-saturday-market",
-      "title": "The Saturday market",
-      "body": "The market was busy, but the stallholders still had time to talk. I bought oranges from a woman who remembered that I like the small, tart ones, then walked the long way around the square with the paper bag tucked under my arm. A child was trying to teach a patient dog to sit beside the flower buckets. I wrote the scene down before it faded: orange peel on my fingers, the dog looking solemn, somebody laughing behind me. It is a small day, which feels like enough of a reason to remember it.\n\nI met my friend Lerato at the taxi rank just after nine. She had a long shopping list for her mother and I had promised to help carry the heavier things, though we both knew we would stop for coffee first. We walked between the stalls slowly, greeting the people she knew and comparing the fruit at each table. The market smelled of bread, coriander and warm pavement after rain.\n\nAt a fabric stall, Lerato found a piece of yellow cloth that reminded her of the curtains in her grandmother's kitchen. The seller, Mrs Naidoo, told us where it came from and showed us a photograph of a dress her daughter had made. We stayed longer than we meant to. I bought two metres, unsure what I would do with it, and Lerato said I could learn to sew a cushion before attempting anything complicated.\n\nWe sat on a bench behind the library and shared a bag of vetkoek. Lerato talked about a difficult conversation at work. I wanted to offer a solution immediately, but she said she mostly needed someone to listen while she decided what to do. So I asked a few questions and let the silence be comfortable. Before we left she said she felt less alone with the problem, even though nothing had been settled.\n\nAt home I put the oranges in a bowl and the fabric over the back of a chair. The dog at the flower stall was still in my mind, serious and patient among the buckets. I wrote these details down because an ordinary Saturday can hold friendship, noise, colour and the beginning of a new skill. Next week I will ask Mrs Naidoo whether she knows someone who gives sewing lessons.",
-      "kind": "Journal",
-      "protected": false,
-      "perspective": "first",
-      "tags": [
-        "Weekend",
-        "People",
-        "Places"
-      ],
-      "createdAt": "2026-10-25T09:25:00.000Z"
-    },
-    {
-      "id": "demo-journal-room-to-think",
-      "title": "A quieter afternoon",
-      "body": "I had more on my list than the afternoon could hold. Instead of moving everything to tomorrow, I circled the one call that needed an answer and the laundry that was already waiting. I took both in turn, then sat by the window with tea and no screen for ten minutes. The other tasks are still there, but they feel like separate things now rather than one large cloud. I want to remember that a shorter list can be an honest plan, not a sign that I have given up.\n\nThe morning began with three messages about different deadlines, a leaking tap and a note from my brother asking whether I could help him on Saturday. I felt my shoulders rise before I had even finished breakfast. I made a second cup of tea and listed everything on a sheet of paper, including the small tasks I usually pretend do not count. The page looked crowded, but at least the tasks were no longer circling in my head.\n\nI phoned the landlord about the tap and left a message with the details. Then I replied to my brother, Sibusiso, to say I could help for two hours but could not stay the whole day. He was disappointed at first, and I felt guilty. We talked about what he needed most and agreed I would bring the boxes in the morning; his neighbour would help with the furniture later.\n\nBy mid-afternoon the work deadline had shifted, and I had finished the laundry. The list still contained four unfinished items, but the kitchen was quieter and the tap had stopped dripping after the plumber tightened a fitting. I sat by the window and watched the schoolchildren pass in pairs. One carried a cardboard model carefully in both hands, protecting it from the wind.\n\nI have a habit of calling a day unsuccessful when I cannot do everything. Today I want to describe it more accurately. I answered the urgent call, set a boundary, dealt with a practical problem and made room to breathe. I can return to the remaining tasks tomorrow without treating them as proof that I failed today.",
-      "kind": "Journal",
-      "protected": false,
-      "perspective": "first",
-      "tags": [
-        "Balance",
-        "Reflection",
-        "Routine"
-      ],
-      "createdAt": "2026-10-25T15:40:00.000Z"
-    },
-    {
-      "id": "demo-journal-end-of-week",
-      "title": "What I want to keep",
-      "body": "This week went better when I asked for help early, ate lunch away from my desk, and stopped trying to solve every small problem before bed. I did not manage those things every day. I did notice the difference on the days I remembered. For next week, I am keeping the sketchbook by the door and leaving one evening open. I am not making a grand promise to become more organised; I am making the next useful step easier to find.\n\nOn Monday I stayed at my desk through lunch and wondered why I could not concentrate by three o'clock. On Tuesday I took a sandwich outside with my colleague Amina, and we sat beneath the trees for half an hour. We spoke about books and the rain rather than deadlines. I came back with more energy, although the work waiting for me had not changed.\n\nWednesday was harder. A meeting ran late and I agreed to take responsibility for a report I did not have time to finish. I was irritated with myself all evening. The next morning I told my manager, Daniel, that I needed another day and asked for help with the figures. He agreed, and a colleague offered to check the spreadsheet. I had spent more time fearing the conversation than it took to have it.\n\nOn Friday I visited my aunt in Soweto. She sent me home with a container of soup and asked whether I was still drawing. I said I had not opened my sketchbook for weeks. She put a pencil on the table and asked me to draw the cup in front of us. It was crooked, and we both laughed, but she kept it on the fridge when I left.\n\nLooking back, I do not need to turn these moments into strict rules. I want to remember what helped: asking early, eating away from the desk and leaving a little room for a person or an unexpected plan. I put the sketchbook beside the front door and wrote next week's important dates on the calendar. That is enough preparation for tonight.",
-      "kind": "Journal",
-      "protected": false,
-      "perspective": "first",
-      "tags": [
-        "Weekly reflection",
-        "Habits",
-        "Planning"
-      ],
+      "perspective": "third",
+      "tags": ["Demo", "Scrubbing", "Distancing", "Long entry"],
+      "entitiesRecognized": ["Person A", "Person B", "Person C", "Organisation A", "Place A", "the Nest"],
+      "demoGuide": "This demo shows the two concealment layers on one long, ordinary entry. Names, people, a workplace and places were replaced, and the first-person original was distanced into third person, so it reads as if it is about somebody else. Use the key button in the reading dock: unlock with your passkey to highlight where replacements are. The originals are never shown here. Try 'Review or add details' to correct a replacement or add one the model missed. This long entry also shows how the model handles a full week of writing at once.",
       "createdAt": "2026-10-26T17:05:00.000Z"
     },
     {
-      "id": "demo-story-juniper-01",
-      "title": "The empty lot",
-      "body": "When Nia first stopped beside the empty lot on Juniper Street, she was only looking for a place to sit while the rain passed. Rowan was already there, balancing a paper cup on the low brick wall and watching water run toward the storm drain. Between them, the lot held a tangle of grass, two stubborn marigolds, and a broken sign for a shop that had closed years ago.\n\nNia said the space looked like it was waiting for someone to make a decision. Rowan laughed and said it looked like it was waiting for the rain to stop. They both stayed under the awning until the clouds thinned. Before they left, Rowan drew a rectangle in the damp dust with one finger and asked what might fit inside it. Nia said: a table, perhaps. Then they went home separately, carrying the same small question.\n\nFor the next few days, Nia found herself looking at the lot from the bus window. She noticed the light reached its back wall in the afternoon, and that the bakery next door threw away clean wooden crates every Thursday. On Friday she came back with a notebook, though she told herself she was only passing through. Rowan arrived with two coffees and a pencil. Neither had a plan yet. They wrote down what they knew: the landlord lived nearby, the tap behind the building still worked, and the marigolds had survived without anyone tending them.\n\nThey decided not to promise a garden or invite a crowd. First, they would ask the neighbours what the space needed. Rowan drew a small square for a table on the page. Nia added a question mark beside it. It was a beginning modest enough to carry home.",
-      "kind": "Story",
+      "id": "demo-journal-photo-voice",
+      "title": "Demo Journal — A photo and a voice note, kept hidden",
+      "body": "🖼 Photo — hidden in this view. Unlock with your passkey to reveal attached media.\n\nShe took the photograph at the gate of the Nest on Saturday morning, before the street woke up. The jacaranda had dropped its flowers across the pavement in the night, and Person A's bicycle was leaning against the wall where he always left it, front wheel turned slightly outward. She wanted to remember the exact blue of the early light. In this scrubbed view the photograph itself is not shown and is not described; only this marker stands in its place, so that someone reading over her shoulder — or finding this entry — learns nothing from the image.\n\n🎙 Voice note — hidden in this view. Its transcript was scrubbed like ordinary writing.\n\nTranscript: She was standing at the gate when she recorded it, speaking quietly so as not to wake the house. She said the flowers had come down in the night and covered the whole pavement in Place A. She said Person A had promised to fix the gate hinge before Blue Moon on Sunday, and that they would walk to the market afterwards if the weather held. She laughed at the end and said she was talking to her journal again instead of just looking at the street.\n\nLater she listened to the recording once and wrote down what mattered: the hinge, the market, the flowers. The photograph and the recording stay locked with the original. What travels, what is read by default, and what any model may ever see is only this scrubbed text and these markers.",
+      "kind": "Journal",
       "protected": false,
       "perspective": "third",
-      "curatedDeck": "Juniper Street Garden",
-      "tags": [
-        "Fiction",
-        "Neighbourhood",
-        "Part 1"
-      ],
-      "createdAt": "2026-10-22T16:30:00.000Z"
+      "tags": ["Demo", "Media", "Voice note", "Scrubbing"],
+      "entitiesRecognized": ["Person A", "Place A", "the Nest", "Blue Moon"],
+      "demoGuide": "This demo shows that concealment is not only about text. In the default view an attached photo or voice recording is not displayed and not even represented as an image — only a marker stands in its place. A voice note's transcript is scrubbed exactly like typed writing. Unlock with the key button in the reading dock to start a reveal session; in a real entry the media and the scrub locations appear only inside that session, and are hidden again when it ends.",
+      "createdAt": "2026-10-25T09:25:00.000Z"
     },
     {
-      "id": "demo-story-juniper-02",
-      "title": "A table and four pots",
-      "body": "A week later, Nia returned with a folded page of measurements. Rowan brought four pots rescued from a storeroom and a jar of screws that had belonged to his grandfather. They began with the table: two borrowed trestles, a wide plank, and a coat of paint that dried darker than the label promised. It wobbled, but only when someone leaned hard on one corner.\n\nPeople passing along Juniper Street slowed to ask what they were making. One neighbour offered mint cuttings; another knew where to find clean compost. A little girl named Amari chose the first marigold pot and insisted it needed a blue stone beside it for luck. By late afternoon, the lot looked almost the same from the road. Up close, it had a place to sit, four green beginnings, and a list of names on the back of Nia's plan.\n\nThe work did not happen in a tidy sequence. Rain softened the soil before they could finish the first bed. The hardware shop had run out of the screws Rowan wanted, so he used the mixed jar from his grandfather and sorted the useful ones on the table. Nia worried the neighbours would lose interest once the novelty wore off. Then Mrs. Dlamini came back with a thermos and a handwritten note about which plants could manage the afternoon shade.\n\nThey made a small rota, but left space beside every name for people to change their minds. Amari drew a sun in the corner and added three blue stones, just in case the first one got lonely. Before packing up, Nia stood at the gate and looked at the table from the street. It was still crooked. It was also the first thing on Juniper Street that had been built by people who had not known one another the week before.",
-      "kind": "Story",
+      "id": "demo-journal-small-details",
+      "title": "Demo Journal — Small details that add up",
+      "body": "She nearly did not write this down, because nothing in it felt private on its own. She had taken the early taxi from Place A again, the one that left before the school traffic, and bought bread at the bakery that opened at six. The woman at the till knew her order. She was at her desk at Organisation A by seven, an hour before Person B, and she used the quiet to finish the register for the Saturday reading group.\n\nAt lunch she walked to the clinic in Place B to collect her repeat prescription, the one she fetched on the last Friday of every month. The nurse greeted her by her first name and asked about the garden at the Nest. On the way back she passed the primary school just as the children were leaving, and the crossing guard waved her across with the last group, laughing that she was becoming one of his regulars.\n\nIn the evening Person C phoned from the church hall, where the sewing circle met on Thursdays. They spoke about the cushion, about her mother's chair, and about the lift club that collected her at the corner of the two main roads in Place A at half past five each morning. Person C said the driver had changed the route again, and now passed the bakery just as it opened.\n\nNone of these details is a name, an address, or a number. But together they describe one person's week precisely: where she sleeps, when she leaves, which taxi she takes, where she works, which clinic she attends and what for, which church hall she visits, and who her people are. Anyone who knows the area could put the pieces together in minutes. That is why the scrubbing in this entry replaced combinations, not only single words — the routine itself is identifying, even when every individual fact looks harmless.",
+      "kind": "Journal",
       "protected": false,
       "perspective": "third",
-      "curatedDeck": "Juniper Street Garden",
-      "tags": [
-        "Fiction",
-        "Neighbourhood",
-        "Part 2"
-      ],
-      "createdAt": "2026-10-23T16:30:00.000Z"
+      "tags": ["Demo", "Contextual risk", "Scrubbing"],
+      "entitiesRecognized": ["Person B", "Person C", "Organisation A", "Place A", "Place B", "the Nest"],
+      "demoGuide": "This demo shows contextual identification: no single detail here is a name or an address, but the combination — a routine, a clinic day, a lift club, a church hall — can identify a person and a situation. LuLu is meant to assess combinations, not only words. Unlock with the key button to see which details were replaced, then use 'Review or add details' if you spot a combination the model left exposed. Nothing about the original wording is shown.",
+      "createdAt": "2026-10-24T14:10:00.000Z"
     },
     {
-      "id": "demo-story-juniper-03",
-      "title": "The first harvest",
-      "body": "By the time the first tomatoes ripened, the table had acquired a repaired leg and a collection of mismatched mugs. Nia kept a notebook in the top drawer, where anyone could write down what needed watering or what they had taken home. Rowan added a page for ideas that did not fit anywhere else. Amari's blue stone had moved from the marigold pot to the middle of the table, where it served as a paperweight.\n\nOn the first warm evening of spring, the neighbours cut the tomatoes into a bowl and passed it around with bread. They did not make speeches. Someone asked whether they should try beans next, and three people answered at once. Nia looked at the lot, still uneven and still full of weeds, and saw that it had become a place where a next time could be imagined. She wrote that down before going home.\n\nThe notebook filled slowly. There were lists of seedlings, reminders to tighten the table leg, and small observations that had nothing to do with gardening. Someone had written that the afternoon light made the back wall look gold. Another person left a recipe for tomato chutney and a note saying the jar was in the bakery fridge. Rowan began repairing the broken shop sign and asked everyone to vote on whether it should point toward the garden or toward the street.\n\nWhen the colder evenings returned, the group covered the beds with leaves and carried the pots under the awning. The lot looked quiet again, but the table stayed in place. Nia took the notebook home to copy the pages before the damp could reach them. She found her first square sketch among the notes and smiled at how little it had promised. Next to it, she wrote a new question: what might grow here next year? The answer could wait until spring. For now, the garden had become a place people knew how to return to.",
+      "id": "demo-story-coercive-01",
+      "title": "Demo Story — Coercive control, Part 1: Small rules",
+      "body": "At first the rules sounded like care. Person A said he only worried because the roads near Place A were unsafe after dark, so she should send a message when she left Organisation A, another when she boarded the taxi, and another when she reached the Nest. If a reply took longer than twenty minutes, he would phone, and then phone again, until she answered. She told Person C it was sweet that somebody checked.\n\nThen the rules found their shape. He chose which taxi she should take, although it left forty minutes earlier than the one she preferred. He asked why she needed to stay for the sewing circle on Thursdays when she could be home. When she visited her sister in Place B, he wanted the address, the time she would leave, and a photograph of the two of them together so he could 'know she was safe'.\n\nShe began to arrange her days around the messages. She stopped accepting the late shift at Organisation A because explaining it took more energy than the shift itself. She answered her phone in the middle of conversations, quickly, apologetically, and her friends learned to pause while she typed. Person C asked whether she was in trouble. She laughed and said no, he just worried, that was all. But she noticed she had stopped deciding small things without first calculating how they would be received.",
       "kind": "Story",
       "protected": false,
       "perspective": "third",
-      "curatedDeck": "Juniper Street Garden",
-      "tags": [
-        "Fiction",
-        "Neighbourhood",
-        "Part 3"
-      ],
-      "createdAt": "2026-10-24T16:30:00.000Z"
+      "curatedDeck": "Demo: Coercive control",
+      "tags": ["Demo", "Story", "Pattern: coercive control", "Part 1"],
+      "entitiesRecognized": ["Person A", "Person C", "Organisation A", "Place A", "Place B", "the Nest"],
+      "demoGuide": "This is Part 1 of a three-part demo Story. Each part reads like an ordinary account; the pattern only emerges across all three. Read the parts in order, then run the pattern check from the Cloud demo by selecting the three parts together: only this scrubbed text is assessed, and the result is advisory. It can suggest reading more about the behaviour, talking with Lu, or opening support options. Nothing is diagnosed and nobody is contacted.",
+      "createdAt": "2026-10-20T18:00:00.000Z"
     },
     {
-      "id": "demo-story-lantern-01",
-      "title": "The last paper lantern",
-      "body": "At the end of the winter festival, Leila found one paper lantern still glowing beneath the arcade roof. Most of the others had gone dark, their painted moons and cranes folded softly against the night. She was supposed to help pack the stalls away, but the lantern's little pool of gold made the tiled passage feel like a room someone had left just for her.\n\nA bookseller named Tomas came by carrying a box of unsold postcards. He asked whether she thought the light would last until morning. Leila said she did not know, so they sat on the step and watched. While they waited, Tomas told her about a postcard he had kept for years without sending. Leila told him about the train trip she kept planning and postponing. When the wick finally dimmed, neither of them had solved the other person's problem. They had, however, made a plan to meet for tea and look at a map.\n\nThe arcade was different after the festival. Without the music and strings of colour overhead, Leila could hear the old clock behind the tailor's shop ticking unevenly. Tomas said the postcards had been printed for a town he had never visited, all blue coastlines and names he could not pronounce. He had bought them because his sister once told him she wanted to see the sea. Every year he meant to send one, and every year he found a reason to wait until he had something more important to say.\n\nLeila understood the habit. Her train trip had become a folder of saved routes and a promise she moved from one month to the next. She had imagined she needed a perfect weekend, enough money for every stop, and a companion who could take time off. Tomas asked which part mattered most. She said the sea. He suggested they start with the station timetable. The lantern went out while they were talking, but neither of them hurried to stand. They set a day to meet, then carried the empty boxes back through the quiet arcade.",
+      "id": "demo-story-coercive-02",
+      "title": "Demo Story — Coercive control, Part 2: The checking",
+      "body": "By the second month the checking had a timetable. Person A knew the lift club left the corner in Place A at half past five, and if her message came at twenty to six he would ask what had delayed her. He asked who else rode in the car. He asked why Person C's name appeared in her call list twice in one evening. He began finishing her sentences about her own day, correcting details, as if her account needed his permission to be accurate.\n\nShe was given rules for the Nest as well. His visits were not announced; he said surprises kept things honest. Her phone had to stay on the table, not in her bag. If she silenced it during supper with her sister, there were questions until midnight. Once, when her battery died at Organisation A, she came home to fourteen missed calls and a message saying she had chosen to make him imagine the worst.\n\nShe started writing two versions of every plan: the real one, and the one that would not need defending. She told Person C less, not because she trusted her less, but because every detail she shared became a detail she might have to account for. The sewing circle Thursdays were now 'extra work'. Her sister's visits were 'errands'. She was surprised at how quickly a person can become fluent in smaller truths, and how tired the fluency made her.",
       "kind": "Story",
       "protected": false,
       "perspective": "third",
-      "curatedDeck": "Lanternlight Notes",
-      "tags": [
-        "Fiction",
-        "Chance meetings",
-        "Part 1"
-      ],
-      "createdAt": "2026-10-25T18:45:00.000Z"
+      "curatedDeck": "Demo: Coercive control",
+      "tags": ["Demo", "Story", "Pattern: coercive control", "Part 2"],
+      "entitiesRecognized": ["Person A", "Person C", "Organisation A", "Place A", "the Nest"],
+      "demoGuide": "Part 2 of the coercive-control demo. Notice how the behaviour is now monitoring and restriction rather than concern: unannounced checks, rules about the phone, and her world getting smaller to stay manageable. On its own this part might look ambiguous; assessed together with Parts 1 and 3, the pattern becomes clearer. That is the point of the demo — patterns are read across entries, not from a single day.",
+      "createdAt": "2026-10-21T18:00:00.000Z"
     },
     {
-      "id": "demo-story-lantern-02",
-      "title": "A map with room to wander",
-      "body": "The next afternoon, Tomas brought the map to the tea shop, folded along a route that crossed three towns and ended by the sea. Leila had expected to talk herself out of the trip. Instead, she noticed the small pencil marks Tomas had added beside places with good bookshops and quiet benches. He said he had drawn them from memory, not advice. That made the route feel less like an itinerary and more like an invitation.\n\nThey chose one weekend, circled the station where Leila would change trains, and left the rest blank. Tomas finally wrote his postcard while they waited for the bill. He addressed it to his sister and kept the message short: he had found a story he wanted to tell her in person. Outside, the arcade was busy again. Leila tucked the map into her bag, no longer needing the lantern to know where to begin.\n\nFor the next two weeks, Leila kept the map on her kitchen table. She looked up the train times, then bought a ticket before she could redesign the entire weekend. Tomas posted the card and sent her a photograph of the empty desk where it had been sitting for years. His sister replied with the name of a small café near the coast and a reminder to bring a jumper because the wind always turned cold after sunset.\n\nOn the morning of the trip, Leila nearly missed the connection because she followed the wrong platform sign. A station attendant pointed her toward the footbridge, and she arrived just as the doors began to close. She found a window seat and watched the city give way to low hills, then fields, then a strip of bright water. There was no grand moment when the journey became certain. There was only the next station, the next page of the map, and the fact that she had gone.\n\nTomas met her at the bookshop by the shore. His sister was already inside, holding the postcard and laughing at how short the message had been. They spent the afternoon walking without checking the route. On the train home, Leila folded the map along a new line and left room for another one.",
+      "id": "demo-story-coercive-03",
+      "title": "Demo Story — Coercive control, Part 3: Permission",
+      "body": "In the third month she asked permission without being told to. She asked whether she could spend Saturday with her sister in Place B, presenting the plan like a request: who would be there, when she would leave, when she would be back. Person A considered it the way a manager considers leave, and approved it with conditions. She felt grateful, and then quietly frightened by her own gratitude.\n\nAt Organisation A she turned down the training course in the city because it meant two nights away, and explaining two nights was more than she could face. Person B asked if everything was all right at home. She said yes too quickly. That evening she sat in the Nest with her phone in her hand, drafting a message about a plan she had not yet made, rehearsing explanations for a question that had not yet been asked.\n\nPerson C found her crying in the church hall after the sewing circle she was no longer supposed to attend. She said the sentence out loud for the first time: she could not remember the last decision she had made without first checking how it would land. Person C did not tell her what to call it. She made tea, and stayed, and said that whatever she decided to do next, she would not have to explain it in triplicate to be believed.",
       "kind": "Story",
       "protected": false,
       "perspective": "third",
-      "curatedDeck": "Lanternlight Notes",
-      "tags": [
-        "Fiction",
-        "Chance meetings",
-        "Part 2"
-      ],
-      "createdAt": "2026-10-26T18:15:00.000Z"
+      "curatedDeck": "Demo: Coercive control",
+      "tags": ["Demo", "Story", "Pattern: coercive control", "Part 3"],
+      "entitiesRecognized": ["Person A", "Person B", "Person C", "Organisation A", "Place B", "the Nest"],
+      "demoGuide": "Part 3 completes the coercive-control demo. Now run the pattern check: select Parts 1–3 in the Cloud demo and assess the reviewed scrubbed text. Expect an advisory signal for coercive control, with options to read more about the behaviour, talk with Lu, or open the support directory. A professional, if she ever chose one, would see only this scrubbed version — she could get help without exposing herself until she decides otherwise.",
+      "createdAt": "2026-10-22T18:00:00.000Z"
     },
     {
-      "id": "demo-story-river-01",
-      "title": "The letter in the blue tin",
-      "body": "Maya found the blue tin on a shelf above her mother's sewing machine, between a packet of buttons and a jar filled with chalk. Inside were letters tied with a faded ribbon, each addressed to the same house on River Road. The oldest envelope carried a date from more than thirty years ago. Maya was looking for a needle to mend her coat, but she sat down at the kitchen table and untied the ribbon instead.\n\nThe letters were from her grandfather, Yusuf, to a friend named Anna who had moved away after the old railway station closed. They were full of everyday details: a neighbour's stubborn lemon tree, a broken bicycle, the first rain after a dry winter. In one letter Yusuf described building a shelf for the community library with wood left over from a shop renovation. Maya recognised the shelf. She had borrowed books from it as a child without knowing who had made it.\n\nHer mother came in carrying groceries and stopped when she saw the envelopes. She explained that Yusuf had kept copies of the letters because Anna returned them years later, tucked into a parcel with photographs. The two friends had intended to meet again, but work, illness and distance repeatedly changed their plans. Nobody in the family knew whether Anna still lived at the address on the envelopes.\n\nMaya suggested looking for her. Her mother was hesitant; the letters belonged to another time, and she did not want to intrude on a stranger. They agreed to begin gently by asking the librarian whether anyone remembered Anna. Maya photographed the shelf, put the letters back in the tin, and wrote down the questions they wanted to ask. The next Saturday they would go together, with no expectation that the search had to end anywhere in particular.",
+      "id": "demo-story-financial-01",
+      "title": "Demo Story — Financial control, Part 1: One account",
+      "body": "It began as practicality. Person A suggested her salary from Organisation A go into the household account he already managed, so that rent, groceries and the taxi fare came from one place. He kept the card. He said she was careless with money, and at first she almost believed him, because he said it calmly, with examples: the yellow cloth from the market in Place A, the sewing lessons, the lunch she had bought Person C.\n\nAn allowance was arranged, weekly, in cash, counted onto the table at the Nest. It was meant to cover her taxi fare and small things. When she asked for more one week — her shoes had split at the heel — he asked to see the old shoes, and then asked why a person who sat at a desk all day wore shoes out so quickly. She repaired them with glue instead.\n\nShe stopped telling her sister what things cost. She practised saying 'we are saving' in a tone that ended conversations. At Organisation A she volunteered for unpaid extra duties because asking for the overtime form meant explaining, at home, exactly how much she earned and where every rand of it would go. Her own pay slip had become a document she saw once a month, briefly, in his hand.",
       "kind": "Story",
       "protected": false,
       "perspective": "third",
-      "curatedDeck": "River Road Letters",
-      "tags": [
-        "Fiction",
-        "Family",
-        "Part 1"
-      ],
-      "createdAt": "2026-10-20T10:00:00.000Z"
+      "curatedDeck": "Demo: Financial control",
+      "tags": ["Demo", "Story", "Pattern: financial control", "Part 1"],
+      "entitiesRecognized": ["Person A", "Person C", "Organisation A", "Place A", "the Nest"],
+      "demoGuide": "Part 1 of the financial-control demo. The behaviour here is interference with money: her earnings managed by someone else, spending interrogated, small purchases treated as evidence. Read all three parts in order, then run the pattern check on the scrubbed text from the Cloud demo. The assessment is advisory — it describes the pattern in the wording; it does not decide what is true or what she should do.",
+      "createdAt": "2026-10-17T18:00:00.000Z"
     },
     {
-      "id": "demo-story-river-02",
-      "title": "A shelf with a history",
-      "body": "The librarian, Mr Molefe, remembered the shelf immediately. He had been a volunteer when Yusuf brought it in, although he had not known its maker well. He took Maya and her mother through the reading room to the back wall, where the wood had darkened under years of hands and sunlight. A small brass plate beneath the bottom ledge carried two initials that Maya had never noticed.\n\nMr Molefe did not know where Anna lived now, but he remembered that she had helped catalogue the library's first collection. He offered to search the old volunteer records and call if he found a safe way to contact her. Maya left her number, then spent the afternoon reading at a table near the window. Her mother chose a book about gardens and said she wanted to learn the names of the plants in their courtyard.\n\nA week passed before the librarian called. He had spoken to another former volunteer who knew Anna's daughter, but he did not hand over anyone's private details. Instead, he asked whether Maya was comfortable sharing a short note that he could pass along. Maya wrote that she had found the letters and would be glad to return copies if Anna wished. She added that there was no need to reply if the message was unwelcome.\n\nTwo days later a card arrived at the library. Anna was alive, living near the coast and delighted to hear about the tin. She remembered Yusuf's shelf, particularly the way one corner had needed a folded piece of paper to make it level. She invited Maya and her mother to send photographs and said she would write when her hands allowed it. Maya carried the card home carefully. The search had not recovered the past, but it had made room for a new conversation.",
+      "id": "demo-story-financial-02",
+      "title": "Demo Story — Financial control, Part 2: Receipts",
+      "body": "The receipts came next. Every purchase, however small, had to be accounted for: the bread, the taxi top-up, the prescription collection at the clinic in Place B. If a receipt was missing he reconstructed the purchase from her change and questioned the difference. She learned to keep slips folded in her shoe until she could hand them over, and to do her small kindnesses invisibly. The bunch of flowers she used to buy her mother became a debt she owed the house.\n\nWhen her sister asked why she never contributed to family lunch any more, she said money was tight, which was true in a way she could not explain. Person A earned less than she did. That fact was not mentioned in the house; it lived in the space between his careful counting and her careful silence. He reviewed the bank messages on her phone in the evenings, although the account was 'theirs', and asked about a transfer of fifty rand to Person C until she admitted it was for the sewing circle's tea fund.\n\nShe began to keep a private arithmetic in her head: what she earned, what things cost, what she had handed over, what she could not prove. At Organisation A she was trusted with the petty cash register and reconciled it to the cent every Friday. She found she could keep perfect books for everyone except herself, in a house where her own money had become a subject she needed permission to raise.",
       "kind": "Story",
       "protected": false,
       "perspective": "third",
-      "curatedDeck": "River Road Letters",
-      "tags": [
-        "Fiction",
-        "Family",
-        "Part 2"
-      ],
-      "createdAt": "2026-10-21T10:00:00.000Z"
+      "curatedDeck": "Demo: Financial control",
+      "tags": ["Demo", "Story", "Pattern: financial control", "Part 2"],
+      "entitiesRecognized": ["Person A", "Person C", "Organisation A", "Place B"],
+      "demoGuide": "Part 2 of the financial-control demo: surveillance of spending, receipts as evidence, and debts manufactured out of ordinary kindness. Together with Parts 1 and 3 this is the kind of cumulative picture the Decisions assessment is built to read. Notice that every name and place is already replaced — the pattern is visible in the behaviour, not in the identities.",
+      "createdAt": "2026-10-18T18:00:00.000Z"
     },
     {
-      "id": "demo-story-river-03",
-      "title": "The photograph on the windowsill",
-      "body": "Anna's first letter arrived in a large envelope with a photograph of the coast. She wrote about the library, the long bus rides home and Yusuf's habit of arriving with more tools than a job required. She also remembered a disagreement they had once had about lending books to people who could not provide an address. They had argued for weeks before deciding to ask the readers what would make borrowing easier.\n\nMaya read the letter aloud to her mother on a rainy Sunday. They recognised Yusuf's stubbornness, but the story gave it a different shape: he had been willing to listen after the argument, and Anna had been willing to change her mind too. Maya wrote back with a photograph of the repaired shelf and asked whether Anna remembered the names of the first books placed on it.\n\nThe exchange continued slowly. Some weeks there was a postcard; other weeks there was only a short message passed through the librarian. Maya began visiting the library on Saturdays, helping children cover worn books with paper. Her mother joined a gardening group and brought cuttings from the courtyard. Neither of them had planned those changes when they opened the blue tin.\n\nAt the end of spring, Anna sent a photograph of herself and Yusuf standing beside the unfinished shelf. On its back she had written the date and the names of everyone who helped. Maya placed a copy on the kitchen windowsill, where the morning light reached it. The original returned to the tin with the letters, and the empty space beside it was left for whatever came next.",
+      "id": "demo-story-financial-03",
+      "title": "Demo Story — Financial control, Part 3: The promotion",
+      "body": "When Organisation A offered her the senior post, with travel to the branch in Place B twice a month and a salary she had worked six years toward, Person A was quiet for a whole evening. Then he explained the problems: the travel would cost the house, her hours would change, people at head office would 'fill her head'. He suggested she ask instead for part-time hours, closer to home, until things were settled. Things had been about to be settled for three years.\n\nShe practised accepting the post in the mirror at the Nest, quietly, the way she had once practised saying 'we are saving'. Person B at Organisation A asked for her answer by Friday. On Thursday she found the offer letter folded into the receipts file, although she had left it in her bag. He said he had only been tidying. She understood, standing there, that tidying was how her life was being rearranged — item by item, with her earnings, her hours and finally her ambitions refiled where she could not reach them alone.\n\nShe did not sign anything that week. She told Person B she needed more time, and hated the sentence as she said it. Person C, hearing only fragments, said: a person should be able to hold her own pay slip without asking. She kept that sentence the way she kept receipts — folded small, in a safe place, as evidence of something she intended to reconcile later.",
       "kind": "Story",
       "protected": false,
       "perspective": "third",
-      "curatedDeck": "River Road Letters",
-      "tags": [
-        "Fiction",
-        "Family",
-        "Part 3"
-      ],
-      "createdAt": "2026-10-22T10:00:00.000Z"
+      "curatedDeck": "Demo: Financial control",
+      "tags": ["Demo", "Story", "Pattern: financial control", "Part 3"],
+      "entitiesRecognized": ["Person A", "Person B", "Person C", "Organisation A", "Place B", "the Nest"],
+      "demoGuide": "Part 3 completes the financial-control demo: interference reaching her employment itself. Run the pattern check on Parts 1–3 from the Cloud demo and expect an advisory signal for financial or economic control. From there she could read more about the behaviour, talk with Lu, or prepare a scrubbed copy for a professional — who would see only this version, never her name, employer or bank details, unless she chose otherwise.",
+      "createdAt": "2026-10-19T18:00:00.000Z"
+    },
+    {
+      "id": "demo-story-threats-01",
+      "title": "Demo Story — Threats and intimidation, Part 1: Warnings",
+      "body": "The first threats were dressed as warnings about other people. Person A said the men at the taxi rank in Place A were dangerous and she should be grateful somebody waited up for her. He said her sister in Place B was turning her against him, and that families who interfered usually regretted it. He never raised his voice for these. He said them while making tea, which somehow made them harder to argue with.\n\nThen the warnings came closer. If she embarrassed him in front of his friends again — she had laughed at the wrong moment — there would be consequences, and she could decide for herself what that word meant. If she switched her phone off at the Nest, she should not be surprised at what he might have to do to get her attention. He described, in detail and with regret, what he was capable of when he felt disrespected. He always added that he did not want it to come to that, as if the outcome lived in her hands and not in his.\n\nShe found herself measuring rooms. At Organisation A she laughed too loudly at lunch and then checked her phone with her heart going, although no message had come. At home she kept her voice even and her face pleasant, and discovered she was rehearsing both in the taxi on the way there. Person C asked why she had gone so quiet in company. She said she was tired. It was easier than saying she was listening, all the time, for the temperature of the next sentence.",
+      "kind": "Story",
+      "protected": false,
+      "perspective": "third",
+      "curatedDeck": "Demo: Threats and intimidation",
+      "tags": ["Demo", "Story", "Pattern: threats", "Part 1"],
+      "entitiesRecognized": ["Person A", "Person C", "Organisation A", "Place A", "Place B", "the Nest"],
+      "demoGuide": "Part 1 of the threats-and-intimidation demo. The behaviour here is threatening language used to create fear and restrict choice — often quiet, often framed as concern or regret. Many people experience this without ever being touched, and many do not know it has a name. Read all three parts, then run the pattern check on the scrubbed text; the result is advisory only and never contacts anyone.",
+      "createdAt": "2026-10-14T18:00:00.000Z"
+    },
+    {
+      "id": "demo-story-threats-02",
+      "title": "Demo Story — Threats and intimidation, Part 2: Consequences",
+      "body": "The consequences began to be demonstrated rather than described. When she came home twenty minutes late from Organisation A, Person A was sitting in the dark at the Nest. He did not shout. He stood up, walked past her, and put his fist through the kitchen door, an inch from where her shoulder had been. Then he apologised for frightening her and said her lateness had done it. The hole stayed in the door for months. He said repairs were expensive, and that she should think of it as a reminder they both needed.\n\nAfter that, objects did the talking. A mug thrown at the wall during an argument about her sister. His hand flat and hard on the table when she mentioned the training course. The car driven too fast down the road in Place A, in silence, while she held the door handle and understood that her fear was the destination. Each time, afterwards, came the calm explanation: she knew how he got when he felt ignored; she should not push him there.\n\nShe stopped arguing entirely, which he noticed and praised. The house was peaceful now, he said. She agreed, and kept her disagreements at Organisation A, in the register she reconciled on Fridays, in the sewing circle she still attended in secret. She understood that peace had become the name for a room where only one person's temper was allowed to exist, and she had arranged her whole life to keep that room quiet.",
+      "kind": "Story",
+      "protected": false,
+      "perspective": "third",
+      "curatedDeck": "Demo: Threats and intimidation",
+      "tags": ["Demo", "Story", "Pattern: threats", "Part 2"],
+      "entitiesRecognized": ["Person A", "Organisation A", "Place A", "the Nest"],
+      "demoGuide": "Part 2 of the threats demo: intimidation through objects, speed and silence, followed by calm blame. Notice the pattern is in the behaviour and its rhythm — demonstration, apology, blame — not in any identity. The assessment that reads these three parts also scores an immediate-safety cue separately; a high cue offers the support directory first. It does not raise any alert by itself.",
+      "createdAt": "2026-10-15T18:00:00.000Z"
+    },
+    {
+      "id": "demo-story-threats-03",
+      "title": "Demo Story — Threats and intimidation, Part 3: The sentence",
+      "body": "The sentence came on an ordinary Tuesday. She had said she would sleep at her sister's in Place B after the family lunch, one night, as she had done before. Person A listened, nodded, and then told her, conversationally, exactly what would happen to her if she ever tried to leave him properly. He named the road she walked to the taxi. He named the hour. He hoped, he said, that she would never make him prove he meant it.\n\nShe slept at her sister's anyway, and did not sleep. She lay listening to the house and understood that the threat had been designed to travel with her — that was its whole architecture. It did not need him in the room. At Organisation A the next day, Person B found her staring at a blank screen and made her tea without asking questions, and she nearly told him everything simply because his kindness had no conditions attached.\n\nThat evening she wrote it all down for the first time: the door, the mug, the car, the sentence. Writing it did not make her safe, and she knew it. But the words on the page were in her own order, not his, and nobody had interrupted them. She read them twice. Then she closed the book, made supper, and answered her phone pleasantly at the usual time — while part of her stayed with the page, where the truth was now kept in a form she could return to, and one day, if she chose, show to someone who could help.",
+      "kind": "Story",
+      "protected": false,
+      "perspective": "third",
+      "curatedDeck": "Demo: Threats and intimidation",
+      "tags": ["Demo", "Story", "Pattern: threats", "Part 3"],
+      "entitiesRecognized": ["Person A", "Person B", "Organisation A", "Place B"],
+      "demoGuide": "Part 3 completes the threats demo with an explicit threat and an immediate-safety consideration. Run the pattern check on Parts 1–3: expect advisory signals for threats or intimidation and possibly the immediate-safety cue, which puts support options first. Her writing here is the reason LuLu keeps originals locked locally and shares only scrubbed copies — she can show this account to a professional without her name, road or hour attached, and decide later whether to be known.",
+      "createdAt": "2026-10-16T18:00:00.000Z"
+    },
+    {
+      "id": "demo-story-digital-01",
+      "title": "Demo Story — Digital monitoring, Part 1: The shared phone",
+      "body": "Person A knew her phone password because he had set the phone up, and at the time it had felt like help. He checked the weather on it, he said. He checked the taxi times. Sometimes she found her messages marked read that she had not opened, and once a conversation with Person C had been scrolled to a point weeks back, although he said the phone must have opened in his pocket.\n\nThe location sharing was his idea, presented as safety: both of them, visible to each other, on the map. In practice she never looked at his. He looked at hers the way other people checked the time. If the dot rested too long at Organisation A after hours, a message arrived. If it passed the shops in Place A, he asked what she had bought. The map had made her whole day into a document she had not agreed to write.\n\nShe began leaving the phone in her bag at the sewing circle, face down, like something that might report her. Person C asked why she flinched when it buzzed. She said the sound had started to feel like being called into an office. She laughed when she said it, and Person C laughed too, and then looked at her more carefully and did not ask again in front of the others.",
+      "kind": "Story",
+      "protected": false,
+      "perspective": "third",
+      "curatedDeck": "Demo: Digital monitoring",
+      "tags": ["Demo", "Story", "Pattern: digital monitoring", "Part 1"],
+      "entitiesRecognized": ["Person A", "Person C", "Organisation A", "Place A"],
+      "demoGuide": "Part 1 of the digital-monitoring demo: technology framed as help and safety becoming surveillance — passwords kept, messages read, location watched. Read all three parts in order, then run the pattern check on the scrubbed text. LuLu's own design answers this directly: originals stay encrypted on the device, and nothing about her account is visible to anyone she has not chosen.",
+      "createdAt": "2026-10-11T18:00:00.000Z"
+    },
+    {
+      "id": "demo-story-digital-02",
+      "title": "Demo Story — Digital monitoring, Part 2: Screenshots",
+      "body": "The screenshots arrived as jokes, mostly. Person A would send her a photograph of her own message thread with Person C, a line circled, and a laughing face — and then, underneath, the question the laughter was carrying. Who was 'he' in that sentence. Why had she deleted a message. Why had her last-seen time changed at Blue Moon if she had been asleep at the Nest. Each question was small enough to answer. Answering all of them took her whole evening.\n\nHe had her old email password too, from the year he set up the laptop. A login alert named a device she did not recognise, at an hour when he was beside her on the couch reading over her shoulder — reading, she realised, possibly the same words twice, once on each screen. She changed nothing. Changing a password was a sentence she would have to say out loud, and she was not ready for its grammar.\n\nAt Organisation A she began using the work phone for Person C, her sister, the sewing circle. Her real life migrated, contact by contact, to a number he did not audit. She felt the strangeness of it: she was not hiding an affair or a crime. She was hiding ordinary friendship, ordinary tiredness, ordinary jokes — the entire unedited text of a person — in the one channel where it would not be reviewed by morning.",
+      "kind": "Story",
+      "protected": false,
+      "perspective": "third",
+      "curatedDeck": "Demo: Digital monitoring",
+      "tags": ["Demo", "Story", "Pattern: digital monitoring", "Part 2"],
+      "entitiesRecognized": ["Person A", "Person C", "Organisation A", "the Nest", "Blue Moon"],
+      "demoGuide": "Part 2 of the digital-monitoring demo: account access and message auditing, and the quiet migration of a person's real life to an unwatched channel. Combined with Parts 1 and 3 this is what the Decisions assessment scores as digital monitoring or control. Every identity here is already replaced; the behaviour is what is being read.",
+      "createdAt": "2026-10-12T18:00:00.000Z"
+    },
+    {
+      "id": "demo-story-digital-03",
+      "title": "Demo Story — Digital monitoring, Part 3: The new password",
+      "body": "She changed the email password on a lunch break at Organisation A, sitting in the stairwell where the signal was bad, with her hands shaking over a form she had filled in a hundred times for other people. Then the phone's password. Then she turned the location sharing off, and watched her own dot disappear from the map with a feeling she had to sit down inside of, although she was already sitting.\n\nPerson A knew within the hour — the map told on her by going empty. The messages that followed were reasonable at first, then injured, then cold. He said trust had been broken. He said people who hide things usually have a reason. She read them in the stairwell the next day and noticed that for the first time in two years she was reading his words in her own time, unobserved while she reacted to them. Her face, doing whatever it needed to do, belonged to her again.\n\nShe did not win anything she could name. The Nest was quieter and stranger; her sister in Place B was told only that she had 'sorted out her phone'. But at the sewing circle on Thursday she left the phone in her pocket, sound on, and when it buzzed she answered it the way people do when a sound is only a sound. Person C watched her do it and said nothing at all, which was its own kind of understanding.",
+      "kind": "Story",
+      "protected": false,
+      "perspective": "third",
+      "curatedDeck": "Demo: Digital monitoring",
+      "tags": ["Demo", "Story", "Pattern: digital monitoring", "Part 3"],
+      "entitiesRecognized": ["Person A", "Person C", "Organisation A", "Place B", "the Nest"],
+      "demoGuide": "Part 3 completes the digital-monitoring demo. Run the pattern check on Parts 1–3 from the Cloud demo and expect an advisory signal for digital monitoring or control. Note what her account demonstrates about LuLu itself: a record can be written, kept and understood while the writer stays unexposed — and revealed to another person only scrubbed, only by her choice.",
+      "createdAt": "2026-10-13T18:00:00.000Z"
     }
   ]
 }

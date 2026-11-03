@@ -31,15 +31,15 @@ def main():
     args = parser.parse_args()
     data = json.loads((ROOT / 'scripts/demo-catalogue-seed.json').read_text())
     entries, manifest = data['entries'], data['manifest']
-    assert data['catalogueId'] == 'johannesburg-v1' and len(entries) == 10
+    assert data['catalogueId'] == 'johannesburg-v1' and len(entries) == len(manifest['entryIds'])
     assert [entry['id'] for entry in entries] == manifest['entryIds']
     token = subprocess.check_output(['gcloud', 'auth', 'print-access-token'], text=True).strip()
     headers = {'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json'}
     with urllib.request.urlopen(urllib.request.Request(BASE + '/demoCatalogues/johannesburg-v1', headers=headers)) as response:
         current = json.load(response)
     old_ids = [v['stringValue'] for v in current['fields']['entryIds']['arrayValue']['values']]
-    expected_old = ['demo-quiet-morning', 'demo-lantern-walk', 'demo-small-rituals']
-    if old_ids != expected_old: raise SystemExit('Live manifest differs from the reviewed three-entry catalogue; no changes made.')
+    expected_old = ['demo-journal-quiet-start', 'demo-journal-small-win', 'demo-journal-saturday-market', 'demo-journal-room-to-think', 'demo-journal-end-of-week', 'demo-story-juniper-01', 'demo-story-juniper-02', 'demo-story-juniper-03', 'demo-story-lantern-01', 'demo-story-lantern-02', 'demo-story-river-01', 'demo-story-river-02', 'demo-story-river-03']
+    if old_ids != expected_old: raise SystemExit('Live manifest differs from the reviewed 13-entry catalogue; no changes made.')
     writes = []
     for entry in entries:
         document = {key: value for key, value in entry.items() if key != 'id'}
