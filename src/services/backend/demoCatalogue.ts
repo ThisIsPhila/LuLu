@@ -1,4 +1,4 @@
-import { doc, getDoc, onSnapshot, runTransaction, serverTimestamp, type Firestore, type Unsubscribe } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot, runTransaction, serverTimestamp, type Firestore, type Unsubscribe, writeBatch } from 'firebase/firestore';
 import type { Entry } from '../../domain/journal';
 import { database } from './firebase.ts';
 import { mapDemoRecord, type DemoRecord } from './demoCatalogueRecords.ts';
@@ -50,10 +50,28 @@ export function watchDemoEntries(receive: (entries: Entry[]) => void, fail: (err
   return () => { closed = true; generation += 1; stop(); };
 }
 
+// Old v1 starter entry IDs that need cleanup
+const OLD_V1_ENTRY_IDS = [
+  'starter-johannesburg-v1-quiet-start',
+  'starter-johannesburg-v1-small-win',
+  'starter-johannesburg-v1-saturday-market',
+  'starter-johannesburg-v1-room-to-think',
+  'starter-johannesburg-v1-end-of-week',
+  'starter-johannesburg-v1-juniper-01',
+  'starter-johannesburg-v1-juniper-02',
+  'starter-johannesburg-v1-juniper-03',
+  'starter-johannesburg-v1-lantern-01',
+  'starter-johannesburg-v1-lantern-02',
+  'starter-johannesburg-v1-river-01',
+  'starter-johannesburg-v1-river-02',
+  'starter-johannesburg-v1-river-03',
+];
+
 /**
  * Copy the shared fictional catalogue into an account's ordinary journal once.
- * The transaction marker makes retries and concurrent sign-ins safe: existing
- * user entries are never replaced, and later deletions are never reseeded.
+ * The transaction marker makes retries and concurrent sign-ins safe.
+ * Handles v1->v2 migration: deletes old v1 entries and seeds new v2 entries.
+ * Also cleans up any lingering old v1 entries even if no marker exists.
  */
 export async function ensureStarterEntries(uid: string, firestore: Firestore = database): Promise<number> {
   if (typeof uid !== 'string' || !uid.trim() || uid.length > 128 || uid.includes('/')) {
@@ -63,13 +81,27 @@ export async function ensureStarterEntries(uid: string, firestore: Firestore = d
   const markerRef = doc(firestore, 'users', uid, STARTER_MARKER_COLLECTION, DEMO_CATALOGUE_ID);
   const manifestRef = doc(firestore, 'demoCatalogues', DEMO_CATALOGUE_ID);
 
+  // Pre-transaction: clean up old v1 entries outside the transaction if they exist
+  // (Firestore transactions require all reads before all writes)
+  const oldEntriesToDelete: string[] = [];
+  for (const oldId of OLD_V1_ENTRY_IDS) {
+    const oldRef = doc(firestore, 'users', uid, 'entries', oldId);
+    const oldSnap = await getDoc(oldRef);
+    if (oldSnap.exists()) {
+      oldEntriesToDelete.push(oldId);
+    }
+  }
+
   return runTransaction(firestore, async transaction => {
     // Firestore requires all reads before all writes in a transaction.
     const markerSnapshot = await transaction.get(markerRef);
     const manifestSnapshot = await transaction.get(manifestRef);
     if (!manifestSnapshot.exists()) throw new Error('The starter catalogue is not available yet.');
 
-    let oldEntryIdsToDelete: string[] = [];
+    const manifest = parseManifest(manifestSnapshot.data());
+
+    let oldEntryIdsToDelete: string[] = [...oldEntriesToDelete];
+
     if (markerSnapshot.exists()) {
       const marker = markerSnapshot.data() as Record<string, unknown>;
       const isOldStarterMarker = marker.catalogueId === DEMO_CATALOGUE_ID && marker.version === 1 &&
@@ -77,25 +109,25 @@ export async function ensureStarterEntries(uid: string, firestore: Firestore = d
         marker.entryIds.every((id: unknown) => typeof id === 'string' && /^starter-johannesburg-v1-[a-z0-9-]{1,80}$/.test(id)) &&
         new Set(marker.entryIds).size === marker.entryIds.length;
       if (isOldStarterMarker) {
-        // Upgrade accounts that received the first demo catalogue: remove their
-        // starter copies before seeding the replacement demo set.
-        oldEntryIdsToDelete = marker.entryIds as string[];
-      } else {
-        const markerKeys = Object.keys(marker).sort();
-        const expectedKeys = ['catalogueId', 'completedAt', 'entryIds', 'version'];
-        if (markerKeys.length !== expectedKeys.length || markerKeys.some((key, index) => key !== expectedKeys[index]) ||
-            marker.catalogueId !== DEMO_CATALOGUE_ID || marker.version !== 2 ||
-            !Array.isArray(marker.entryIds) || marker.entryIds.length > 20 ||
-            marker.entryIds.some((id: unknown) => typeof id !== 'string' || !/^starter-johannesburg-v1-[a-z0-9-]{1,80}$/.test(id)) ||
-            new Set(marker.entryIds).size !== marker.entryIds.length ||
-            !((marker.completedAt as {toDate?: () => Date})?.toDate?.() instanceof Date)) {
-          throw new Error('The starter-entry migration marker is invalid.');
+        oldEntryIdsToDelete = [...new Set([...oldEntryIdsToDelete, ...(marker.entryIds as string[])])];
+      } else if (marker.catalogueId === DEMO_CATALOGUE_ID && marker.version === 2) {
+        // Already migrated to v2 — check if ALL new entries actually exist
+        const expectedIds = manifest.entryIds.map((id: string) => starterEntryId(id));
+        const checkRefs = expectedIds.map((id: string) => doc(firestore, 'users', uid, 'entries', id));
+        const checkSnaps = await Promise.all(checkRefs.map(ref => transaction.get(ref)));
+        const allExist = checkSnaps.every(snap => snap.exists());
+        if (allExist) {
+          // All entries present — but still clean up any old v1 entries
+          for (const id of oldEntryIdsToDelete) {
+            transaction.delete(doc(firestore, 'users', uid, 'entries', id));
+          }
+          return 0; // Already fully migrated
         }
-        return 0;
+        // Some entries missing — fall through to re-seed
+      } else {
+        throw new Error('The starter-entry migration marker is invalid.');
       }
     }
-
-    const manifest = parseManifest(manifestSnapshot.data());
     const sourceRefs = manifest.entryIds.map(id => doc(firestore, 'demoCatalogues', DEMO_CATALOGUE_ID, 'entries', id));
     const sourceSnapshots = await Promise.all(sourceRefs.map(ref => transaction.get(ref)));
     const sourceEntries = sourceSnapshots.map((snapshot, index) => {
@@ -108,7 +140,7 @@ export async function ensureStarterEntries(uid: string, firestore: Firestore = d
     const targetSnapshots = await Promise.all(targetRefs.map(ref => transaction.get(ref)));
 
     // ALL WRITES AFTER ALL READS
-    // Delete old starter entries first (v1 -> v2 migration)
+    // Delete old starter entries (v1 -> v2 migration + any lingering old entries)
     for (const id of oldEntryIdsToDelete) {
       transaction.delete(doc(firestore, 'users', uid, 'entries', id));
     }
