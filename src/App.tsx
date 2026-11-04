@@ -682,7 +682,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
           <section className="journal-source-panel" aria-label="Journal status">
             {(personalState.status === 'loading' || starterState.status === 'loading' || onboardingImportState.status === 'loading') && <p className="journal-source-status" role="status">Preparing your journal…</p>}
             {personalState.status === 'error' && <p className="journal-source-status is-error" role="alert">Could not load your journal. {personalState.message || 'Check your connection and try again.'} <button type="button" onClick={()=>{setPersonalState({status:'loading'});setWatchAttempt(value=>value+1);}}>Try again</button></p>}
-            {starterState.status === 'error' && <p className="journal-source-status is-error" role="alert">Could not prepare your starter entries. {starterState.message || 'Check your connection and try again.'} <button type="button" onClick={()=>setStarterAttempt(value=>value+1)}>Try again</button></p>}
+            {starterState.status === 'error' && <p className="journal-source-status is-error" role="alert">{starterState.message || 'Could not prepare your starter entries. Check your connection and try again.'} <button type="button" onClick={()=>setStarterAttempt(value=>value+1)}>Try again</button></p>}
             {onboardingImportState.status === 'error' && <p className="journal-source-status is-error" role="alert">Your onboarding details are still on this device. {onboardingImportState.message || 'Setup could not be finished yet.'} <button type="button" onClick={()=>setOnboardingImportAttempt(value=>value+1)}>Try again</button></p>}
           </section>
         )}
