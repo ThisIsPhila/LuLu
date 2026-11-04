@@ -308,7 +308,7 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
     if(development){setStarterState({status:'ready'});return;}
     setStarterState({status:'loading'});
     ensureStarterEntries(session.uid).then(()=>{if(current)setStarterState({status:'ready'});}).catch(e=>{
-      if(current)setStarterState({status:'error',message:e instanceof Error?e.message:'Could not prepare your starter entries.'});
+      if(current)setStarterState({status:'error',message:'Could not prepare your starter entries.'});
     });
     return()=>{current=false;};
   },[session.uid,starterAttempt]);
