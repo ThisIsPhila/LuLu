@@ -842,6 +842,11 @@ function JournalApp({session,onSignedOut}:{session:AppSession;onSignedOut:()=>vo
               showNavigationHeader={!showSharedNavigationHeader}
               onEnterProtected={() => setIsProtectedGateOpen(true)}
               onReviewReplacements={() => { if (selectedEntry) navigatePrivate('inspector', selectedEntry.body); }}
+              onUpdateEntry={async (updated) => {
+                if (!session?.uid) return;
+                await updateEntry(session.uid, updated.id, { title: updated.title, body: updated.body, kind: updated.kind, curatedDeck: updated.curatedDeck, favorite: updated.favorite, tags: updated.tags });
+                setSelectedEntry(updated);
+              }}
               storySequence={readerStorySequence}
               onSelectStorySequenceEntry={entry => {
                 originalReadRequest.current++;

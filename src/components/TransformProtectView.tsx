@@ -540,7 +540,7 @@ export const TransformProtectView: React.FC<Props> = ({
             {segment.status === 'ready' && segment.scrubbedText !== undefined ? <div className="ordinary-writing-comparison">
               <div className="ordinary-writing-copy"><small>Before · original sent to privacy service</small><p>{renderSourceHighlights(segment.originalText, segment.entities)}</p></div>
               <div className="ordinary-writing-copy is-safe"><small>After · scrubbed text available to Lu</small><p>{renderScrubbedHighlights(segment.originalText, segment.scrubbedText, segment.entities)}</p>{segment.entities.length === 0 && <em>No identifying details were detected. A cloud scan can miss details.</em>}</div>
-              {segment.entities.length > 0 && <p className="ordinary-writing-entity-legend">Highlighted labels show what was replaced with generic names such as Person A or Place A.</p>}
+              {segment.entities.length > 0 && <p className="ordinary-writing-entity-legend">Highlighted labels show what was replaced with generic names such as a person or place.</p>}
               {onAskLu && <button type="button" className="ordinary-writing-ask-lu" onClick={() => onAskLu(segment.scrubbedText!)}>Ask Lu about this scrubbed paragraph</button>}
               <div className="ordinary-writing-pattern-action">
                 <label><input type="checkbox" checked={segment.assessmentConsent} disabled={segment.assessmentStatus === 'assessing'} onChange={event => setPatternConsent(segment.id, event.target.checked)} /><span>I reviewed this scrubbed paragraph and allow OpenAI Decisions to assess possible patterns in it. This is not a prediction, diagnosis, or finding about what happened.</span></label>

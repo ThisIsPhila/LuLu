@@ -10,7 +10,7 @@ const KEY = 'lulu.development.journal.v1';
 const CONTACTS = 'lulu.development.contacts.v1';
 const LIBRARY_ITEMS = 'lulu.development.notes-tasks.v1';
 const CATALOGUE_MIGRATION = 'lulu.development.catalogue.johannesburg-v1';
-const CATALOGUE_CONTENT_MIGRATION = 'lulu.development.catalogue.demo-content-v4';
+const CATALOGUE_CONTENT_MIGRATION = 'lulu.development.catalogue.demo-content-v7';
 const changed = new EventTarget();
 
 type CatalogueEntry = {
@@ -81,10 +81,12 @@ function sampleEntries(): Entry[] {
   });
 }
 function refreshDemoSamples(entries: Entry[]): Entry[] {
-  if (localStorage.getItem(CATALOGUE_CONTENT_MIGRATION) === 'complete') return entries;
   const samples = sampleEntries();
   const sampleIds = new Set(samples.map(sample => sample.id));
-  const kept = entries.filter(item => !item.id.startsWith('demo-') && !sampleIds.has(item.id));
+  // The local development preview is a demo surface: keep only the current
+  // scrubbed demo entries so old samples and unrelated local entries do not
+  // obscure the behaviour being tested.
+  const kept: Entry[] = [];
   const next = [...kept, ...samples];
   localStorage.setItem(KEY, JSON.stringify(next));
   localStorage.setItem(CATALOGUE_MIGRATION, 'complete');

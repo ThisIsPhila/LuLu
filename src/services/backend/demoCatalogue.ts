@@ -16,7 +16,7 @@ function starterEntryId(sourceId: string) {
 function parseManifest(value: unknown): DemoManifest {
   if (!value || typeof value !== 'object') throw new Error('The sample catalogue manifest is invalid.');
   const manifest = value as Partial<DemoManifest>;
-  if (manifest.version !== 1 || typeof manifest.label !== 'string' || manifest.label.length < 1 || manifest.label.length > 80 || !Array.isArray(manifest.entryIds) ||
+  if (manifest.version !== 2 || typeof manifest.label !== 'string' || manifest.label.length < 1 || manifest.label.length > 80 || !Array.isArray(manifest.entryIds) ||
       manifest.entryIds.length > 20 || manifest.entryIds.some(id => typeof id !== 'string' || !/^demo-[a-z0-9-]{1,80}$/.test(id)) ||
       new Set(manifest.entryIds).size !== manifest.entryIds.length) {
     throw new Error('The sample catalogue manifest is invalid.');
@@ -65,19 +65,33 @@ export async function ensureStarterEntries(uid: string, firestore: Firestore = d
 
   return runTransaction(firestore, async transaction => {
     const markerSnapshot = await transaction.get(markerRef);
+    let replacingOldStarterCatalogue = false;
     if (markerSnapshot.exists()) {
-      const marker = markerSnapshot.data();
-      const markerKeys = Object.keys(marker).sort();
-      const expectedKeys = ['catalogueId', 'completedAt', 'entryIds', 'version'];
-      if (markerKeys.length !== expectedKeys.length || markerKeys.some((key, index) => key !== expectedKeys[index]) ||
-          marker.catalogueId !== DEMO_CATALOGUE_ID || marker.version !== 1 ||
-          !Array.isArray(marker.entryIds) || marker.entryIds.length > 20 ||
-          marker.entryIds.some((id: unknown) => typeof id !== 'string' || !/^starter-johannesburg-v1-[a-z0-9-]{1,80}$/.test(id)) ||
-          new Set(marker.entryIds).size !== marker.entryIds.length ||
-          !(marker.completedAt?.toDate?.() instanceof Date)) {
-        throw new Error('The starter-entry migration marker is invalid.');
+      const marker = markerSnapshot.data() as Record<string, unknown>;
+      const isOldStarterMarker = marker.catalogueId === DEMO_CATALOGUE_ID && marker.version === 1 &&
+        Array.isArray(marker.entryIds) && marker.entryIds.length <= 20 &&
+        marker.entryIds.every((id: unknown) => typeof id === 'string' && /^starter-johannesburg-v1-[a-z0-9-]{1,80}$/.test(id)) &&
+        new Set(marker.entryIds).size === marker.entryIds.length;
+      if (isOldStarterMarker) {
+        // Upgrade accounts that received the first demo catalogue: remove their
+        // starter copies before seeding the replacement demo set.
+        replacingOldStarterCatalogue = true;
+        for (const id of marker.entryIds as string[]) {
+          transaction.delete(doc(firestore, 'users', uid, 'entries', id));
+        }
+      } else {
+        const markerKeys = Object.keys(marker).sort();
+        const expectedKeys = ['catalogueId', 'completedAt', 'entryIds', 'version'];
+        if (markerKeys.length !== expectedKeys.length || markerKeys.some((key, index) => key !== expectedKeys[index]) ||
+            marker.catalogueId !== DEMO_CATALOGUE_ID || marker.version !== 2 ||
+            !Array.isArray(marker.entryIds) || marker.entryIds.length > 20 ||
+            marker.entryIds.some((id: unknown) => typeof id !== 'string' || !/^starter-johannesburg-v1-[a-z0-9-]{1,80}$/.test(id)) ||
+            new Set(marker.entryIds).size !== marker.entryIds.length ||
+            !((marker.completedAt as {toDate?: () => Date})?.toDate?.() instanceof Date)) {
+          throw new Error('The starter-entry migration marker is invalid.');
+        }
+        return 0;
       }
-      return 0;
     }
 
     const manifestSnapshot = await transaction.get(manifestRef);
@@ -120,7 +134,7 @@ export async function ensureStarterEntries(uid: string, firestore: Firestore = d
     }
     transaction.set(markerRef, {
       catalogueId: DEMO_CATALOGUE_ID,
-      version: 1,
+      version: 2,
       entryIds,
       completedAt: serverTimestamp(),
     });
