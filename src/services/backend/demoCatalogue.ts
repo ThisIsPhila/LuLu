@@ -64,8 +64,12 @@ export async function ensureStarterEntries(uid: string, firestore: Firestore = d
   const manifestRef = doc(firestore, 'demoCatalogues', DEMO_CATALOGUE_ID);
 
   return runTransaction(firestore, async transaction => {
+    // Firestore requires all reads before all writes in a transaction.
     const markerSnapshot = await transaction.get(markerRef);
-    let replacingOldStarterCatalogue = false;
+    const manifestSnapshot = await transaction.get(manifestRef);
+    if (!manifestSnapshot.exists()) throw new Error('The starter catalogue is not available yet.');
+
+    let oldEntryIdsToDelete: string[] = [];
     if (markerSnapshot.exists()) {
       const marker = markerSnapshot.data() as Record<string, unknown>;
       const isOldStarterMarker = marker.catalogueId === DEMO_CATALOGUE_ID && marker.version === 1 &&
@@ -75,10 +79,7 @@ export async function ensureStarterEntries(uid: string, firestore: Firestore = d
       if (isOldStarterMarker) {
         // Upgrade accounts that received the first demo catalogue: remove their
         // starter copies before seeding the replacement demo set.
-        replacingOldStarterCatalogue = true;
-        for (const id of marker.entryIds as string[]) {
-          transaction.delete(doc(firestore, 'users', uid, 'entries', id));
-        }
+        oldEntryIdsToDelete = marker.entryIds as string[];
       } else {
         const markerKeys = Object.keys(marker).sort();
         const expectedKeys = ['catalogueId', 'completedAt', 'entryIds', 'version'];
@@ -94,20 +95,23 @@ export async function ensureStarterEntries(uid: string, firestore: Firestore = d
       }
     }
 
-    const manifestSnapshot = await transaction.get(manifestRef);
-    if (!manifestSnapshot.exists()) throw new Error('The starter catalogue is not available yet.');
     const manifest = parseManifest(manifestSnapshot.data());
     const sourceRefs = manifest.entryIds.map(id => doc(firestore, 'demoCatalogues', DEMO_CATALOGUE_ID, 'entries', id));
     const sourceSnapshots = await Promise.all(sourceRefs.map(ref => transaction.get(ref)));
     const sourceEntries = sourceSnapshots.map((snapshot, index) => {
       if (!snapshot.exists()) throw new Error('A starter entry listed in the catalogue is missing.');
       const record = snapshot.data() as DemoRecord;
-      // Reuse the strict public-catalogue validator before copying any fields.
       const mapped = mapDemoRecord(snapshot.id, record);
       return { mapped, targetId: starterEntryId(manifest.entryIds[index]) };
     });
     const targetRefs = sourceEntries.map(entry => doc(firestore, 'users', uid, 'entries', entry.targetId));
     const targetSnapshots = await Promise.all(targetRefs.map(ref => transaction.get(ref)));
+
+    // ALL WRITES AFTER ALL READS
+    // Delete old starter entries first (v1 -> v2 migration)
+    for (const id of oldEntryIdsToDelete) {
+      transaction.delete(doc(firestore, 'users', uid, 'entries', id));
+    }
 
     const entryIds: string[] = [];
     let createdCount = 0;
